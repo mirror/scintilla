@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file Position.h
- ** Will define global type name Position in the Sci internal namespace.
+ ** Defines global type name Position in the Sci internal namespace.
  **/
 // Copyright 2015 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -8,14 +8,31 @@
 #ifndef POSITION_H
 #define POSITION_H
 
+/*
+ * Defines type used for internal representation of positions and line numbers. This type may be 32 or 64 bits
+ * depending on if documents larger than 2G are desired. In namespace separate from Scintilla. Since this type is
+ * internal in nature, the Sci namespace is not conditionally compiled.
+ */
 namespace Sci {
 
-// After 3.6.0:
-// typedef int Position;
+/* If you want large file support (documents greater than 2G), define SCI_LARGE_FILE_SUPPORT
+ * by default Scintilla restricts document sizes to 2G.
+ */
+#ifdef SCI_LARGE_FILE_SUPPORT
+typedef std::ptrdiff_t Position;
+#else
+typedef int Position;
+#endif
 
-// A later version (4.x) of this file may:
-//#if defined(SCI_LARGE_FILE_SUPPORT)
-//typedef ptrdiff_t Position;
+inline Position Clamp(Position val, Position minVal, Position maxVal) {
+	if (val > maxVal)
+		val = maxVal;
+	if (val < minVal)
+		val = minVal;
+	return val;
+}
+
+const Position invalidPosition = -1;
 
 }
 
