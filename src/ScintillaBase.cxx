@@ -1071,6 +1071,13 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return StringResult(lParam, DocumentLexState()->GetSubStyleBases());
 #endif
 
+	case SCI_GETLARGEPOSITIONSUPPORT:
+#ifdef SCI_LARGE_FILE_SUPPORT
+		return true;
+#else
+		return false;
+#endif
+
 	default:
 		return Editor::WndProc(iMessage, wParam, lParam);
 	}

@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 31 July 2015 NH</p>
+    <p>Last edited 12 August 2015 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3259,6 +3259,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GRABFOCUS">SCI_GRABFOCUS</a><br />
      <a class="message" href="#SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</a><br />
      <a class="message" href="#SCI_GETFOCUS">SCI_GETFOCUS</a><br />
+     <a class="message" href="#SCI_GETLARGEPOSITIONSUPPORT">SCI_GETLARGEPOSITIONSUPPORT</a><br />
     </code>
 
     <p>To forward a message <code>(WM_XXXX, WPARAM, LPARAM)</code> to Scintilla, you can use
@@ -3422,6 +3423,9 @@ struct Sci_TextToFind {
     <p>The internal focus flag can be set with <code>SCI_SETFOCUS</code>. This is used by clients
     that have complex focus requirements such as having their own window that gets the real focus
     but with the need to indicate that Scintilla has the logical focus.</p>
+
+    <p><b id="SCI_GETLARGEPOSITIONSUPPORT" class="provisional">SCI_GETLARGEPOSITIONSUPPORT</b><br />
+    Returns whether documents larger than 2GB are supported.</p>
 
     <h2 id="BraceHighlighting">Brace highlighting</h2>
     <code><a class="message" href="#SCI_BRACEHIGHLIGHT">SCI_BRACEHIGHLIGHT(int pos1, int
@@ -7544,7 +7548,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
     <p>Provisional features are displayed in this document with <span class="provisional">a distinctive background colour</span>.</p>
 
-    <p>There are currently no provisional messages.
+    <p><code class="provisional">SCI_GETLARGEPOSITIONSUPPORT</code> is provisional.
     The <code class="provisional">SC_TECHNOLOGY_DIRECTWRITERETAIN</code> and
     <code class="provisional">SC_TECHNOLOGY_DIRECTWRITEDC</code> values for
     <a class="message" href="#SCI_SETTECHNOLOGY">SCI_SETTECHNOLOGY</a> are provisional.</p>

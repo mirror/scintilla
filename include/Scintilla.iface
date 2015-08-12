@@ -4683,6 +4683,9 @@ evt void AutoCCompleted=2030(string text, int position, int ch, CompletionMethod
 
 cat Provisional
 
+# Are documents larger than 2GB supported?
+get bool GetLargePositionSupport=2692(,)
+
 cat Deprecated
 
 # Deprecated in 2.21
