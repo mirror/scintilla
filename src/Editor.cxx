@@ -593,16 +593,16 @@ void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSel
 	if (sel.Count() > 1 || !(sel.RangeMain().anchor == newMain.anchor) || sel.IsRectangular()) {
 		invalidateWholeSelection = true;
 	}
-	int firstAffected = Platform::Minimum(sel.RangeMain().Start().Position(), newMain.Start().Position());
+	int firstAffected = std::min(sel.RangeMain().Start().Position(), newMain.Start().Position());
 	// +1 for lastAffected ensures caret repainted
-	int lastAffected = Platform::Maximum(newMain.caret.Position()+1, newMain.anchor.Position());
-	lastAffected = Platform::Maximum(lastAffected, sel.RangeMain().End().Position());
+	int lastAffected = std::max(newMain.caret.Position()+1, newMain.anchor.Position());
+	lastAffected = std::max(lastAffected, sel.RangeMain().End().Position());
 	if (invalidateWholeSelection) {
 		for (size_t r=0; r<sel.Count(); r++) {
-			firstAffected = Platform::Minimum(firstAffected, sel.Range(r).caret.Position());
-			firstAffected = Platform::Minimum(firstAffected, sel.Range(r).anchor.Position());
-			lastAffected = Platform::Maximum(lastAffected, sel.Range(r).caret.Position()+1);
-			lastAffected = Platform::Maximum(lastAffected, sel.Range(r).anchor.Position());
+			firstAffected = std::min(firstAffected, sel.Range(r).caret.Position());
+			firstAffected = std::min(firstAffected, sel.Range(r).anchor.Position());
+			lastAffected = std::max(lastAffected, sel.Range(r).caret.Position()+1);
+			lastAffected = std::max(lastAffected, sel.Range(r).anchor.Position());
 		}
 	}
 	ContainerNeedsUpdate(SC_UPDATE_SELECTION);
@@ -2471,7 +2471,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 	if (mh.modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT)) {
 		view.llc.Invalidate(LineLayout::llCheckTextAndStyle);
 		int lineDoc = pdoc->LineFromPosition(mh.position);
-		int lines = Platform::Maximum(0, mh.linesAdded);
+		int lines = std::max(0, mh.linesAdded);
 		if (Wrapping()) {
 			NeedWrapping(lineDoc, lineDoc + lines + 1);
 		}
@@ -3848,8 +3848,8 @@ void Editor::Indent(bool forwards) {
 			int anchorPosOnLine = sel.Range(r).anchor.Position() - pdoc->LineStart(lineOfAnchor);
 			int currentPosPosOnLine = caretPosition - pdoc->LineStart(lineCurrentPos);
 			// Multiple lines selected so indent / dedent
-			int lineTopSel = Platform::Minimum(lineOfAnchor, lineCurrentPos);
-			int lineBottomSel = Platform::Maximum(lineOfAnchor, lineCurrentPos);
+			int lineTopSel = std::min(lineOfAnchor, lineCurrentPos);
+			int lineBottomSel = std::max(lineOfAnchor, lineCurrentPos);
 			if (pdoc->LineStart(lineBottomSel) == sel.Range(r).anchor.Position() || pdoc->LineStart(lineBottomSel) == caretPosition)
 				lineBottomSel--;  	// If not selecting any characters on a line, do not indent
 			pdoc->Indent(forwards, lineBottomSel, lineTopSel);
@@ -6081,14 +6081,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return sel.IsRectangular() ? sel.Rectangular().anchor.Position() : sel.MainAnchor();
 
 	case SCI_SETSELECTIONSTART:
-		SetSelection(Platform::Maximum(sel.MainCaret(), static_cast<int>(wParam)), static_cast<int>(wParam));
+		SetSelection(std::max(sel.MainCaret(), static_cast<int>(wParam)), static_cast<int>(wParam));
 		break;
 
 	case SCI_GETSELECTIONSTART:
 		return sel.LimitsForRectangularElseMain().start.Position();
 
 	case SCI_SETSELECTIONEND:
-		SetSelection(static_cast<int>(wParam), Platform::Minimum(sel.MainAnchor(), static_cast<int>(wParam)));
+		SetSelection(static_cast<int>(wParam), std::min(sel.MainAnchor(), static_cast<int>(wParam)));
 		break;
 
 	case SCI_GETSELECTIONEND:
