@@ -442,7 +442,7 @@ int Document::GetLastChild(int lineParent, int level, int lastLine) {
 	if (level == -1)
 		level = GetLevel(lineParent) & SC_FOLDLEVELNUMBERMASK;
 	int maxLine = LinesTotal();
-	int lookLastLine = (lastLine != -1) ? Platform::Minimum(LinesTotal() - 1, lastLine) : -1;
+	int lookLastLine = (lastLine != -1) ? std::min(LinesTotal() - 1, lastLine) : -1;
 	int lineMaxSubord = lineParent;
 	while (lineMaxSubord < maxLine - 1) {
 		EnsureStyledTo(LineStart(lineMaxSubord + 2));
@@ -482,7 +482,7 @@ int Document::GetFoldParent(int line) const {
 
 void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, int line, int lastLine) {
 	int level = GetLevel(line);
-	int lookLastLine = Platform::Maximum(line, lastLine) + 1;
+	int lookLastLine = std::max(line, lastLine) + 1;
 
 	int lookLine = line;
 	int lookLineLevel = level;
@@ -1671,7 +1671,7 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 		const int lengthFind = *length;
 
 		//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
-		const int limitPos = Platform::Maximum(startPos, endPos);
+		const int limitPos = std::max(startPos, endPos);
 		int pos = startPos;
 		if (!forward) {
 			// Back all of a character

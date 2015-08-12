@@ -1636,7 +1636,7 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 		// Find the most recent line with some text
 
 		int lineLastWithText = line;
-		while (lineLastWithText > Platform::Maximum(line - 20, 0) && model.pdoc->IsWhiteLine(lineLastWithText)) {
+		while (lineLastWithText > std::max(line - 20, 0) && model.pdoc->IsWhiteLine(lineLastWithText)) {
 			lineLastWithText--;
 		}
 		if (lineLastWithText < line) {
@@ -1659,7 +1659,7 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 		}
 
 		int lineNextWithText = line;
-		while (lineNextWithText < Platform::Minimum(line + 20, model.pdoc->LinesTotal()) && model.pdoc->IsWhiteLine(lineNextWithText)) {
+		while (lineNextWithText < std::min(line + 20, model.pdoc->LinesTotal()) && model.pdoc->IsWhiteLine(lineNextWithText)) {
 			lineNextWithText++;
 		}
 		if (lineNextWithText > line) {
