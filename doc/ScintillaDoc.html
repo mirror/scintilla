@@ -6545,7 +6545,7 @@ struct SCNotification {
 	int listType;	/* SCN_USERLISTSELECTION */
 	int x;			/* SCN_DWELLSTART, SCN_DWELLEND */
 	int y;		/* SCN_DWELLSTART, SCN_DWELLEND */
-	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
+	Sci_Position token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
 	int annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
 	int updated;	/* SCN_UPDATEUI */
 	int listCompletionMethod; 
