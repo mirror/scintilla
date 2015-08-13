@@ -40,11 +40,11 @@ public:
 	void InsertLine(int line, int position, bool lineStart);
 	void SetLineStart(int line, int position);
 	void RemoveLine(int line);
-	int Lines() const {
+	Sci::Position Lines() const {
 		return starts.Partitions();
 	}
 	int LineFromPosition(int pos) const;
-	int LineStart(int line) const {
+	Sci::Position LineStart(Sci::Position line) const {
 		return starts.PositionFromPartition(line);
 	}
 

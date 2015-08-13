@@ -2011,9 +2011,11 @@ void Document::IncrementStyleClock() {
 }
 
 void SCI_METHOD Document::DecorationFillRange(Sci_Position position, int value, Sci_Position fillLength) {
-	if (decorations.FillRange(position, value, fillLength)) {
+	Sci::Position positionP = static_cast<Sci::Position>(position);
+	Sci::Position fillLengthP = static_cast<Sci::Position>(fillLength);
+	if (decorations.FillRange(positionP, value, fillLengthP)) {
 		DocModification mh(SC_MOD_CHANGEINDICATOR | SC_PERFORMED_USER,
-							position, fillLength);
+							positionP, fillLengthP);
 		NotifyModified(mh);
 	}
 }

@@ -479,9 +479,9 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 	if (pvsDraw && pvsDraw->indicatorsSetFore > 0) {
 		for (Decoration *deco = pdoc->decorations.root; deco; deco = deco->next) {
 			if (pvsDraw->indicators[deco->indicator].OverridesTextFore()) {
-				int startPos = deco->rs.EndRun(posLineStart);
+				Sci::Position startPos = deco->rs.EndRun(posLineStart);
 				while (startPos < (posLineStart + lineRange.end)) {
-					Insert(startPos - posLineStart);
+					Insert(static_cast<int>(startPos - posLineStart));
 					startPos = deco->rs.EndRun(startPos);
 				}
 			}

@@ -115,7 +115,7 @@ void DecorationList::SetCurrentValue(int value) {
 	currentValue = value ? value : 1;
 }
 
-bool DecorationList::FillRange(int &position, int value, int &fillLength) {
+bool DecorationList::FillRange(Sci::Position &position, int value, Sci::Position &fillLength) {
 	if (!current) {
 		current = DecorationFromIndicator(currentIndicator);
 		if (!current) {
@@ -135,7 +135,9 @@ void DecorationList::InsertSpace(int position, int insertLength) {
 	for (Decoration *deco=root; deco; deco = deco->next) {
 		deco->rs.InsertSpace(position, insertLength);
 		if (atEnd) {
-			deco->rs.FillRange(position, 0, insertLength);
+			Sci::Position positionPos = position;
+			Sci::Position insertLengthPos = insertLength;
+			deco->rs.FillRange(positionPos, 0, insertLengthPos);
 		}
 	}
 }

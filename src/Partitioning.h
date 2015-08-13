@@ -16,20 +16,20 @@ namespace Scintilla {
 /// in a range.
 /// Used by the Partitioning class.
 
-class SplitVectorWithRangeAdd : public SplitVector<int> {
+class SplitVectorWithRangeAdd : public SplitVector<Sci::Position> {
 public:
-	explicit SplitVectorWithRangeAdd(int growSize_) {
+	explicit SplitVectorWithRangeAdd(Sci::Position growSize_) {
 		SetGrowSize(growSize_);
 		ReAllocate(growSize_);
 	}
 	~SplitVectorWithRangeAdd() {
 	}
-	void RangeAddDelta(int start, int end, int delta) {
+	void RangeAddDelta(Sci::Position start, Sci::Position end, Sci::Position delta) {
 		// end is 1 past end, so end-start is number of elements to change
-		int i = 0;
-		int rangeLength = end - start;
-		int range1Length = rangeLength;
-		int part1Left = part1Length - start;
+		Sci::Position i = 0;
+		Sci::Position rangeLength = end - start;
+		Sci::Position range1Length = rangeLength;
+		Sci::Position part1Left = part1Length - start;
 		if (range1Length > part1Left)
 			range1Length = part1Left;
 		while (i < range1Length) {
@@ -55,12 +55,12 @@ class Partitioning {
 private:
 	// To avoid calculating all the partition positions whenever any text is inserted
 	// there may be a step somewhere in the list.
-	int stepPartition;
-	int stepLength;
+	Sci::Position stepPartition;
+	Sci::Position stepLength;
 	SplitVectorWithRangeAdd *body;
 
 	// Move step forward
-	void ApplyStep(int partitionUpTo) {
+	void ApplyStep(Sci::Position partitionUpTo) {
 		if (stepLength != 0) {
 			body->RangeAddDelta(stepPartition+1, partitionUpTo + 1, stepLength);
 		}
@@ -72,14 +72,14 @@ private:
 	}
 
 	// Move step backward
-	void BackStep(int partitionDownTo) {
+	void BackStep(Sci::Position partitionDownTo) {
 		if (stepLength != 0) {
 			body->RangeAddDelta(partitionDownTo+1, stepPartition+1, -stepLength);
 		}
 		stepPartition = partitionDownTo;
 	}
 
-	void Allocate(int growSize) {
+	void Allocate(Sci::Position growSize) {
 		body = new SplitVectorWithRangeAdd(growSize);
 		stepPartition = 0;
 		stepLength = 0;
@@ -88,7 +88,7 @@ private:
 	}
 
 public:
-	explicit Partitioning(int growSize) {
+	explicit Partitioning(Sci::Position growSize) {
 		Allocate(growSize);
 	}
 
@@ -97,11 +97,11 @@ public:
 		body = 0;
 	}
 
-	int Partitions() const {
+	Sci::Position Partitions() const {
 		return body->Length()-1;
 	}
 
-	void InsertPartition(int partition, int pos) {
+	void InsertPartition(Sci::Position partition, Sci::Position pos) {
 		if (stepPartition < partition) {
 			ApplyStep(partition);
 		}
@@ -109,7 +109,7 @@ public:
 		stepPartition++;
 	}
 
-	void SetPartitionStartPosition(int partition, int pos) {
+	void SetPartitionStartPosition(Sci::Position partition, Sci::Position pos) {
 		ApplyStep(partition+1);
 		if ((partition < 0) || (partition > body->Length())) {
 			return;
@@ -117,7 +117,7 @@ public:
 		body->SetValueAt(partition, pos);
 	}
 
-	void InsertText(int partitionInsert, int delta) {
+	void InsertText(Sci::Position partitionInsert, Sci::Position delta) {
 		// Point all the partitions after the insertion point further along in the buffer
 		if (stepLength != 0) {
 			if (partitionInsert >= stepPartition) {
@@ -139,7 +139,7 @@ public:
 		}
 	}
 
-	void RemovePartition(int partition) {
+	void RemovePartition(Sci::Position partition) {
 		if (partition > stepPartition) {
 			ApplyStep(partition);
 			stepPartition--;
@@ -149,29 +149,29 @@ public:
 		body->Delete(partition);
 	}
 
-	int PositionFromPartition(int partition) const {
+	Sci::Position PositionFromPartition(Sci::Position partition) const {
 		PLATFORM_ASSERT(partition >= 0);
 		PLATFORM_ASSERT(partition < body->Length());
 		if ((partition < 0) || (partition >= body->Length())) {
 			return 0;
 		}
-		int pos = body->ValueAt(partition);
+		Sci::Position pos = body->ValueAt(partition);
 		if (partition > stepPartition)
 			pos += stepLength;
 		return pos;
 	}
 
 	/// Return value in range [0 .. Partitions() - 1] even for arguments outside interval
-	int PartitionFromPosition(int pos) const {
+	Sci::Position PartitionFromPosition(Sci::Position pos) const {
 		if (body->Length() <= 1)
 			return 0;
 		if (pos >= (PositionFromPartition(body->Length()-1)))
 			return body->Length() - 1 - 1;
-		int lower = 0;
-		int upper = body->Length()-1;
+		Sci::Position lower = 0;
+		Sci::Position upper = body->Length()-1;
 		do {
-			int middle = (upper + lower + 1) / 2; 	// Round high
-			int posMiddle = body->ValueAt(middle);
+			Sci::Position middle = (upper + lower + 1) / 2; 	// Round high
+			Sci::Position posMiddle = body->ValueAt(middle);
 			if (middle > stepPartition)
 				posMiddle += stepLength;
 			if (pos < posMiddle) {
@@ -184,7 +184,7 @@ public:
 	}
 
 	void DeleteAll() {
-		int growSize = body->GetGrowSize();
+		Sci::Position growSize = body->GetGrowSize();
 		delete body;
 		Allocate(growSize);
 	}
