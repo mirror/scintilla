@@ -18,31 +18,31 @@ class RunStyles {
 private:
 	Partitioning *starts;
 	SplitVector<int> *styles;
-	int RunFromPosition(int position) const;
-	int SplitRun(int position);
-	void RemoveRun(int run);
-	void RemoveRunIfEmpty(int run);
-	void RemoveRunIfSameAsPrevious(int run);
+	Sci::Position RunFromPosition(Sci::Position position) const;
+	Sci::Position SplitRun(Sci::Position position);
+	void RemoveRun(Sci::Position run);
+	void RemoveRunIfEmpty(Sci::Position run);
+	void RemoveRunIfSameAsPrevious(Sci::Position run);
 	// Private so RunStyles objects can not be copied
 	RunStyles(const RunStyles &);
 public:
 	RunStyles();
 	~RunStyles();
-	int Length() const;
-	int ValueAt(int position) const;
-	int FindNextChange(int position, int end) const;
-	int StartRun(int position) const;
-	int EndRun(int position) const;
+	Sci::Position Length() const;
+	int ValueAt(Sci::Position position) const;
+	Sci::Position FindNextChange(Sci::Position position, Sci::Position end) const;
+	Sci::Position StartRun(Sci::Position position) const;
+	Sci::Position EndRun(Sci::Position position) const;
 	// Returns true if some values may have changed
-	bool FillRange(int &position, int value, int &fillLength);
-	void SetValueAt(int position, int value);
-	void InsertSpace(int position, int insertLength);
+	bool FillRange(Sci::Position &position, int value, Sci::Position &fillLength);
+	void SetValueAt(Sci::Position position, int value);
+	void InsertSpace(Sci::Position position, Sci::Position insertLength);
 	void DeleteAll();
-	void DeleteRange(int position, int deleteLength);
-	int Runs() const;
+	void DeleteRange(Sci::Position position, Sci::Position deleteLength);
+	Sci::Position Runs() const;
 	bool AllSame() const;
 	bool AllSameAs(int value) const;
-	int Find(int value, int start) const;
+	Sci::Position Find(int value, Sci::Position start) const;
 
 	void Check() const;
 };

@@ -25,8 +25,8 @@ using namespace Scintilla;
 #endif
 
 // Find the first run at a position
-int RunStyles::RunFromPosition(int position) const {
-	int run = starts->PartitionFromPosition(position);
+Sci::Position RunStyles::RunFromPosition(Sci::Position position) const {
+	Sci::Position run = starts->PartitionFromPosition(position);
 	// Go to first element with this position
 	while ((run > 0) && (position == starts->PositionFromPartition(run-1))) {
 		run--;
@@ -35,9 +35,9 @@ int RunStyles::RunFromPosition(int position) const {
 }
 
 // If there is no run boundary at position, insert one continuing style.
-int RunStyles::SplitRun(int position) {
-	int run = RunFromPosition(position);
-	int posRun = starts->PositionFromPartition(run);
+Sci::Position RunStyles::SplitRun(Sci::Position position) {
+	Sci::Position run = RunFromPosition(position);
+	Sci::Position posRun = starts->PositionFromPartition(run);
 	if (posRun < position) {
 		int runStyle = ValueAt(position);
 		run++;
@@ -47,12 +47,12 @@ int RunStyles::SplitRun(int position) {
 	return run;
 }
 
-void RunStyles::RemoveRun(int run) {
+void RunStyles::RemoveRun(Sci::Position run) {
 	starts->RemovePartition(run);
 	styles->DeleteRange(run, 1);
 }
 
-void RunStyles::RemoveRunIfEmpty(int run) {
+void RunStyles::RemoveRunIfEmpty(Sci::Position run) {
 	if ((run < starts->Partitions()) && (starts->Partitions() > 1)) {
 		if (starts->PositionFromPartition(run) == starts->PositionFromPartition(run+1)) {
 			RemoveRun(run);
@@ -60,7 +60,7 @@ void RunStyles::RemoveRunIfEmpty(int run) {
 	}
 }
 
-void RunStyles::RemoveRunIfSameAsPrevious(int run) {
+void RunStyles::RemoveRunIfSameAsPrevious(Sci::Position run) {
 	if ((run > 0) && (run < starts->Partitions())) {
 		if (styles->ValueAt(run-1) == styles->ValueAt(run)) {
 			RemoveRun(run);
@@ -81,21 +81,21 @@ RunStyles::~RunStyles() {
 	styles = NULL;
 }
 
-int RunStyles::Length() const {
+Sci::Position RunStyles::Length() const {
 	return starts->PositionFromPartition(starts->Partitions());
 }
 
-int RunStyles::ValueAt(int position) const {
+int RunStyles::ValueAt(Sci::Position position) const {
 	return styles->ValueAt(starts->PartitionFromPosition(position));
 }
 
-int RunStyles::FindNextChange(int position, int end) const {
-	int run = starts->PartitionFromPosition(position);
+Sci::Position RunStyles::FindNextChange(Sci::Position position, Sci::Position end) const {
+	Sci::Position run = starts->PartitionFromPosition(position);
 	if (run < starts->Partitions()) {
-		int runChange = starts->PositionFromPartition(run);
+		Sci::Position runChange = starts->PositionFromPartition(run);
 		if (runChange > position)
 			return runChange;
-		int nextChange = starts->PositionFromPartition(run + 1);
+		Sci::Position nextChange = starts->PositionFromPartition(run + 1);
 		if (nextChange > position) {
 			return nextChange;
 		} else if (position < end) {
@@ -108,23 +108,23 @@ int RunStyles::FindNextChange(int position, int end) const {
 	}
 }
 
-int RunStyles::StartRun(int position) const {
+Sci::Position RunStyles::StartRun(Sci::Position position) const {
 	return starts->PositionFromPartition(starts->PartitionFromPosition(position));
 }
 
-int RunStyles::EndRun(int position) const {
+Sci::Position RunStyles::EndRun(Sci::Position position) const {
 	return starts->PositionFromPartition(starts->PartitionFromPosition(position) + 1);
 }
 
-bool RunStyles::FillRange(int &position, int value, int &fillLength) {
+bool RunStyles::FillRange(Sci::Position &position, int value, Sci::Position &fillLength) {
 	if (fillLength <= 0) {
 		return false;
 	}
-	int end = position + fillLength;
+	Sci::Position end = position + fillLength;
 	if (end > Length()) {
 		return false;
 	}
-	int runEnd = RunFromPosition(end);
+	Sci::Position runEnd = RunFromPosition(end);
 	if (styles->ValueAt(runEnd) == value) {
 		// End already has value so trim range.
 		end = starts->PositionFromPartition(runEnd);
@@ -136,7 +136,7 @@ bool RunStyles::FillRange(int &position, int value, int &fillLength) {
 	} else {
 		runEnd = SplitRun(end);
 	}
-	int runStart = RunFromPosition(position);
+	Sci::Position runStart = RunFromPosition(position);
 	if (styles->ValueAt(runStart) == value) {
 		// Start is in expected value so trim range.
 		runStart++;
@@ -151,7 +151,7 @@ bool RunStyles::FillRange(int &position, int value, int &fillLength) {
 	if (runStart < runEnd) {
 		styles->SetValueAt(runStart, value);
 		// Remove each old run over the range
-		for (int run=runStart+1; run<runEnd; run++) {
+		for (Sci::Position run=runStart+1; run<runEnd; run++) {
 			RemoveRun(runStart+1);
 		}
 		runEnd = RunFromPosition(end);
@@ -165,13 +165,13 @@ bool RunStyles::FillRange(int &position, int value, int &fillLength) {
 	}
 }
 
-void RunStyles::SetValueAt(int position, int value) {
-	int len = 1;
+void RunStyles::SetValueAt(Sci::Position position, int value) {
+	Sci::Position len = 1;
 	FillRange(position, value, len);
 }
 
-void RunStyles::InsertSpace(int position, int insertLength) {
-	int runStart = RunFromPosition(position);
+void RunStyles::InsertSpace(Sci::Position position, Sci::Position insertLength) {
+	Sci::Position runStart = RunFromPosition(position);
 	if (starts->PositionFromPartition(runStart) == position) {
 		int runStyle = ValueAt(position);
 		// Inserting at start of run so make previous longer
@@ -208,10 +208,10 @@ void RunStyles::DeleteAll() {
 	styles->InsertValue(0, 2, 0);
 }
 
-void RunStyles::DeleteRange(int position, int deleteLength) {
-	int end = position + deleteLength;
-	int runStart = RunFromPosition(position);
-	int runEnd = RunFromPosition(end);
+void RunStyles::DeleteRange(Sci::Position position, Sci::Position deleteLength) {
+	Sci::Position end = position + deleteLength;
+	Sci::Position runStart = RunFromPosition(position);
+	Sci::Position runEnd = RunFromPosition(end);
 	if (runStart == runEnd) {
 		// Deleting from inside one run
 		starts->InsertText(runStart, -deleteLength);
@@ -221,7 +221,7 @@ void RunStyles::DeleteRange(int position, int deleteLength) {
 		runEnd = SplitRun(end);
 		starts->InsertText(runStart, -deleteLength);
 		// Remove each old run over the range
-		for (int run=runStart; run<runEnd; run++) {
+		for (Sci::Position run=runStart; run<runEnd; run++) {
 			RemoveRun(runStart);
 		}
 		RemoveRunIfEmpty(runStart);
@@ -229,12 +229,12 @@ void RunStyles::DeleteRange(int position, int deleteLength) {
 	}
 }
 
-int RunStyles::Runs() const {
+Sci::Position RunStyles::Runs() const {
 	return starts->Partitions();
 }
 
 bool RunStyles::AllSame() const {
-	for (int run = 1; run < starts->Partitions(); run++) {
+	for (Sci::Position run = 1; run < starts->Partitions(); run++) {
 		if (styles->ValueAt(run) != styles->ValueAt(run - 1))
 			return false;
 	}
@@ -245,9 +245,9 @@ bool RunStyles::AllSameAs(int value) const {
 	return AllSame() && (styles->ValueAt(0) == value);
 }
 
-int RunStyles::Find(int value, int start) const {
+Sci::Position RunStyles::Find(int value, Sci::Position start) const {
 	if (start < Length()) {
-		int run = start ? RunFromPosition(start) : 0;
+		Sci::Position run = start ? RunFromPosition(start) : 0;
 		if (styles->ValueAt(run) == value)
 			return start;
 		run++;
@@ -270,9 +270,9 @@ void RunStyles::Check() const {
 	if (starts->Partitions() != styles->Length()-1) {
 		throw std::runtime_error("RunStyles: Partitions and styles different lengths.");
 	}
-	int start=0;
+	Sci::Position start=0;
 	while (start < Length()) {
-		int end = EndRun(start);
+		Sci::Position end = EndRun(start);
 		if (start >= end) {
 			throw std::runtime_error("RunStyles: Partition is 0 length.");
 		}
@@ -281,7 +281,7 @@ void RunStyles::Check() const {
 	if (styles->ValueAt(styles->Length()-1) != 0) {
 		throw std::runtime_error("RunStyles: Unused style at end changed.");
 	}
-	for (int j=1; j<styles->Length()-1; j++) {
+	for (Sci::Position j=1; j<styles->Length()-1; j++) {
 		if (styles->ValueAt(j) == styles->ValueAt(j-1)) {
 			throw std::runtime_error("RunStyles: Style of a partition same as previous.");
 		}

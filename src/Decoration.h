@@ -46,7 +46,7 @@ public:
 	int GetCurrentValue() const { return currentValue; }
 
 	// Returns true if some values may have changed
-	bool FillRange(int &position, int value, int &fillLength);
+	bool FillRange(Sci::Position &position, int value, Sci::Position &fillLength);
 
 	void InsertSpace(int position, int insertLength);
 	void DeleteRange(int position, int deleteLength);

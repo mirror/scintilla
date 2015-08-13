@@ -68,7 +68,7 @@ int ContractionState::LinesDisplayed() const {
 	}
 }
 
-int ContractionState::DisplayFromDoc(int lineDoc) const {
+int ContractionState::DisplayFromDoc(Sci::Position lineDoc) const {
 	if (OneToOne()) {
 		return (lineDoc <= linesInDocument) ? lineDoc : linesInDocument;
 	} else {
