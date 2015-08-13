@@ -55,7 +55,7 @@ void LexInterface::Colourise(int start, int end) {
 		// code looks for child lines which may trigger styling.
 		performingStyle = true;
 
-		int lengthDoc = pdoc->Length();
+		int lengthDoc = pdoc->PositionLength();
 		if (end == -1)
 			end = lengthDoc;
 		int len = end - start;
@@ -289,7 +289,7 @@ int Document::AddMark(int line, int markerNum) {
 	if (line >= 0 && line <= LinesTotal()) {
 		int prev = static_cast<LineMarkers *>(perLineData[ldMarkers])->
 			AddMark(line, markerNum, LinesTotal());
-		DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
+		DocModification mh(SC_MOD_CHANGEMARKER, PositionLineStart(line), 0, 0, 0, line);
 		NotifyModified(mh);
 		return prev;
 	} else {
@@ -306,13 +306,13 @@ void Document::AddMarkSet(int line, int valueSet) {
 		if (m & 1)
 			static_cast<LineMarkers *>(perLineData[ldMarkers])->
 				AddMark(line, i, LinesTotal());
-	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
+	DocModification mh(SC_MOD_CHANGEMARKER, PositionLineStart(line), 0, 0, 0, line);
 	NotifyModified(mh);
 }
 
 void Document::DeleteMark(int line, int markerNum) {
 	static_cast<LineMarkers *>(perLineData[ldMarkers])->DeleteMark(line, markerNum, false);
-	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
+	DocModification mh(SC_MOD_CHANGEMARKER, PositionLineStart(line), 0, 0, 0, line);
 	NotifyModified(mh);
 }
 
@@ -340,19 +340,23 @@ int Document::LineFromHandle(int markerHandle) {
 	return static_cast<LineMarkers *>(perLineData[ldMarkers])->LineFromHandle(markerHandle);
 }
 
+int Document::PositionLineStart(int line) const {
+	return cb.LineStart(line);
+}
+
 Sci_Position SCI_METHOD Document::LineStart(Sci_Position line) const {
 	return cb.LineStart(line);
 }
 
 bool Document::IsLineStartPosition(int position) const {
-	return LineStart(LineFromPosition(position)) == position;
+	return PositionLineStart(LineOfPosition(position)) == position;
 }
 
-Sci_Position SCI_METHOD Document::LineEnd(Sci_Position line) const {
+int Document::PositionLineEnd(int line) const {
 	if (line >= LinesTotal() - 1) {
-		return LineStart(line + 1);
+		return PositionLineStart(line + 1);
 	} else {
-		int position = LineStart(line + 1);
+		int position = PositionLineStart(line + 1);
 		if (SC_CP_UTF8 == dbcsCodePage) {
 			unsigned char bytes[] = {
 				static_cast<unsigned char>(cb.CharAt(position-3)),
@@ -375,6 +379,10 @@ Sci_Position SCI_METHOD Document::LineEnd(Sci_Position line) const {
 	}
 }
 
+Sci_Position SCI_METHOD Document::LineEnd(Sci_Position line) const {
+	return PositionLineEnd(line);
+}
+
 void SCI_METHOD Document::SetErrorStatus(int status) {
 	// Tell the watchers an error has occurred.
 	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
@@ -382,26 +390,30 @@ void SCI_METHOD Document::SetErrorStatus(int status) {
 	}
 }
 
+int Document::LineOfPosition(int pos) const {
+	return cb.LineFromPosition(pos);
+}
+
 Sci_Position SCI_METHOD Document::LineFromPosition(Sci_Position pos) const {
 	return cb.LineFromPosition(pos);
 }
 
 int Document::LineEndPosition(int position) const {
-	return LineEnd(LineFromPosition(position));
+	return PositionLineEnd(LineOfPosition(position));
 }
 
 bool Document::IsLineEndPosition(int position) const {
-	return LineEnd(LineFromPosition(position)) == position;
+	return PositionLineEnd(LineOfPosition(position)) == position;
 }
 
 bool Document::IsPositionInLineEnd(int position) const {
-	return position >= LineEnd(LineFromPosition(position));
+	return position >= PositionLineEnd(LineOfPosition(position));
 }
 
 int Document::VCHomePosition(int position) const {
-	int line = LineFromPosition(position);
-	int startPosition = LineStart(line);
-	int endLine = LineEnd(line);
+	int line = LineOfPosition(position);
+	int startPosition = PositionLineStart(line);
+	int endLine = PositionLineEnd(line);
 	int startText = startPosition;
 	while (startText < endLine && (cb.CharAt(startText) == ' ' || cb.CharAt(startText) == '\t'))
 		startText++;
@@ -415,7 +427,7 @@ int SCI_METHOD Document::SetLevel(Sci_Position line, int level) {
 	int prev = static_cast<LineLevels *>(perLineData[ldLevels])->SetLevel(line, level, LinesTotal());
 	if (prev != level) {
 		DocModification mh(SC_MOD_CHANGEFOLD | SC_MOD_CHANGEMARKER,
-		                   LineStart(line), 0, 0, 0, line);
+		                   PositionLineStart(line), 0, 0, 0, line);
 		mh.foldLevelNow = level;
 		mh.foldLevelPrev = prev;
 		NotifyModified(mh);
@@ -445,7 +457,7 @@ int Document::GetLastChild(int lineParent, int level, int lastLine) {
 	int lookLastLine = (lastLine != -1) ? std::min(LinesTotal() - 1, lastLine) : -1;
 	int lineMaxSubord = lineParent;
 	while (lineMaxSubord < maxLine - 1) {
-		EnsureStyledTo(LineStart(lineMaxSubord + 2));
+		EnsureStyledTo(PositionLineStart(lineMaxSubord + 2));
 		if (!IsSubordinate(level, GetLevel(lineMaxSubord + 1)))
 			break;
 		if ((lookLastLine != -1) && (lineMaxSubord >= lookLastLine) && !(GetLevel(lineMaxSubord) & SC_FOLDLEVELWHITEFLAG))
@@ -551,7 +563,7 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, in
 }
 
 int Document::ClampPositionIntoDocument(int pos) const {
-	return Platform::Clamp(pos, 0, Length());
+	return Platform::Clamp(pos, 0, PositionLength());
 }
 
 bool Document::IsCrLf(int pos) const {
@@ -570,7 +582,7 @@ int Document::LenChar(int pos) {
 	} else if (SC_CP_UTF8 == dbcsCodePage) {
 		const unsigned char leadByte = static_cast<unsigned char>(cb.CharAt(pos));
 		const int widthCharBytes = UTF8BytesOfLead[leadByte];
-		int lengthDoc = Length();
+		int lengthDoc = PositionLength();
 		if ((pos + widthCharBytes) > lengthDoc)
 			return lengthDoc - pos;
 		else
@@ -620,7 +632,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) c
 	if (pos <= 0)
 		return 0;
 	if (pos >= Length())
-		return Length();
+		return PositionLength();
 
 	// PLATFORM_ASSERT(pos > 0 && pos < Length());
 	if (checkLineEnd && IsCrLf(pos - 1)) {
@@ -649,7 +661,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) c
 		} else {
 			// Anchor DBCS calculations at start of line because start of line can
 			// not be a DBCS trail byte.
-			int posStartLine = LineStart(LineFromPosition(pos));
+			int posStartLine = PositionLineStart(LineOfPosition(pos));
 			if (pos == posStartLine)
 				return pos;
 
@@ -686,8 +698,8 @@ int Document::NextPosition(int pos, int moveDir) const {
 	int increment = (moveDir > 0) ? 1 : -1;
 	if (pos + increment <= 0)
 		return 0;
-	if (pos + increment >= Length())
-		return Length();
+	if (pos + increment >= PositionLength())
+		return PositionLength();
 
 	if (dbcsCodePage) {
 		if (SC_CP_UTF8 == dbcsCodePage) {
@@ -727,12 +739,12 @@ int Document::NextPosition(int pos, int moveDir) const {
 			if (moveDir > 0) {
 				int mbsize = IsDBCSLeadByte(cb.CharAt(pos)) ? 2 : 1;
 				pos += mbsize;
-				if (pos > Length())
-					pos = Length();
+				if (pos > PositionLength())
+					pos = PositionLength();
 			} else {
 				// Anchor DBCS calculations at start of line because start of line can
 				// not be a DBCS trail byte.
-				int posStartLine = LineStart(LineFromPosition(pos));
+				int posStartLine = PositionLineStart(LineOfPosition(pos));
 				// See http://msdn.microsoft.com/en-us/library/cc194792%28v=MSDN.10%29.aspx
 				// http://msdn.microsoft.com/en-us/library/cc194790.aspx
 				if ((pos - 1) <= posStartLine) {
@@ -1053,7 +1065,7 @@ void Document::ChangeInsertion(const char *s, int length) {
 
 int SCI_METHOD Document::AddData(char *data, Sci_Position length) {
 	try {
-		int position = Length();
+		int position = PositionLength();
 		InsertString(position, data, length);
 	} catch (std::bad_alloc &) {
 		return SC_STATUS_BADALLOC;
@@ -1251,8 +1263,8 @@ static std::string CreateIndentation(int indent, int tabSize, bool insertSpaces)
 int SCI_METHOD Document::GetLineIndentation(Sci_Position line) {
 	int indent = 0;
 	if ((line >= 0) && (line < LinesTotal())) {
-		int lineStart = LineStart(line);
-		int length = Length();
+		int lineStart = PositionLineStart(line);
+		int length = PositionLength();
 		for (int i = lineStart; i < length; i++) {
 			char ch = cb.CharAt(i);
 			if (ch == ' ')
@@ -1272,7 +1284,7 @@ int Document::SetLineIndentation(int line, int indent) {
 		indent = 0;
 	if (indent != indentOfLine) {
 		std::string linebuf = CreateIndentation(indent, tabInChars, !useTabs);
-		int thisLineStart = LineStart(line);
+		int thisLineStart = PositionLineStart(line);
 		int indentPos = GetLineIndentPosition(line);
 		UndoGroup ug(this);
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
@@ -1286,8 +1298,8 @@ int Document::SetLineIndentation(int line, int indent) {
 int Document::GetLineIndentPosition(int line) const {
 	if (line < 0)
 		return 0;
-	int pos = LineStart(line);
-	int length = Length();
+	int pos = PositionLineStart(line);
+	int length = PositionLength();
 	while ((pos < length) && IsSpaceOrTab(cb.CharAt(pos))) {
 		pos++;
 	}
@@ -1296,9 +1308,9 @@ int Document::GetLineIndentPosition(int line) const {
 
 int Document::GetColumn(int pos) {
 	int column = 0;
-	int line = LineFromPosition(pos);
+	int line = LineOfPosition(pos);
 	if ((line >= 0) && (line < LinesTotal())) {
-		for (int i = LineStart(line); i < pos;) {
+		for (int i = PositionLineStart(line); i < pos;) {
 			char ch = cb.CharAt(i);
 			if (ch == '\t') {
 				column = NextTab(column, tabInChars);
@@ -1348,7 +1360,7 @@ int Document::CountUTF16(int startPos, int endPos) const {
 }
 
 int Document::FindColumn(int line, int column) {
-	int position = LineStart(line);
+	int position = PositionLineStart(line);
 	if ((line >= 0) && (line < LinesTotal())) {
 		int columnCurrent = 0;
 		while ((columnCurrent < column) && (position < Length())) {
@@ -1376,7 +1388,7 @@ void Document::Indent(bool forwards, int lineBottom, int lineTop) {
 	for (int line = lineBottom; line >= lineTop; line--) {
 		int indentOfLine = GetLineIndentation(line);
 		if (forwards) {
-			if (LineStart(line) < LineEnd(line)) {
+			if (PositionLineStart(line) < PositionLineEnd(line)) {
 				SetLineIndentation(line, indentOfLine + IndentSize());
 			}
 		} else {
@@ -1448,8 +1460,8 @@ void Document::ConvertLineEnds(int eolModeSet) {
 }
 
 bool Document::IsWhiteLine(int line) const {
-	int currentChar = LineStart(line);
-	int endLine = LineEnd(line);
+	int currentChar = PositionLineStart(line);
+	int endLine = PositionLineEnd(line);
 	while (currentChar < endLine) {
 		if (cb.CharAt(currentChar) != ' ' && cb.CharAt(currentChar) != '\t') {
 			return false;
@@ -1460,7 +1472,7 @@ bool Document::IsWhiteLine(int line) const {
 }
 
 int Document::ParaUp(int pos) const {
-	int line = LineFromPosition(pos);
+	int line = LineOfPosition(pos);
 	line--;
 	while (line >= 0 && IsWhiteLine(line)) { // skip empty lines
 		line--;
@@ -1469,11 +1481,11 @@ int Document::ParaUp(int pos) const {
 		line--;
 	}
 	line++;
-	return LineStart(line);
+	return PositionLineStart(line);
 }
 
 int Document::ParaDown(int pos) const {
-	int line = LineFromPosition(pos);
+	int line = LineOfPosition(pos);
 	while (line < LinesTotal() && !IsWhiteLine(line)) { // skip non-empty lines
 		line++;
 	}
@@ -1481,9 +1493,9 @@ int Document::ParaDown(int pos) const {
 		line++;
 	}
 	if (line < LinesTotal())
-		return LineStart(line);
+		return PositionLineStart(line);
 	else // end of a document
-		return LineEnd(line-1);
+		return PositionLineEnd(line-1);
 }
 
 CharClassify::cc Document::WordCharClass(unsigned char ch) const {
@@ -1881,8 +1893,8 @@ void Document::EnsureStyledTo(int pos) {
 	if ((enteredStyling == 0) && (pos > GetEndStyled())) {
 		IncrementStyleClock();
 		if (pli && !pli->UseContainerLexing()) {
-			int lineEndStyled = LineFromPosition(GetEndStyled());
-			int endStyledTo = LineStart(lineEndStyled);
+			int lineEndStyled = LineOfPosition(GetEndStyled());
+			int endStyledTo = PositionLineStart(lineEndStyled);
 			pli->Colourise(endStyledTo, pos);
 		} else {
 			// Ask the watchers to style, and stop as soon as one responds.
@@ -1904,7 +1916,7 @@ void Document::LexerChanged() {
 int SCI_METHOD Document::SetLineState(Sci_Position line, int state) {
 	int statePrevious = static_cast<LineState *>(perLineData[ldState])->SetLineState(line, state);
 	if (state != statePrevious) {
-		DocModification mh(SC_MOD_CHANGELINESTATE, LineStart(line), 0, 0, 0, line);
+		DocModification mh(SC_MOD_CHANGELINESTATE, PositionLineStart(line), 0, 0, 0, line);
 		NotifyModified(mh);
 	}
 	return statePrevious;
@@ -1931,18 +1943,18 @@ StyledText Document::MarginStyledText(int line) const {
 
 void Document::MarginSetText(int line, const char *text) {
 	static_cast<LineAnnotation *>(perLineData[ldMargin])->SetText(line, text);
-	DocModification mh(SC_MOD_CHANGEMARGIN, LineStart(line), 0, 0, 0, line);
+	DocModification mh(SC_MOD_CHANGEMARGIN, PositionLineStart(line), 0, 0, 0, line);
 	NotifyModified(mh);
 }
 
 void Document::MarginSetStyle(int line, int style) {
 	static_cast<LineAnnotation *>(perLineData[ldMargin])->SetStyle(line, style);
-	NotifyModified(DocModification(SC_MOD_CHANGEMARGIN, LineStart(line), 0, 0, 0, line));
+	NotifyModified(DocModification(SC_MOD_CHANGEMARGIN, PositionLineStart(line), 0, 0, 0, line));
 }
 
 void Document::MarginSetStyles(int line, const unsigned char *styles) {
 	static_cast<LineAnnotation *>(perLineData[ldMargin])->SetStyles(line, styles);
-	NotifyModified(DocModification(SC_MOD_CHANGEMARGIN, LineStart(line), 0, 0, 0, line));
+	NotifyModified(DocModification(SC_MOD_CHANGEMARGIN, PositionLineStart(line), 0, 0, 0, line));
 }
 
 void Document::MarginClearAll() {
@@ -1964,7 +1976,7 @@ void Document::AnnotationSetText(int line, const char *text) {
 		const int linesBefore = AnnotationLines(line);
 		static_cast<LineAnnotation *>(perLineData[ldAnnotation])->SetText(line, text);
 		const int linesAfter = AnnotationLines(line);
-		DocModification mh(SC_MOD_CHANGEANNOTATION, LineStart(line), 0, 0, 0, line);
+		DocModification mh(SC_MOD_CHANGEANNOTATION, PositionLineStart(line), 0, 0, 0, line);
 		mh.annotationLinesAdded = linesAfter - linesBefore;
 		NotifyModified(mh);
 	}
@@ -1972,7 +1984,7 @@ void Document::AnnotationSetText(int line, const char *text) {
 
 void Document::AnnotationSetStyle(int line, int style) {
 	static_cast<LineAnnotation *>(perLineData[ldAnnotation])->SetStyle(line, style);
-	DocModification mh(SC_MOD_CHANGEANNOTATION, LineStart(line), 0, 0, 0, line);
+	DocModification mh(SC_MOD_CHANGEANNOTATION, PositionLineStart(line), 0, 0, 0, line);
 	NotifyModified(mh);
 }
 
@@ -2105,7 +2117,7 @@ int Document::WordPartLeft(int pos) {
 
 int Document::WordPartRight(int pos) {
 	char startChar = cb.CharAt(pos);
-	int length = Length();
+	int length = PositionLength();
 	if (IsWordPartSeparator(startChar)) {
 		while (pos < length && IsWordPartSeparator(cb.CharAt(pos)))
 			++pos;
@@ -2256,25 +2268,25 @@ public:
 		startPos = doc->MovePositionOutsideChar(minPos, 1, false);
 		endPos = doc->MovePositionOutsideChar(maxPos, 1, false);
 
-		lineRangeStart = doc->LineFromPosition(startPos);
-		lineRangeEnd = doc->LineFromPosition(endPos);
+		lineRangeStart = doc->LineOfPosition(startPos);
+		lineRangeEnd = doc->LineOfPosition(endPos);
 		if ((increment == 1) &&
-			(startPos >= doc->LineEnd(lineRangeStart)) &&
+			(startPos >= doc->PositionLineEnd(lineRangeStart)) &&
 			(lineRangeStart < lineRangeEnd)) {
 			// the start position is at end of line or between line end characters.
 			lineRangeStart++;
-			startPos = doc->LineStart(lineRangeStart);
+			startPos = doc->PositionLineStart(lineRangeStart);
 		} else if ((increment == -1) &&
-			(startPos <= doc->LineStart(lineRangeStart)) &&
+			(startPos <= doc->PositionLineStart(lineRangeStart)) &&
 			(lineRangeStart > lineRangeEnd)) {
 			// the start position is at beginning of line.
 			lineRangeStart--;
-			startPos = doc->LineEnd(lineRangeStart);
+			startPos = doc->PositionLineEnd(lineRangeStart);
 		}
 		lineRangeBreak = lineRangeEnd + increment;
 	}
 	Range LineRange(int line) const {
-		Range range(doc->LineStart(line), doc->LineEnd(line));
+		Range range(doc->PositionLineStart(line), doc->PositionLineEnd(line));
 		if (increment == 1) {
 			if (line == lineRangeStart)
 				range.start = startPos;
@@ -2694,8 +2706,8 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 	const char searchEnd = s[*length - 1];
 	const char searchEndPrev = (*length > 1) ? s[*length - 2] : '\0';
 	for (int line = resr.lineRangeStart; line != resr.lineRangeBreak; line += resr.increment) {
-		int startOfLine = doc->LineStart(line);
-		int endOfLine = doc->LineEnd(line);
+		int startOfLine = doc->PositionLineStart(line);
+		int endOfLine = doc->PositionLineEnd(line);
 		if (resr.increment == 1) {
 			if (line == resr.lineRangeStart) {
 				if ((resr.startPos != startOfLine) && (s[0] == '^'))
@@ -2752,7 +2764,7 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 
 const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, int *length) {
 	substituted.clear();
-	DocumentIndexer di(doc, doc->Length());
+	DocumentIndexer di(doc, doc->PositionLength());
 	search.GrabMatches(di);
 	for (int j = 0; j < *length; j++) {
 		if (text[j] == '\\') {

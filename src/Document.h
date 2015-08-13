@@ -270,6 +270,7 @@ public:
 
 	void SCI_METHOD SetErrorStatus(int status);
 
+	int LineOfPosition(int pos) const;
 	Sci_Position SCI_METHOD LineFromPosition(Sci_Position pos) const;
 	int ClampPositionIntoDocument(int pos) const;
 	bool IsCrLf(int pos) const;
@@ -350,8 +351,10 @@ public:
 	void DeleteMarkFromHandle(int markerHandle);
 	void DeleteAllMarks(int markerNum);
 	int LineFromHandle(int markerHandle);
+	int PositionLineStart(int line) const;
 	Sci_Position SCI_METHOD LineStart(Sci_Position line) const;
 	bool IsLineStartPosition(int position) const;
+	int PositionLineEnd(int line) const;
 	Sci_Position SCI_METHOD LineEnd(Sci_Position line) const;
 	int LineEndPosition(int position) const;
 	bool IsLineEndPosition(int position) const;
@@ -369,6 +372,7 @@ public:
 	int ExtendWordSelect(int pos, int delta, bool onlyWordCharacters=false);
 	int NextWordStart(int pos, int delta);
 	int NextWordEnd(int pos, int delta);
+	int PositionLength() const { return cb.Length(); }
 	Sci_Position SCI_METHOD Length() const { return cb.Length(); }
 	void Allocate(int newSize) { cb.Allocate(newSize); }
 

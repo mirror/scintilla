@@ -1139,10 +1139,10 @@ UINT ScintillaWin::CodePageOfDocument() const {
 }
 
 sptr_t ScintillaWin::GetTextLength() {
-	if (pdoc->Length() == 0)
+	if (pdoc->PositionLength() == 0)
 		return 0;
-	std::vector<char> docBytes(pdoc->Length(), '\0');
-	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
+	std::vector<char> docBytes(pdoc->PositionLength(), '\0');
+	pdoc->GetCharRange(&docBytes[0], 0, pdoc->PositionLength());
 	if (IsUnicodeMode()) {
 		return UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
 	} else {
@@ -1153,12 +1153,12 @@ sptr_t ScintillaWin::GetTextLength() {
 
 sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
 	wchar_t *ptr = reinterpret_cast<wchar_t *>(lParam);
-	if (pdoc->Length() == 0) {
+	if (pdoc->PositionLength() == 0) {
 		*ptr = L'\0';
 		return 0;
 	}
-	std::vector<char> docBytes(pdoc->Length(), '\0');
-	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
+	std::vector<char> docBytes(pdoc->PositionLength(), '\0');
+	pdoc->GetCharRange(&docBytes[0], 0, pdoc->PositionLength());
 	if (IsUnicodeMode()) {
 		size_t lengthUTF16 = UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
 		if (lParam == 0)
@@ -1609,7 +1609,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				int nStart = static_cast<int>(wParam);
 				int nEnd = static_cast<int>(lParam);
 				if (nStart == 0 && nEnd == -1) {
-					nEnd = pdoc->Length();
+					nEnd = pdoc->PositionLength();
 				}
 				if (nStart == -1) {
 					nStart = nEnd;	// Remove selection
@@ -1630,7 +1630,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				Sci_CharacterRange *pCR = reinterpret_cast<Sci_CharacterRange *>(lParam);
 				sel.selType = Selection::selStream;
 				if (pCR->cpMin == 0 && pCR->cpMax == -1) {
-					SetSelection(pCR->cpMin, pdoc->Length());
+					SetSelection(pCR->cpMin, pdoc->PositionLength());
 				} else {
 					SetSelection(pCR->cpMin, pCR->cpMax);
 				}
