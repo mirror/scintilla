@@ -183,14 +183,14 @@ bool Document::SetLineEndTypesAllowed(int lineEndBitSet_) {
 	}
 }
 
-void Document::InsertLine(int line) {
+void Document::InsertLine(Sci::Position line) {
 	for (int j=0; j<ldSize; j++) {
 		if (perLineData[j])
 			perLineData[j]->InsertLine(line);
 	}
 }
 
-void Document::RemoveLine(int line) {
+void Document::RemoveLine(Sci::Position line) {
 	for (int j=0; j<ldSize; j++) {
 		if (perLineData[j])
 			perLineData[j]->RemoveLine(line);
@@ -1926,7 +1926,7 @@ int SCI_METHOD Document::GetLineState(Sci_Position line) const {
 	return static_cast<LineState *>(perLineData[ldState])->GetLineState(line);
 }
 
-int Document::GetMaxLineState() {
+Sci::Position Document::GetMaxLineState() {
 	return static_cast<LineState *>(perLineData[ldState])->GetMaxLineState();
 }
 

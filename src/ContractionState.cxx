@@ -52,7 +52,7 @@ void ContractionState::Clear() {
 	linesInDocument = 1;
 }
 
-int ContractionState::LinesInDoc() const {
+Sci::Position ContractionState::LinesInDoc() const {
 	if (OneToOne()) {
 		return linesInDocument;
 	} else {
@@ -60,7 +60,7 @@ int ContractionState::LinesInDoc() const {
 	}
 }
 
-int ContractionState::LinesDisplayed() const {
+Sci::Position ContractionState::LinesDisplayed() const {
 	if (OneToOne()) {
 		return linesInDocument;
 	} else {
@@ -68,7 +68,7 @@ int ContractionState::LinesDisplayed() const {
 	}
 }
 
-int ContractionState::DisplayFromDoc(Sci::Position lineDoc) const {
+Sci::Position ContractionState::DisplayFromDoc(Sci::Position lineDoc) const {
 	if (OneToOne()) {
 		return (lineDoc <= linesInDocument) ? lineDoc : linesInDocument;
 	} else {
@@ -78,11 +78,11 @@ int ContractionState::DisplayFromDoc(Sci::Position lineDoc) const {
 	}
 }
 
-int ContractionState::DisplayLastFromDoc(int lineDoc) const {
+Sci::Position ContractionState::DisplayLastFromDoc(Sci::Position lineDoc) const {
 	return DisplayFromDoc(lineDoc) + GetHeight(lineDoc) - 1;
 }
 
-int ContractionState::DocFromDisplay(int lineDisplay) const {
+Sci::Position ContractionState::DocFromDisplay(Sci::Position lineDisplay) const {
 	if (OneToOne()) {
 		return lineDisplay;
 	} else {
@@ -92,13 +92,13 @@ int ContractionState::DocFromDisplay(int lineDisplay) const {
 		if (lineDisplay > LinesDisplayed()) {
 			return displayLines->PartitionFromPosition(LinesDisplayed());
 		}
-		int lineDoc = displayLines->PartitionFromPosition(lineDisplay);
+		Sci::Position lineDoc = displayLines->PartitionFromPosition(lineDisplay);
 		PLATFORM_ASSERT(GetVisible(lineDoc));
 		return lineDoc;
 	}
 }
 
-void ContractionState::InsertLine(int lineDoc) {
+void ContractionState::InsertLine(Sci::Position lineDoc) {
 	if (OneToOne()) {
 		linesInDocument++;
 	} else {
@@ -108,20 +108,20 @@ void ContractionState::InsertLine(int lineDoc) {
 		expanded->SetValueAt(lineDoc, 1);
 		heights->InsertSpace(lineDoc, 1);
 		heights->SetValueAt(lineDoc, 1);
-		int lineDisplay = DisplayFromDoc(lineDoc);
+		Sci::Position lineDisplay = DisplayFromDoc(lineDoc);
 		displayLines->InsertPartition(lineDoc, lineDisplay);
 		displayLines->InsertText(lineDoc, 1);
 	}
 }
 
-void ContractionState::InsertLines(int lineDoc, int lineCount) {
-	for (int l = 0; l < lineCount; l++) {
+void ContractionState::InsertLines(Sci::Position lineDoc, Sci::Position lineCount) {
+	for (Sci::Position l = 0; l < lineCount; l++) {
 		InsertLine(lineDoc + l);
 	}
 	Check();
 }
 
-void ContractionState::DeleteLine(int lineDoc) {
+void ContractionState::DeleteLine(Sci::Position lineDoc) {
 	if (OneToOne()) {
 		linesInDocument--;
 	} else {
@@ -135,14 +135,14 @@ void ContractionState::DeleteLine(int lineDoc) {
 	}
 }
 
-void ContractionState::DeleteLines(int lineDoc, int lineCount) {
-	for (int l = 0; l < lineCount; l++) {
+void ContractionState::DeleteLines(Sci::Position lineDoc, Sci::Position lineCount) {
+	for (Sci::Position l = 0; l < lineCount; l++) {
 		DeleteLine(lineDoc);
 	}
 	Check();
 }
 
-bool ContractionState::GetVisible(int lineDoc) const {
+bool ContractionState::GetVisible(Sci::Position lineDoc) const {
 	if (OneToOne()) {
 		return true;
 	} else {
@@ -152,7 +152,7 @@ bool ContractionState::GetVisible(int lineDoc) const {
 	}
 }
 
-bool ContractionState::SetVisible(int lineDocStart, int lineDocEnd, bool isVisible) {
+bool ContractionState::SetVisible(Sci::Position lineDocStart, Sci::Position lineDocEnd, bool isVisible) {
 	if (OneToOne() && isVisible) {
 		return false;
 	} else {
@@ -160,7 +160,7 @@ bool ContractionState::SetVisible(int lineDocStart, int lineDocEnd, bool isVisib
 		int delta = 0;
 		Check();
 		if ((lineDocStart <= lineDocEnd) && (lineDocStart >= 0) && (lineDocEnd < LinesInDoc())) {
-			for (int line = lineDocStart; line <= lineDocEnd; line++) {
+			for (Sci::Position line = lineDocStart; line <= lineDocEnd; line++) {
 				if (GetVisible(line) != isVisible) {
 					int difference = isVisible ? heights->ValueAt(line) : -heights->ValueAt(line);
 					visible->SetValueAt(line, isVisible ? 1 : 0);
@@ -184,7 +184,7 @@ bool ContractionState::HiddenLines() const {
 	}
 }
 
-bool ContractionState::GetExpanded(int lineDoc) const {
+bool ContractionState::GetExpanded(Sci::Position lineDoc) const {
 	if (OneToOne()) {
 		return true;
 	} else {
@@ -193,7 +193,7 @@ bool ContractionState::GetExpanded(int lineDoc) const {
 	}
 }
 
-bool ContractionState::SetExpanded(int lineDoc, bool isExpanded) {
+bool ContractionState::SetExpanded(Sci::Position lineDoc, bool isExpanded) {
 	if (OneToOne() && isExpanded) {
 		return false;
 	} else {
@@ -209,7 +209,7 @@ bool ContractionState::SetExpanded(int lineDoc, bool isExpanded) {
 	}
 }
 
-int ContractionState::ContractedNext(int lineDocStart) const {
+Sci::Position ContractionState::ContractedNext(Sci::Position lineDocStart) const {
 	if (OneToOne()) {
 		return -1;
 	} else {
@@ -217,7 +217,7 @@ int ContractionState::ContractedNext(int lineDocStart) const {
 		if (!expanded->ValueAt(lineDocStart)) {
 			return lineDocStart;
 		} else {
-			int lineDocNextChange = expanded->EndRun(lineDocStart);
+			Sci::Position lineDocNextChange = expanded->EndRun(lineDocStart);
 			if (lineDocNextChange < LinesInDoc())
 				return lineDocNextChange;
 			else
@@ -226,7 +226,7 @@ int ContractionState::ContractedNext(int lineDocStart) const {
 	}
 }
 
-int ContractionState::GetHeight(int lineDoc) const {
+int ContractionState::GetHeight(Sci::Position lineDoc) const {
 	if (OneToOne()) {
 		return 1;
 	} else {
@@ -236,7 +236,7 @@ int ContractionState::GetHeight(int lineDoc) const {
 
 // Set the number of display lines needed for this line.
 // Return true if this is a change.
-bool ContractionState::SetHeight(int lineDoc, int height) {
+bool ContractionState::SetHeight(Sci::Position lineDoc, int height) {
 	if (OneToOne() && (height == 1)) {
 		return false;
 	} else if (lineDoc < LinesInDoc()) {
@@ -258,7 +258,7 @@ bool ContractionState::SetHeight(int lineDoc, int height) {
 }
 
 void ContractionState::ShowAll() {
-	int lines = LinesInDoc();
+	Sci::Position lines = LinesInDoc();
 	Clear();
 	linesInDocument = lines;
 }
@@ -267,14 +267,14 @@ void ContractionState::ShowAll() {
 
 void ContractionState::Check() const {
 #ifdef CHECK_CORRECTNESS
-	for (int vline = 0; vline < LinesDisplayed(); vline++) {
-		const int lineDoc = DocFromDisplay(vline);
+	for (Sci::Position vline = 0; vline < LinesDisplayed(); vline++) {
+		const Sci::Position lineDoc = DocFromDisplay(vline);
 		PLATFORM_ASSERT(GetVisible(lineDoc));
 	}
-	for (int lineDoc = 0; lineDoc < LinesInDoc(); lineDoc++) {
-		const int displayThis = DisplayFromDoc(lineDoc);
-		const int displayNext = DisplayFromDoc(lineDoc + 1);
-		const int height = displayNext - displayThis;
+	for (Sci::Position lineDoc = 0; lineDoc < LinesInDoc(); lineDoc++) {
+		const Sci::Position displayThis = DisplayFromDoc(lineDoc);
+		const Sci::Position displayNext = DisplayFromDoc(lineDoc + 1);
+		const Sci::Position height = displayNext - displayThis;
 		PLATFORM_ASSERT(height >= 0);
 		if (GetVisible(lineDoc)) {
 			PLATFORM_ASSERT(GetHeight(lineDoc) == height);
