@@ -249,7 +249,7 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 				}
 				if (highlightDelimiter.isEnabled) {
 					int lastLine = model.cs.DocFromDisplay(topLine + model.LinesOnScreen()) + 1;
-					model.pdoc->GetHighlightDelimiters(highlightDelimiter, model.pdoc->LineFromPosition(model.sel.MainCaret()), lastLine);
+					model.pdoc->GetHighlightDelimiters(highlightDelimiter, model.pdoc->LineOfPosition(model.sel.MainCaret()), lastLine);
 				}
 			}
 

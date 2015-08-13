@@ -1202,11 +1202,11 @@ void ScintillaCocoa::ClaimSelection()
  */
 NSPoint ScintillaCocoa::GetCaretPosition()
 {
-  const int line = pdoc->LineFromPosition(sel.RangeMain().caret.Position());
+  const int line = pdoc->LineOfPosition(sel.RangeMain().caret.Position());
   NSPoint result;
 
   result.y = line;
-  result.x = sel.RangeMain().caret.Position() - pdoc->LineStart(line);
+  result.x = sel.RangeMain().caret.Position() - pdoc->PositionLineStart(line);
   return result;
 }
 
@@ -1227,7 +1227,7 @@ void ScintillaCocoa::DragScroll()
   }
 
   // TODO: does not work for wrapped lines, fix it.
-  int line = pdoc->LineFromPosition(posDrag.Position());
+  int line = pdoc->LineOfPosition(posDrag.Position());
   int currentVisibleLine = cs.DisplayFromDoc(line);
   int lastVisibleLine = Platform::Minimum(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
 
@@ -1335,8 +1335,8 @@ void ScintillaCocoa::StartDrag()
   PRectangle client = GetTextRectangle();
   int selStart = sel.RangeMain().Start().Position();
   int selEnd = sel.RangeMain().End().Position();
-  int startLine = pdoc->LineFromPosition(selStart);
-  int endLine = pdoc->LineFromPosition(selEnd);
+  int startLine = pdoc->LineOfPosition(selStart);
+  int endLine = pdoc->LineOfPosition(selEnd);
   Point pt;
   long startPos, endPos, ep;
   PRectangle rcSel;
@@ -2277,7 +2277,7 @@ void ScintillaCocoa::CompositionCommit()
 {
   pdoc->TentativeCommit();
   pdoc->decorations.SetCurrentIndicator(INDIC_IME);
-  pdoc->DecorationFillRange(0, 0, pdoc->Length());
+  pdoc->DecorationFillRange(0, 0, pdoc->PositionLength());
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -763,8 +763,8 @@ const char *LexState::GetSubStyleBases() {
 void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 #ifdef SCI_LEXER
 	if (DocumentLexState()->lexLanguage != SCLEX_CONTAINER) {
-		int lineEndStyled = pdoc->LineFromPosition(pdoc->GetEndStyled());
-		int endStyled = pdoc->LineStart(lineEndStyled);
+		int lineEndStyled = pdoc->LineOfPosition(pdoc->GetEndStyled());
+		int endStyled = pdoc->PositionLineStart(lineEndStyled);
 		DocumentLexState()->Colourise(endStyled, endStyleNeeded);
 		return;
 	}
@@ -984,7 +984,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_COLOURISE:
 		if (DocumentLexState()->lexLanguage == SCLEX_CONTAINER) {
 			pdoc->ModifiedAt(static_cast<int>(wParam));
-			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : static_cast<int>(lParam));
+			NotifyStyleToNeeded((lParam == -1) ? pdoc->PositionLength() : static_cast<int>(lParam));
 		} else {
 			DocumentLexState()->Colourise(static_cast<int>(wParam), static_cast<int>(lParam));
 		}
