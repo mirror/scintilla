@@ -27,9 +27,9 @@ class DecorationList {
 	int currentIndicator;
 	int currentValue;
 	Decoration *current;
-	int lengthDocument;
+	Sci::Position lengthDocument;
 	Decoration *DecorationFromIndicator(int indicator);
-	Decoration *Create(int indicator, int length);
+	Decoration *Create(int indicator, Sci::Position length);
 	void Delete(int indicator);
 	void DeleteAnyEmpty();
 public:
@@ -48,13 +48,13 @@ public:
 	// Returns true if some values may have changed
 	bool FillRange(Sci::Position &position, int value, Sci::Position &fillLength);
 
-	void InsertSpace(int position, int insertLength);
-	void DeleteRange(int position, int deleteLength);
+	void InsertSpace(Sci::Position position, Sci::Position insertLength);
+	void DeleteRange(Sci::Position position, Sci::Position deleteLength);
 
-	int AllOnFor(int position) const;
-	int ValueAt(int indicator, int position);
-	int Start(int indicator, int position);
-	int End(int indicator, int position);
+	int AllOnFor(Sci::Position position) const;
+	int ValueAt(int indicator, Sci::Position position);
+	Sci::Position Start(int indicator, Sci::Position position);
+	Sci::Position End(int indicator, Sci::Position position);
 };
 
 #ifdef SCI_NAMESPACE

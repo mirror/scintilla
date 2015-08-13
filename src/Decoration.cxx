@@ -59,7 +59,7 @@ Decoration *DecorationList::DecorationFromIndicator(int indicator) {
 	return 0;
 }
 
-Decoration *DecorationList::Create(int indicator, int length) {
+Decoration *DecorationList::Create(int indicator, Sci::Position length) {
 	currentIndicator = indicator;
 	Decoration *decoNew = new Decoration(indicator);
 	decoNew->rs.InsertSpace(0, length);
@@ -129,20 +129,18 @@ bool DecorationList::FillRange(Sci::Position &position, int value, Sci::Position
 	return changed;
 }
 
-void DecorationList::InsertSpace(int position, int insertLength) {
+void DecorationList::InsertSpace(Sci::Position position, Sci::Position insertLength) {
 	const bool atEnd = position == lengthDocument;
 	lengthDocument += insertLength;
 	for (Decoration *deco=root; deco; deco = deco->next) {
 		deco->rs.InsertSpace(position, insertLength);
 		if (atEnd) {
-			Sci::Position positionPos = position;
-			Sci::Position insertLengthPos = insertLength;
-			deco->rs.FillRange(positionPos, 0, insertLengthPos);
+			deco->rs.FillRange(position, 0, insertLength);
 		}
 	}
 }
 
-void DecorationList::DeleteRange(int position, int deleteLength) {
+void DecorationList::DeleteRange(Sci::Position position, Sci::Position deleteLength) {
 	lengthDocument -= deleteLength;
 	Decoration *deco;
 	for (deco=root; deco; deco = deco->next) {
@@ -163,7 +161,7 @@ void DecorationList::DeleteAnyEmpty() {
 	}
 }
 
-int DecorationList::AllOnFor(int position) const {
+int DecorationList::AllOnFor(Sci::Position position) const {
 	int mask = 0;
 	for (Decoration *deco=root; deco; deco = deco->next) {
 		if (deco->rs.ValueAt(position)) {
@@ -175,7 +173,7 @@ int DecorationList::AllOnFor(int position) const {
 	return mask;
 }
 
-int DecorationList::ValueAt(int indicator, int position) {
+int DecorationList::ValueAt(int indicator, Sci::Position position) {
 	Decoration *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.ValueAt(position);
@@ -183,7 +181,7 @@ int DecorationList::ValueAt(int indicator, int position) {
 	return 0;
 }
 
-int DecorationList::Start(int indicator, int position) {
+Sci::Position DecorationList::Start(int indicator, Sci::Position position) {
 	Decoration *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.StartRun(position);
@@ -191,7 +189,7 @@ int DecorationList::Start(int indicator, int position) {
 	return 0;
 }
 
-int DecorationList::End(int indicator, int position) {
+Sci::Position DecorationList::End(int indicator, Sci::Position position) {
 	Decoration *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.EndRun(position);

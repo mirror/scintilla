@@ -49,16 +49,16 @@ public:
 	}
 	virtual ~LineMarkers();
 	virtual void Init();
-	virtual void InsertLine(int line);
-	virtual void RemoveLine(int line);
+	virtual void InsertLine(Sci::Position line);
+	virtual void RemoveLine(Sci::Position line);
 
-	int MarkValue(int line);
-	int MarkerNext(int lineStart, int mask) const;
-	int AddMark(int line, int marker, int lines);
-	void MergeMarkers(int pos);
-	bool DeleteMark(int line, int markerNum, bool all);
+	int MarkValue(Sci::Position line);
+	Sci::Position MarkerNext(Sci::Position lineStart, int mask) const;
+	int AddMark(Sci::Position line, int marker, Sci::Position lines);
+	void MergeMarkers(Sci::Position pos);
+	bool DeleteMark(Sci::Position line, int markerNum, bool all);
 	void DeleteMarkFromHandle(int markerHandle);
-	int LineFromHandle(int markerHandle);
+	Sci::Position LineFromHandle(int markerHandle);
 };
 
 class LineLevels : public PerLine {
@@ -66,13 +66,13 @@ class LineLevels : public PerLine {
 public:
 	virtual ~LineLevels();
 	virtual void Init();
-	virtual void InsertLine(int line);
-	virtual void RemoveLine(int line);
+	virtual void InsertLine(Sci::Position line);
+	virtual void RemoveLine(Sci::Position line);
 
-	void ExpandLevels(int sizeNew=-1);
+	void ExpandLevels(Sci::Position sizeNew=-1);
 	void ClearLevels();
-	int SetLevel(int line, int level, int lines);
-	int GetLevel(int line) const;
+	int SetLevel(Sci::Position line, int level, Sci::Position lines);
+	int GetLevel(Sci::Position line) const;
 };
 
 class LineState : public PerLine {
@@ -82,12 +82,12 @@ public:
 	}
 	virtual ~LineState();
 	virtual void Init();
-	virtual void InsertLine(int line);
-	virtual void RemoveLine(int line);
+	virtual void InsertLine(Sci::Position line);
+	virtual void RemoveLine(Sci::Position line);
 
-	int SetLineState(int line, int state);
-	int GetLineState(int line);
-	int GetMaxLineState() const;
+	int SetLineState(Sci::Position line, int state);
+	int GetLineState(Sci::Position line);
+	Sci::Position GetMaxLineState() const;
 };
 
 class LineAnnotation : public PerLine {
@@ -97,19 +97,19 @@ public:
 	}
 	virtual ~LineAnnotation();
 	virtual void Init();
-	virtual void InsertLine(int line);
-	virtual void RemoveLine(int line);
+	virtual void InsertLine(Sci::Position line);
+	virtual void RemoveLine(Sci::Position line);
 
-	bool MultipleStyles(int line) const;
-	int Style(int line) const;
-	const char *Text(int line) const;
-	const unsigned char *Styles(int line) const;
-	void SetText(int line, const char *text);
+	bool MultipleStyles(Sci::Position line) const;
+	int Style(Sci::Position line) const;
+	const char *Text(Sci::Position line) const;
+	const unsigned char *Styles(Sci::Position line) const;
+	void SetText(Sci::Position line, const char *text);
 	void ClearAll();
-	void SetStyle(int line, int style);
-	void SetStyles(int line, const unsigned char *styles);
-	int Length(int line) const;
-	int Lines(int line) const;
+	void SetStyle(Sci::Position line, int style);
+	void SetStyles(Sci::Position line, const unsigned char *styles);
+	int Length(Sci::Position line) const;
+	int Lines(Sci::Position line) const;
 };
 
 typedef std::vector<int> TabstopList;
@@ -121,12 +121,12 @@ public:
 	}
 	virtual ~LineTabstops();
 	virtual void Init();
-	virtual void InsertLine(int line);
-	virtual void RemoveLine(int line);
+	virtual void InsertLine(Sci::Position line);
+	virtual void RemoveLine(Sci::Position line);
 
-	bool ClearTabstops(int line);
-	bool AddTabstop(int line, int x);
-	int GetNextTabstop(int line, int x) const;
+	bool ClearTabstops(Sci::Position line);
+	bool AddTabstop(Sci::Position line, int x);
+	int GetNextTabstop(Sci::Position line, int x) const;
 };
 
 #ifdef SCI_NAMESPACE

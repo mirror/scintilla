@@ -261,8 +261,8 @@ public:
 	int GetLineEndTypesAllowed() const { return cb.GetLineEndTypes(); }
 	bool SetLineEndTypesAllowed(int lineEndBitSet_);
 	int GetLineEndTypesActive() const { return cb.GetLineEndTypes(); }
-	virtual void InsertLine(int line);
-	virtual void RemoveLine(int line);
+	virtual void InsertLine(Sci::Position line);
+	virtual void RemoveLine(Sci::Position line);
 
 	int SCI_METHOD Version() const {
 		return dvLineEnd;
@@ -306,7 +306,7 @@ public:
 	bool IsCollectingUndo() const { return cb.IsCollectingUndo(); }
 	void BeginUndoAction() { cb.BeginUndoAction(); }
 	void EndUndoAction() { cb.EndUndoAction(); }
-	void AddUndoAction(int token, bool mayCoalesce) { cb.AddUndoAction(token, mayCoalesce); }
+	void AddUndoAction(Sci::Position token, bool mayCoalesce) { cb.AddUndoAction(token, mayCoalesce); }
 	void SetSavePoint();
 	bool IsSavePoint() const { return cb.IsSavePoint(); }
 
@@ -317,7 +317,7 @@ public:
 
 	const char * SCI_METHOD BufferPointer() { return cb.BufferPointer(); }
 	const char *RangePointer(int position, int rangeLength) { return cb.RangePointer(position, rangeLength); }
-	int GapPosition() const { return cb.GapPosition(); }
+	Sci::Position GapPosition() const { return cb.GapPosition(); }
 
 	int SCI_METHOD GetLineIndentation(Sci_Position line);
 	int SetLineIndentation(int line, int indent);
@@ -372,7 +372,7 @@ public:
 	int ExtendWordSelect(int pos, int delta, bool onlyWordCharacters=false);
 	int NextWordStart(int pos, int delta);
 	int NextWordEnd(int pos, int delta);
-	int PositionLength() const { return cb.Length(); }
+	Sci::Position PositionLength() const { return cb.Length(); }
 	Sci_Position SCI_METHOD Length() const { return cb.Length(); }
 	void Allocate(int newSize) { cb.Allocate(newSize); }
 
@@ -414,7 +414,7 @@ public:
 
 	int SCI_METHOD SetLineState(Sci_Position line, int state);
 	int SCI_METHOD GetLineState(Sci_Position line) const;
-	int GetMaxLineState();
+	Sci::Position GetMaxLineState();
 	void SCI_METHOD ChangeLexerState(Sci_Position start, Sci_Position end);
 
 	StyledText MarginStyledText(int line) const;
@@ -479,18 +479,18 @@ public:
 class DocModification {
 public:
 	int modificationType;
-	int position;
-	int length;
-	int linesAdded;	/**< Negative if lines deleted. */
+	Sci::Position position;
+	Sci::Position length;
+	Sci::Position linesAdded;	/**< Negative if lines deleted. */
 	const char *text;	/**< Only valid for changes to text, not for changes to style. */
-	int line;
+	Sci::Position line;
 	int foldLevelNow;
 	int foldLevelPrev;
 	int annotationLinesAdded;
-	int token;
+	Sci::Position token;
 
-	DocModification(int modificationType_, int position_=0, int length_=0,
-		int linesAdded_=0, const char *text_=0, int line_=0) :
+	DocModification(int modificationType_, Sci::Position position_=0, Sci::Position length_=0,
+		Sci::Position linesAdded_=0, const char *text_=0, Sci::Position line_=0) :
 		modificationType(modificationType_),
 		position(position_),
 		length(length_),
@@ -502,7 +502,7 @@ public:
 		annotationLinesAdded(0),
 		token(0) {}
 
-	DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
+	DocModification(int modificationType_, const Action &act, Sci::Position linesAdded_=0) :
 		modificationType(modificationType_),
 		position(act.position),
 		length(act.lenData),
