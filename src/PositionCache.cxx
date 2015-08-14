@@ -122,8 +122,8 @@ int LineLayout::LineLastVisible(int line) const {
 	}
 }
 
-Range LineLayout::SubLineRange(int subLine) const {
-	return Range(LineStart(subLine), LineLastVisible(subLine));
+RangeInLine LineLayout::SubLineRange(int subLine) const {
+	return RangeInLine(LineStart(subLine), LineLastVisible(subLine));
 }
 
 bool LineLayout::InLine(int offset, int line) const {
@@ -148,17 +148,17 @@ void LineLayout::SetLineStart(int line, int start) {
 	lineStarts[line] = start;
 }
 
-void LineLayout::SetBracesHighlight(Range rangeLine, const Position braces[],
+void LineLayout::SetBracesHighlight(Range rangeLine, const Sci::Position braces[],
                                     char bracesMatchStyle, int xHighlight, bool ignoreStyle) {
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
-		int braceOffset = braces[0] - rangeLine.start;
+		int braceOffset = static_cast<int>(braces[0] - rangeLine.start);
 		if (braceOffset < numCharsInLine) {
 			bracePreviousStyles[0] = styles[braceOffset];
 			styles[braceOffset] = bracesMatchStyle;
 		}
 	}
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[1])) {
-		int braceOffset = braces[1] - rangeLine.start;
+		int braceOffset = static_cast<int>(braces[1] - rangeLine.start);
 		if (braceOffset < numCharsInLine) {
 			bracePreviousStyles[1] = styles[braceOffset];
 			styles[braceOffset] = bracesMatchStyle;
@@ -170,15 +170,15 @@ void LineLayout::SetBracesHighlight(Range rangeLine, const Position braces[],
 	}
 }
 
-void LineLayout::RestoreBracesHighlight(Range rangeLine, const Position braces[], bool ignoreStyle) {
+void LineLayout::RestoreBracesHighlight(Range rangeLine, const Sci::Position braces[], bool ignoreStyle) {
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
-		int braceOffset = braces[0] - rangeLine.start;
+		int braceOffset = static_cast<int>(braces[0] - rangeLine.start);
 		if (braceOffset < numCharsInLine) {
 			styles[braceOffset] = bracePreviousStyles[0];
 		}
 	}
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[1])) {
-		int braceOffset = braces[1] - rangeLine.start;
+		int braceOffset = static_cast<int>(braces[1] - rangeLine.start);
 		if (braceOffset < numCharsInLine) {
 			styles[braceOffset] = bracePreviousStyles[1];
 		}
@@ -200,7 +200,7 @@ int LineLayout::FindBefore(XYPOSITION x, int lower, int upper) const {
 }
 
 
-int LineLayout::FindPositionFromX(XYPOSITION x, Range range, bool charPosition) const {
+int LineLayout::FindPositionFromX(XYPOSITION x, RangeInLine range, bool charPosition) const {
 	int pos = FindBefore(x, range.start, range.end);
 	while (pos < range.end) {
 		if (charPosition) {
@@ -225,7 +225,7 @@ Point LineLayout::PointFromPosition(int posInLine, int lineHeight) const {
 	}
 
 	for (int subLine = 0; subLine < lines; subLine++) {
-		const Range rangeSubLine = SubLineRange(subLine);
+		const RangeInLine rangeSubLine = SubLineRange(subLine);
 		if (posInLine >= rangeSubLine.start) {
 			pt.y = static_cast<XYPOSITION>(subLine*lineHeight);
 			if (posInLine <= rangeSubLine.end) {
@@ -260,7 +260,7 @@ void LineLayoutCache::Allocate(size_t length_) {
 	cache.resize(length_);
 }
 
-void LineLayoutCache::AllocateForLevel(int linesOnScreen, int linesInDoc) {
+void LineLayoutCache::AllocateForLevel(Sci::Position linesOnScreen, Sci::Position linesInDoc) {
 	PLATFORM_ASSERT(useCount == 0);
 	size_t lengthForLevel = 0;
 	if (level == llcCaret) {
@@ -313,15 +313,15 @@ void LineLayoutCache::SetLevel(int level_) {
 	}
 }
 
-LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChars, int styleClock_,
-                                      int linesOnScreen, int linesInDoc) {
+LineLayout *LineLayoutCache::Retrieve(Sci::Position lineNumber, Sci::Position lineCaret, int maxChars, int styleClock_,
+                                      Sci::Position linesOnScreen, Sci::Position linesInDoc) {
 	AllocateForLevel(linesOnScreen, linesInDoc);
 	if (styleClock != styleClock_) {
 		Invalidate(LineLayout::llCheckTextAndStyle);
 		styleClock = styleClock_;
 	}
 	allInvalidated = false;
-	int pos = -1;
+	Sci::Position pos = -1;
 	LineLayout *ret = 0;
 	if (level == llcCaret) {
 		pos = 0;
@@ -336,7 +336,7 @@ LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChar
 	}
 	if (pos >= 0) {
 		PLATFORM_ASSERT(useCount == 0);
-		if (!cache.empty() && (pos < static_cast<int>(cache.size()))) {
+		if (!cache.empty() && (pos < static_cast<Sci::Position>(cache.size()))) {
 			if (cache[pos]) {
 				if ((cache[pos]->lineNumber != lineNumber) ||
 				        (cache[pos]->maxLineLength < maxChars)) {
@@ -440,7 +440,7 @@ void BreakFinder::Insert(int val) {
 	}
 }
 
-BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, int posLineStart_,
+BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, RangeInLine lineRange_, Sci::Position posLineStart_,
 	int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw) :
 	ll(ll_),
 	lineRange(lineRange_),
@@ -470,9 +470,9 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 			SelectionSegment portion = psel->Range(r).Intersect(segmentLine);
 			if (!(portion.start == portion.end)) {
 				if (portion.start.IsValid())
-					Insert(portion.start.Position() - posLineStart);
+					Insert(static_cast<int>(portion.start.Position() - posLineStart));
 				if (portion.end.IsValid())
-					Insert(portion.end.Position() - posLineStart);
+					Insert(static_cast<int>(portion.end.Position() - posLineStart));
 			}
 		}
 	}

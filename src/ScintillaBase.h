@@ -67,7 +67,7 @@ protected:
 	virtual void CancelModes();
 	virtual int KeyCommand(unsigned int iMessage);
 
-	void AutoCompleteInsert(Position startPos, int removeLen, const char *text, int textLen);
+	void AutoCompleteInsert(Sci::Position startPos, int removeLen, const char *text, int textLen);
 	void AutoCompleteStart(int lenEntered, const char *list);
 	void AutoCompleteCancel();
 	void AutoCompleteMove(int delta);
@@ -89,7 +89,7 @@ protected:
 	virtual void ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers);
 	virtual void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
 
-	void NotifyStyleToNeeded(int endStyleNeeded);
+	void NotifyStyleToNeeded(Sci::Position endStyleNeeded);
 	void NotifyLexerChanged(Document *doc, void *userData);
 
 public:

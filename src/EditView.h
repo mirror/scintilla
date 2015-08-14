@@ -35,6 +35,7 @@ enum DrawPhase {
 	drawAll = 0x1FF
 };
 
+void StringFromPosition(char *s, Sci::Position pos);
 bool ValidStyledText(const ViewStyle &vs, size_t styleOffset, const StyledText &st);
 int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, const StyledText &st);
 void DrawTextNoClipPhase(Surface *surface, PRectangle rc, const Style &style, XYPOSITION ybase,
@@ -97,48 +98,48 @@ public:
 	bool LinesOverlap() const;
 
 	void ClearAllTabstops();
-	XYPOSITION NextTabstopPos(int line, XYPOSITION x, XYPOSITION tabWidth) const;
-	bool ClearTabstops(int line);
-	bool AddTabstop(int line, int x);
-	int GetNextTabstop(int line, int x) const;
-	void LinesAddedOrRemoved(int lineOfPos, int linesAdded);
+	XYPOSITION NextTabstopPos(Sci::Position line, XYPOSITION x, XYPOSITION tabWidth) const;
+	bool ClearTabstops(Sci::Position line);
+	bool AddTabstop(Sci::Position line, int x);
+	int GetNextTabstop(Sci::Position line, int x) const;
+	void LinesAddedOrRemoved(Sci::Position lineOfPos, Sci::Position linesAdded);
 
 	void DropGraphics(bool freeObjects);
 	void AllocateGraphics(const ViewStyle &vsDraw);
 	void RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw);
 
-	LineLayout *RetrieveLineLayout(int lineNumber, const EditModel &model);
-	void LayoutLine(const EditModel &model, int line, Surface *surface, const ViewStyle &vstyle,
+	LineLayout *RetrieveLineLayout(Sci::Position lineNumber, const EditModel &model);
+	void LayoutLine(const EditModel &model, Sci::Position line, Surface *surface, const ViewStyle &vstyle,
 		LineLayout *ll, int width = LineLayout::wrapWidthInfinite);
 
-	Point LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, int topLine, const ViewStyle &vs);
+	Point LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, Sci::Position topLine, const ViewStyle &vs);
 	SelectionPosition SPositionFromLocation(Surface *surface, const EditModel &model, Point pt, bool canReturnInvalid,
 		bool charPosition, bool virtualSpace, const ViewStyle &vs);
-	SelectionPosition SPositionFromLineX(Surface *surface, const EditModel &model, int lineDoc, int x, const ViewStyle &vs);
-	int DisplayFromPosition(Surface *surface, const EditModel &model, int pos, const ViewStyle &vs);
-	int StartEndDisplayLine(Surface *surface, const EditModel &model, int pos, bool start, const ViewStyle &vs);
+	SelectionPosition SPositionFromLineX(Surface *surface, const EditModel &model, Sci::Position lineDoc, int x, const ViewStyle &vs);
+	Sci::Position DisplayFromPosition(Surface *surface, const EditModel &model, Sci::Position pos, const ViewStyle &vs);
+	Sci::Position StartEndDisplayLine(Surface *surface, const EditModel &model, Sci::Position pos, bool start, const ViewStyle &vs);
 
-	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
+	void DrawIndentGuide(Surface *surface, Sci::Position lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
 	void DrawEOL(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine,
-		int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
+		Sci::Position line, Sci::Position lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
 		ColourOptional background);
 	void DrawAnnotation(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-		int line, int xStart, PRectangle rcLine, int subLine, DrawPhase phase);
-	void DrawCarets(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int line,
+		Sci::Position line, int xStart, PRectangle rcLine, int subLine, DrawPhase phase);
+	void DrawCarets(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, Sci::Position line,
 		int xStart, PRectangle rcLine, int subLine) const;
 	void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine,
-		Range lineRange, int posLineStart, int xStart,
+		RangeInLine lineRange, Sci::Position posLineStart, int xStart,
 		int subLine, ColourOptional background) const;
-	void DrawForeground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int lineVisible,
-		PRectangle rcLine, Range lineRange, int posLineStart, int xStart,
+	void DrawForeground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, Sci::Position lineVisible,
+		PRectangle rcLine, RangeInLine lineRange, Sci::Position posLineStart, int xStart,
 		int subLine, ColourOptional background);
 	void DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-		int line, int lineVisible, PRectangle rcLine, int xStart, int subLine);
-	void DrawLine(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int line,
-		int lineVisible, int xStart, PRectangle rcLine, int subLine, DrawPhase phase);
+		Sci::Position line, Sci::Position lineVisible, PRectangle rcLine, int xStart, int subLine);
+	void DrawLine(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, Sci::Position line,
+		Sci::Position lineVisible, int xStart, PRectangle rcLine, int subLine, DrawPhase phase);
 	void PaintText(Surface *surfaceWindow, const EditModel &model, PRectangle rcArea, PRectangle rcClient,
 		const ViewStyle &vsDraw);
-	long FormatRange(bool draw, Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
+	Sci::Position FormatRange(bool draw, Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
 		const EditModel &model, const ViewStyle &vs);
 };
 
