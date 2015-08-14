@@ -65,6 +65,9 @@ ScintillaEditPy/ScintillaEditPy directory. Several log files are produced which 
 help uncover problems in the bridge if it fails to build.
 
 The qmake program is run to produce make files from ScintillaEditPy.pro.
+Uncomment the line adding the define for large file support if you wish to build and test
+a 64-bit version of Scintilla. The line to uncomment is:
+DEFINES += SCI_LARGE_FILE_SUPPORT=1
 
 The system make program is then run to build the library. The library is located in
 the scintilla/bin directory as ScintillaEditPy.so for Unix systems and 

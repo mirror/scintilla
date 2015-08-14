@@ -71,36 +71,36 @@ signals:
 	void horizontalRangeChanged(int max, int page);
 	void verticalRangeChanged(int max, int page);
 	void notifyChange();
-	void linesAdded(int linesAdded);
+	void linesAdded(Sci_Position linesAdded);
 
 	// Clients can use this hook to add additional
 	// formats (e.g. rich text) to the MIME data.
 	void aboutToCopy(QMimeData *data);
 
 	// Scintilla Notifications
-	void styleNeeded(int position);
+	void styleNeeded(Sci_Position position);
 	void charAdded(int ch);
 	void savePointChanged(bool dirty);
 	void modifyAttemptReadOnly();
 	void key(int key);
-	void doubleClick(int position, int line);
+	void doubleClick(Sci_Position position, Sci_Position line);
 	void updateUi();
-	void modified(int type, int position, int length, int linesAdded,
-	              const QByteArray &text, int line, int foldNow, int foldPrev);
+	void modified(int type, Sci_Position position, Sci_Position length, Sci_Position linesAdded,
+	              const QByteArray &text, Sci_Position line, int foldNow, int foldPrev);
 	void macroRecord(int message, uptr_t wParam, sptr_t lParam);
-	void marginClicked(int position, int modifiers, int margin);
-	void textAreaClicked(int line, int modifiers);
-	void needShown(int position, int length);
+	void marginClicked(Sci_Position position, int modifiers, int margin);
+	void textAreaClicked(Sci_Position line, int modifiers);
+	void needShown(Sci_Position position, Sci_Position length);
 	void painted();
 	void userListSelection(); // Wants some args.
 	void uriDropped();        // Wants some args.
 	void dwellStart(int x, int y);
 	void dwellEnd(int x, int y);
 	void zoom(int zoom);
-	void hotSpotClick(int position, int modifiers);
-	void hotSpotDoubleClick(int position, int modifiers);
+	void hotSpotClick(Sci_Position position, int modifiers);
+	void hotSpotDoubleClick(Sci_Position position, int modifiers);
 	void callTipClick();
-	void autoCompleteSelection(int position, const QString &text);
+	void autoCompleteSelection(Sci_Position position, const QString &text);
 	void autoCompleteCancelled();
 
 	// Base notifications for compatibility with other Scintilla implementations
@@ -139,7 +139,6 @@ private:
 
 	QTime time;
 
-	int preeditPos;
 	QString preeditString;
 
 	int wheelDelta;

@@ -34,7 +34,7 @@ using namespace Scintilla;
 #endif
 
 ScintillaEditBase::ScintillaEditBase(QWidget *parent)
-: QAbstractScrollArea(parent), sqt(0), preeditPos(-1), wheelDelta(0)
+: QAbstractScrollArea(parent), sqt(0), wheelDelta(0)
 {
 	sqt = new ScintillaQt(this);
 
@@ -567,7 +567,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 		}
 
 		// Set candidate box position for Qt::ImMicroFocus.
-		preeditPos = sqt->CurrentPosition();
+		sqt->preeditPos = sqt->CurrentPosition();
 		sqt->EnsureCaretVisible();
 		updateMicroFocus();
 	}
@@ -582,7 +582,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 	switch (query) {
 		case Qt::ImMicroFocus:
 		{
-			int startPos = (preeditPos >= 0) ? preeditPos : pos;
+			int startPos = (sqt->preeditPos >= 0) ? sqt->preeditPos : pos;
 			Point pt = sqt->LocationFromPosition(startPos);
 			int width = send(SCI_GETCARETWIDTH);
 			int height = send(SCI_TEXTHEIGHT, line);

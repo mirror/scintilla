@@ -44,7 +44,7 @@ public:
 	void NotifySavePoint(Document *doc, void *userData, bool atSavePoint);
 	void NotifyModified(Document *doc, DocModification mh, void *userData);
 	void NotifyDeleted(Document *doc, void *userData);
-	void NotifyStyleNeeded(Document *doc, void *userData, int endPos);
+	void NotifyStyleNeeded(Document *doc, void *userData, Sci::Position endPos);
 	void NotifyLexerChanged(Document *doc, void *userData);
 	void NotifyErrorOccurred(Document *doc, void *userData, int status);
 };
@@ -75,7 +75,7 @@ void WatcherHelper::NotifyModified(Document *, DocModification mh, void *) {
 void WatcherHelper::NotifyDeleted(Document *, void *) {
 }
 
-void WatcherHelper::NotifyStyleNeeded(Document *, void *, int endPos) {
+void WatcherHelper::NotifyStyleNeeded(Document *, void *, Sci::Position endPos) {
 	owner->emit_style_needed(endPos);
 }
 
@@ -112,23 +112,23 @@ void *ScintillaDocument::pointer() {
 	return pdoc;
 }
 
-int ScintillaDocument::line_from_position(int pos) {
+Sci_Position ScintillaDocument::line_from_position(Sci_Position pos) {
     return (static_cast<Document *>(pdoc))->LineFromPosition(pos);
 }
 
-bool ScintillaDocument::is_cr_lf(int pos) {
+bool ScintillaDocument::is_cr_lf(Sci_Position pos) {
     return (static_cast<Document *>(pdoc))->IsCrLf(pos);
 }
 
-bool ScintillaDocument::delete_chars(int pos, int len) {
+bool ScintillaDocument::delete_chars(Sci_Position pos, Sci_Position len) {
     return (static_cast<Document *>(pdoc))->DeleteChars(pos, len);
 }
 
-int ScintillaDocument::undo() {
+Sci_Position ScintillaDocument::undo() {
     return (static_cast<Document *>(pdoc))->Undo();
 }
 
-int ScintillaDocument::redo() {
+Sci_Position ScintillaDocument::redo() {
     return (static_cast<Document *>(pdoc))->Redo();
 }
 
@@ -176,11 +176,11 @@ bool ScintillaDocument::is_read_only() {
     return (static_cast<Document *>(pdoc))->IsReadOnly();
 }
 
-void ScintillaDocument::insert_string(int position, QByteArray &str) {
+void ScintillaDocument::insert_string(Sci_Position position, QByteArray &str) {
     (static_cast<Document *>(pdoc))->InsertString(position, str.data(), str.size());
 }
 
-QByteArray ScintillaDocument::get_char_range(int position, int length) {
+QByteArray ScintillaDocument::get_char_range(Sci_Position position, Sci_Position length) {
     Document *doc = static_cast<Document *>(pdoc);
 
     if (position < 0 || length <= 0 || position + length > doc->Length())
@@ -191,35 +191,35 @@ QByteArray ScintillaDocument::get_char_range(int position, int length) {
     return ba;
 }
 
-char ScintillaDocument::style_at(int position) {
+char ScintillaDocument::style_at(Sci_Position position) {
     return (static_cast<Document *>(pdoc))->StyleAt(position);
 }
 
-int ScintillaDocument::line_start(int lineno) {
+Sci_Position ScintillaDocument::line_start(Sci_Position lineno) {
     return (static_cast<Document *>(pdoc))->LineStart(lineno);
 }
 
-int ScintillaDocument::line_end(int lineno) {
+Sci_Position ScintillaDocument::line_end(Sci_Position lineno) {
     return (static_cast<Document *>(pdoc))->LineEnd(lineno);
 }
 
-int ScintillaDocument::line_end_position(int pos) {
+Sci_Position ScintillaDocument::line_end_position(Sci_Position pos) {
     return (static_cast<Document *>(pdoc))->LineEndPosition(pos);
 }
 
-int ScintillaDocument::length() {
+Sci_Position ScintillaDocument::length() {
     return (static_cast<Document *>(pdoc))->Length();
 }
 
-int ScintillaDocument::lines_total() {
+Sci_Position ScintillaDocument::lines_total() {
     return (static_cast<Document *>(pdoc))->LinesTotal();
 }
 
-void ScintillaDocument::start_styling(int position, char flags) {
+void ScintillaDocument::start_styling(Sci_Position position, char flags) {
     (static_cast<Document *>(pdoc))->StartStyling(position, flags);
 }
 
-bool ScintillaDocument::set_style_for(int length, char style) {
+bool ScintillaDocument::set_style_for(Sci_Position length, char style) {
     return (static_cast<Document *>(pdoc))->SetStyleFor(length, style);
 }
 
@@ -227,7 +227,7 @@ int ScintillaDocument::get_end_styled() {
     return (static_cast<Document *>(pdoc))->GetEndStyled();
 }
 
-void ScintillaDocument::ensure_styled_to(int position) {
+void ScintillaDocument::ensure_styled_to(Sci_Position position) {
     (static_cast<Document *>(pdoc))->EnsureStyledTo(position);
 }
 
@@ -235,19 +235,19 @@ void ScintillaDocument::set_current_indicator(int indic) {
     (static_cast<Document *>(pdoc))->decorations.SetCurrentIndicator(indic);
 }
 
-void ScintillaDocument::decoration_fill_range(int position, int value, int fillLength) {
+void ScintillaDocument::decoration_fill_range(Sci_Position position, int value, Sci_Position fillLength) {
     (static_cast<Document *>(pdoc))->DecorationFillRange(position, value, fillLength);
 }
 
-int ScintillaDocument::decorations_value_at(int indic, int position) {
+int ScintillaDocument::decorations_value_at(int indic, Sci_Position position) {
     return (static_cast<Document *>(pdoc))->decorations.ValueAt(indic, position);
 }
 
-int ScintillaDocument::decorations_start(int indic, int position) {
+Sci_Position ScintillaDocument::decorations_start(int indic, Sci_Position position) {
     return (static_cast<Document *>(pdoc))->decorations.Start(indic, position);
 }
 
-int ScintillaDocument::decorations_end(int indic, int position) {
+Sci_Position ScintillaDocument::decorations_end(int indic, Sci_Position position) {
     return (static_cast<Document *>(pdoc))->decorations.End(indic, position);
 }
 
@@ -267,11 +267,11 @@ void ScintillaDocument::set_eol_mode(int eol_mode) {
     (static_cast<Document *>(pdoc))->eolMode = eol_mode;
 }
 
-int ScintillaDocument::move_position_outside_char(int pos, int move_dir, bool check_line_end) {
+Sci_Position ScintillaDocument::move_position_outside_char(Sci_Position pos, int move_dir, bool check_line_end) {
     return (static_cast<Document *>(pdoc))->MovePositionOutsideChar(pos, move_dir, check_line_end);
 }
 
-int ScintillaDocument::get_character(int pos) {
+int ScintillaDocument::get_character(Sci_Position pos) {
     return (static_cast<Document *>(pdoc))->GetCharacterAndWidth(pos, NULL);
 }
 
@@ -285,13 +285,13 @@ void ScintillaDocument::emit_save_point(bool atSavePoint) {
     emit save_point(atSavePoint);
 }
 
-void ScintillaDocument::emit_modified(int position, int modification_type, const QByteArray& text, int length,
-    int linesAdded, int line, int foldLevelNow, int foldLevelPrev) {
+void ScintillaDocument::emit_modified(Sci_Position position, int modification_type, const QByteArray& text, Sci_Position length,
+    Sci_Position linesAdded, Sci_Position line, int foldLevelNow, int foldLevelPrev) {
     emit modified(position, modification_type, text, length,
         linesAdded, line, foldLevelNow, foldLevelPrev);
 }
 
-void ScintillaDocument::emit_style_needed(int pos) {
+void ScintillaDocument::emit_style_needed(Sci_Position pos) {
     emit style_needed(pos);
 }
 
