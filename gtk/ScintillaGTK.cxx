@@ -218,7 +218,7 @@ private:
 	virtual void ScrollText(int linesToMove);
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
-	virtual bool ModifyScrollBars(int nMax, int nPage);
+	virtual bool ModifyScrollBars(Sci::Position nMax, Sci::Position nPage);
 	void ReconfigureScrollBars();
 	virtual void NotifyChange();
 	virtual void NotifyFocus(bool focus);
@@ -1243,7 +1243,7 @@ void ScintillaGTK::SetHorizontalScrollPos() {
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmenth), xOffset);
 }
 
-bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
+bool ScintillaGTK::ModifyScrollBars(Sci::Position nMax, Sci::Position nPage) {
 	bool modified = false;
 	int pageScroll = LinesToScroll();
 
@@ -2941,7 +2941,7 @@ gboolean ScintillaGTK::DragMotion(GtkWidget *widget, GdkDragContext *context,
 void ScintillaGTK::DragLeave(GtkWidget *widget, GdkDragContext * /*context*/, guint) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
-		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
+		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 		//Platform::DebugPrintf("DragLeave %x\n", sciThis);
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
@@ -2954,7 +2954,7 @@ void ScintillaGTK::DragEnd(GtkWidget *widget, GdkDragContext * /*context*/) {
 		// If drag did not result in drop here or elsewhere
 		if (!sciThis->dragWasDropped)
 			sciThis->SetEmptySelection(sciThis->posDrag);
-		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
+		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 		//Platform::DebugPrintf("DragEnd %x %d\n", sciThis, sciThis->dragWasDropped);
 		sciThis->inDragDrop = ddNone;
 	} catch (...) {
@@ -2967,7 +2967,7 @@ gboolean ScintillaGTK::Drop(GtkWidget *widget, GdkDragContext * /*context*/,
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		//Platform::DebugPrintf("Drop %x\n", sciThis);
-		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
+		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2979,7 +2979,7 @@ void ScintillaGTK::DragDataReceived(GtkWidget *widget, GdkDragContext * /*contex
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		sciThis->ReceivedDrop(selection_data);
-		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
+		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -3010,7 +3010,7 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 			}
 			sciThis->ClearSelection();
 		}
-		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
+		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
