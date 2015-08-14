@@ -13,6 +13,12 @@
  * depending on if documents larger than 2G are desired. In namespace separate from Scintilla. Since this type is
  * internal in nature, the Sci namespace is not conditionally compiled.
  */
+
+/**
+ * A Position is a position within a document between two characters or at the beginning or end.
+ * Sometimes used as a character index where it identifies the character after the position.
+ */
+
 namespace Sci {
 
 /* If you want large file support (documents greater than 2G), define SCI_LARGE_FILE_SUPPORT

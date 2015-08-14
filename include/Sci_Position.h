@@ -9,42 +9,28 @@
 #ifndef SCI_POSITION_H
 #define SCI_POSITION_H
 
-/* If you want large file support (documents greater than 2G), define SCI_EXPERIM_64
- * by default Scintilla restricts document sizes to 2G.
- */
-#ifdef SCI_EXPERIM_64
-	#ifdef __cplusplus
-		#include <cstddef>
+#ifdef __cplusplus
+	#include <cstddef>
 
-		// Basic signed type used throughout interface
-		typedef std::ptrdiff_t Sci_Position;
-
-		// Unsigned variant used for ILexer::Lex and ILexer::Fold
-		typedef std::size_t Sci_PositionU;
-
-		// For Sci_CharacterRange  which is defined as long to be compatible with Win32 CHARRANGE
-		typedef std::ptrdiff_t Sci_PositionCR;
-	#else
-		#include <stddef.h>
-
-		// Basic signed type used throughout interface
-		typedef ptrdiff_t Sci_Position;
-
-		// Unsigned variant used for ILexer::Lex and ILexer::Fold
-		typedef size_t Sci_PositionU;
-
-		// For Sci_CharacterRange  which is defined as long to be compatible with Win32 CHARRANGE
-		typedef ptrdiff_t Sci_PositionCR;
-	#endif
-#else   /* default 32-bit file support */
 	// Basic signed type used throughout interface
-	typedef int Sci_Position;
+	typedef std::ptrdiff_t Sci_Position;
 
 	// Unsigned variant used for ILexer::Lex and ILexer::Fold
-	typedef unsigned int Sci_PositionU;
+	typedef std::size_t Sci_PositionU;
 
 	// For Sci_CharacterRange  which is defined as long to be compatible with Win32 CHARRANGE
-	typedef long Sci_PositionCR;
-#endif  /* SCI_EXPERIM_64 */
+	typedef std::ptrdiff_t Sci_PositionCR;
+#else
+	#include <stddef.h>
+
+	// Basic signed type used throughout interface
+	typedef ptrdiff_t Sci_Position;
+
+	// Unsigned variant used for ILexer::Lex and ILexer::Fold
+	typedef size_t Sci_PositionU;
+
+	// For Sci_CharacterRange  which is defined as long to be compatible with Win32 CHARRANGE
+	typedef ptrdiff_t Sci_PositionCR;
+#endif
 
 #endif

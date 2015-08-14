@@ -183,7 +183,7 @@ static int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault, const Vie
 	return markerCheck;
 }
 
-void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRectangle rcMargin,
+void MarginView::PaintMargin(Surface *surface, Sci::Position topLine, PRectangle rc, PRectangle rcMargin,
 	const EditModel &model, const ViewStyle &vs) {
 
 	PRectangle rcSelMargin = rcMargin;
@@ -227,7 +227,7 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 			}
 
 			const int lineStartPaint = static_cast<int>(rcMargin.top + ptOrigin.y) / vs.lineHeight;
-			int visibleLine = model.TopLineOfMain() + lineStartPaint;
+			Sci::Position visibleLine = model.TopLineOfMain() + lineStartPaint;
 			int yposScreen = lineStartPaint * vs.lineHeight - static_cast<int>(ptOrigin.y);
 			// Work out whether the top line is whitespace located after a
 			// lessening of fold level which implies a 'fold tail' but which should not
@@ -236,7 +236,7 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 			if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
 				int level = model.pdoc->GetLevel(model.cs.DocFromDisplay(visibleLine));
 				if (level & SC_FOLDLEVELWHITEFLAG) {
-					int lineBack = model.cs.DocFromDisplay(visibleLine);
+					Sci::Position lineBack = model.cs.DocFromDisplay(visibleLine);
 					int levelPrev = level;
 					while ((lineBack > 0) && (levelPrev & SC_FOLDLEVELWHITEFLAG)) {
 						lineBack--;
@@ -248,7 +248,7 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 					}
 				}
 				if (highlightDelimiter.isEnabled) {
-					int lastLine = model.cs.DocFromDisplay(topLine + model.LinesOnScreen()) + 1;
+					Sci::Position lastLine = model.cs.DocFromDisplay(topLine + model.LinesOnScreen()) + 1;
 					model.pdoc->GetHighlightDelimiters(highlightDelimiter, model.pdoc->LineOfPosition(model.sel.MainCaret()), lastLine);
 				}
 			}
@@ -262,10 +262,10 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 			while ((visibleLine < model.cs.LinesDisplayed()) && yposScreen < rc.bottom) {
 
 				PLATFORM_ASSERT(visibleLine < model.cs.LinesDisplayed());
-				const int lineDoc = model.cs.DocFromDisplay(visibleLine);
+				const Sci::Position lineDoc = model.cs.DocFromDisplay(visibleLine);
 				PLATFORM_ASSERT(model.cs.GetVisible(lineDoc));
-				const int firstVisibleLine = model.cs.DisplayFromDoc(lineDoc);
-				const int lastVisibleLine = model.cs.DisplayLastFromDoc(lineDoc);
+				const Sci::Position firstVisibleLine = model.cs.DisplayFromDoc(lineDoc);
+				const Sci::Position lastVisibleLine = model.cs.DisplayLastFromDoc(lineDoc);
 				const bool firstSubLine = visibleLine == firstVisibleLine;
 				const bool lastSubLine = visibleLine == lastVisibleLine;
 
@@ -310,7 +310,7 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 							}
 						}
 						needWhiteClosure = false;
-						const int firstFollowupLine = model.cs.DocFromDisplay(model.cs.DisplayFromDoc(lineDoc + 1));
+						const Sci::Position firstFollowupLine = model.cs.DocFromDisplay(model.cs.DisplayFromDoc(lineDoc + 1));
 						const int firstFollowupLineLevel = model.pdoc->GetLevel(firstFollowupLine);
 						const int secondFollowupLineLevelNum = model.pdoc->GetLevel(firstFollowupLine + 1) & SC_FOLDLEVELNUMBERMASK;
 						if (!model.cs.GetExpanded(lineDoc)) {
@@ -373,7 +373,7 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 					if (firstSubLine) {
 						char number[100] = "";
 						if (lineDoc >= 0)
-							sprintf(number, "%d", lineDoc + 1);
+							StringFromPosition(number, lineDoc + 1);
 						if (model.foldFlags & (SC_FOLDFLAG_LEVELNUMBERS | SC_FOLDFLAG_LINESTATE)) {
 							if (model.foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
 								int lev = model.pdoc->GetLevel(lineDoc);
