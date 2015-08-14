@@ -108,6 +108,12 @@ HEADERS  += \
 
 DEFINES += SCINTILLA_QT=1 MAKING_LIBRARY=1 SCI_LEXER=1 _CRT_SECURE_NO_DEPRECATE=1
 
+# Uncomment the appropriate line for the various combinations of interface width and internal size
+# The default if you don't uncomment either of thse is to build 32-bit internal and 32-bit external interface code
+
+# 64-bit internal and external interface code
+#DEFINES += SCI_LARGE_FILE_SUPPORT=1
+
 DESTDIR = ../../bin
 
 unix:!mac {
