@@ -1545,7 +1545,7 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info)
 void ScintillaCocoa::DraggingExited(id <NSDraggingInfo> info)
 {
 #pragma unused(info)
-  SetDragPosition(SelectionPosition(invalidPosition));
+  SetDragPosition(SelectionPosition(Sci::invalidPosition));
   FineTickerCancel(tickPlatform);
   inDragDrop = ddNone;
 }

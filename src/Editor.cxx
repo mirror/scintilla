@@ -917,7 +917,7 @@ void Editor::ScrollTo(Sci::Position line, bool moveThumb) {
 		// Try to optimise small scrolls
 #ifndef UNDER_CE
 		Sci::Position linesToMove = topLine - topLineNew;
-		bool performBlit = (abs(linesToMove) <= 10) && (paintState == notPainting);
+		bool performBlit = (std::abs(static_cast<double>(linesToMove)) <= 10.5) && (paintState == notPainting);
 		willRedrawAll = !performBlit;
 #endif
 		SetTopLine(topLineNew);
