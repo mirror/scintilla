@@ -810,7 +810,7 @@ Sci::Position Document::GetRelativePositionUTF16(Sci::Position positionStart, Sc
 			const Sci::Position posNext = NextPosition(pos, increment);
 			if (posNext == pos)
 				return INVALID_POSITION;
-			if (abs(pos-posNext) > 3)	// 4 byte character = 2*UTF16.
+			if (abs(static_cast<int>(pos-posNext)) > 3)	// 4 byte character = 2*UTF16.
 				characterOffset -= increment;
 			pos = posNext;
 			characterOffset -= increment;
