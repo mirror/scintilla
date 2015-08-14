@@ -308,7 +308,7 @@ class ScintillaWin :
 
 	virtual int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
 	virtual bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
-	void ChangeScrollPos(int barType, int pos);
+	void ChangeScrollPos(int barType, Sci::Position pos);
 	sptr_t GetTextLength();
 	sptr_t GetText(uptr_t wParam, sptr_t lParam);
 
@@ -658,7 +658,7 @@ static bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCh
 // Returns the target converted to UTF8.
 // Return the length in bytes.
 int ScintillaWin::TargetAsUTF8(char *text) {
-	int targetLength = targetEnd - targetStart;
+	Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text) {
 			pdoc->GetCharRange(text, targetStart, targetLength);
@@ -1588,10 +1588,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case EM_GETSEL:
 			if (wParam) {
-				*reinterpret_cast<int *>(wParam) = SelectionStart().Position();
+				*reinterpret_cast<int *>(wParam) = static_cast<int>(SelectionStart().Position());
 			}
 			if (lParam) {
-				*reinterpret_cast<int *>(lParam) = SelectionEnd().Position();
+				*reinterpret_cast<int *>(lParam) = static_cast<int>(SelectionEnd().Position());
 			}
 			return MAKELONG(SelectionStart().Position(), SelectionEnd().Position());
 
@@ -1826,7 +1826,7 @@ bool ScintillaWin::GetScrollInfo(int nBar, LPSCROLLINFO lpsi) {
 }
 
 // Change the scroll position but avoid repaint if changing to same value
-void ScintillaWin::ChangeScrollPos(int barType, int pos) {
+void ScintillaWin::ChangeScrollPos(int barType, Sci::Position pos) {
 	SCROLLINFO sci = {
 		sizeof(sci), 0, 0, 0, 0, 0, 0
 	};
