@@ -1202,7 +1202,7 @@ void ScintillaCocoa::ClaimSelection()
  */
 NSPoint ScintillaCocoa::GetCaretPosition()
 {
-  const int line = pdoc->LineOfPosition(sel.RangeMain().caret.Position());
+  const Sci::Position line = pdoc->LineOfPosition(sel.RangeMain().caret.Position());
   NSPoint result;
 
   result.y = line;
@@ -1227,9 +1227,9 @@ void ScintillaCocoa::DragScroll()
   }
 
   // TODO: does not work for wrapped lines, fix it.
-  int line = pdoc->LineOfPosition(posDrag.Position());
-  int currentVisibleLine = cs.DisplayFromDoc(line);
-  int lastVisibleLine = Platform::Minimum(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
+  Sci::Position line = pdoc->LineOfPosition(posDrag.Position());
+  Sci::Position currentVisibleLine = cs.DisplayFromDoc(line);
+  Sci::Position lastVisibleLine = std::min(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
 
   if (currentVisibleLine <= topLine && topLine > 0)
     ScrollTo(topLine - scrollSpeed);
@@ -1333,10 +1333,10 @@ void ScintillaCocoa::StartDrag()
 
   // calculate the bounds of the selection
   PRectangle client = GetTextRectangle();
-  int selStart = sel.RangeMain().Start().Position();
-  int selEnd = sel.RangeMain().End().Position();
-  int startLine = pdoc->LineOfPosition(selStart);
-  int endLine = pdoc->LineOfPosition(selEnd);
+  Sci::Position selStart = sel.RangeMain().Start().Position();
+  Sci::Position selEnd = sel.RangeMain().End().Position();
+  Sci::Position startLine = pdoc->LineOfPosition(selStart);
+  Sci::Position endLine = pdoc->LineOfPosition(selEnd);
   Point pt;
   long startPos, endPos, ep;
   PRectangle rcSel;
@@ -1877,7 +1877,7 @@ void ScintillaCocoa::SetHorizontalScrollPos()
  * @param nPage Number of lines per scroll page.
  * @return True if there was a change, otherwise false.
  */
-bool ScintillaCocoa::ModifyScrollBars(int nMax, int nPage)
+bool ScintillaCocoa::ModifyScrollBars(Sci::Position nMax, Sci::Position nPage)
 {
 #pragma unused(nMax, nPage)
   return SetScrollingSize();

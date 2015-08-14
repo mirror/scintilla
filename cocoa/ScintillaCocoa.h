@@ -160,7 +160,7 @@ public:
   void ScrollText(int linesToMove);
   void SetVerticalScrollPos();
   void SetHorizontalScrollPos();
-  bool ModifyScrollBars(int nMax, int nPage);
+  bool ModifyScrollBars(Sci::Position nMax, Sci::Position nPage);
   bool SetScrollingSize(void);
   void Resize();
   void UpdateForScroll();
