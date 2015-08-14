@@ -4,6 +4,7 @@
 	<load-typesystem name="typesystem_gui_common.xml" generate="no"/>
 	<primitive-type name="sptr_t"/>
 	<primitive-type name="uptr_t"/>
+	<primitive-type name="std::ptrdiff_t"/>
 	<value-type name="Sci_NotifyHeader" />
 	<rejection class="Sci_NotifyHeader" field-name="hwndFrom" />
 	<value-type name="SCNotification" />
