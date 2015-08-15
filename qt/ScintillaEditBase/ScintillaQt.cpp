@@ -239,7 +239,7 @@ bool ScintillaQt::ValidCodePage(int codePage) const
 }
 
 
-void ScintillaQt::ScrollText(int linesToMove)
+void ScintillaQt::ScrollText(Sci::Position linesToMove)
 {
 	int dy = vs.lineHeight * (linesToMove);
 	scrollArea->viewport()->scroll(0, dy);

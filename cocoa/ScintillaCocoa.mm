@@ -499,7 +499,7 @@ void ScintillaCocoa::IdleWork() {
 
 //--------------------------------------------------------------------------------------------------
 
-void ScintillaCocoa::QueueIdleWork(WorkNeeded::workItems items, int upTo) {
+void ScintillaCocoa::QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) {
   Editor::QueueIdleWork(items, upTo);
   ObserverAdd();
 }
@@ -1823,7 +1823,7 @@ void ScintillaCocoa::WillDraw(NSRect rect)
 /**
  * ScrollText is empty because scrolling is handled by the NSScrollView.
  */
-void ScintillaCocoa::ScrollText(int)
+void ScintillaCocoa::ScrollText(Sci::Position)
 {
 }
 
