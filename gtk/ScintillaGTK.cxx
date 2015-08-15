@@ -215,7 +215,7 @@ private:
 	virtual bool PaintContains(PRectangle rc);
 	void FullPaint();
 	virtual PRectangle GetClientRectangle() const;
-	virtual void ScrollText(int linesToMove);
+	virtual void ScrollText(Sci::Position linesToMove);
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
 	virtual bool ModifyScrollBars(Sci::Position nMax, Sci::Position nPage);
@@ -335,7 +335,7 @@ private:
 	static gboolean TimeOut(TimeThunk *tt);
 	static gboolean IdleCallback(ScintillaGTK *sciThis);
 	static gboolean StyleIdle(ScintillaGTK *sciThis);
-	virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
+	virtual void QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo);
 	static void PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis);
 
 #if GTK_CHECK_VERSION(3,0,0)
@@ -1220,7 +1220,7 @@ PRectangle ScintillaGTK::GetClientRectangle() const {
 	return rc;
 }
 
-void ScintillaGTK::ScrollText(int linesToMove) {
+void ScintillaGTK::ScrollText(Sci::Position linesToMove) {
 	int diff = vs.lineHeight * -linesToMove;
 	//Platform::DebugPrintf("ScintillaGTK::ScrollText %d %d %0d,%0d %0d,%0d\n", linesToMove, diff,
 	//	rc.left, rc.top, rc.right, rc.bottom);
@@ -3052,7 +3052,7 @@ gboolean ScintillaGTK::StyleIdle(ScintillaGTK *sciThis) {
 	return FALSE;
 }
 
-void ScintillaGTK::QueueIdleWork(WorkNeeded::workItems items, int upTo) {
+void ScintillaGTK::QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) {
 	Editor::QueueIdleWork(items, upTo);
 	if (!workNeeded.active) {
 		// Only allow one style needed to be queued

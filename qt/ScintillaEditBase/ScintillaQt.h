@@ -103,7 +103,7 @@ private:
 	virtual bool ValidCodePage(int codePage) const;
 
 private:
-	virtual void ScrollText(int linesToMove);
+	virtual void ScrollText(Sci::Position linesToMove);
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
 	virtual bool ModifyScrollBars(Sci::Position nMax, Sci::Position nPage);
