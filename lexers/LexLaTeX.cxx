@@ -26,6 +26,7 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 #include "LexerBase.h"
 
 #ifdef SCI_NAMESPACE

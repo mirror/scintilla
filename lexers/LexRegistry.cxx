@@ -27,6 +27,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -53,7 +54,7 @@ struct OptionSetRegistry : public OptionSet<OptionsRegistry> {
 	}
 };
 
-class LexerRegistry : public ILexer {
+class LexerRegistry : public DefaultLexer {
 	OptionsRegistry options;
 	OptionSetRegistry optSetRegistry;
 
@@ -165,7 +166,7 @@ public:
 	LexerRegistry() {}
 	virtual ~LexerRegistry() {}
 	virtual int SCI_METHOD Version() const {
-		return lvOriginal;
+		return lvRelease4;
 	}
 	virtual void SCI_METHOD Release() {
 		delete this;

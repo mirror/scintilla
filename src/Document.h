@@ -187,7 +187,7 @@ struct RegexError : public std::runtime_error {
 
 /**
  */
-class Document : PerLine, public IDocumentWithLineEnd, public ILoader {
+class Document : PerLine, public IDocument, public ILoader {
 
 public:
 	/** Used to pair watcher pointer with user data. */
@@ -258,7 +258,7 @@ public:
 	virtual void RemoveLine(Sci::Position line);
 
 	int SCI_METHOD Version() const {
-		return dvLineEnd;
+		return dvRelease4;
 	}
 
 	void SCI_METHOD SetErrorStatus(int status);
