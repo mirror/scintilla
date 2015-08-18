@@ -40,6 +40,10 @@ public:
 	void SCI_METHOD SetIdentifiers(int style, const char *identifiers);
 	int SCI_METHOD DistanceToSecondaryStyles();
 	const char * SCI_METHOD GetSubStyleBases();
+	int SCI_METHOD MaximumNamedStyle();
+	const char * SCI_METHOD NameOfStyle(int style);
+	const char * SCI_METHOD DescriptionOfStyle(int style);
+	const char * SCI_METHOD TagsOfStyle(int style);
 };
 
 #ifdef SCI_NAMESPACE
