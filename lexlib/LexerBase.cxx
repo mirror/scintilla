@@ -113,6 +113,22 @@ const char * SCI_METHOD DefaultLexer::GetSubStyleBases() {
 	return styleSubable;
 }
 
+int SCI_METHOD DefaultLexer::MaximumNamedStyle() {
+	return 0;
+}
+
+const char * SCI_METHOD DefaultLexer::NameOfStyle(int) {
+	return "";
+}
+
+const char * SCI_METHOD DefaultLexer::DescriptionOfStyle(int) {
+	return "";
+}
+
+const char * SCI_METHOD DefaultLexer::TagsOfStyle(int) {
+	return "";
+}
+
 LexerBase::LexerBase() {
 	for (int wl = 0; wl < numWordLists; wl++)
 		keyWordLists[wl] = new WordList;
