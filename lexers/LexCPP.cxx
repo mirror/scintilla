@@ -429,7 +429,7 @@ const char styleSubable[] = {SCE_C_IDENTIFIER, SCE_C_COMMENTDOCKEYWORD, 0};
 
 }
 
-class LexerCPP : public ILexerWithSubStyles {
+class LexerCPP : public ILexer {
 	bool caseSensitive;
 	CharacterSet setWord;
 	CharacterSet setNegationOp;
@@ -484,7 +484,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const {
-		return lvSubStyles;
+		return lvRelease4;
 	}
 	const char * SCI_METHOD PropertyNames() {
 		return osCPP.PropertyNames();
