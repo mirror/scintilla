@@ -1799,6 +1799,26 @@ class TestLexer(unittest.TestCase):
 		wordSet = self.ed.DescribeKeyWordSets()
 		self.assertNotEquals(wordSet, b"")
 
+	def testMaximumNamedStyle(self):
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		maxStyle = self.ed.MaximumNamedStyle
+		self.assertEquals(maxStyle, 27)
+
+	def testNameOfStyle(self):
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		style1 = self.ed.NameOfStyle(1)
+		self.assertEquals(style1, b"SCE_C_COMMENT")
+
+	def testDescriptionOfStyle(self):
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		style1Description = self.ed.DescriptionOfStyle(1)
+		self.assertEquals(style1Description, b"Comment: /* */.")
+
+	def testTagsOfStyle(self):
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		style1Tags = self.ed.TagsOfStyle(1)
+		self.assertEquals(style1Tags, b"comment")
+
 class TestSubStyles(unittest.TestCase):
 	''' These tests include knowledge of the current implementation in the cpp lexer
 	and may have to change when that implementation changes.
