@@ -2379,7 +2379,7 @@ struct Sci_TextToFind {
     use the styling commands to mark errors detected by a compiler. The following commands can be
     used.</p>
     <code><a class="message" href="#SCI_GETENDSTYLED">SCI_GETENDSTYLED</a><br />
-     <a class="message" href="#SCI_STARTSTYLING">SCI_STARTSTYLING(int position, int unused)</a><br />
+     <a class="message" href="#SCI_STARTSTYLING">SCI_STARTSTYLING(int position)</a><br />
      <a class="message" href="#SCI_SETSTYLING">SCI_SETSTYLING(int length, int style)</a><br />
      <a class="message" href="#SCI_SETSTYLINGEX">SCI_SETSTYLINGEX(int length, const char
     *styles)</a><br />
@@ -2397,9 +2397,9 @@ struct Sci_TextToFind {
     container. The container can send <code>SCI_GETENDSTYLED</code> to work out where it needs to
     start styling. Scintilla will always ask to style whole lines.</p>
 
-    <p><b id="SCI_STARTSTYLING">SCI_STARTSTYLING(int pos, int unused)</b><br />
+    <p><b id="SCI_STARTSTYLING">SCI_STARTSTYLING(int pos)</b><br />
      This prepares for styling by setting the styling position <code>pos</code> to start at.
-     The unused argument was used in earlier versions but is now ignored.
+     Earlier versions had a second argument but that is now ignored.
      After
     <code>SCI_STARTSTYLING</code>, send multiple <code>SCI_SETSTYLING</code> messages for each
     lexical entity to style or send <code>SCI_SETSTYLINGEX</code> to style in blocks.</p>

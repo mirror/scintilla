@@ -35,7 +35,7 @@ public:
 	virtual int SCI_METHOD SetLevel(Sci_Position line, int level) = 0;
 	virtual int SCI_METHOD GetLineState(Sci_Position line) const = 0;
 	virtual int SCI_METHOD SetLineState(Sci_Position line, int state) = 0;
-	virtual void SCI_METHOD StartStyling(Sci_Position position, char mask) = 0;
+	virtual void SCI_METHOD StartStyling(Sci_Position position) = 0;
 	virtual bool SCI_METHOD SetStyleFor(Sci_Position length, char style) = 0;
 	virtual bool SCI_METHOD SetStyles(Sci_Position length, const char *styles) = 0;
 	virtual void SCI_METHOD DecorationSetCurrentIndicator(int indicator) = 0;

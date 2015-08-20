@@ -140,7 +140,7 @@ public:
 	}
 	// Style setting
 	void StartAt(Sci_PositionU start) {
-		pAccess->StartStyling(start, '\377');
+		pAccess->StartStyling(start);
 		startPosStyling = start;
 	}
 	Sci_PositionU GetStartSegment() const {

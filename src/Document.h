@@ -392,7 +392,7 @@ public:
 	void SetDefaultCharClasses(bool includeWordClass);
 	void SetCharClasses(const unsigned char *chars, CharClassify::cc newCharClass);
 	int GetCharsOfClass(CharClassify::cc characterClass, unsigned char *buffer);
-	void SCI_METHOD StartStyling(Sci_Position position, char mask);
+	void SCI_METHOD StartStyling(Sci_Position position);
 	bool SCI_METHOD SetStyleFor(Sci_Position length, char style);
 	bool SCI_METHOD SetStyles(Sci_Position length, const char *styles);
 	Sci::Position GetEndStyled() const { return endStyled; }
