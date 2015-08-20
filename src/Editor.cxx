@@ -2078,7 +2078,7 @@ void Editor::ClearDocumentStyle() {
 		}
 		deco = decoNext;
 	}
-	pdoc->StartStyling(0, '\377');
+	pdoc->StartStyling(0);
 	pdoc->SetStyleFor(pdoc->Length(), 0);
 	cs.ShowAll();
 	SetAnnotationHeights(0, pdoc->LinesTotal());
@@ -5456,7 +5456,7 @@ void Editor::AddStyledText(char *buffer, Sci::Position appendLength) {
 	for (i = 0; i < textLength; i++) {
 		text[i] = buffer[i*2+1];
 	}
-	pdoc->StartStyling(CurrentPosition(), static_cast<unsigned char>(0xff));
+	pdoc->StartStyling(CurrentPosition());
 	pdoc->SetStyles(textLength, text.c_str());
 	SetEmptySelection(sel.MainCaret() + lengthInserted);
 }
@@ -6252,7 +6252,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->GetLineEndTypesActive();
 
 	case SCI_STARTSTYLING:
-		pdoc->StartStyling(static_cast<Sci_Position>(wParam), static_cast<char>(lParam));
+		pdoc->StartStyling(static_cast<Sci_Position>(wParam));
 		break;
 
 	case SCI_SETSTYLING:

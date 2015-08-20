@@ -206,9 +206,9 @@ get int GetEOLMode=2030(,)
 # Set the current end of line mode.
 set void SetEOLMode=2031(int eolMode,)
 
-# Set the current styling position to pos and the styling mask to mask.
-# The styling mask can be used to protect some bits in each styling byte from modification.
-fun void StartStyling=2032(position pos, int mask)
+# Set the current styling position to pos.
+# Should be called before SetStyling or SetStylingEx.
+fun void StartStyling=2032(position pos)
 
 # Change style from current styling position for length characters to a style
 # and move the current styling position to after this newly styled segment.
