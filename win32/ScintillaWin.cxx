@@ -2644,13 +2644,13 @@ void ScintillaWin::ImeEndComposition() {
 LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 	// Reconversion on windows limits within one line without eol.
 	// Look around:   baseStart  <--  (|mainStart|  -- mainEnd)  --> baseEnd.
-	const int mainStart = sel.RangeMain().Start().Position();
-	const int mainEnd = sel.RangeMain().End().Position();
-	const int curLine = pdoc->LineFromPosition(mainStart);
+	const Sci::Position mainStart = sel.RangeMain().Start().Position();
+	const Sci::Position mainEnd = sel.RangeMain().End().Position();
+	const Sci::Position curLine = pdoc->LineFromPosition(mainStart);
 	if (curLine != pdoc->LineFromPosition(mainEnd))
 		return 0;
-	const int baseStart = pdoc->LineStart(curLine);
-	const int baseEnd = pdoc->LineEnd(curLine);
+	const Sci::Position baseStart = pdoc->LineStart(curLine);
+	const Sci::Position baseEnd = pdoc->LineEnd(curLine);
 	if ((baseStart == baseEnd) || (mainEnd > baseEnd))
 		return 0;
 
@@ -2701,8 +2701,8 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 
 	// Make place for next composition string to sit in.
 	for (size_t r=0; r<sel.Count(); r++) {
-		int rBase = sel.Range(r).Start().Position();
-		int docCompStart = rBase + adjust;
+		Sci::Position rBase = sel.Range(r).Start().Position();
+		Sci::Position docCompStart = rBase + adjust;
 
 		if (inOverstrike) { // the docCompLen of bytes will be overstriked.
 			sel.Range(r).caret.SetPosition(docCompStart);
@@ -2710,8 +2710,8 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 		} else {
 			// Ensure docCompStart+docCompLen be not beyond lineEnd.
 			// since docCompLen by byte might break eol.
-			int lineEnd = pdoc->LineEnd(pdoc->LineFromPosition(rBase));
-			int overflow = (docCompStart + docCompLen) - lineEnd;
+			Sci::Position lineEnd = pdoc->LineEnd(pdoc->LineFromPosition(rBase));
+			Sci::Position overflow = (docCompStart + docCompLen) - lineEnd;
 			if (overflow > 0) {
 				pdoc->DeleteChars(docCompStart, docCompLen - overflow);
 			} else {
