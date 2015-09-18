@@ -1333,8 +1333,6 @@ Sci::Position Document::CountCharacters(Sci::Position startPos, Sci::Position en
 	Sci::Position i = startPos;
 	while (i < endPos) {
 		count++;
-		if (IsCrLf(i))
-			i++;
 		i = NextPosition(i, 1);
 	}
 	return count;
