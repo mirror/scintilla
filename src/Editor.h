@@ -392,7 +392,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Sci::Position InsertSpace(Sci::Position position, Sci::Position spaces);
 	void AddChar(char ch);
 	virtual void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false);
-	void FillVirtualSpace();
+	void ClearBeforeTentativeStart();
 	void InsertPaste(const char *text, Sci::Position len);
 	enum PasteShape { pasteStream=0, pasteRectangular = 1, pasteLine = 2 };
 	void InsertPasteShape(const char *text, Sci::Position len, PasteShape shape);

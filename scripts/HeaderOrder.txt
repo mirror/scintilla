@@ -34,6 +34,7 @@
 #include <memory>
 #include <sstream>
 #include <regex>
+#include <sstream>
 
 // GTK+ headers
 #include <glib.h>
