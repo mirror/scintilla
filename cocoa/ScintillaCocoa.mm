@@ -334,6 +334,18 @@ const CGFloat paddingHighlightY = 2;
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Method called by owning ScintillaCocoa object when it is destroyed.
+ */
+- (void) ownerDestroyed
+{
+  mTarget = NULL;
+  [notificationQueue release];
+  notificationQueue = nil;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Method called by a timer installed by ScintillaCocoa. This two step approach is needed because
  * a native Obj-C class is required as target for the timer.
  */
@@ -358,7 +370,7 @@ const CGFloat paddingHighlightY = 2;
   [notificationQueue enqueueNotification: notification
                             postingStyle: NSPostWhenIdle
                             coalesceMask: (NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
-                                forModes: nil];
+                                forModes: @[NSDefaultRunLoopMode, NSModalPanelRunLoopMode]];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -391,8 +403,6 @@ ScintillaCocoa::ScintillaCocoa(SCIContentView* view, SCIMarginView* viewMargin)
   enteredSetScrollingSize = false;
   scrollSpeed = 1;
   scrollTicks = 2000;
-  tickTimer = NULL;
-  idleTimer = NULL;
   observer = NULL;
   layerFindIndicator = NULL;
   imeInteraction = imeInline;
@@ -408,6 +418,7 @@ ScintillaCocoa::ScintillaCocoa(SCIContentView* view, SCIMarginView* viewMargin)
 ScintillaCocoa::~ScintillaCocoa()
 {
   Finalise();
+  [timerTarget ownerDestroyed];
   [timerTarget release];
 }
 
@@ -560,24 +571,24 @@ public:
 			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
 			return 1;
 		} else {
-            CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                                         reinterpret_cast<const UInt8 *>(mixed),
-                                                         lenMixed, encoding, false);
+			CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+								     reinterpret_cast<const UInt8 *>(mixed),
+								     lenMixed, encoding, false);
 
-            NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
-                                                                        locale:[NSLocale currentLocale]];
+			NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
+										    locale:[NSLocale currentLocale]];
 
-            char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
+			char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
 
 			size_t lenMapped = strlen(encoded);
-            if (lenMapped < sizeFolded) {
-                memcpy(folded, encoded,  lenMapped);
-            } else {
-                folded[0] = '\0';
-                lenMapped = 1;
-            }
-            delete []encoded;
-            CFRelease(cfsVal);
+			if (lenMapped < sizeFolded) {
+				memcpy(folded, encoded,  lenMapped);
+			} else {
+				folded[0] = '\0';
+				lenMapped = 1;
+			}
+			delete []encoded;
+			CFRelease(cfsVal);
 			return lenMapped;
 		}
 	}
@@ -587,38 +598,37 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
 	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
 		return new CaseFolderUnicode();
 	} else {
-        CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-                                                             vs.styles[STYLE_DEFAULT].characterSet);
-        if (pdoc->dbcsCodePage == 0) {
-            CaseFolderTable *pcf = new CaseFolderTable();
-            pcf->StandardASCII();
-            // Only for single byte encodings
-            for (int i=0x80; i<0x100; i++) {
-                char sCharacter[2] = "A";
-                sCharacter[0] = static_cast<char>(i);
-                CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                                             reinterpret_cast<const UInt8 *>(sCharacter),
-                                                             1, encoding, false);
-                if (!cfsVal)
-                        continue;
+		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+								     vs.styles[STYLE_DEFAULT].characterSet);
+		if (pdoc->dbcsCodePage == 0) {
+			CaseFolderTable *pcf = new CaseFolderTable();
+			pcf->StandardASCII();
+			// Only for single byte encodings
+			for (int i=0x80; i<0x100; i++) {
+				char sCharacter[2] = "A";
+				sCharacter[0] = static_cast<char>(i);
+				CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+									     reinterpret_cast<const UInt8 *>(sCharacter),
+									     1, encoding, false);
+				if (!cfsVal)
+					continue;
 
-                NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
-                                                                            locale:[NSLocale currentLocale]];
+				NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
+											    locale:[NSLocale currentLocale]];
 
-                char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
+				char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
 
-                if (strlen(encoded) == 1) {
-                    pcf->SetTranslation(sCharacter[0], encoded[0]);
-                }
+				if (strlen(encoded) == 1) {
+					pcf->SetTranslation(sCharacter[0], encoded[0]);
+				}
 
-                delete []encoded;
-                CFRelease(cfsVal);
-            }
-            return pcf;
-        } else {
-            return new CaseFolderDBCS(encoding);
-        }
-		return 0;
+				delete []encoded;
+				CFRelease(cfsVal);
+			}
+			return pcf;
+		} else {
+			return new CaseFolderDBCS(encoding);
+		}
 	}
 }
 
@@ -957,7 +967,8 @@ void ScintillaCocoa::FineTickerStart(TickReason reason, int millis, int toleranc
     [fineTimer setTolerance: tolerance / 1000.0];
   }
   timers[reason] = fineTimer;
-  [[NSRunLoop currentRunLoop] addTimer:fineTimer forMode:NSDefaultRunLoopMode];
+  [NSRunLoop.currentRunLoop addTimer: fineTimer forMode: NSDefaultRunLoopMode];
+  [NSRunLoop.currentRunLoop addTimer: fineTimer forMode: NSModalPanelRunLoopMode];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -984,11 +995,12 @@ bool ScintillaCocoa::SetIdle(bool on)
     if (idler.state)
     {
       // Scintilla ticks = milliseconds
-      idleTimer = [NSTimer scheduledTimerWithTimeInterval: timer.tickSize / 1000.0
-						   target: timerTarget
-						 selector: @selector(idleTimerFired:)
-						 userInfo: nil
-						  repeats: YES];
+      NSTimer *idleTimer = [NSTimer scheduledTimerWithTimeInterval: timer.tickSize / 1000.0
+                                                            target: timerTarget
+                                                          selector: @selector(idleTimerFired:)
+                                                          userInfo: nil
+                                                           repeats: YES];
+      [NSRunLoop.currentRunLoop addTimer: idleTimer forMode: NSModalPanelRunLoopMode];
       idler.idlerID = reinterpret_cast<IdlerID>(idleTimer);
     }
     else
@@ -1282,6 +1294,7 @@ void ScintillaCocoa::DragScroll()
 
 - (void)pasteboard:(NSPasteboard *)pasteboard item:(NSPasteboardItem *)item provideDataForType:(NSString *)type
 {
+#pragma unused(item)
   if (selectedText.Length() == 0)
     return;
 

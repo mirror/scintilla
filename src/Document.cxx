@@ -2151,7 +2151,7 @@ Sci::Position Document::WordPartRight(Sci::Position pos) {
 	return pos;
 }
 
-bool IsLineEndChar(char c) {
+static bool IsLineEndChar(char c) {
 	return (c == '\n' || c == '\r');
 }
 
