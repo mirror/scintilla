@@ -177,6 +177,7 @@ public:
 	void Allocate(Sci::Position newSize);
 	int GetLineEndTypes() const { return utf8LineEnds; }
 	void SetLineEndTypes(int utf8LineEnds_);
+	bool ContainsLineEnd(const char *s, int length) const;
 	void SetPerLine(PerLine *pl);
 	Sci::Position Lines() const;
 	Sci::Position LineStart(Sci::Position line) const;

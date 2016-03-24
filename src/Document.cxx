@@ -105,6 +105,7 @@ Document::Document() {
 	useTabs = true;
 	tabIndents = true;
 	backspaceUnindents = false;
+	durationStyleOneLine = 0.00001;
 
 	matchesValid = false;
 	regex = 0;
@@ -266,7 +267,7 @@ void Document::TentativeUndo() {
 			bool endSavePoint = cb.IsSavePoint();
 			if (startSavePoint != endSavePoint)
 				NotifySavePoint(endSavePoint);
-				
+
 			cb.TentativeCommit();
 		}
 		enteredModification--;
@@ -443,12 +444,12 @@ static bool IsSubordinate(int levelStart, int levelTry) {
 	if (levelTry & SC_FOLDLEVELWHITEFLAG)
 		return true;
 	else
-		return (levelStart & SC_FOLDLEVELNUMBERMASK) < (levelTry & SC_FOLDLEVELNUMBERMASK);
+		return LevelNumber(levelStart) < LevelNumber(levelTry);
 }
 
 Sci::Position Document::GetLastChild(Sci::Position lineParent, int level, Sci::Position lastLine) {
 	if (level == -1)
-		level = GetLevel(lineParent) & SC_FOLDLEVELNUMBERMASK;
+		level = LevelNumber(GetLevel(lineParent));
 	Sci::Position maxLine = LinesTotal();
 	Sci::Position lookLastLine = (lastLine != -1) ? std::min(LinesTotal() - 1, lastLine) : -1;
 	Sci::Position lineMaxSubord = lineParent;
@@ -461,7 +462,7 @@ Sci::Position Document::GetLastChild(Sci::Position lineParent, int level, Sci::P
 		lineMaxSubord++;
 	}
 	if (lineMaxSubord > lineParent) {
-		if (level > (GetLevel(lineMaxSubord + 1) & SC_FOLDLEVELNUMBERMASK)) {
+		if (level > LevelNumber(GetLevel(lineMaxSubord + 1))) {
 			// Have chewed up some whitespace that belongs to a parent so seek back
 			if (GetLevel(lineMaxSubord) & SC_FOLDLEVELWHITEFLAG) {
 				lineMaxSubord--;
@@ -472,16 +473,16 @@ Sci::Position Document::GetLastChild(Sci::Position lineParent, int level, Sci::P
 }
 
 Sci::Position Document::GetFoldParent(Sci::Position line) const {
-	int level = GetLevel(line) & SC_FOLDLEVELNUMBERMASK;
+	int level = LevelNumber(GetLevel(line));
 	Sci::Position lineLook = line - 1;
 	while ((lineLook > 0) && (
 	            (!(GetLevel(lineLook) & SC_FOLDLEVELHEADERFLAG)) ||
-	            ((GetLevel(lineLook) & SC_FOLDLEVELNUMBERMASK) >= level))
+	            (LevelNumber(GetLevel(lineLook)) >= level))
 	      ) {
 		lineLook--;
 	}
 	if ((GetLevel(lineLook) & SC_FOLDLEVELHEADERFLAG) &&
-	        ((GetLevel(lineLook) & SC_FOLDLEVELNUMBERMASK) < level)) {
+	        (LevelNumber(GetLevel(lineLook)) < level)) {
 		return lineLook;
 	} else {
 		return -1;
@@ -494,11 +495,11 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, Sc
 
 	Sci::Position lookLine = line;
 	int lookLineLevel = level;
-	int lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+	int lookLineLevelNum = LevelNumber(lookLineLevel);
 	while ((lookLine > 0) && ((lookLineLevel & SC_FOLDLEVELWHITEFLAG) ||
-		((lookLineLevel & SC_FOLDLEVELHEADERFLAG) && (lookLineLevelNum >= (GetLevel(lookLine + 1) & SC_FOLDLEVELNUMBERMASK))))) {
+		((lookLineLevel & SC_FOLDLEVELHEADERFLAG) && (lookLineLevelNum >= LevelNumber(GetLevel(lookLine + 1)))))) {
 		lookLineLevel = GetLevel(--lookLine);
-		lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+		lookLineLevelNum = LevelNumber(lookLineLevel);
 	}
 
 	Sci::Position beginFoldBlock = (lookLineLevel & SC_FOLDLEVELHEADERFLAG) ? lookLine : GetFoldParent(lookLine);
@@ -512,7 +513,7 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, Sc
 	if (endFoldBlock < line) {
 		lookLine = beginFoldBlock - 1;
 		lookLineLevel = GetLevel(lookLine);
-		lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+		lookLineLevelNum = LevelNumber(lookLineLevel);
 		while ((lookLine >= 0) && (lookLineLevelNum >= SC_FOLDLEVELBASE)) {
 			if (lookLineLevel & SC_FOLDLEVELHEADERFLAG) {
 				if (GetLastChild(lookLine, -1, lookLastLine) == line) {
@@ -521,17 +522,17 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, Sc
 					firstChangeableLineBefore = line - 1;
 				}
 			}
-			if ((lookLine > 0) && (lookLineLevelNum == SC_FOLDLEVELBASE) && ((GetLevel(lookLine - 1) & SC_FOLDLEVELNUMBERMASK) > lookLineLevelNum))
+			if ((lookLine > 0) && (lookLineLevelNum == SC_FOLDLEVELBASE) && (LevelNumber(GetLevel(lookLine - 1)) > lookLineLevelNum))
 				break;
 			lookLineLevel = GetLevel(--lookLine);
-			lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+			lookLineLevelNum = LevelNumber(lookLineLevel);
 		}
 	}
 	if (firstChangeableLineBefore == -1) {
-		for (lookLine = line - 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+		for (lookLine = line - 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = LevelNumber(lookLineLevel);
 			lookLine >= beginFoldBlock;
-			lookLineLevel = GetLevel(--lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK) {
-			if ((lookLineLevel & SC_FOLDLEVELWHITEFLAG) || (lookLineLevelNum > (level & SC_FOLDLEVELNUMBERMASK))) {
+			lookLineLevel = GetLevel(--lookLine), lookLineLevelNum = LevelNumber(lookLineLevel)) {
+			if ((lookLineLevel & SC_FOLDLEVELWHITEFLAG) || (lookLineLevelNum > LevelNumber(level))) {
 				firstChangeableLineBefore = lookLine;
 				break;
 			}
@@ -541,10 +542,10 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, Sc
 		firstChangeableLineBefore = beginFoldBlock - 1;
 
 	Sci::Position firstChangeableLineAfter = -1;
-	for (lookLine = line + 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+	for (lookLine = line + 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = LevelNumber(lookLineLevel);
 		lookLine <= endFoldBlock;
-		lookLineLevel = GetLevel(++lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK) {
-		if ((lookLineLevel & SC_FOLDLEVELHEADERFLAG) && (lookLineLevelNum < (GetLevel(lookLine + 1) & SC_FOLDLEVELNUMBERMASK))) {
+		lookLineLevel = GetLevel(++lookLine), lookLineLevelNum = LevelNumber(lookLineLevel)) {
+		if ((lookLineLevel & SC_FOLDLEVELHEADERFLAG) && (lookLineLevelNum < LevelNumber(GetLevel(lookLine + 1)))) {
 			firstChangeableLineAfter = lookLine;
 			break;
 		}
@@ -1284,7 +1285,7 @@ Sci::Position Document::SetLineIndentation(Sci::Position line, int indent) {
 		Sci::Position indentPos = GetLineIndentPosition(line);
 		UndoGroup ug(this);
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
-		return thisLineStart + InsertString(thisLineStart, linebuf.c_str(), 
+		return thisLineStart + InsertString(thisLineStart, linebuf.c_str(),
 			static_cast<Sci::Position>(linebuf.length()));
 	} else {
 		return GetLineIndentPosition(line);
@@ -1900,6 +1901,33 @@ void Document::EnsureStyledTo(Sci::Position pos) {
 	}
 }
 
+void Document::StyleToAdjustingLineDuration(int pos) {
+	// Place bounds on the duration used to avoid glitches spiking it
+	// and so causing slow styling or non-responsive scrolling
+	const double minDurationOneLine = 0.000001;
+	const double maxDurationOneLine = 0.0001;
+
+	// Alpha value for exponential smoothing.
+	// Most recent value contributes 25% to smoothed value.
+	const double alpha = 0.25;
+
+	const Sci_Position lineFirst = LineFromPosition(GetEndStyled());
+	ElapsedTime etStyling;
+	EnsureStyledTo(pos);
+	const double durationStyling = etStyling.Duration();
+	const Sci_Position lineLast = LineFromPosition(GetEndStyled());
+	if (lineLast >= lineFirst + 8) {
+		// Only adjust for styling multiple lines to avoid instability
+		const double durationOneLine = durationStyling / (lineLast - lineFirst);
+		durationStyleOneLine = alpha * durationOneLine + (1.0 - alpha) * durationStyleOneLine;
+		if (durationStyleOneLine < minDurationOneLine) {
+			durationStyleOneLine = minDurationOneLine;
+		} else if (durationStyleOneLine > maxDurationOneLine) {
+			durationStyleOneLine = maxDurationOneLine;
+		}
+	}
+}
+
 void Document::LexerChanged() {
 	// Tell the watchers the lexer has changed.
 	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
@@ -2197,7 +2225,7 @@ Sci::Position Document::BraceMatch(Sci::Position position, Sci::Position /*maxRe
 	char chSeek = BraceOpposite(chBrace);
 	if (chSeek == '\0')
 		return - 1;
-	char styBrace = static_cast<char>(StyleAt(position));
+	const int styBrace = StyleIndexAt(position);
 	int direction = -1;
 	if (chBrace == '(' || chBrace == '[' || chBrace == '{' || chBrace == '<')
 		direction = 1;
@@ -2205,7 +2233,7 @@ Sci::Position Document::BraceMatch(Sci::Position position, Sci::Position /*maxRe
 	position = NextPosition(position, direction);
 	while ((position >= 0) && (position < Length())) {
 		char chAtPos = CharAt(position);
-		char styAtPos = static_cast<char>(StyleAt(position));
+		const int styAtPos = StyleIndexAt(position);
 		if ((position > GetEndStyled()) || (styAtPos == styBrace)) {
 			if (chAtPos == chBrace)
 				depth++;
@@ -2536,10 +2564,10 @@ public:
 		return doc != other.doc || position != other.position;
 	}
 	Sci::Position Pos() const {
-		return position; 
+		return position;
 	}
 	Sci::Position PosRoundUp() const {
-		return position; 
+		return position;
 	}
 };
 
@@ -2636,7 +2664,7 @@ Sci::Position Cxx11RegexFindText(Document *doc, Sci::Position minPos, Sci::Posit
 			std::wregex regexp;
 #if defined(__APPLE__)
 			// Using a UTF-8 locale doesn't change to Unicode over a byte buffer so '.'
-			// is one byte not one character. 
+			// is one byte not one character.
 			// However, on OS X this makes wregex act as Unicode
 			std::locale localeU("en_US.UTF-8");
 			regexp.imbue(localeU);

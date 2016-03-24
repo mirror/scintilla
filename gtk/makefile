@@ -31,7 +31,13 @@ RANLIB = ranlib
 endif
 endif
 
+# Enable Position Independent Code except on Windows where it is the default so the flag produces a warning
+ifndef windir
+PICFLAGS = -fPIC
+endif
+
 ifdef windir
+CC = gcc
 DEL = del /q
 COMPLIB=..\bin\scintilla.a
 else
@@ -46,7 +52,7 @@ INCLUDEDIRS=-I ../include -I ../src -I ../lexlib
 ifdef CHECK_DEPRECATED
 DEPRECATED=-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DDISABLE_GDK_FONT
 endif
-CXXBASEFLAGS=-Wall -pedantic -DGTK -DSCI_LEXER $(INCLUDEDIRS) $(DEPRECATED)
+CXXBASEFLAGS=-Wall -pedantic $(PICFLAGS) -DGTK -DSCI_LEXER $(INCLUDEDIRS) $(DEPRECATED)
 
 ifdef NOTHREADS
 THREADFLAGS=-DG_THREADS_IMPL_NONE
@@ -69,7 +75,7 @@ CTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS) $(THREADFLAGS)
 endif
 
 CFLAGS:=$(CTFLAGS)
-CXXTFLAGS:=--std=c++0x $(CTFLAGS) $(REFLAGS)
+CXXTFLAGS:=--std=gnu++0x $(CTFLAGS) $(REFLAGS)
 
 CONFIGFLAGS:=$(shell pkg-config --cflags $(GTKVERSION))
 MARSHALLER=scintilla-marshal.o
