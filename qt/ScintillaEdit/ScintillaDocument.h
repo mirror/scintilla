@@ -78,7 +78,7 @@ public:
     int get_eol_mode();
     void set_eol_mode(int eol_mode);
     Sci_Position move_position_outside_char(Sci_Position pos, int move_dir, bool check_line_end);
-    
+
     int get_character(Sci_Position pos); // Calls GetCharacterAndWidth(pos, NULL)
 
 private:
