@@ -231,6 +231,18 @@ private:
 
 public:
 
+	struct CharacterExtracted {
+		unsigned int character;
+		unsigned int widthBytes;
+		CharacterExtracted(unsigned int character_, unsigned int widthBytes_) :
+			character(character_), widthBytes(widthBytes_) {
+		}
+		// For DBCS characters turn 2 bytes into an int
+		static CharacterExtracted DBCS(unsigned char lead, unsigned char trail) {
+			return CharacterExtracted((lead << 8) | trail, 2);
+		}
+	};
+
 	LexInterface *pli;
 
 	int eolMode;
@@ -278,6 +290,8 @@ public:
 	Sci::Position MovePositionOutsideChar(Sci::Position pos, int moveDir, bool checkLineEnd=true) const;
 	Sci::Position NextPosition(Sci::Position pos, int moveDir) const;
 	bool NextCharacter(Sci::Position &pos, int moveDir) const;	// Returns true if pos changed
+	Document::CharacterExtracted CharacterAfter(Sci::Position position) const;
+	Document::CharacterExtracted CharacterBefore(Sci::Position position) const;
 	Sci_Position SCI_METHOD GetRelativePosition(Sci_Position positionStart, Sci_Position characterOffset) const;
 	Sci::Position GetRelativePositionUTF16(Sci::Position positionStart, Sci::Position characterOffset) const;
 	int SCI_METHOD GetCharacterAndWidth(Sci_Position position, Sci_Position *pWidth) const;
@@ -369,20 +383,13 @@ public:
 	void GetHighlightDelimiters(HighlightDelimiter &hDelimiter, Sci::Position line, Sci::Position lastLine);
 
 	void Indent(bool forwards);
-	Sci::Position ExtendWordSelect(Sci::Position pos, int delta, bool onlyWordCharacters=false);
-	Sci::Position NextWordStart(Sci::Position pos, int delta);
-	Sci::Position NextWordEnd(Sci::Position pos, int delta);
+	Sci::Position ExtendWordSelect(Sci::Position pos, int delta, bool onlyWordCharacters=false) const;
+	Sci::Position NextWordStart(Sci::Position pos, int delta) const;
+	Sci::Position NextWordEnd(Sci::Position pos, int delta) const;
 	Sci::Position PositionLength() const { return cb.Length(); }
 	Sci_Position SCI_METHOD Length() const { return cb.Length(); }
 	void Allocate(Sci::Position newSize) { cb.Allocate(newSize); }
 
-	struct CharacterExtracted {
-		unsigned int character;
-		unsigned int widthBytes;
-		CharacterExtracted(unsigned int character_, unsigned int widthBytes_) :
-			character(character_), widthBytes(widthBytes_) {
-		}
-	};
 	CharacterExtracted ExtractCharacter(Sci::Position position) const;
 
 	bool IsWordStartAt(Sci::Position pos) const;
@@ -398,13 +405,13 @@ public:
 
 	void SetDefaultCharClasses(bool includeWordClass);
 	void SetCharClasses(const unsigned char *chars, CharClassify::cc newCharClass);
-	int GetCharsOfClass(CharClassify::cc characterClass, unsigned char *buffer);
+	int GetCharsOfClass(CharClassify::cc characterClass, unsigned char *buffer) const;
 	void SCI_METHOD StartStyling(Sci_Position position);
 	bool SCI_METHOD SetStyleFor(Sci_Position length, char style);
 	bool SCI_METHOD SetStyles(Sci_Position length, const char *styles);
 	Sci::Position GetEndStyled() const { return endStyled; }
 	void EnsureStyledTo(Sci::Position pos);
-	void StyleToAdjustingLineDuration(int pos);
+	void StyleToAdjustingLineDuration(Sci::Position pos);
 	void LexerChanged();
 	int GetStyleClock() const { return styleClock; }
 	void IncrementStyleClock();
@@ -434,10 +441,11 @@ public:
 	bool AddWatcher(DocWatcher *watcher, void *userData);
 	bool RemoveWatcher(DocWatcher *watcher, void *userData);
 
-	CharClassify::cc WordCharClass(unsigned char ch) const;
-	bool IsWordPartSeparator(char ch) const;
-	Sci::Position WordPartLeft(Sci::Position pos);
-	Sci::Position WordPartRight(Sci::Position pos);
+	bool IsASCIIWordByte(unsigned char ch) const;
+	CharClassify::cc WordCharacterClass(unsigned int ch) const;
+	bool IsWordPartSeparator(unsigned int ch) const;
+	Sci::Position WordPartLeft(Sci::Position pos) const;
+	Sci::Position WordPartRight(Sci::Position pos) const;
 	Sci::Position ExtendStyleRange(Sci::Position pos, int delta, bool singleLine = false);
 	bool IsWhiteLine(Sci::Position line) const;
 	Sci::Position ParaUp(Sci::Position pos) const;

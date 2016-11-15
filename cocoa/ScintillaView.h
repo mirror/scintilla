@@ -74,7 +74,8 @@ extern NSString *const SCIUpdateUINotification;
   NSTextInputClient,
   NSUserInterfaceValidations,
   NSDraggingSource,
-  NSDraggingDestination>
+  NSDraggingDestination,
+  NSAccessibilityStaticText>
 {
 @private
   ScintillaView* mOwner;
@@ -129,6 +130,8 @@ extern NSString *const SCIUpdateUINotification;
 - (void) suspendDrawing: (BOOL) suspend;
 - (void) notification: (Scintilla::SCNotification*) notification;
 
+- (void) updateIndicatorIME;
+
 // Scroller handling
 - (void) setMarginWidth: (int) width;
 - (SCIContentView*) content;
@@ -141,6 +144,7 @@ extern NSString *const SCIUpdateUINotification;
 - (void) setEditable: (BOOL) editable;
 - (BOOL) isEditable;
 - (NSRange) selectedRange;
+- (NSRange) selectedRangePositions;
 
 - (NSString*) selectedString;
 

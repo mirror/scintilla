@@ -64,6 +64,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
       [currentCursors addObject: [reverseArrowCursor retain]];
     }
     [self setClientView:[aScrollView documentView]];
+    self.accessibilityLabel = @"Scintilla Margin";
   }
   return self;
 }
@@ -122,6 +123,12 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   owner.backend->MouseUp(theEvent);
 }
 
+// Not a simple button so return failure
+- (BOOL)accessibilityPerformPress
+{
+  return NO;
+}
+
 /**
  * This method is called to give us the opportunity to define our mouse sensitive rectangle.
  */
@@ -167,6 +174,14 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
     [self registerForDraggedTypes: [NSArray arrayWithObjects:
                                    NSStringPboardType, ScintillaRecPboardType, NSFilenamesPboardType, nil]];
+
+    // Set up accessibility in the text role
+    self.accessibilityElement = TRUE;
+    self.accessibilityEnabled = TRUE;
+    self.accessibilityLabel = NSLocalizedString(@"Scintilla", nil);	// No real localization
+    self.accessibilityRoleDescription = @"source code editor";
+    self.accessibilityRole = NSAccessibilityTextAreaRole;
+    self.accessibilityIdentifier = @"Scintilla";
   }
 
   return self;
@@ -350,6 +365,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange
 {
+  const NSInteger lengthCharacters = self.accessibilityNumberOfCharacters;
+  if (aRange.location > lengthCharacters) {
+    return nil;
+  }
   const NSRange posRange = mOwner.backend->PositionsFromCharacters(aRange);
   // The backend validated aRange and may have removed characters beyond the end of the document.
   const NSRange charRange = mOwner.backend->CharactersFromPositions(posRange);
@@ -490,9 +509,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (NSRange) selectedRange
 {
-  const long positionBegin = [mOwner message: SCI_GETSELECTIONSTART];
-  const long positionEnd = [mOwner message: SCI_GETSELECTIONEND];
-  NSRange posRangeSel = NSMakeRange(positionBegin, positionEnd-positionBegin);
+  const NSRange posRangeSel = [mOwner selectedRangePositions];
+  if (posRangeSel.length == 0)
+  {
+    return NSMakeRange(NSNotFound, 0);
+  }
   return mOwner.backend->CharactersFromPositions(posRangeSel);
 }
 
@@ -556,7 +577,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
       }
       // Ensure only a single selection.
       mOwner.backend->SelectOnlyMainSelection();
-      replacementRange = [self selectedRange];
+      const NSRange posRangeSel = [mOwner selectedRangePositions];
+      replacementRange = mOwner.backend->CharactersFromPositions(posRangeSel);
     }
   }
 
@@ -613,7 +635,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (NSArray*) validAttributesForMarkedText
 {
-  return nil;
+  return @[];
 }
 
 // End of the NSTextInputClient protocol adoption.
@@ -931,6 +953,222 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   return mOwner.backend->WndProc(SCI_GETREADONLY, 0, 0) == 0;
 }
 
+#pragma mark - NSAccessibility
+
+//--------------------------------------------------------------------------------------------------
+
+// Adoption of NSAccessibility protocol.
+// NSAccessibility wants to pass ranges in UTF-16 code units, not bytes (like Scintilla)
+// or characters.
+// Needs more testing with non-ASCII and non-BMP text.
+// Needs to take account of folding and wraping.
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Text of the whole document as a string.
+ */
+- (id) accessibilityValue {
+  const sptr_t length = [mOwner message: SCI_GETLENGTH];
+  return mOwner.backend->RangeTextAsString(NSMakeRange(0,static_cast<int>(length)));
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Line of the caret.
+ */
+- (NSInteger) accessibilityInsertionPointLineNumber {
+  const int caret = static_cast<int>([mOwner message: SCI_GETCURRENTPOS]);
+  const NSRange rangeCharactersCaret = mOwner.backend->CharactersFromPositions(NSMakeRange(caret, 0));
+  return mOwner.backend->VisibleLineForIndex(rangeCharactersCaret.location);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Not implemented and not called by VoiceOver.
+ */
+- (NSRange)accessibilityRangeForPosition:(NSPoint)point {
+  return NSMakeRange(0,0);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Number of characters in the whole document.
+ */
+- (NSInteger) accessibilityNumberOfCharacters {
+  sptr_t length = [mOwner message: SCI_GETLENGTH];
+  const NSRange posRange = mOwner.backend->CharactersFromPositions(NSMakeRange(length, 0));
+  return posRange.location;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : The selection text as a string.
+ */
+- (NSString *) accessibilitySelectedText {
+  const sptr_t positionBegin = [mOwner message: SCI_GETSELECTIONSTART];
+  const sptr_t positionEnd = [mOwner message: SCI_GETSELECTIONEND];
+  const NSRange posRangeSel = NSMakeRange(positionBegin, positionEnd-positionBegin);
+  return mOwner.backend->RangeTextAsString(posRangeSel);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : The character range of the main selection.
+ */
+- (NSRange) accessibilitySelectedTextRange {
+  const sptr_t positionBegin = [mOwner message: SCI_GETSELECTIONSTART];
+  const sptr_t positionEnd = [mOwner message: SCI_GETSELECTIONEND];
+  const NSRange posRangeSel = NSMakeRange(positionBegin, positionEnd-positionBegin);
+  return mOwner.backend->CharactersFromPositions(posRangeSel);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : The setter for accessibilitySelectedTextRange.
+ * This method is the only setter required for reasonable VoiceOver behaviour.
+ */
+- (void) setAccessibilitySelectedTextRange: (NSRange) range {
+  NSRange rangePositions = mOwner.backend->PositionsFromCharacters(range);
+  [mOwner message: SCI_SETSELECTION wParam: rangePositions.location lParam:NSMaxRange(rangePositions)];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Range of the glyph at a character index.
+ * Currently doesn't try to handle composite characters.
+ */
+- (NSRange) accessibilityRangeForIndex: (NSInteger)index {
+  sptr_t length = [mOwner message: SCI_GETLENGTH];
+  const NSRange rangeLength = mOwner.backend->CharactersFromPositions(NSMakeRange(length, 0));
+  NSRange rangePositions = NSMakeRange(length, 0);
+  if (index < rangeLength.location) {
+    rangePositions = mOwner.backend->PositionsFromCharacters(NSMakeRange(index, 1));
+  }
+  return mOwner.backend->CharactersFromPositions(rangePositions);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : All the text ranges.
+ * Currently only returns the main selection.
+ */
+- (NSArray<NSValue *>*) accessibilitySelectedTextRanges {
+  const sptr_t positionBegin = [mOwner message: SCI_GETSELECTIONSTART];
+  const sptr_t positionEnd = [mOwner message: SCI_GETSELECTIONEND];
+  const NSRange posRangeSel = NSMakeRange(positionBegin, positionEnd-positionBegin);
+  NSRange rangeCharacters = mOwner.backend->CharactersFromPositions(posRangeSel);
+  NSValue *valueRange = [NSValue valueWithRange:(NSRange)rangeCharacters];
+  return @[valueRange];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Character range currently visible.
+ */
+- (NSRange) accessibilityVisibleCharacterRange {
+  const sptr_t lineTopVisible = [mOwner message: SCI_GETFIRSTVISIBLELINE];
+  const sptr_t lineTop = [mOwner message:SCI_DOCLINEFROMVISIBLE wParam:lineTopVisible];
+  const sptr_t lineEndVisible = lineTopVisible + [mOwner message: SCI_LINESONSCREEN] - 1;
+  const sptr_t lineEnd = [mOwner message:SCI_DOCLINEFROMVISIBLE wParam:lineEndVisible];
+  const sptr_t posStartView = [mOwner message: SCI_POSITIONFROMLINE wParam: lineTop];
+  const sptr_t posEndView = [mOwner message: SCI_GETLINEENDPOSITION wParam: lineEnd];
+  const NSRange posRangeSel = NSMakeRange(posStartView, posEndView-posStartView);
+  return mOwner.backend->CharactersFromPositions(posRangeSel);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Character range of a line.
+ */
+- (NSRange)accessibilityRangeForLine:(NSInteger)line {
+  return mOwner.backend->RangeForVisibleLine(line);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Line number of a text position in characters.
+ */
+- (NSInteger)accessibilityLineForIndex:(NSInteger)index {
+  return mOwner.backend->VisibleLineForIndex(index);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : A rectangle that covers a range which will be shown as the
+ * VoiceOver cursor.
+ * Producing a nice rectangle is a little tricky particularly when including new
+ * lines. Needs to improve the case where parts of two lines are included.
+ */
+- (NSRect)accessibilityFrameForRange:(NSRange)range {
+  const NSRect rectInView = mOwner.backend->FrameForRange(range);
+  const NSRect rectInWindow = [[[self superview] superview] convertRect:rectInView toView:nil];
+  return [self.window convertRectToScreen:rectInWindow];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : A range of text as a string.
+ */
+- (NSString *) accessibilityStringForRange:(NSRange)range {
+  const NSRange posRange = mOwner.backend->PositionsFromCharacters(range);
+  return mOwner.backend->RangeTextAsString(posRange);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : A range of text as an attributed string.
+ * Currently no attributes are set.
+ */
+- (NSAttributedString *) accessibilityAttributedStringForRange:(NSRange)range {
+  const NSRange posRange = mOwner.backend->PositionsFromCharacters(range);
+  NSString *result = mOwner.backend->RangeTextAsString(posRange);
+  return [[[NSMutableAttributedString alloc] initWithString:result] autorelease];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * NSAccessibility : Show the context menu at the caret.
+ */
+- (BOOL)accessibilityPerformShowMenu {
+  const sptr_t caret = [mOwner message: SCI_GETCURRENTPOS];
+  NSRect rect;
+  rect.origin.x = [mOwner message: SCI_POINTXFROMPOSITION wParam: 0 lParam: caret];
+  rect.origin.y = [mOwner message: SCI_POINTYFROMPOSITION wParam: 0 lParam: caret];
+  rect.origin.y += [mOwner message: SCI_TEXTHEIGHT wParam: 0 lParam: 0];
+  rect.size.width = 1.0;
+  rect.size.height = 1.0;
+  NSRect rectInWindow = [[[self superview] superview] convertRect:rect toView:nil];
+  NSPoint pt = rectInWindow.origin;
+  NSEvent *event = [NSEvent mouseEventWithType: NSRightMouseDown
+				      location: pt
+				 modifierFlags: 0
+				     timestamp: 0
+				  windowNumber: [[self window] windowNumber]
+				       context: nil
+				   eventNumber: 0
+				    clickCount: 1
+				      pressure: 0.0];
+  NSMenu *menu = mOwner.backend->CreateContextMenu(event);
+  [NSMenu popUpContextMenu:menu withEvent:event forView:self];
+  return YES;
+}
+
 //--------------------------------------------------------------------------------------------------
 
 - (void) dealloc
@@ -1148,6 +1386,21 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Setup a special indicator used in the editor to provide visual feedback for
+ * input composition, depending on language, keyboard etc.
+ */
+- (void) updateIndicatorIME
+{
+  [self setColorProperty: SCI_INDICSETFORE parameter: INDIC_IME fromHTML: @"#FF0000"];
+  const bool drawInBackground = [self message: SCI_GETPHASESDRAW] != 0;
+  [self setGeneralProperty: SCI_INDICSETUNDER parameter: INDIC_IME value: drawInBackground];
+  [self setGeneralProperty: SCI_INDICSETSTYLE parameter: INDIC_IME value: INDIC_PLAIN];
+  [self setGeneralProperty: SCI_INDICSETALPHA parameter: INDIC_IME value: 100];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Initialization of the view. Used to setup a few other things we need.
  */
 - (id) initWithFrame: (NSRect) frame
@@ -1186,12 +1439,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     // which require our attention.
     mBackend->SetDelegate(self);
 
-    // Setup a special indicator used in the editor to provide visual feedback for
-    // input composition, depending on language, keyboard etc.
-    [self setColorProperty: SCI_INDICSETFORE parameter: INDIC_IME fromHTML: @"#FF0000"];
-    [self setGeneralProperty: SCI_INDICSETUNDER parameter: INDIC_IME value: 1];
-    [self setGeneralProperty: SCI_INDICSETSTYLE parameter: INDIC_IME value: INDIC_PLAIN];
-    [self setGeneralProperty: SCI_INDICSETALPHA parameter: INDIC_IME value: 100];
+    [self updateIndicatorIME];
 
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserver:self
@@ -1759,6 +2007,21 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 {
   return [mContent selectedRange];
 }
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Return the main selection as an NSRange of positions (not characters).
+ * Unlike selectedRange, this can return empty ranges inside the document.
+ */
+
+- (NSRange) selectedRangePositions
+{
+  const sptr_t positionBegin = [self message: SCI_GETSELECTIONSTART];
+  const sptr_t positionEnd = [self message: SCI_GETSELECTIONEND];
+  return NSMakeRange(positionBegin, positionEnd-positionBegin);
+}
+
 
 //--------------------------------------------------------------------------------------------------
 

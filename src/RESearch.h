@@ -39,7 +39,7 @@ public:
 	int Execute(CharacterIndexer &ci, Sci::Position lp, Sci::Position endp);
 
 	enum { MAXTAG=10 };
-	enum { MAXNFA=2048 };
+	enum { MAXNFA=4096 };
 	enum { NOTFOUND=-1 };
 
 	Sci::Position bopat[MAXTAG];

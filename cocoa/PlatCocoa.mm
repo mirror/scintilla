@@ -26,12 +26,13 @@
 #import <Foundation/NSGeometry.h>
 
 #import "Platform.h"
-#import "ScintillaView.h"
-#import "ScintillaCocoa.h"
-#import "PlatCocoa.h"
 
 #include "StringCopy.h"
 #include "XPM.h"
+
+#import "ScintillaView.h"
+#import "ScintillaCocoa.h"
+#import "PlatCocoa.h"
 
 using namespace Scintilla;
 
@@ -1298,7 +1299,7 @@ void Window::SetCursor(Cursor curs)
   if (wid)
   {
     id idWin = reinterpret_cast<id>(wid);
-    if ([idWin isMemberOfClass: [SCIContentView class]])
+    if ([idWin isKindOfClass: [SCIContentView class]])
     {
       SCIContentView* container = reinterpret_cast<SCIContentView*>(idWin);
       [container setCursor: curs];

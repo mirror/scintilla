@@ -46,13 +46,11 @@ public:
 		workStyle=1,
 		workUpdateUI=2
 	};
-	bool active;
 	enum workItems items;
 	Sci::Position upTo;
 
-	WorkNeeded() : active(false), items(workNone), upTo(0) {}
+	WorkNeeded() : items(workNone), upTo(0) {}
 	void Reset() {
-		active = false;
 		items = workNone;
 		upTo = 0;
 	}
@@ -178,6 +176,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	bool hasFocus;
 	bool mouseDownCaptures;
+	bool mouseWheelCaptures;
 
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;
@@ -286,8 +285,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int LinesToScroll() const;
 	Sci::Position MaxScrollPos() const;
 	SelectionPosition ClampPositionIntoDocument(SelectionPosition sp) const;
-	Point LocationFromPosition(SelectionPosition pos);
-	Point LocationFromPosition(Sci::Position pos);
+	Point LocationFromPosition(SelectionPosition pos, PointEnd pe=peDefault);
+	Point LocationFromPosition(Sci::Position pos, PointEnd pe=peDefault);
 	int XFromPosition(Sci::Position pos);
 	int XFromPosition(SelectionPosition sp);
 	SelectionPosition SPositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false, bool virtualSpace=true);
@@ -367,6 +366,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DropCaret();
 	void CaretSetPeriod(int period);
 	void InvalidateCaret();
+	virtual void NotifyCaretMove();
 	virtual void UpdateSystemCaret();
 
 	bool Wrapping() const;
@@ -391,7 +391,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ChangeSize();
 
 	void FilterSelections();
-	Sci::Position InsertSpace(Sci::Position position, Sci::Position spaces);
+	Sci::Position RealizeVirtualSpace(Sci::Position position, Sci::Position virtualSpace);
+	SelectionPosition RealizeVirtualSpace(const SelectionPosition &position);
 	void AddChar(char ch);
 	virtual void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false);
 	void ClearBeforeTentativeStart();
@@ -414,7 +415,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DelCharBack(bool allowLineStartDeletion);
 	virtual void ClaimSelection() = 0;
 
-	static int ModifierFlags(bool shift, bool ctrl, bool alt, bool meta=false);
+	static int ModifierFlags(bool shift, bool ctrl, bool alt, bool meta=false, bool super=false);
 	virtual void NotifyChange() = 0;
 	virtual void NotifyFocus(bool focus);
 	virtual void SetCtrlID(int identifier);
@@ -464,6 +465,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	SelectionPosition PositionUpOrDown(SelectionPosition spStart, int direction, int lastX);
 	void CursorUpOrDown(int direction, Selection::selTypes selt);
 	void ParaUpOrDown(int direction, Selection::selTypes selt);
+	Range RangeDisplayLine(Sci::Position lineVisible);
 	Sci::Position StartEndDisplayLine(Sci::Position pos, bool start);
 	Sci::Position VCHomeDisplayPosition(Sci::Position position);
 	Sci::Position VCHomeWrapPosition(Sci::Position position);
@@ -527,7 +529,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	Sci::Position PositionAfterArea(PRectangle rcArea) const;
 	void StyleToPositionInView(Sci::Position pos);
-	int PositionAfterMaxStyling(int posMax, bool scrolling) const;
+	Sci::Position PositionAfterMaxStyling(Sci::Position posMax, bool scrolling) const;
 	void StartIdleStyling(bool truncatedLastStyling);
 	void StyleAreaBounded(PRectangle rcArea, bool scrolling);
 	void IdleStyling();
@@ -570,6 +572,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void AddStyledText(char *buffer, Sci::Position appendLength);
 
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) = 0;
+	bool ValidMargin(uptr_t wParam) const;
 	void StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	sptr_t StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 

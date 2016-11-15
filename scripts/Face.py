@@ -82,6 +82,7 @@ class Face:
 							raise Exception("Duplicate value " + value + " " + name)
 						self.values[value] = 1
 						self.order.append(name)
+						currentComment = []
 					elif featureType == "evt":
 						retType, name, value = decodeEvent(featureVal)
 						self.features[name] = {
@@ -112,6 +113,8 @@ class Face:
 						self.features[name] = {
 							"FeatureType": featureType,
 							"Category": currentCategory,
-							"Value": value }
+							"Value": value,
+							"Comment": currentComment }
 						self.order.append(name)
+						currentComment = []
 

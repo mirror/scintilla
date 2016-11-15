@@ -1,5 +1,5 @@
 // Scintilla source code edit control
-/** @file Editor.cxx
+/** @file EditView.cxx
  ** Defines the appearance of the main text area of the editor window.
  **/
 // Copyright 1998-2014 by Neil Hodgson <neilh@scintilla.org>
@@ -26,6 +26,7 @@
 #include "Scintilla.h"
 
 #include "StringCopy.h"
+#include "CharacterSet.h"
 #include "Position.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
@@ -316,21 +317,25 @@ static const char *ControlCharacterString(unsigned char ch) {
 	}
 }
 
-static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid) {
-	int ydiff = static_cast<int>(rcTab.bottom - rcTab.top) / 2;
-	int xhead = static_cast<int>(rcTab.right) - 1 - ydiff;
-	if (xhead <= rcTab.left) {
-		ydiff -= static_cast<int>(rcTab.left) - xhead - 1;
-		xhead = static_cast<int>(rcTab.left) - 1;
-	}
+static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const ViewStyle &vsDraw) {
 	if ((rcTab.left + 2) < (rcTab.right - 1))
 		surface->MoveTo(static_cast<int>(rcTab.left) + 2, ymid);
 	else
 		surface->MoveTo(static_cast<int>(rcTab.right) - 1, ymid);
 	surface->LineTo(static_cast<int>(rcTab.right) - 1, ymid);
-	surface->LineTo(xhead, ymid - ydiff);
-	surface->MoveTo(static_cast<int>(rcTab.right) - 1, ymid);
-	surface->LineTo(xhead, ymid + ydiff);
+
+	// Draw the arrow head if needed
+	if (vsDraw.tabDrawMode == tdLongArrow) {
+		int ydiff = static_cast<int>(rcTab.bottom - rcTab.top) / 2;
+		int xhead = static_cast<int>(rcTab.right) - 1 - ydiff;
+		if (xhead <= rcTab.left) {
+			ydiff -= static_cast<int>(rcTab.left) - xhead - 1;
+			xhead = static_cast<int>(rcTab.left) - 1;
+		}
+		surface->LineTo(xhead, ymid - ydiff);
+		surface->MoveTo(static_cast<int>(rcTab.right) - 1, ymid);
+		surface->LineTo(xhead, ymid + ydiff);
+	}
 }
 
 void EditView::RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw) {
@@ -400,16 +405,16 @@ void EditView::LayoutLine(const EditModel &model, Sci::Position line, Surface *s
 					(ll->chars[numCharsInLine] == chDoc);
 				else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseLower)
 					allSame = allSame &&
-					(ll->chars[numCharsInLine] == static_cast<char>(tolower(chDoc)));
+					(ll->chars[numCharsInLine] == MakeLowerCase(chDoc));
 				else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseUpper)
 					allSame = allSame &&
-					(ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
+					(ll->chars[numCharsInLine] == MakeUpperCase(chDoc));
 				else	{ // Style::caseCamel
-					if ((model.pdoc->WordCharClass(ll->chars[numCharsInLine]) == CharClassify::ccWord) &&
-					  ((numCharsInLine == 0) || (model.pdoc->WordCharClass(ll->chars[numCharsInLine - 1]) != CharClassify::ccWord))) {
-						allSame = allSame && (ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
+					if ((model.pdoc->IsASCIIWordByte(ll->chars[numCharsInLine])) &&
+					  ((numCharsInLine == 0) || (!model.pdoc->IsASCIIWordByte(ll->chars[numCharsInLine - 1])))) {
+						allSame = allSame && (ll->chars[numCharsInLine] == MakeUpperCase(chDoc));
 					} else {
-						allSame = allSame && (ll->chars[numCharsInLine] == static_cast<char>(tolower(chDoc)));
+						allSame = allSame && (ll->chars[numCharsInLine] == MakeLowerCase(chDoc));
 					}
 				}
 				numCharsInLine++;
@@ -428,8 +433,11 @@ void EditView::LayoutLine(const EditModel &model, Sci::Position line, Surface *s
 		ll->widthLine = LineLayout::wrapWidthInfinite;
 		ll->lines = 1;
 		if (vstyle.edgeState == EDGE_BACKGROUND) {
-			const Sci::Position posColumn = model.pdoc->FindColumn(line, vstyle.theEdge);
-			ll->edgeColumn = static_cast<int>(posColumn - posLineStart);
+			Sci::Position posColumn = model.pdoc->FindColumn(line, vstyle.theEdge.column);
+			if (posColumn >= posLineStart) {
+				posColumn -= posLineStart;
+			}
+			ll->edgeColumn = static_cast<int>(posColumn);
 		} else {
 			ll->edgeColumn = -1;
 		}
@@ -449,15 +457,15 @@ void EditView::LayoutLine(const EditModel &model, Sci::Position line, Surface *s
 			for (int charInLine = 0; charInLine<lineLength; charInLine++) {
 				char chDoc = ll->chars[charInLine];
 				if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseUpper)
-					ll->chars[charInLine] = static_cast<char>(toupper(chDoc));
+					ll->chars[charInLine] = static_cast<char>(MakeUpperCase(chDoc));
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseLower)
-					ll->chars[charInLine] = static_cast<char>(tolower(chDoc));
+					ll->chars[charInLine] = static_cast<char>(MakeLowerCase(chDoc));
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseCamel) {
-					if ((model.pdoc->WordCharClass(ll->chars[charInLine]) == CharClassify::ccWord) &&
-					  ((charInLine == 0) || (model.pdoc->WordCharClass(ll->chars[charInLine - 1]) != CharClassify::ccWord))) {
-						ll->chars[charInLine] = static_cast<char>(toupper(chDoc));
+					if ((model.pdoc->IsASCIIWordByte(ll->chars[charInLine])) &&
+					  ((charInLine == 0) || (!model.pdoc->IsASCIIWordByte(ll->chars[charInLine - 1])))) {
+						ll->chars[charInLine] = static_cast<char>(MakeUpperCase(chDoc));
 					} else {
-						ll->chars[charInLine] = static_cast<char>(tolower(chDoc));
+						ll->chars[charInLine] = static_cast<char>(MakeLowerCase(chDoc));
 					}
 				}
 			}
@@ -604,24 +612,56 @@ void EditView::LayoutLine(const EditModel &model, Sci::Position line, Surface *s
 	}
 }
 
-Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, Sci::Position topLine, const ViewStyle &vs) {
+Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, Sci::Position topLine,
+				     const ViewStyle &vs, PointEnd pe) {
 	Point pt;
 	if (pos.Position() == INVALID_POSITION)
 		return pt;
-	const Sci::Position line = model.pdoc->LineOfPosition(pos.Position());
-	const Sci::Position lineVisible = model.cs.DisplayFromDoc(line);
-	//Platform::DebugPrintf("line=%d\n", line);
-	AutoLineLayout ll(llc, RetrieveLineLayout(line, model));
+	Sci::Position lineDoc = model.pdoc->LineOfPosition(pos.Position());
+	Sci::Position posLineStart = model.pdoc->PositionLineStart(lineDoc);
+	if ((pe & peLineEnd) && (lineDoc > 0) && (pos.Position() == posLineStart)) {
+		// Want point at end of first line
+		lineDoc--;
+		posLineStart = model.pdoc->PositionLineStart(lineDoc);
+	}
+	const Sci::Position lineVisible = model.cs.DisplayFromDoc(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc, model));
 	if (surface && ll) {
-		const Sci::Position posLineStart = model.pdoc->PositionLineStart(line);
-		LayoutLine(model, line, surface, vs, ll, model.wrapWidth);
+		LayoutLine(model, lineDoc, surface, vs, ll, model.wrapWidth);
 		const int posInLine = static_cast<int>(pos.Position() - posLineStart);
-		pt = ll->PointFromPosition(posInLine, vs.lineHeight);
+		pt = ll->PointFromPosition(posInLine, vs.lineHeight, pe);
 		pt.y += (lineVisible - topLine) * vs.lineHeight;
 		pt.x += vs.textStart - model.xOffset;
 	}
 	pt.x += pos.VirtualSpace() * vs.styles[ll->EndLineStyle()].spaceWidth;
 	return pt;
+}
+
+Range EditView::RangeDisplayLine(Surface *surface, const EditModel &model, Sci::Position lineVisible, const ViewStyle &vs) {
+	Range rangeSubLine = Range(0,0);
+	if (lineVisible < 0) {
+		return rangeSubLine;
+	}
+	const Sci::Position lineDoc = model.cs.DocFromDisplay(lineVisible);
+	const Sci::Position positionLineStart = model.pdoc->PositionLineStart(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc, model));
+	if (surface && ll) {
+		LayoutLine(model, lineDoc, surface, vs, ll, model.wrapWidth);
+		const Sci::Position lineStartSet = model.cs.DisplayFromDoc(lineDoc);
+		const int subLine = static_cast<int>(lineVisible - lineStartSet);
+		if (subLine < ll->lines) {
+			RangeInLine rir = ll->SubLineRange(subLine);
+			rangeSubLine.start = rir.start;
+			rangeSubLine.end = rir.start;
+			if (subLine == ll->lines-1) {
+				rangeSubLine.end = model.pdoc->PositionLineStart(lineDoc + 1) -
+					positionLineStart;
+			}
+		}
+	}
+	rangeSubLine.start += positionLineStart;
+	rangeSubLine.end += positionLineStart;
+	return rangeSubLine;
 }
 
 SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditModel &model, Point pt, bool canReturnInvalid, bool charPosition, bool virtualSpace, const ViewStyle &vs) {
@@ -758,7 +798,7 @@ static ColourDesired TextBackground(const EditModel &model, const ViewStyle &vsD
 		if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
 			(i >= ll->edgeColumn) &&
 			(i < ll->numCharsBeforeEOL))
-			return vsDraw.edgecolour;
+			return vsDraw.theEdge.colour;
 		if (inHotspot && vsDraw.hotspotColours.back.isSet)
 			return vsDraw.hotspotColours.back;
 	}
@@ -970,15 +1010,24 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 	}
 }
 
-static void DrawIndicator(int indicNum, int startPos, int endPos, Surface *surface, const ViewStyle &vsDraw,
-	const LineLayout *ll, int xStart, PRectangle rcLine, int subLine, Indicator::DrawState drawState, int value) {
+static void DrawIndicator(int indicNum, Sci::Position startPos, Sci::Position endPos, Surface *surface, const ViewStyle &vsDraw,
+	const LineLayout *ll, int xStart, PRectangle rcLine, Sci::Position secondCharacter, int subLine, Indicator::DrawState drawState, int value) {
 	const XYPOSITION subLineStart = ll->positions[ll->LineStart(subLine)];
 	PRectangle rcIndic(
 		ll->positions[startPos] + xStart - subLineStart,
 		rcLine.top + vsDraw.maxAscent,
 		ll->positions[endPos] + xStart - subLineStart,
 		rcLine.top + vsDraw.maxAscent + 3);
-	vsDraw.indicators[indicNum].Draw(surface, rcIndic, rcLine, drawState, value);
+	PRectangle rcFirstCharacter = rcIndic;
+	// Allow full descent space for character indicators
+	rcFirstCharacter.bottom = rcLine.top + vsDraw.maxAscent + vsDraw.maxDescent;
+	if (secondCharacter >= 0) {
+		rcFirstCharacter.right = ll->positions[secondCharacter] + xStart - subLineStart;
+	} else {
+		// Indicator continued from earlier line so make an empty box and don't draw
+		rcFirstCharacter.right = rcFirstCharacter.left;
+	}
+	vsDraw.indicators[indicNum].Draw(surface, rcIndic, rcLine, rcFirstCharacter, drawState, value);
 }
 
 static void DrawIndicators(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
@@ -1001,8 +1050,9 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 					rangeRun.ContainsCharacter(hoverIndicatorPos);
 				const int value = deco->rs.ValueAt(startPos);
 				Indicator::DrawState drawState = hover ? Indicator::drawHover : Indicator::drawNormal;
-				DrawIndicator(deco->indicator, static_cast<int>(startPos - posLineStart), static_cast<int>(endPos - posLineStart),
-					surface, vsDraw, ll, xStart, rcLine, subLine, drawState, value);
+				const Sci::Position posSecond = model.pdoc->MovePositionOutsideChar(rangeRun.First() + 1, 1);
+				DrawIndicator(deco->indicator, startPos - posLineStart, endPos - posLineStart,
+					surface, vsDraw, ll, xStart, rcLine, posSecond - posLineStart, subLine, drawState, value);
 				startPos = endPos;
 				if (!deco->rs.ValueAt(startPos)) {
 					startPos = deco->rs.EndRun(startPos);
@@ -1020,13 +1070,15 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 			if (rangeLine.ContainsCharacter(model.braces[0])) {
 				int braceOffset = static_cast<int>(model.braces[0] - posLineStart);
 				if (braceOffset < ll->numCharsInLine) {
-					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, subLine, Indicator::drawNormal, 1);
+					const Sci::Position secondOffset = model.pdoc->MovePositionOutsideChar(model.braces[0] + 1, 1) - posLineStart;
+					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, secondOffset, subLine, Indicator::drawNormal, 1);
 				}
 			}
 			if (rangeLine.ContainsCharacter(model.braces[1])) {
 				int braceOffset = static_cast<int>(model.braces[1] - posLineStart);
 				if (braceOffset < ll->numCharsInLine) {
-					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, subLine, Indicator::drawNormal, 1);
+					const Sci::Position secondOffset = model.pdoc->MovePositionOutsideChar(model.braces[1] + 1, 1) - posLineStart;
+					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, secondOffset, subLine, Indicator::drawNormal, 1);
 				}
 			}
 		}
@@ -1348,12 +1400,24 @@ static void DrawEdgeLine(Surface *surface, const ViewStyle &vsDraw, const LineLa
 	RangeInLine lineRange, int xStart) {
 	if (vsDraw.edgeState == EDGE_LINE) {
 		PRectangle rcSegment = rcLine;
-		int edgeX = static_cast<int>(vsDraw.theEdge * vsDraw.spaceWidth);
+		int edgeX = static_cast<int>(vsDraw.theEdge.column * vsDraw.spaceWidth);
 		rcSegment.left = static_cast<XYPOSITION>(edgeX + xStart);
 		if ((ll->wrapIndent != 0) && (lineRange.start != 0))
 			rcSegment.left -= ll->wrapIndent;
 		rcSegment.right = rcSegment.left + 1;
-		surface->FillRectangle(rcSegment, vsDraw.edgecolour);
+		surface->FillRectangle(rcSegment, vsDraw.theEdge.colour);
+	} else if (vsDraw.edgeState == EDGE_MULTILINE) {
+		for (size_t edge = 0; edge < vsDraw.theMultiEdge.size(); edge++) {
+			if (vsDraw.theMultiEdge[edge].column >= 0) {
+				PRectangle rcSegment = rcLine;
+				int edgeX = static_cast<int>(vsDraw.theMultiEdge[edge].column * vsDraw.spaceWidth);
+				rcSegment.left = static_cast<XYPOSITION>(edgeX + xStart);
+				if ((ll->wrapIndent != 0) && (lineRange.start != 0))
+					rcSegment.left -= ll->wrapIndent;
+				rcSegment.right = rcSegment.left + 1;
+				surface->FillRectangle(rcSegment, vsDraw.theMultiEdge[edge].colour);
+			}
+		}
 	}
 }
 
@@ -1533,7 +1597,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
 							if (customDrawTabArrow == NULL)
-								DrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2));
+								DrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2), vsDraw);
 							else
 								customDrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2));
 						}
@@ -1874,7 +1938,8 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 					ll->SetBracesHighlight(rangeLine, model.braces, static_cast<char>(model.bracesMatchStyle),
 						static_cast<int>(model.highlightGuideColumn * vsDraw.spaceWidth), bracesIgnoreStyle);
 
-					if (leftTextOverlap && bufferedDraw) {
+					if (leftTextOverlap && (bufferedDraw || ((phasesDraw < phasesMultiple) && (*it & drawBack)))) {
+						// Clear the left margin
 						PRectangle rcSpacer = rcLine;
 						rcSpacer.right = rcSpacer.left;
 						rcSpacer.left -= 1;
@@ -1928,10 +1993,19 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		if (rcBeyondEOF.top < rcBeyondEOF.bottom) {
 			surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.styles[STYLE_DEFAULT].back);
 			if (vsDraw.edgeState == EDGE_LINE) {
-				int edgeX = static_cast<int>(vsDraw.theEdge * vsDraw.spaceWidth);
+				int edgeX = static_cast<int>(vsDraw.theEdge.column * vsDraw.spaceWidth);
 				rcBeyondEOF.left = static_cast<XYPOSITION>(edgeX + xStart);
 				rcBeyondEOF.right = rcBeyondEOF.left + 1;
-				surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.edgecolour);
+				surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.theEdge.colour);
+			} else if (vsDraw.edgeState == EDGE_MULTILINE) {
+				for (size_t edge = 0; edge < vsDraw.theMultiEdge.size(); edge++) {
+					if (vsDraw.theMultiEdge[edge].column >= 0) {
+						int edgeX = static_cast<int>(vsDraw.theMultiEdge[edge].column * vsDraw.spaceWidth);
+						rcBeyondEOF.left = static_cast<XYPOSITION>(edgeX + xStart);
+						rcBeyondEOF.right = rcBeyondEOF.left + 1;
+						surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.theMultiEdge[edge].colour);
+					}
+				}
 			}
 		}
 		//Platform::DebugPrintf("start display %d, offset = %d\n", pdoc->Length(), xOffset);
@@ -1970,9 +2044,9 @@ Sci::Position EditView::FormatRange(bool draw, Sci_RangeToFormat *pfr, Surface *
 	// Modify the view style for printing as do not normally want any of the transient features to be printed
 	// Printing supports only the line number margin.
 	int lineNumberIndex = -1;
-	for (int margin = 0; margin <= SC_MAX_MARGIN; margin++) {
+	for (size_t margin = 0; margin < vs.ms.size(); margin++) {
 		if ((vsPrint.ms[margin].style == SC_MARGIN_NUMBER) && (vsPrint.ms[margin].width > 0)) {
-			lineNumberIndex = margin;
+			lineNumberIndex = static_cast<int>(margin);
 		} else {
 			vsPrint.ms[margin].width = 0;
 		}

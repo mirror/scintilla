@@ -340,7 +340,7 @@ static bool IsOneCharOperator(int c) {
 	    || c == '*' || c == '/' || c == '^' || c == '%'
 	    || c == '.' || c == ':' || c == '!' || c == '<'
 	    || c == '>' || c == '=' || c == '-' || c == '&'
-	    || c == '|' || c == '$';
+	    || c == '|' || c == '$' || c == '?';
 }
 
 static bool IsTwoCharOperator(int c, int n) {
