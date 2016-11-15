@@ -27,6 +27,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -128,7 +129,7 @@ struct OptionSetJSON : public OptionSet<OptionsJSON> {
 	}
 };
 
-class LexerJSON : public ILexer {
+class LexerJSON : public DefaultLexer {
 	OptionsJSON options;
 	OptionSetJSON optSetJSON;
 	EscapeSequence escapeSeq;
@@ -209,7 +210,7 @@ class LexerJSON : public ILexer {
 	}
 	virtual ~LexerJSON() {}
 	virtual int SCI_METHOD Version() const {
-		return lvOriginal;
+		return lvRelease4;
 	}
 	virtual void SCI_METHOD Release() {
 		delete this;

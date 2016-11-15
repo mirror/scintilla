@@ -155,10 +155,10 @@ public:
   void SetMouseCapture(bool on);
   bool HaveMouseCapture();
   void WillDraw(NSRect rect);
-  void ScrollText(int linesToMove);
+  void ScrollText(Sci::Position linesToMove);
   void SetVerticalScrollPos();
   void SetHorizontalScrollPos();
-  bool ModifyScrollBars(int nMax, int nPage);
+  bool ModifyScrollBars(Sci::Position nMax, Sci::Position nPage);
   bool SetScrollingSize(void);
   void Resize();
   void UpdateForScroll();
@@ -194,7 +194,7 @@ public:
   void ObserverAdd();
   void ObserverRemove();
   virtual void IdleWork();
-  virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
+  virtual void QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo);
   int InsertText(NSString* input);
   NSRange PositionsFromCharacters(NSRange rangeCharacters) const;
   NSRange CharactersFromPositions(NSRange rangePositions) const;

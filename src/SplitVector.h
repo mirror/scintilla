@@ -17,16 +17,16 @@ template <typename T>
 class SplitVector {
 protected:
 	T *body;
-	int size;
-	int lengthBody;
-	int part1Length;
-	int gapLength;	/// invariant: gapLength == size - lengthBody
-	int growSize;
+	Sci::Position size;
+	Sci::Position lengthBody;
+	Sci::Position part1Length;
+	Sci::Position gapLength;	/// invariant: gapLength == size - lengthBody
+	Sci::Position growSize;
 
 	/// Move the gap to a particular position so that insertion and
 	/// deletion at that point will not require much copying and
 	/// hence be fast.
-	void GapTo(int position) {
+	void GapTo(Sci::Position position) {
 		if (position != part1Length) {
 			if (position < part1Length) {
 				// Moving the gap towards start so moving elements towards end
@@ -47,7 +47,7 @@ protected:
 
 	/// Check that there is room in the buffer for an insertion,
 	/// reallocating if more space needed.
-	void RoomFor(int insertionLength) {
+	void RoomFor(Sci::Position insertionLength) {
 		if (gapLength <= insertionLength) {
 			while (growSize < size / 6)
 				growSize *= 2;
@@ -75,18 +75,18 @@ public:
 		body = 0;
 	}
 
-	int GetGrowSize() const {
+	Sci::Position GetGrowSize() const {
 		return growSize;
 	}
 
-	void SetGrowSize(int growSize_) {
+	void SetGrowSize(Sci::Position growSize_) {
 		growSize = growSize_;
 	}
 
 	/// Reallocate the storage for the buffer to be newSize and
 	/// copy exisiting contents to the new buffer.
 	/// Must not be used to decrease the size of the buffer.
-	void ReAllocate(int newSize) {
+	void ReAllocate(Sci::Position newSize) {
 		if (newSize < 0)
 			throw std::runtime_error("SplitVector::ReAllocate: negative size.");
 
@@ -108,7 +108,7 @@ public:
 	/// Retrieving positions outside the range of the buffer returns 0.
 	/// The assertions here are disabled since calling code can be
 	/// simpler if out of range access works and returns 0.
-	T ValueAt(int position) const {
+	T ValueAt(Sci::Position position) const {
 		if (position < part1Length) {
 			//PLATFORM_ASSERT(position >= 0);
 			if (position < 0) {
@@ -126,7 +126,7 @@ public:
 		}
 	}
 
-	void SetValueAt(int position, T v) {
+	void SetValueAt(Sci::Position position, T v) {
 		if (position < part1Length) {
 			PLATFORM_ASSERT(position >= 0);
 			if (position < 0) {
@@ -144,7 +144,7 @@ public:
 		}
 	}
 
-	T &operator[](int position) const {
+	T &operator[](Sci::Position position) const {
 		PLATFORM_ASSERT(position >= 0 && position < lengthBody);
 		if (position < part1Length) {
 			return body[position];
@@ -154,13 +154,13 @@ public:
 	}
 
 	/// Retrieve the length of the buffer.
-	int Length() const {
+	Sci::Position Length() const {
 		return lengthBody;
 	}
 
 	/// Insert a single value into the buffer.
 	/// Inserting at positions outside the current range fails.
-	void Insert(int position, T v) {
+	void Insert(Sci::Position position, T v) {
 		PLATFORM_ASSERT((position >= 0) && (position <= lengthBody));
 		if ((position < 0) || (position > lengthBody)) {
 			return;
@@ -175,7 +175,7 @@ public:
 
 	/// Insert a number of elements into the buffer setting their value.
 	/// Inserting at positions outside the current range fails.
-	void InsertValue(int position, int insertLength, T v) {
+	void InsertValue(Sci::Position position, Sci::Position insertLength, T v) {
 		PLATFORM_ASSERT((position >= 0) && (position <= lengthBody));
 		if (insertLength > 0) {
 			if ((position < 0) || (position > lengthBody)) {
@@ -192,14 +192,14 @@ public:
 
 	/// Ensure at least length elements allocated,
 	/// appending zero valued elements if needed.
-	void EnsureLength(int wantedLength) {
+	void EnsureLength(Sci::Position wantedLength) {
 		if (Length() < wantedLength) {
 			InsertValue(Length(), wantedLength - Length(), 0);
 		}
 	}
 
 	/// Insert text into the buffer from an array.
-	void InsertFromArray(int positionToInsert, const T s[], int positionFrom, int insertLength) {
+	void InsertFromArray(Sci::Position positionToInsert, const T s[], Sci::Position positionFrom, Sci::Position insertLength) {
 		PLATFORM_ASSERT((positionToInsert >= 0) && (positionToInsert <= lengthBody));
 		if (insertLength > 0) {
 			if ((positionToInsert < 0) || (positionToInsert > lengthBody)) {
@@ -215,7 +215,7 @@ public:
 	}
 
 	/// Delete one element from the buffer.
-	void Delete(int position) {
+	void Delete(Sci::Position position) {
 		PLATFORM_ASSERT((position >= 0) && (position < lengthBody));
 		if ((position < 0) || (position >= lengthBody)) {
 			return;
@@ -225,7 +225,7 @@ public:
 
 	/// Delete a range from the buffer.
 	/// Deleting positions outside the current range fails.
-	void DeleteRange(int position, int deleteLength) {
+	void DeleteRange(Sci::Position position, Sci::Position deleteLength) {
 		PLATFORM_ASSERT((position >= 0) && (position + deleteLength <= lengthBody));
 		if ((position < 0) || ((position + deleteLength) > lengthBody)) {
 			return;
@@ -247,11 +247,11 @@ public:
 	}
 
 	// Retrieve a range of elements into an array
-	void GetRange(T *buffer, int position, int retrieveLength) const {
+	void GetRange(T *buffer, Sci::Position position, Sci::Position retrieveLength) const {
 		// Split into up to 2 ranges, before and after the split then use memcpy on each.
-		int range1Length = 0;
+		Sci::Position range1Length = 0;
 		if (position < part1Length) {
-			int part1AfterPosition = part1Length - position;
+			Sci::Position part1AfterPosition = part1Length - position;
 			range1Length = retrieveLength;
 			if (range1Length > part1AfterPosition)
 				range1Length = part1AfterPosition;
@@ -259,7 +259,7 @@ public:
 		std::copy(body + position, body + position + range1Length, buffer);
 		buffer += range1Length;
 		position = position + range1Length + gapLength;
-		int range2Length = retrieveLength - range1Length;
+		Sci::Position range2Length = retrieveLength - range1Length;
 		std::copy(body + position, body + position + range2Length, buffer);
 	}
 
@@ -270,7 +270,7 @@ public:
 		return body;
 	}
 
-	T *RangePointer(int position, int rangeLength) {
+	T *RangePointer(Sci::Position position, Sci::Position rangeLength) {
 		if (position < part1Length) {
 			if ((position + rangeLength) > part1Length) {
 				// Range overlaps gap, so move gap to start of range.
@@ -284,7 +284,7 @@ public:
 		}
 	}
 
-	int GapPosition() const {
+	Sci::Position GapPosition() const {
 		return part1Length;
 	}
 };

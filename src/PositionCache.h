@@ -16,6 +16,14 @@ static inline bool IsEOLChar(char ch) {
 	return (ch == '\r') || (ch == '\n');
 }
 
+struct RangeInLine {
+	int start;
+	int end;
+	RangeInLine(int start_, int end_) :
+		start(start_), end(end_) {
+	}
+};
+
 // There are two points for some positions and this enumeration
 // can choose between the end of the first line or subline
 // and the start of the next line or subline.
@@ -33,7 +41,7 @@ private:
 	int *lineStarts;
 	int lenLineStarts;
 	/// Drawing is only performed for @a maxLineLength characters on each line.
-	int lineNumber;
+	Sci::Position lineNumber;
 	bool inCache;
 public:
 	enum { wrapWidthInfinite = 0x7ffffff };
@@ -66,14 +74,14 @@ public:
 	void Invalidate(validLevel validity_);
 	int LineStart(int line) const;
 	int LineLastVisible(int line) const;
-	Range SubLineRange(int line) const;
+	RangeInLine SubLineRange(int line) const;
 	bool InLine(int offset, int line) const;
 	void SetLineStart(int line, int start);
-	void SetBracesHighlight(Range rangeLine, const Position braces[],
+	void SetBracesHighlight(Range rangeLine, const Sci::Position braces[],
 		char bracesMatchStyle, int xHighlight, bool ignoreStyle);
-	void RestoreBracesHighlight(Range rangeLine, const Position braces[], bool ignoreStyle);
+	void RestoreBracesHighlight(Range rangeLine, const Sci::Position braces[], bool ignoreStyle);
 	int FindBefore(XYPOSITION x, int lower, int upper) const;
-	int FindPositionFromX(XYPOSITION x, Range range, bool charPosition) const;
+	int FindPositionFromX(XYPOSITION x, RangeInLine range, bool charPosition) const;
 	Point PointFromPosition(int posInLine, int lineHeight, PointEnd pe) const;
 	int EndLineStyle() const;
 };
@@ -87,7 +95,7 @@ class LineLayoutCache {
 	int styleClock;
 	int useCount;
 	void Allocate(size_t length_);
-	void AllocateForLevel(int linesOnScreen, int linesInDoc);
+	void AllocateForLevel(Sci::Position linesOnScreen, Sci::Position linesInDoc);
 public:
 	LineLayoutCache();
 	virtual ~LineLayoutCache();
@@ -101,8 +109,8 @@ public:
 	void Invalidate(LineLayout::validLevel validity_);
 	void SetLevel(int level_);
 	int GetLevel() const { return level; }
-	LineLayout *Retrieve(int lineNumber, int lineCaret, int maxChars, int styleClock_,
-		int linesOnScreen, int linesInDoc);
+	LineLayout *Retrieve(Sci::Position lineNumber, Sci::Position lineCaret, int maxChars, int styleClock_,
+		Sci::Position linesOnScreen, Sci::Position linesInDoc);
 	void Dispose(LineLayout *ll);
 };
 
@@ -158,8 +166,8 @@ struct TextSegment {
 // Class to break a line of text into shorter runs at sensible places.
 class BreakFinder {
 	const LineLayout *ll;
-	Range lineRange;
-	int posLineStart;
+	RangeInLine lineRange;
+	Sci::Position posLineStart;
 	int nextBreak;
 	std::vector<int> selAndEdge;
 	unsigned int saeCurrentPos;
@@ -177,7 +185,7 @@ public:
 	enum { lengthStartSubdivision = 300 };
 	// Try to make each subdivided run lengthEachSubdivision or shorter.
 	enum { lengthEachSubdivision = 100 };
-	BreakFinder(const LineLayout *ll_, const Selection *psel, Range rangeLine_, int posLineStart_,
+	BreakFinder(const LineLayout *ll_, const Selection *psel, RangeInLine rangeLine_, Sci::Position posLineStart_,
 		int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw);
 	~BreakFinder();
 	TextSegment Next();

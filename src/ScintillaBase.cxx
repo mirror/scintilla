@@ -206,24 +206,24 @@ void ScintillaBase::AutoCompleteDoubleClick(void *p) {
 	sci->AutoCompleteCompleted(0, SC_AC_DOUBLECLICK);
 }
 
-void ScintillaBase::AutoCompleteInsert(Position startPos, int removeLen, const char *text, int textLen) {
+void ScintillaBase::AutoCompleteInsert(Sci::Position startPos, int removeLen, const char *text, int textLen) {
 	UndoGroup ug(pdoc);
 	if (multiAutoCMode == SC_MULTIAUTOC_ONCE) {
 		pdoc->DeleteChars(startPos, removeLen);
-		const int lengthInserted = pdoc->InsertString(startPos, text, textLen);
+		const Sci::Position lengthInserted = pdoc->InsertString(startPos, text, textLen);
 		SetEmptySelection(startPos + lengthInserted);
 	} else {
 		// SC_MULTIAUTOC_EACH
 		for (size_t r=0; r<sel.Count(); r++) {
 			if (!RangeContainsProtected(sel.Range(r).Start().Position(),
 				sel.Range(r).End().Position())) {
-				int positionInsert = sel.Range(r).Start().Position();
+				Sci::Position positionInsert = sel.Range(r).Start().Position();
 				positionInsert = RealizeVirtualSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
 				if (positionInsert - removeLen >= 0) {
 					positionInsert -= removeLen;
 					pdoc->DeleteChars(positionInsert, removeLen);
 				}
-				const int lengthInserted = pdoc->InsertString(positionInsert, text, textLen);
+				const Sci::Position lengthInserted = pdoc->InsertString(positionInsert, text, textLen);
 				if (lengthInserted > 0) {
 					sel.Range(r).caret.SetPosition(positionInsert + lengthInserted);
 					sel.Range(r).anchor.SetPosition(positionInsert + lengthInserted);
@@ -287,7 +287,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 		rcac.top = pt.y + vs.lineHeight;
 	}
 	rcac.right = rcac.left + widthLB;
-	rcac.bottom = static_cast<XYPOSITION>(Platform::Minimum(static_cast<int>(rcac.top) + heightLB, static_cast<int>(rcPopupBounds.bottom)));
+	rcac.bottom = std::min(rcac.top + heightLB, rcPopupBounds.bottom);
 	ac.lb->SetPositionRelative(rcac, wMain);
 	ac.lb->SetFont(vs.styles[STYLE_DEFAULT].font);
 	unsigned int aveCharWidth = static_cast<unsigned int>(vs.styles[STYLE_DEFAULT].aveCharWidth);
@@ -381,7 +381,7 @@ void ScintillaBase::AutoCompleteCompleted(char ch, unsigned int completionMethod
 	scn.listCompletionMethod = completionMethod;
 	scn.wParam = listType;
 	scn.listType = listType;
-	Position firstPos = ac.posStart - ac.startLen;
+	Sci::Position firstPos = ac.posStart - ac.startLen;
 	scn.position = firstPos;
 	scn.lParam = firstPos;
 	scn.text = selected.c_str();
@@ -394,7 +394,7 @@ void ScintillaBase::AutoCompleteCompleted(char ch, unsigned int completionMethod
 	if (listType > 0)
 		return;
 
-	Position endPos = sel.MainCaret();
+	Sci::Position endPos = sel.MainCaret();
 	if (ac.dropRestOfWord)
 		endPos = pdoc->ExtendWordSelect(endPos, 1, true);
 	if (endPos < firstPos)
@@ -550,6 +550,10 @@ public:
 	void SetIdentifiers(int style, const char *identifiers);
 	int DistanceToSecondaryStyles();
 	const char *GetSubStyleBases();
+	int MaximumNamedStyle();
+	const char *NameOfStyle(int style);
+	const char *DescriptionOfStyle(int style);
+	const char *TagsOfStyle(int style);
 };
 
 #ifdef SCI_NAMESPACE
@@ -559,7 +563,7 @@ public:
 LexState::LexState(Document *pdoc_) : LexInterface(pdoc_) {
 	lexCurrent = 0;
 	performingStyle = false;
-	interfaceVersion = lvOriginal;
+	interfaceVersion = lvRelease4;
 	lexLanguage = SCLEX_CONTAINER;
 }
 
@@ -583,7 +587,7 @@ void LexState::SetLexerModule(const LexerModule *lex) {
 			instance->Release();
 			instance = 0;
 		}
-		interfaceVersion = lvOriginal;
+		interfaceVersion = lvRelease4;
 		lexCurrent = lex;
 		if (lexCurrent) {
 			instance = lexCurrent->Create();
@@ -690,81 +694,113 @@ int LexState::PropGetExpanded(const char *key, char *result) const {
 }
 
 int LexState::LineEndTypesSupported() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->LineEndTypesSupported();
+	if (instance) {
+		return instance->LineEndTypesSupported();
 	}
 	return 0;
 }
 
 int LexState::AllocateSubStyles(int styleBase, int numberStyles) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->AllocateSubStyles(styleBase, numberStyles);
+	if (instance) {
+		return instance->AllocateSubStyles(styleBase, numberStyles);
 	}
 	return -1;
 }
 
 int LexState::SubStylesStart(int styleBase) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->SubStylesStart(styleBase);
+	if (instance) {
+		return instance->SubStylesStart(styleBase);
 	}
 	return -1;
 }
 
 int LexState::SubStylesLength(int styleBase) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->SubStylesLength(styleBase);
+	if (instance) {
+		return instance->SubStylesLength(styleBase);
 	}
 	return 0;
 }
 
 int LexState::StyleFromSubStyle(int subStyle) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->StyleFromSubStyle(subStyle);
+	if (instance) {
+		return instance->StyleFromSubStyle(subStyle);
 	}
 	return 0;
 }
 
 int LexState::PrimaryStyleFromStyle(int style) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->PrimaryStyleFromStyle(style);
+	if (instance) {
+		return instance->PrimaryStyleFromStyle(style);
 	}
 	return 0;
 }
 
 void LexState::FreeSubStyles() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		static_cast<ILexerWithSubStyles *>(instance)->FreeSubStyles();
+	if (instance) {
+		instance->FreeSubStyles();
 	}
 }
 
 void LexState::SetIdentifiers(int style, const char *identifiers) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		static_cast<ILexerWithSubStyles *>(instance)->SetIdentifiers(style, identifiers);
+	if (instance) {
+		instance->SetIdentifiers(style, identifiers);
 		pdoc->ModifiedAt(0);
 	}
 }
 
 int LexState::DistanceToSecondaryStyles() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->DistanceToSecondaryStyles();
+	if (instance) {
+		return instance->DistanceToSecondaryStyles();
 	}
 	return 0;
 }
 
 const char *LexState::GetSubStyleBases() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->GetSubStyleBases();
+	if (instance) {
+		return instance->GetSubStyleBases();
 	}
 	return "";
 }
 
+int LexState::MaximumNamedStyle() {
+	if (instance) {
+		return instance->MaximumNamedStyle();
+	} else {
+		return -1;
+	}
+}
+
+const char *LexState::NameOfStyle(int style) {
+	if (instance) {
+		return instance->NameOfStyle(style);
+	} else {
+		return 0;
+	}
+}
+
+const char *LexState::DescriptionOfStyle(int style) {
+	if (instance) {
+		return instance->DescriptionOfStyle(style);
+	} else {
+		return 0;
+	}
+}
+
+const char *LexState::TagsOfStyle(int style) {
+	if (instance) {
+		return instance->TagsOfStyle(style);
+	} else {
+		return 0;
+	}
+}
+
 #endif
 
-void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
+void ScintillaBase::NotifyStyleToNeeded(Sci::Position endStyleNeeded) {
 #ifdef SCI_LEXER
 	if (DocumentLexState()->lexLanguage != SCLEX_CONTAINER) {
-		int lineEndStyled = pdoc->LineFromPosition(pdoc->GetEndStyled());
-		int endStyled = pdoc->LineStart(lineEndStyled);
+		Sci::Position lineEndStyled = pdoc->LineOfPosition(pdoc->GetEndStyled());
+		Sci::Position endStyled = pdoc->PositionLineStart(lineEndStyled);
 		DocumentLexState()->Colourise(endStyled, endStyleNeeded);
 		return;
 	}
@@ -983,8 +1019,8 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_COLOURISE:
 		if (DocumentLexState()->lexLanguage == SCLEX_CONTAINER) {
-			pdoc->ModifiedAt(static_cast<int>(wParam));
-			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : static_cast<int>(lParam));
+			pdoc->ModifiedAt(static_cast<Sci::Position>(wParam));
+			NotifyStyleToNeeded((lParam == -1) ? pdoc->PositionLength() : static_cast<Sci::Position>(lParam));
 		} else {
 			DocumentLexState()->Colourise(static_cast<int>(wParam), static_cast<int>(lParam));
 		}
@@ -1069,6 +1105,26 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_GETSUBSTYLEBASES:
 		return StringResult(lParam, DocumentLexState()->GetSubStyleBases());
+
+	case SCI_GETMAXIMUMNAMEDSTYLE:
+		return DocumentLexState()->MaximumNamedStyle();
+
+	case SCI_NAMEOFSTYLE:
+		return StringResult(lParam, DocumentLexState()->NameOfStyle(wParam));
+
+	case SCI_DESCRIPTIONOFSTYLE:
+		return StringResult(lParam, DocumentLexState()->DescriptionOfStyle(wParam));
+
+	case SCI_TAGSOFSTYLE:
+		return StringResult(lParam, DocumentLexState()->TagsOfStyle(wParam));
+
+#endif
+
+	case SCI_GETLARGEPOSITIONSUPPORT:
+#ifdef SCI_LARGE_FILE_SUPPORT
+		return true;
+#else
+		return false;
 #endif
 
 	default:

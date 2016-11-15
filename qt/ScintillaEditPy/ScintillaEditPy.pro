@@ -120,6 +120,12 @@ CONFIG(release, debug|release) {
     DEFINES += NDEBUG=1
 }
 
+# Uncomment the appropriate line for the various combinations of interface width and internal size
+# The default if you don't uncomment either of thse is to build 32-bit internal and 32-bit external interface code
+
+# 64-bit internal and external interface code
+#DEFINES += SCI_LARGE_FILE_SUPPORT=1
+
 DESTDIR = ../../bin
 
 unix:!mac {

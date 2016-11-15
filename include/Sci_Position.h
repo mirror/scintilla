@@ -9,13 +9,28 @@
 #ifndef SCI_POSITION_H
 #define SCI_POSITION_H
 
-// Basic signed type used throughout interface
-typedef int Sci_Position;
+#ifdef __cplusplus
+	#include <cstddef>
 
-// Unsigned variant used for ILexer::Lex and ILexer::Fold
-typedef unsigned int Sci_PositionU;
+	// Basic signed type used throughout interface
+	typedef std::ptrdiff_t Sci_Position;
 
-// For Sci_CharacterRange  which is defined as long to be compatible with Win32 CHARRANGE
-typedef long Sci_PositionCR;
+	// Unsigned variant used for ILexer::Lex and ILexer::Fold
+	typedef std::size_t Sci_PositionU;
+
+	// For Sci_CharacterRange  which is defined as long to be compatible with Win32 CHARRANGE
+	typedef std::ptrdiff_t Sci_PositionCR;
+#else
+	#include <stddef.h>
+
+	// Basic signed type used throughout interface
+	typedef ptrdiff_t Sci_Position;
+
+	// Unsigned variant used for ILexer::Lex and ILexer::Fold
+	typedef size_t Sci_PositionU;
+
+	// For Sci_CharacterRange  which is defined as long to be compatible with Win32 CHARRANGE
+	typedef ptrdiff_t Sci_PositionCR;
+#endif
 
 #endif

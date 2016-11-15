@@ -33,6 +33,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 # ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -359,7 +360,7 @@ public:
 
 }
 
-class LexerBaan : public ILexer {
+class LexerBaan : public DefaultLexer {
 	WordListAbridged keywords;
 	WordListAbridged keywords2;
 	WordListAbridged keywords3;
@@ -379,7 +380,7 @@ public:
 	}
 
 	int SCI_METHOD Version() const {
-		return lvOriginal;
+		return lvRelease4;
 	}
 
 	void SCI_METHOD Release() {
@@ -398,7 +399,7 @@ public:
 		return osBaan.DescribeProperty(name);
 	}
 
-	int SCI_METHOD PropertySet(const char *key, const char *val);
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
 
 	const char * SCI_METHOD DescribeWordListSets() {
 		return osBaan.DescribeWordListSets();

@@ -214,6 +214,7 @@
 		28B647101B54C0720009DC49 /* LexNull.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28B6470A1B54C0720009DC49 /* LexNull.cxx */; };
 		28B647111B54C0720009DC49 /* LexProps.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28B6470B1B54C0720009DC49 /* LexProps.cxx */; };
 		28BC38EC1B74C6AD008BF9EB /* Sci_Position.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		28BC38F01B7DD3BD008BF9EB /* Position.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BC38EF1B7DD3BD008BF9EB /* Position.h */; };
 		28C40CA81CB7321200B089F2 /* LexJSON.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28C40CA71CB7321200B089F2 /* LexJSON.cxx */; };
 		28D516D81830FFCA0047C93D /* info_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */; };
 		28D516D91830FFCA0047C93D /* mac_cursor_busy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */; };
@@ -435,6 +436,7 @@
 		28B6470A1B54C0720009DC49 /* LexNull.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexNull.cxx; path = ../../lexers/LexNull.cxx; sourceTree = "<group>"; };
 		28B6470B1B54C0720009DC49 /* LexProps.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexProps.cxx; path = ../../lexers/LexProps.cxx; sourceTree = "<group>"; };
 		28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sci_Position.h; path = ../../include/Sci_Position.h; sourceTree = "<group>"; };
+		28BC38EF1B7DD3BD008BF9EB /* Position.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Position.h; path = ../../src/Position.h; sourceTree = "<group>"; };
 		28C40CA71CB7321200B089F2 /* LexJSON.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexJSON.cxx; path = ../../lexers/LexJSON.cxx; sourceTree = "<group>"; };
 		28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info_bar_bg@2x.png"; sourceTree = "<group>"; };
 		28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_busy@2x.png"; sourceTree = "<group>"; };
@@ -681,6 +683,7 @@
 				114B6FDF11FA7645004FB6AB /* OptionSet.h */,
 				114B6FB011FA7623004FB6AB /* Partitioning.h */,
 				114B6FB111FA7623004FB6AB /* PerLine.h */,
+				28BC38EF1B7DD3BD008BF9EB /* Position.h */,
 				114B6FB211FA7623004FB6AB /* PositionCache.h */,
 				114B6FE011FA7645004FB6AB /* PropSetSimple.h */,
 				114B6FB311FA7623004FB6AB /* RESearch.h */,
@@ -850,6 +853,7 @@
 				114B6FD611FA7623004FB6AB /* ViewStyle.h in Headers */,
 				114B6FD711FA7623004FB6AB /* XPM.h in Headers */,
 				114B6FE311FA7645004FB6AB /* Accessor.h in Headers */,
+				28BC38F01B7DD3BD008BF9EB /* Position.h in Headers */,
 				114B6FE411FA7645004FB6AB /* CharacterSet.h in Headers */,
 				114B6FE511FA7645004FB6AB /* LexAccessor.h in Headers */,
 				114B6FE611FA7645004FB6AB /* LexerBase.h in Headers */,

@@ -20,7 +20,7 @@ class ContractionState {
 	RunStyles *expanded;
 	RunStyles *heights;
 	Partitioning *displayLines;
-	int linesInDocument;
+	Sci::Position linesInDocument;
 
 	void EnsureData();
 
@@ -36,27 +36,27 @@ public:
 
 	void Clear();
 
-	int LinesInDoc() const;
-	int LinesDisplayed() const;
-	int DisplayFromDoc(int lineDoc) const;
-	int DisplayLastFromDoc(int lineDoc) const;
-	int DocFromDisplay(int lineDisplay) const;
+	Sci::Position LinesInDoc() const;
+	Sci::Position LinesDisplayed() const;
+	Sci::Position DisplayFromDoc(Sci::Position lineDoc) const;
+	Sci::Position DisplayLastFromDoc(Sci::Position lineDoc) const;
+	Sci::Position DocFromDisplay(Sci::Position lineDisplay) const;
 
-	void InsertLine(int lineDoc);
-	void InsertLines(int lineDoc, int lineCount);
-	void DeleteLine(int lineDoc);
-	void DeleteLines(int lineDoc, int lineCount);
+	void InsertLine(Sci::Position lineDoc);
+	void InsertLines(Sci::Position lineDoc, Sci::Position lineCount);
+	void DeleteLine(Sci::Position lineDoc);
+	void DeleteLines(Sci::Position lineDoc, Sci::Position lineCount);
 
-	bool GetVisible(int lineDoc) const;
-	bool SetVisible(int lineDocStart, int lineDocEnd, bool isVisible);
+	bool GetVisible(Sci::Position lineDoc) const;
+	bool SetVisible(Sci::Position lineDocStart, Sci::Position lineDocEnd, bool isVisible);
 	bool HiddenLines() const;
 
-	bool GetExpanded(int lineDoc) const;
-	bool SetExpanded(int lineDoc, bool isExpanded);
-	int ContractedNext(int lineDocStart) const;
+	bool GetExpanded(Sci::Position lineDoc) const;
+	bool SetExpanded(Sci::Position lineDoc, bool isExpanded);
+	Sci::Position ContractedNext(Sci::Position lineDocStart) const;
 
-	int GetHeight(int lineDoc) const;
-	bool SetHeight(int lineDoc, int height);
+	int GetHeight(Sci::Position lineDoc) const;
+	bool SetHeight(Sci::Position lineDoc, int height);
 
 	void ShowAll();
 	void Check() const;

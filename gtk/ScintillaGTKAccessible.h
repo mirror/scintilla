@@ -20,7 +20,7 @@ private:
 	ScintillaGTK *sci;
 
 	// local state for comparing
-	Position old_pos;
+	Sci::Position old_pos;
 	std::vector<SelectionRange> old_sels;
 
 	void UpdateCursor();
@@ -31,8 +31,8 @@ private:
 		} catch (...) {}
 	}
 
-	Position ByteOffsetFromCharacterOffset(Position startByte, int characterOffset) {
-		Position pos = sci->pdoc->GetRelativePosition(startByte, characterOffset);
+	Sci::Position ByteOffsetFromCharacterOffset(Sci::Position startByte, int characterOffset) {
+		Sci::Position pos = sci->pdoc->GetRelativePosition(startByte, characterOffset);
 		if (pos == INVALID_POSITION) {
 			// clamp invalid positions inside the document
 			if (characterOffset > 0) {
@@ -44,34 +44,34 @@ private:
 		return pos;
 	}
 
-	Position ByteOffsetFromCharacterOffset(int characterOffset) {
+	Sci::Position ByteOffsetFromCharacterOffset(int characterOffset) {
 		return ByteOffsetFromCharacterOffset(0, characterOffset);
 	}
 
-	int CharacterOffsetFromByteOffset(Position byteOffset) {
+	int CharacterOffsetFromByteOffset(Sci::Position byteOffset) {
 		return sci->pdoc->CountCharacters(0, byteOffset);
 	}
 
-	void CharacterRangeFromByteRange(Position startByte, Position endByte, int *startChar, int *endChar) {
+	void CharacterRangeFromByteRange(Sci::Position startByte, Sci::Position endByte, int *startChar, int *endChar) {
 		*startChar = CharacterOffsetFromByteOffset(startByte);
 		*endChar = *startChar + sci->pdoc->CountCharacters(startByte, endByte);
 	}
 
-	void ByteRangeFromCharacterRange(int startChar, int endChar, Position& startByte, Position& endByte) {
+	void ByteRangeFromCharacterRange(int startChar, int endChar, Sci::Position& startByte, Sci::Position& endByte) {
 		startByte = ByteOffsetFromCharacterOffset(startChar);
 		endByte = ByteOffsetFromCharacterOffset(startByte, endChar - startChar);
 	}
 
-	Position PositionBefore(Position pos) {
+	Sci::Position PositionBefore(Sci::Position pos) {
 		return sci->pdoc->MovePositionOutsideChar(pos - 1, -1, true);
 	}
 
-	Position PositionAfter(Position pos) {
+	Sci::Position PositionAfter(Sci::Position pos) {
 		return sci->pdoc->MovePositionOutsideChar(pos + 1, 1, true);
 	}
 
 	// For AtkText
-	gchar *GetTextRangeUTF8(Position startByte, Position endByte);
+	gchar *GetTextRangeUTF8(Sci::Position startByte, Sci::Position endByte);
 	gchar *GetText(int startChar, int endChar);
 	gchar *GetTextAfterOffset(int charOffset, AtkTextBoundary boundaryType, int *startChar, int *endChar);
 	gchar *GetTextBeforeOffset(int charOffset, AtkTextBoundary boundaryType, int *startChar, int *endChar);
@@ -94,7 +94,7 @@ private:
 	gboolean RemoveSelection(int selection_num);
 	gboolean SetSelection(gint selection_num, int startChar, int endChar);
 	// for AtkEditableText
-	bool InsertStringUTF8(Position bytePos, const gchar *utf8, int lengthBytes);
+	bool InsertStringUTF8(Sci::Position bytePos, const gchar *utf8, int lengthBytes);
 	void SetTextContents(const gchar *contents);
 	void InsertText(const gchar *contents, int lengthBytes, int *charPosition);
 	void CopyText(int startChar, int endChar);

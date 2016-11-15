@@ -432,9 +432,49 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 
 const char styleSubable[] = {SCE_C_IDENTIFIER, SCE_C_COMMENTDOCKEYWORD, 0};
 
+struct LexicalClass {
+	int value;
+	const char *name;
+	const char *description;
+	const char *tags;
+};
+
+
+LexicalClass lexicalClasses[] = {
+	// Lexer cpp SCLEX_CPP SCE_C_:
+	0, "SCE_C_DEFAULT", "White space", "white-space",
+	1, "SCE_C_COMMENT", "Comment: /* */.", "comment",
+	2, "SCE_C_COMMENTLINE", "Line Comment: //.", "comment line",
+	3, "SCE_C_COMMENTDOC", "Doc comment: block comments beginning with /** or /*!", "comment documentation",
+	4, "SCE_C_NUMBER", "Number", "literal numeric",
+	5, "SCE_C_WORD", "Keyword", "keyword",
+	6, "SCE_C_STRING", "Double quoted string", "literal quoted string",
+	7, "SCE_C_CHARACTER", "Single quoted string", "literal quoted string character",
+	8, "SCE_C_UUID", "UUIDs (only in IDL)", "literal quoted uuid",
+	9, "SCE_C_PREPROCESSOR", "Preprocessor", "preprocessor",
+	10, "SCE_C_OPERATOR", "Operators", "operator",
+	11, "SCE_C_IDENTIFIER", "Identifiers", "identifier",
+	12, "SCE_C_STRINGEOL", "End of line where string is not closed", "error literal quoted string",
+	13, "SCE_C_VERBATIM", "Verbatim strings for C#", "literal quoted string multi-line raw",
+	14, "SCE_C_REGEX", "Regular expressions for JavaScript", "literal quoted regex",
+	15, "SCE_C_COMMENTLINEDOC", "Doc Comment Line: line comments beginning with /// or //!.", "comment line documentation",
+	16, "SCE_C_WORD2", "Keywords2", "keyword",
+	17, "SCE_C_COMMENTDOCKEYWORD", "Comment keyword", "comment documentation keyword",
+	18, "SCE_C_COMMENTDOCKEYWORDERROR", "Comment keyword error", "error comment documentation keyword",
+	19, "SCE_C_GLOBALCLASS", "Global class", "identifier",
+	20, "SCE_C_STRINGRAW", "Raw strings for C++0x", "literal quoted string multi-line raw",
+	21, "SCE_C_TRIPLEVERBATIM", "Triple-quoted strings for Vala", "literal quoted string multi-line",
+	22, "SCE_C_HASHQUOTEDSTRING", "Hash-quoted strings for Pike", "literal quoted string multi-line",
+	23, "SCE_C_PREPROCESSORCOMMENT", "Preprocessor stream comment", "comment preprocessor",
+	24, "SCE_C_PREPROCESSORCOMMENTDOC", "Preprocessor stream doc comment", "comment documentation preprocessor",
+	25, "SCE_C_USERLITERAL", "User defined literals", "literal user",
+	26, "SCE_C_TASKMARKER", "Task Marker", "comment task-marker",
+	27, "SCE_C_ESCAPESEQUENCE", "Escape sequence", "literal quoted string escape-sequence",
+};
+
 }
 
-class LexerCPP : public ILexerWithSubStyles {
+class LexerCPP : public ILexer {
 	bool caseSensitive;
 	CharacterSet setWord;
 	CharacterSet setNegationOp;
@@ -489,7 +529,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const {
-		return lvSubStyles;
+		return lvRelease4;
 	}
 	const char * SCI_METHOD PropertyNames() {
 		return osCPP.PropertyNames();
@@ -544,6 +584,19 @@ public:
 	}
 	const char * SCI_METHOD GetSubStyleBases() {
 		return styleSubable;
+	}
+
+	int SCI_METHOD MaximumNamedStyle() {
+		return (sizeof(lexicalClasses) / sizeof(lexicalClasses[0])) - 1;
+	}
+	const char * SCI_METHOD NameOfStyle(int style) {
+		return lexicalClasses[style].name;
+	}
+	const char * SCI_METHOD DescriptionOfStyle(int style) {
+		return lexicalClasses[style].description;
+	}
+	const char * SCI_METHOD TagsOfStyle(int style) {
+		return lexicalClasses[style].tags;
 	}
 
 	static ILexer *LexerFactoryCPP() {

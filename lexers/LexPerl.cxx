@@ -27,6 +27,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -398,7 +399,7 @@ struct OptionSetPerl : public OptionSet<OptionsPerl> {
 	}
 };
 
-class LexerPerl : public ILexer {
+class LexerPerl : public DefaultLexer {
 	CharacterSet setWordStart;
 	CharacterSet setWord;
 	CharacterSet setSpecialVar;
@@ -419,7 +420,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const {
-		return lvOriginal;
+		return lvRelease4;
 	}
 	const char *SCI_METHOD PropertyNames() {
 		return osPerl.PropertyNames();

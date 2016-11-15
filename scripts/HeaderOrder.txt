@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <sstream>
 #include <regex>
 #include <sstream>
 
@@ -90,6 +91,7 @@
 #include "OptionSet.h"
 #include "SparseState.h"
 #include "SubStyles.h"
+#include "DefaultLexer.h"
 #include "LexerBase.h"
 #include "LexerSimple.h"
 #include "LexerNoExceptions.h"

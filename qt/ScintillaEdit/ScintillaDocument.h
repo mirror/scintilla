@@ -6,6 +6,7 @@
 #define SCINTILLADOCUMENT_H
 
 #include <QObject>
+#include "Sci_Position.h"
 
 class WatcherHelper;
 
@@ -39,11 +40,11 @@ public:
     virtual ~ScintillaDocument();
     void *pointer();
 
-    int line_from_position(int pos);
-    bool is_cr_lf(int pos);
-    bool delete_chars(int pos, int len);
-    int undo();
-    int redo();
+    Sci_Position line_from_position(Sci_Position pos);
+    bool is_cr_lf(Sci_Position pos);
+    bool delete_chars(Sci_Position pos, Sci_Position len);
+    Sci_Position undo();
+    Sci_Position redo();
     bool can_undo();
     bool can_redo();
     void delete_undo_history();
@@ -55,46 +56,46 @@ public:
     bool is_save_point();
     void set_read_only(bool read_only);
     bool is_read_only();
-    void insert_string(int position, QByteArray &str);
-    QByteArray get_char_range(int position, int length);
-    char style_at(int position);
-    int line_start(int lineno);
-    int line_end(int lineno);
-    int line_end_position(int pos);
-    int length();
-    int lines_total();
-    void start_styling(int position, char flags);
-    bool set_style_for(int length, char style);
+    void insert_string(Sci_Position position, QByteArray &str);
+    QByteArray get_char_range(Sci_Position position, Sci_Position length);
+    char style_at(Sci_Position position);
+    Sci_Position line_start(Sci_Position lineno);
+    Sci_Position line_end(Sci_Position lineno);
+    Sci_Position line_end_position(Sci_Position pos);
+    Sci_Position length();
+    Sci_Position lines_total();
+    void start_styling(Sci_Position position, char flags);
+    bool set_style_for(Sci_Position length, char style);
     int get_end_styled();
-    void ensure_styled_to(int position);
+    void ensure_styled_to(Sci_Position position);
     void set_current_indicator(int indic);
-    void decoration_fill_range(int position, int value, int fillLength);
-    int decorations_value_at(int indic, int position);
-    int decorations_start(int indic, int position);
-    int decorations_end(int indic, int position);
+    void decoration_fill_range(Sci_Position position, int value, Sci_Position fillLength);
+    int decorations_value_at(int indic, Sci_Position position);
+    Sci_Position decorations_start(int indic, Sci_Position position);
+    Sci_Position decorations_end(int indic, Sci_Position position);
     int get_code_page();
     void set_code_page(int code_page);
     int get_eol_mode();
     void set_eol_mode(int eol_mode);
-    int move_position_outside_char(int pos, int move_dir, bool check_line_end);
+    Sci_Position move_position_outside_char(Sci_Position pos, int move_dir, bool check_line_end);
 
-    int get_character(int pos); // Calls GetCharacterAndWidth(pos, NULL)
+    int get_character(Sci_Position pos); // Calls GetCharacterAndWidth(pos, NULL)
 
 private:
     void emit_modify_attempt();
     void emit_save_point(bool atSavePoint);
-    void emit_modified(int position, int modification_type, const QByteArray& text, int length,
-	int linesAdded, int line, int foldLevelNow, int foldLevelPrev);
-    void emit_style_needed(int pos);
+    void emit_modified(Sci_Position position, int modification_type, const QByteArray& text, Sci_Position length,
+	Sci_Position linesAdded, Sci_Position line, int foldLevelNow, int foldLevelPrev);
+    void emit_style_needed(Sci_Position pos);
     void emit_lexer_changed();
     void emit_error_occurred(int status);
 
 signals:
     void modify_attempt();
     void save_point(bool atSavePoint);
-    void modified(int position, int modification_type, const QByteArray& text, int length,
-	int linesAdded, int line, int foldLevelNow, int foldLevelPrev);
-    void style_needed(int pos);
+    void modified(Sci_Position position, int modification_type, const QByteArray& text, Sci_Position length,
+	Sci_Position linesAdded, Sci_Position line, int foldLevelNow, int foldLevelPrev);
+    void style_needed(Sci_Position pos);
     void lexer_changed();
     void error_occurred(int status);
 

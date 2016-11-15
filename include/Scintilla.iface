@@ -2667,6 +2667,21 @@ get int DistanceToSecondaryStyles=4025(,)
 # Result is NUL-terminated.
 get int GetSubStyleBases=4026(, stringresult styles)
 
+# Retrieve the maximum named style for the lexer.
+get int GetMaximumNamedStyle=4029(,)
+
+# Retrieve the name of a style.
+# Result is NUL-terminated.
+fun int NameOfStyle=4030(int style, stringresult names)
+
+# Retrieve a description of a style.
+# Result is NUL-terminated.
+fun int DescriptionOfStyle=4031(int style, stringresult names)
+
+# Retrieve a ' ' separated list of style tags like "literal quoted string".
+# Result is NUL-terminated.
+fun int TagsOfStyle=4032(int style, stringresult names)
+
 # Notifications
 # Type of modification and the action which caused the modification.
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.
@@ -4800,6 +4815,9 @@ evt void AutoCCompleted=2030(string text, int position, int ch, CompletionMethod
 # There are no provisional APIs currently, but some arguments to SCI_SETTECHNOLOGY are provisional.
 
 cat Provisional
+
+# Are documents larger than 2GB supported?
+get bool GetLargePositionSupport=2700(,)
 
 cat Deprecated
 
