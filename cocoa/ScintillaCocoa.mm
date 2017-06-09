@@ -2004,7 +2004,7 @@ void ScintillaCocoa::Resize()
 void ScintillaCocoa::UpdateForScroll() {
   Point ptOrigin = GetVisibleOriginInMain();
   xOffset = static_cast<int>(ptOrigin.x);
-  int newTop = Platform::Minimum(static_cast<int>(ptOrigin.y / vs.lineHeight), MaxScrollPos());
+  Sci::Line newTop = std::min(static_cast<Sci::Line>(ptOrigin.y / vs.lineHeight), MaxScrollPos());
   SetTopLine(newTop);
 }
 
@@ -2253,7 +2253,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
   {
     const UniChar originalKey = [input characterAtIndex: i];
     NSEventModifierFlags modifierFlags = [event modifierFlags];
-      
+
     UniChar key = KeyTranslate(originalKey, modifierFlags);
 
     bool consumed = false; // Consumed as command?
