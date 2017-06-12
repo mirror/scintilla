@@ -97,6 +97,7 @@ BASEOBJS = \
 	CharacterSet.o \
 	CharClassify.o \
 	ContractionState.o \
+	DBCS.o \
 	Decoration.o \
 	Document.o \
 	EditModel.o \

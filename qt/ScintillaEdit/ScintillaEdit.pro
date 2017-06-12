@@ -48,6 +48,7 @@ SOURCES += \
     ../../src/EditModel.cxx \
     ../../src/Document.cxx \
     ../../src/Decoration.cxx \
+    ../../src/DBCS.cxx \
     ../../src/ContractionState.cxx \
     ../../src/CharClassify.cxx \
     ../../src/CellBuffer.cxx \

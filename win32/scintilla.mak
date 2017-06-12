@@ -75,6 +75,7 @@ SHAREDOBJS=\
 	$(DIR_O)\CharacterSet.obj \
 	$(DIR_O)\CharClassify.obj \
 	$(DIR_O)\ContractionState.obj \
+	$(DIR_O)\DBCS.obj \
 	$(DIR_O)\Decoration.obj \
 	$(DIR_O)\Document.obj \
 	$(DIR_O)\EditModel.obj \

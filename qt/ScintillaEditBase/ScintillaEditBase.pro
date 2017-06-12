@@ -10,7 +10,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ScintillaEditBase
 TEMPLATE = lib
 CONFIG += lib_bundle
-
 unix {
     # <regex> requires C++11 support
     greaterThan(QT_MAJOR_VERSION, 4){
@@ -46,6 +45,7 @@ SOURCES += \
     ../../src/EditModel.cxx \
     ../../src/Document.cxx \
     ../../src/Decoration.cxx \
+    ../../src/DBCS.cxx \
     ../../src/ContractionState.cxx \
     ../../src/CharClassify.cxx \
     ../../src/CellBuffer.cxx \
