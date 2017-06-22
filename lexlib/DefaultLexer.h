@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file DefaultLexer.h
- ** A lexer base class with default empty implementations of methods. 
+ ** A lexer base class with default empty implementations of methods.
  ** For lexers that do not support all features so do not need real implementations.
  ** Does have real implementation for style metadata.
  **/
@@ -15,7 +15,7 @@ namespace Scintilla {
 #endif
 
 // A simple lexer with no state
-class DefaultLexer : public ILexerWithSubStyles {
+class DefaultLexer : public ILexerWithMetaData {
 public:
 	DefaultLexer();
 	virtual ~DefaultLexer();
@@ -40,6 +40,10 @@ public:
 	void SCI_METHOD SetIdentifiers(int style, const char *identifiers) override;
 	int SCI_METHOD DistanceToSecondaryStyles() override;
 	const char * SCI_METHOD GetSubStyleBases() override;
+	int SCI_METHOD NamedStyles() override;
+	const char * SCI_METHOD NameOfStyle(int style) override;
+	const char * SCI_METHOD TagsOfStyle(int style) override;
+	const char * SCI_METHOD DescriptionOfStyle(int style) override;
 };
 
 #ifdef SCI_NAMESPACE

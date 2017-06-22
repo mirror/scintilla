@@ -37,7 +37,7 @@ void SCI_METHOD DefaultLexer::Release() {
 }
 
 int SCI_METHOD DefaultLexer::Version() const {
-	return lvOriginal;
+	return lvMetaData;
 }
 
 const char * SCI_METHOD DefaultLexer::PropertyNames() {
@@ -107,4 +107,20 @@ int SCI_METHOD DefaultLexer::DistanceToSecondaryStyles() {
 
 const char * SCI_METHOD DefaultLexer::GetSubStyleBases() {
 	return styleSubable;
+}
+
+int SCI_METHOD DefaultLexer::NamedStyles() {
+	return 0;
+}
+
+const char * SCI_METHOD DefaultLexer::NameOfStyle(int) {
+	return "";
+}
+
+const char * SCI_METHOD DefaultLexer::TagsOfStyle(int) {
+	return "";
+}
+
+const char * SCI_METHOD DefaultLexer::DescriptionOfStyle(int) {
+	return "";
 }

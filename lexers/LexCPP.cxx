@@ -413,7 +413,7 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 
 		DefineProperty("fold.cpp.explicit.anywhere", &OptionsCPP::foldExplicitAnywhere,
 			"Set this property to 1 to enable explicit fold points anywhere, not just in line comments.");
-		
+
 		DefineProperty("fold.cpp.preprocessor.at.else", &OptionsCPP::foldPreprocessorAtElse,
 			"This option enables folding on a preprocessor #else or #endif line of an #if statement.");
 
@@ -434,7 +434,7 @@ const char styleSubable[] = {SCE_C_IDENTIFIER, SCE_C_COMMENTDOCKEYWORD, 0};
 
 }
 
-class LexerCPP : public ILexerWithSubStyles {
+class LexerCPP : public ILexerWithMetaData {
 	bool caseSensitive;
 	CharacterSet setWord;
 	CharacterSet setNegationOp;
@@ -489,7 +489,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const override {
-		return lvSubStyles;
+		return lvMetaData;
 	}
 	const char * SCI_METHOD PropertyNames() override {
 		return osCPP.PropertyNames();
@@ -544,6 +544,18 @@ public:
 	}
 	const char * SCI_METHOD GetSubStyleBases() override {
 		return styleSubable;
+	}
+	int SCI_METHOD NamedStyles() {
+		return 0;
+	}
+	const char * SCI_METHOD NameOfStyle(int) {
+		return "";
+	}
+	const char * SCI_METHOD TagsOfStyle(int) {
+		return "";
+	}
+	const char * SCI_METHOD DescriptionOfStyle(int) {
+		return "";
 	}
 
 	static ILexer *LexerFactoryCPP() {
@@ -1354,7 +1366,7 @@ void SCI_METHOD LexerCPP::Fold(Sci_PositionU startPos, Sci_Position length, int 
 				} else if (styler.Match(j, "end")) {
 					levelNext--;
 				}
-				
+
 				if (options.foldPreprocessorAtElse && (styler.Match(j, "else") || styler.Match(j, "elif"))) {
 					levelMinCurrent--;
 				}

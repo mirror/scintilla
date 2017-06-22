@@ -54,7 +54,7 @@ public:
 	virtual int SCI_METHOD GetCharacterAndWidth(Sci_Position position, Sci_Position *pWidth) const = 0;
 };
 
-enum { lvOriginal=0, lvSubStyles=1 };
+enum { lvOriginal=0, lvSubStyles=1, lvMetaData=2 };
 
 class ILexer {
 public:
@@ -83,6 +83,14 @@ public:
 	virtual void SCI_METHOD SetIdentifiers(int style, const char *identifiers) = 0;
 	virtual int SCI_METHOD DistanceToSecondaryStyles() = 0;
 	virtual const char * SCI_METHOD GetSubStyleBases() = 0;
+};
+
+class ILexerWithMetaData : public ILexerWithSubStyles {
+public:
+	virtual int SCI_METHOD NamedStyles() = 0;
+	virtual const char * SCI_METHOD NameOfStyle(int style) = 0;
+	virtual const char * SCI_METHOD TagsOfStyle(int style) = 0;
+	virtual const char * SCI_METHOD DescriptionOfStyle(int style) = 0;
 };
 
 class ILoader {
