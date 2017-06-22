@@ -130,6 +130,7 @@ LOBJS = \
 	Accessor.o \
 	Catalogue.o \
 	ExternalLexer.o \
+	DefaultLexer.o \
 	LexerBase.o \
 	LexerModule.o \
 	LexerSimple.o \
