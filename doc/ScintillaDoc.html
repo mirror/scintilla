@@ -6860,6 +6860,12 @@ In a future release, 64-bit builds will define these as 64-bit types to allow do
 </p>
 
 <p>
+Methods that return strings as <code>const char *</code> are not required to maintain separate allocations indefinitely:
+lexer implementations may own a single buffer that is reused for each call.
+Callers should make an immediate copy of returned strings.
+</p>
+
+<p>
 The return values from PropertySet and WordListSet are used to indicate whether the change requires
 performing lexing or folding over any of the document. It is the position at which to restart lexing and folding or -1
 if the change does not require any extra work on the document.
@@ -6868,7 +6874,8 @@ optimisation could be to remember where a setting first affects the document and
 </p>
 
 <p><code>Version</code> returns an enumerated value specifying which version of the interface is implemented:
-<code>lvOriginal</code> for <code>ILexer</code> and <code>lvSubStyles</code> for <code>ILexerWithSubStyles</code>.</p>
+<code>lvOriginal</code> for <code>ILexer</code>, <code>lvSubStyles</code> for <code>ILexerWithSubStyles</code>,
+and <code>lvMetaData</code> for <code>ILexerWithMetaData</code>.</p>
 
 <p><code>Release</code> is called to destroy the lexer object.</p>
 
@@ -6906,6 +6913,27 @@ To allow lexers to report which line ends they support, and to support substyles
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetIdentifiers<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">,</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>identifiers<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DistanceToSecondaryStyles<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetSubStyleBases<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S10">};</span><br />
+</div>
+
+<h4>ILexerWithMetaData</h4>
+
+<p><code>NamedStyles</code>, <code>NameOfStyle</code>,
+<code>TagsOfStyle</code>, and <code>DescriptionOfStyle</code>
+are used to provide information on the set of styles used by this lexer.
+<code>NameOfStyle</code> is the C-language identifier like "<code>SCE_LUA_COMMENT</code>".
+<code>TagsOfStyle</code> is a set of tags describing the style in a standardized way like "<code>literal string multiline raw</code>".
+A set of common tags and conventions for combining them is <a  class="jump" href="StyleMetadata.html">described here</a>.
+<code>DescriptionOfStyle</code> is an English description of the style like "<code>Function or method name definition</code>".
+</p>
+
+<div class="highlighted">
+<span class="S5">class</span><span class="S0"> </span>ILexerWithMetaData<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>ILexerWithSubStyles<span class="S0"> </span><span class="S10">{</span><br />
+<span class="S5">public</span><span class="S10">:</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>NamedStyles<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>NameOfStyle<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>TagsOfStyle<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DescriptionOfStyle<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S10">};</span><br />
 </div>
 
