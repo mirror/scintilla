@@ -485,7 +485,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (void) doCommandBySelector: (SEL) selector
 {
-  if ([self respondsToSelector: @selector(selector)])
+  if ([self respondsToSelector: selector])
     [self performSelector: selector withObject: nil];
 }
 
@@ -723,10 +723,13 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (void) keyDown: (NSEvent *) theEvent
 {
+  bool handled = false;
   if (mMarkedTextRange.length == 0)
-	mOwner.backend->KeyboardInput(theEvent);
-  NSArray* events = [NSArray arrayWithObject: theEvent];
-  [self interpretKeyEvents: events];
+	handled = mOwner.backend->KeyboardInput(theEvent);
+  if (!handled) {
+    NSArray* events = [NSArray arrayWithObject: theEvent];
+    [self interpretKeyEvents: events];
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
