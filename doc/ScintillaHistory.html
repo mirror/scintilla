@@ -533,6 +533,17 @@
 	Support dropped for GTK+ versions before 2.24.
 	</li>
 	<li>
+	A new lexer interface ILexerWithMetaData with additional style metadata methods was added.
+	</li>
+	<li>
+	The platform layer interface has changed with unused methods removed, a new mechanism for
+	reporting events, removal of methods that take individual keyboard modifiers, and removal of old timer methods.
+	</li>
+	<li>
+	<a href="StyleMetadata.html">Style metadata</a> may be retrieved from lexers that support this through the SCI_GETNAMEDSTYLES, SCI_NAMEOFSTYLE,
+	SCI_TAGSOFSTYLE, and SCI_DESCRIPTIONOFSTYLE APIs.
+	</li>
+	<li>
 	The default encoding in Scintilla is UTF-8.
 	</li>
 	<li>
