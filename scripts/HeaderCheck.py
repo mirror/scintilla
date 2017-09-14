@@ -89,6 +89,5 @@ def CheckFiles(root):
                     i += 1
                     #~ return
         #print("Master header list", " ".join(masterHeaderList))
-            
 
 CheckFiles("..")
