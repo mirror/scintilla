@@ -2594,7 +2594,7 @@ public:
 	~DocumentIndexer() override {
 	}
 
-	char CharAt(Sci::Position index) override {
+	char CharAt(Sci::Position index) const override {
 		if (index < 0 || index >= end)
 			return 0;
 		else
@@ -3012,7 +3012,7 @@ long BuiltinRegex::FindText(Document *doc, Sci::Position minPos, Sci::Position m
 			}
 		}
 
-		DocumentIndexer di(doc, endOfLine);
+		const DocumentIndexer di(doc, endOfLine);
 		int success = search.Execute(di, startOfLine, endOfLine);
 		if (success) {
 			pos = search.bopat[0];
@@ -3044,7 +3044,7 @@ long BuiltinRegex::FindText(Document *doc, Sci::Position minPos, Sci::Position m
 
 const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, Sci::Position *length) {
 	substituted.clear();
-	DocumentIndexer di(doc, static_cast<Sci::Position>(doc->Length()));
+	const DocumentIndexer di(doc, static_cast<Sci::Position>(doc->Length()));
 	search.GrabMatches(di);
 	for (int j = 0; j < *length; j++) {
 		if (text[j] == '\\') {
