@@ -565,6 +565,10 @@
 	The Scintilla namespace is always active for internal symbols and for the lexer and document interfaces.
 	</li>
 	<li>
+	Fix HTML lexer handling of Django so that nesting a  &#123;&#123; &#125;&#125; or &#123;% %&#125;
+	Django tag inside of a &#123;# #&#125; Django comment does not break highlighting of rest of file
+	</li>
+	<li>
 	The Baan lexer checks that matches to 3rd set of keywords are function calls and leaves as identifiers if not.
 	Baan lexer and folder support #context_on / #context_off preprocessor feature.
 	</li>
