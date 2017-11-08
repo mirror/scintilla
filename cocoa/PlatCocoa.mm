@@ -1908,8 +1908,7 @@ void Window::Destroy()
     id idWin = static_cast<id>(wid);
     if ([idWin isKindOfClass: [NSWindow class]])
     {
-      NSWindow* win = static_cast<NSWindow*>(idWin);
-      [win release];
+      [idWin close];
     }
   }
   wid = 0;
