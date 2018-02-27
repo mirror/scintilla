@@ -14,7 +14,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <limits.h>
-#include <sys/time.h>
 #include <wchar.h>
 
 // C++ wrappers of C standard library
@@ -33,6 +32,8 @@
 // C++ standard library
 #include <stdexcept>
 #include <new>
+#include <utility>
+#include <tuple>
 #include <string>
 #include <vector>
 #include <deque>
@@ -46,6 +47,9 @@
 #include <regex>
 #include <iostream>
 #include <sstream>
+
+// POSIX
+#include <sys/time.h>
 
 // GTK+ headers
 #include <glib.h>
