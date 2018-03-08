@@ -6,9 +6,10 @@
 # Builds for GTK+ 2 and no longer supports GTK+ 1.
 # Also works with ming32-make on Windows.
 
+.SUFFIXES: .cxx .c .o .h .a .list
+
 srcdir ?= .
 
-.SUFFIXES: .cxx .c .o .h .a .list
 ifdef CLANG
 CXX = clang++
 CXXWARNFLAGS = -Wall -pedantic -Wno-deprecated-register -Wno-missing-braces
@@ -98,6 +99,9 @@ MARSHALLER=scintilla-marshal.o
 
 all: $(COMPLIB)
 
+clean:
+	$(DEL) *.o $(COMPLIB) *.plist
+
 .cxx.o:
 	$(CXX) $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) -c $<
 $(MARSHALLER): scintilla-marshal.c
@@ -114,9 +118,6 @@ GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
 	$(GLIB_GENMARSHAL) --body $(GLIB_GENMARSHAL_FLAGS) $< > $@
 
 LEXOBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(srcdir)/../lexers/Lex*.cxx)))))
-
-clean:
-	$(DEL) *.o $(COMPLIB) *.plist
 
 analyze:
 	clang --analyze $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) $(srcdir)/*.cxx $(srcdir)/../src/*.cxx $(srcdir)/../lexlib/*.cxx $(srcdir)/../lexers/*.cxx

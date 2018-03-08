@@ -4,6 +4,14 @@
 # This makefile assumes the MinGW32 version of GCC 4.8+ is used and changes will
 # be needed to use other compilers.
 
+.SUFFIXES: .cxx
+
+DIR_BIN=../bin
+
+COMPONENT = $(DIR_BIN)/Scintilla.dll
+LEXCOMPONENT = $(DIR_BIN)/SciLexer.dll
+LIBSCI = $(DIR_BIN)/libscintilla.a
+
 ifdef CLANG
 # Common location for 32-bit clang on Windows
 CXX = "C:\Program Files (x86)\LLVM\bin\clang++"
@@ -16,7 +24,6 @@ STRIPOPTION = -s
 CXXSTD = gnu++0x
 endif
 
-.SUFFIXES: .cxx
 ifeq ($(OS),Windows_NT)
 DEL = $(if $(wildcard $(dir $(SHELL))rm.exe), $(dir $(SHELL))rm.exe -f, del /q)
 else
@@ -24,10 +31,6 @@ DEL = rm -f
 endif
 RANLIB ?= ranlib
 WINDRES ?= windres
-
-COMPONENT = ../bin/Scintilla.dll
-LEXCOMPONENT = ../bin/SciLexer.dll
-LEXLIB = Lexers.a
 
 vpath %.h ../src ../include ../lexlib
 vpath %.cxx ../src ../lexlib ../lexers
@@ -57,6 +60,11 @@ CXXFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS)
 STRIPFLAG=$(STRIPOPTION)
 endif
 
+all:	$(COMPONENT) $(LEXCOMPONENT) $(LIBSCI)
+
+clean:
+	$(DEL) *.exe *.o *.a *.obj *.dll *.res *.map *.plist
+
 ifdef LPEG_LEXER
 CXXFLAGS+=-DLPEG_LEXER -I ../lua/src
 LUAOBJS:=lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o linit.o \
@@ -73,11 +81,6 @@ endif
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-ALL:	$(COMPONENT) $(LEXCOMPONENT) $(LEXLIB) ScintillaWinS.o
-
-clean:
-	$(DEL) *.exe *.o *.obj *.dll *.res *.map *.plist
-
 analyze:
 	$(CXX) --analyze $(D2DFLAGS) $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx
 
@@ -86,7 +89,7 @@ deps:
 
 LEXOBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard ../lexers/Lex*.cxx)))))
 
-
+# Required for base Scintilla
 BASEOBJS = \
 	AutoComplete.o \
 	CallTip.o \
@@ -123,10 +126,8 @@ BASEOBJS = \
 
 SOBJS = ScintillaWin.o ScintillaBase.o $(BASEOBJS)
 
-$(COMPONENT): $(SOBJS) Scintilla.def
-	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) $(SOBJS) $(CXXFLAGS) $(LIBS)
-
-LOBJS = \
+# Required by lexers
+LEXLIBOBJS=\
 	Accessor.o \
 	Catalogue.o \
 	ExternalLexer.o \
@@ -134,17 +135,24 @@ LOBJS = \
 	LexerBase.o \
 	LexerModule.o \
 	LexerSimple.o \
-	ScintillaWinL.o \
-	ScintillaBaseL.o \
 	StyleContext.o \
 	WordList.o \
-	$(BASEOBJS) \
-	$(LEXOBJS) \
-	$(LUAOBJS)
-$(LEXCOMPONENT): $(LOBJS) Scintilla.def
-	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) $(LOBJS) $(CXXFLAGS) $(LIBS)
 
-$(LEXLIB): $(LEXOBJS) $(LUAOBJS)
+# Required by libraries and DLLs that include lexing
+SCILEXOBJS=\
+	$(BASEOBJS) \
+	$(LEXLIBOBJS) \
+	$(LEXOBJS) \
+	$(LUAOBJS) \
+	ScintillaBaseL.o
+
+$(COMPONENT): $(SOBJS) Scintilla.def
+	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) $(SOBJS) $(CXXFLAGS) $(LIBS)
+
+$(LEXCOMPONENT): ScintillaWinL.o $(SCILEXOBJS) Scintilla.def
+	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) ScintillaWinL.o $(SCILEXOBJS) $(CXXFLAGS) $(LIBS)
+
+$(LIBSCI): ScintillaWinS.o $(SCILEXOBJS)
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
