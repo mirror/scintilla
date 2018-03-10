@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <sys/time.h>
+#include <wchar.h>
 
 // C++ wrappers of C standard library
 #include <cstddef>
@@ -163,6 +164,9 @@
 #import "ScintillaView.h"
 #import "ScintillaCocoa.h"
 #import "PlatCocoa.h"
+
+// curses
+#include "ScintillaCurses.h"
 
 // Catch testing framework
 #include "catch.hpp"

@@ -83,3 +83,7 @@ To build Scintilla, run xcodebuild in the scintilla/cocoa/ScintillaFramework dir
 *** Qt version ***
 
 See the qt/README file to build Scintilla with Qt.
+
+*** Curses version ***
+
+See the curses/README.md file to build Scintilla with curses.
