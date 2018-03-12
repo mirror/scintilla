@@ -80,7 +80,7 @@ Font::~Font() {}
  * The curses attributes are not constructed from various fields in *fp* since
  * there is no `underline` parameter. Instead, you need to manually set the
  * `weight` parameter to be the union of your desired attributes.
- * Scintillua (http://foicica.com/scintillua) has an example of this.
+ * Scintilla's lexers/LexLPeg.cxx has an example of this.
  */
 void Font::Create(const FontParameters &fp) {
   Release();

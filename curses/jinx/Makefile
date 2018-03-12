@@ -3,17 +3,15 @@
 CC = gcc
 CXX = g++
 INCLUDEDIRS = -I ../../include -I ../../src -I ../../lexlib -I ../
-CFLAGS = -DCURSES -DSCI_LEXER -D_XOPEN_SOURCE_EXTENDED -W -Wall $(INCLUDEDIRS) \
-         -Wno-unused-parameter
+CFLAGS = -DCURSES -DSCI_LEXER -Wall $(INCLUDEDIRS)
 CXXFLAGS = $(CFLAGS)
+ifdef LPEG_LEXER
+  CFLAGS += -DLPEG_LEXER -I ../src/lua
+endif
 
-scintilla = ../../bin/scintilla_curses.a
-lexers = $(wildcard ../Lex*.o)
+scintilla = ../../bin/scintilla.a
 
 all: jinx
-jinx.o: jinx.c
-	$(CC) $(CFLAGS) -c $<
-jinx: jinx.o $(lexers) $(scintilla)
-	$(CXX) -DCURSES $^ -o $@ -lncursesw
-clean:
-	rm -f jinx *.o
+jinx.o: jinx.c ; $(CC) $(CFLAGS) -c $<
+jinx: jinx.o $(scintilla) ; $(CXX) $^ -o $@ -lncursesw
+clean: ; rm -f jinx *.o

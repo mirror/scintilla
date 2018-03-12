@@ -224,6 +224,7 @@
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		F437405F9F32C7DEFCA38C11 /* LexIndent.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 282E41F3B9E2BFEDD6A05BE7 /* LexIndent.cxx */; };
+		4D0C4365AB6DF998CD48B1FC /* LexLPeg.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5EB3467789767C0ACE40A46A /* LexLPeg.cxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -449,6 +450,7 @@
 		8DC2EF5B0486A6940098B216 /* Scintilla.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Scintilla.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2F7E79907B2D74100F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		282E41F3B9E2BFEDD6A05BE7 /* LexIndent.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexIndent.cxx; path = ../../lexers/LexIndent.cxx; sourceTree = SOURCE_ROOT; };
+		5EB3467789767C0ACE40A46A /* LexLPeg.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexLPeg.cxx; path = ../../lexers/LexLPeg.cxx; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -598,6 +600,7 @@
 				1102C31B169FB49300DC16AB /* LexLaTeX.cxx */,
 				114B6EE011FA7526004FB6AB /* LexLisp.cxx */,
 				114B6EE111FA7526004FB6AB /* LexLout.cxx */,
+				5EB3467789767C0ACE40A46A /* LexLPeg.cxx */,
 				114B6EE211FA7526004FB6AB /* LexLua.cxx */,
 				114B6EE311FA7526004FB6AB /* LexMagik.cxx */,
 				28B647091B54C0720009DC49 /* LexMake.cxx */,
@@ -1096,6 +1099,7 @@
 				1160E0381803651C00BCEBCB /* LexRust.cxx in Sources */,
 				11FF3FE21810EB3900E13F13 /* LexDMAP.cxx in Sources */,
 				F437405F9F32C7DEFCA38C11 /* LexIndent.cxx in Sources */,
+				4D0C4365AB6DF998CD48B1FC /* LexLPeg.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

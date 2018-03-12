@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
   SSM(SCI_STYLESETFORE, STYLE_DEFAULT, 0xFFFFFF);
   SSM(SCI_STYLESETBACK, STYLE_DEFAULT, 0);
   SSM(SCI_STYLECLEARALL, 0, 0);
+#if !LPEG_LEXER
   SSM(SCI_SETLEXER, SCLEX_CPP, 0);
   SSM(SCI_SETKEYWORDS, 0, (sptr_t)"int char");
   SSM(SCI_STYLESETFORE, SCE_C_COMMENT, 0x00FF00);
@@ -32,6 +33,15 @@ int main(int argc, char **argv) {
   SSM(SCI_STYLESETFORE, SCE_C_WORD, 0xFF0000);
   SSM(SCI_STYLESETFORE, SCE_C_STRING, 0xFF00FF);
   SSM(SCI_STYLESETBOLD, SCE_C_OPERATOR, 1);
+#else
+  SSM(SCI_SETLEXER, SCLEX_LPEG, 0);
+  SSM(SCI_SETPROPERTY, (uptr_t)"lexer.lpeg.home", (sptr_t)"../../lexlua");
+  SSM(SCI_SETPROPERTY, (uptr_t)"lexer.lpeg.color.theme", (sptr_t)"curses");
+  SSM(SCI_PRIVATELEXERCALL, SCI_GETDIRECTFUNCTION,
+      SSM(SCI_GETDIRECTFUNCTION, 0, 0));
+  SSM(SCI_PRIVATELEXERCALL, SCI_SETDOCPOINTER, SSM(SCI_GETDIRECTPOINTER, 0, 0));
+  SSM(SCI_PRIVATELEXERCALL, SCI_SETLEXERLANGUAGE, (sptr_t)"ansi_c");
+#endif
   SSM(SCI_INSERTTEXT, 0, (sptr_t)
       "int main(int argc, char **argv) {\n"
       "    // Start up the gnome\n"
