@@ -1229,7 +1229,7 @@ public:
    *   pressed.
    */
   void KeyPress(int key, bool shift, bool ctrl, bool alt) {
-    KeyDown(key, shift, ctrl, alt, NULL);
+    KeyDownWithModifiers(key, ModifierFlags(shift, ctrl, alt), NULL);
   }
   /**
    * Handles a mouse button press.
@@ -1318,7 +1318,8 @@ public:
           draggingHScrollBar = true, dragOffset = x - scrollBarHPos;
       } else {
         // Have Scintilla handle the click.
-        ButtonDown(Point(x, y), time, shift, ctrl, alt);
+        ButtonDownWithModifiers(Point(x, y), time,
+                                ModifierFlags(shift, ctrl, alt));
         return true;
       }
     } else if (button == 4 || button == 5) {
@@ -1345,9 +1346,7 @@ public:
   bool MouseMove(int y, int x, bool shift, bool ctrl, bool alt) {
     GetWINDOW(); // ensure the curses `WINDOW` has been created
     if (!draggingVScrollBar && !draggingHScrollBar) {
-      int modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
-                      (alt ? SCI_ALT : 0);
-      ButtonMoveWithModifiers(Point(x, y), modifiers);
+      ButtonMoveWithModifiers(Point(x, y), 0, ModifierFlags(shift, ctrl, alt));
     } else if (draggingVScrollBar) {
       int maxy = getmaxy(GetWINDOW()) - scrollBarHeight, pos = y - dragOffset;
       if (pos >= 0 && pos <= maxy) ScrollTo(pos * MaxScrollPos() / maxy);
@@ -1373,7 +1372,10 @@ public:
     if (draggingVScrollBar || draggingHScrollBar)
       draggingVScrollBar = false, draggingHScrollBar = false;
     else if (HaveMouseCapture()) {
-      ButtonUp(Point(x, y), time, ctrl);
+      ButtonUpWithModifiers(Point(x, y), time,
+                            ModifierFlags(ctrl, false, false));
+      // TODO: ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
+      // TODO: listbox->delegate->ListNotify(&event);
     }
   }
   /**
