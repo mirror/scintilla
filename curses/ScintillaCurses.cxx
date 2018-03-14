@@ -453,8 +453,6 @@ public:
   XYPOSITION Descent(Font &font_) { return 0; }
   /** Returns 0 since curses characters have no leading. */
   XYPOSITION InternalLeading(Font &font_) { return 0; }
-  /** Returns 0 since curses characters have no leading. */
-  XYPOSITION ExternalLeading(Font &font_) { return 0; }
   /** Returns 1 since curses characters always have a height of 1. */
   XYPOSITION Height(Font &font_) { return 1; }
   /** Returns 1 since curses characters always have a width of 1. */
@@ -866,22 +864,7 @@ ColourDesired Platform::ChromeHighlight() { return ColourDesired(0, 0, 0); }
 const char *Platform::DefaultFont() { return "monospace"; }
 int Platform::DefaultFontSize() { return 10; }
 unsigned int Platform::DoubleClickTime() { return 500; /* ms */ }
-bool Platform::MouseButtonBounce() { return true; }
 void Platform::DebugDisplay(const char *s) { fprintf(stderr, "%s", s); }
-//bool Platform::IsKeyDown(int key) { return false; }
-//long Platform::SendScintilla(WindowID w, unsigned int msg,
-//                             unsigned long wParam, long lParam) { return 0; }
-//long Platform::SendScintillaPointer(WindowID w, unsigned int msg,
-//                                    unsigned long wParam,
-//                                    void *lParam) { return 0; }
-//bool Platform::IsDBCSLeadByte(int codePage, char ch) { return false; }
-//int Platform::DBCSCharLength(int codePage, const char *s) {
-//  int bytes = mblen(s, MB_CUR_MAX);
-//  return (bytes >= 1) ? bytes : 1;
-//}
-//int Platform::DBCSCharMaxLength() { return MB_CUR_MAX; }
-int Platform::Minimum(int a, int b) { return (a < b) ? a : b; }
-int Platform::Maximum(int a, int b) { return (a > b) ? a : b; }
 void Platform::DebugPrintf(const char *format, ...) {}
 //bool Platform::ShowAssertionPopUps(bool assertionPopUps_) { return true; }
 void Platform::Assert(const char *c, const char *file, int line) {
@@ -889,11 +872,6 @@ void Platform::Assert(const char *c, const char *file, int line) {
   sprintf(buffer, "Assertion [%s] failed at %s %d\r\n", c, file, line);
   Platform::DebugDisplay(buffer);
   abort();
-}
-int Platform::Clamp(int val, int minVal, int maxVal) {
-  if (val > maxVal) val = maxVal;
-  if (val < minVal) val = minVal;
-  return val;
 }
 
 /** Implementation of Scintilla for curses. */
@@ -1049,9 +1027,9 @@ public:
     WINDOW *w = GetWINDOW();
     int maxy = getmaxy(w), maxx = getmaxx(w);
     int height = roundf(static_cast<float>(nPage) / nMax * maxy);
-    scrollBarHeight = Platform::Clamp(height, 1, maxy);
+    scrollBarHeight = Sci::clamp(height, 1, maxy);
     int width = roundf(static_cast<float>(maxx) / scrollWidth * maxx);
-    scrollBarWidth = Platform::Clamp(width, 1, maxx);
+    scrollBarWidth = Sci::clamp(width, 1, maxx);
     return true;
   }
   /**
