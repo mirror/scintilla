@@ -1086,7 +1086,11 @@ public:
     clipboard.Copy(selectedText);
   }
   /** A ticking caret is not implemented. */
-  void SetTicking(bool on) {}
+  bool FineTickerRunning(TickReason reason) { return false; }
+  /** A ticking caret is not implemented. */
+  void FineTickerStart(TickReason reason, int millis, int tolerance) {}
+  /** A ticking caret is not implemented. */
+  void FineTickerCancel(TickReason reason) {}
   /**
    * Sets whether or not the mouse is captured.
    * This is used by Scintilla to handle mouse clicks, drags, and releases.
