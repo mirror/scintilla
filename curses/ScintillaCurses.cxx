@@ -679,12 +679,10 @@ class ListBoxImpl : public ListBox {
   char types[IMAGE_MAX + 1][5]; // UTF-8 character plus terminating '\0'
   int selection;
 public:
-  CallBackAction doubleClickAction;
-  void *doubleClickActionData;
+  IListBoxDelegate *delegate;
 
   /** Allocates a new Scintilla ListBox for curses. */
-  ListBoxImpl() : height(5), width(10), selection(0), doubleClickAction(NULL),
-                  doubleClickActionData(NULL) {
+  ListBoxImpl() : height(5), width(10), selection(0), delegate(NULL) {
     list.reserve(10);
     ClearRegisteredImages();
   }
@@ -816,9 +814,9 @@ public:
   void ClearRegisteredImages() {
     for (int i = 0; i <= IMAGE_MAX; i++) types[i][0] = ' ', types[i][1] = '\0';
   }
-  /** Enable double-click to select a list item. */
-  void SetDoubleClickAction(CallBackAction action, void *data) {
-    doubleClickAction = action, doubleClickActionData = data;
+  /** Defines the delegate for ListBox actions. */
+  void SetDelegate(IListBoxDelegate *lbDelegate) {
+    delegate = lbDelegate;
   }
   /** Sets the list items in the listbox to the given items. */
   void SetList(const char *listText, char separator, char typesep) {
@@ -1293,8 +1291,10 @@ public:
           if (offset == 0 &&
               time - autoCompleteLastClickTime < Platform::DoubleClickTime()) {
             ListBoxImpl* listbox = reinterpret_cast<ListBoxImpl *>(ac.lb.get());
-            if (listbox->doubleClickAction != NULL)
-              listbox->doubleClickAction(listbox->doubleClickActionData);
+            if (listbox->delegate) {
+              ListBoxEvent event(ListBoxEvent::EventType::doubleClick);
+              listbox->delegate->ListNotify(&event);
+            }
           } else ac.lb->Select(n + offset);
           autoCompleteLastClickTime = time;
         } else {
