@@ -22,8 +22,9 @@ sci = AutoComplete.o CallTip.o CaseConvert.o CaseFolder.o Catalogue.o \
       ExternalLexer.o Indicator.o KeyMap.o LineMarker.o MarginView.o PerLine.o \
       PositionCache.o RESearch.o RunStyles.o ScintillaBase.o Selection.o \
       Style.o UniConversion.o ViewStyle.o XPM.o \
-      Accessor.o CharacterSet.o LexerBase.o LexerModule.o LexerNoExceptions.o \
-      LexerSimple.o PropSetSimple.o StyleContext.o WordList.o
+      Accessor.o CharacterSet.o DefaultLexer.o LexerBase.o LexerModule.o \
+      LexerNoExceptions.o LexerSimple.o PropSetSimple.o StyleContext.o \
+      WordList.o
 lexers = $(addsuffix .o,$(basename $(sort $(notdir $(wildcard ../lexers/Lex*.cxx)))))
 ifdef LPEG_LEXER
   CXXFLAGS += -DLPEG_LEXER -I ../lua/src
