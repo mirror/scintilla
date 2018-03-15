@@ -10,6 +10,8 @@
 
 #define SSM(m, w, l) scintilla_send_message(sci, m, w, l)
 
+typedef void Scintilla;
+
 void scnotification(Scintilla *view, int msg, void *lParam, void *wParam) {
   //struct SCNotification *scn = (struct SCNotification *)lParam;
   //printw("SCNotification received: %i", scn->nmhdr.code);

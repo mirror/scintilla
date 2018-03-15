@@ -62,6 +62,8 @@
 #define wcwidth(_) 1 // TODO: http://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c
 #endif
 
+using namespace Scintilla;
+
 // Font handling.
 
 /**
@@ -879,7 +881,7 @@ void Platform::Assert(const char *c, const char *file, int line) {
 class ScintillaCurses : public ScintillaBase {
   Surface *sur; // window surface to draw on
   int width, height; // window dimensions
-  void (*callback)(Scintilla *, int, void *, void *); // SCNotification callback
+  void (*callback)(void *, int, void *, void *); // SCNotification callback
   int scrollBarVPos, scrollBarHPos; // positions of the scroll bars
   int scrollBarHeight, scrollBarWidth; // height and width of the scroll bars
   SelectionText clipboard; // current clipboard text
@@ -920,8 +922,8 @@ public:
    * necessary. When the `WINDOW` is created, it will initially be full-screen.
    * @param callback_ Callback function for Scintilla notifications.
    */
-  ScintillaCurses(void (*callback_)(Scintilla *, int, void *, void *)) :
-               width(0), height(0), scrollBarHeight(1), scrollBarWidth(1) {
+  ScintillaCurses(void (*callback_)(void *, int, void *, void *)) :
+                 width(0), height(0), scrollBarHeight(1), scrollBarWidth(1) {
     callback = callback_;
     sur = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 
@@ -1056,7 +1058,7 @@ public:
   /** Send Scintilla notifications to the parent. */
   void NotifyParent(SCNotification scn) {
     if (callback)
-      (*callback)(reinterpret_cast<Scintilla *>(this), 0, (void *)&scn, 0);
+      (*callback)(reinterpret_cast<void *>(this), 0, (void *)&scn, 0);
   }
   /**
    * Handles an unconsumed key.
@@ -1398,24 +1400,22 @@ public:
 
 // Link with C. Documentation in Scintilla.h.
 extern "C" {
-Scintilla *scintilla_new(void (*callback)(Scintilla *, int, void *, void *)) {
-  return reinterpret_cast<Scintilla *>(new ScintillaCurses(callback));
+void *scintilla_new(void (*callback)(void *, int, void *, void *)) {
+  return reinterpret_cast<void *>(new ScintillaCurses(callback));
 }
-WINDOW *scintilla_get_window(Scintilla *sci) {
+WINDOW *scintilla_get_window(void *sci) {
   return reinterpret_cast<ScintillaCurses *>(sci)->GetWINDOW();
 }
-sptr_t scintilla_send_message(Scintilla *sci, unsigned int iMessage,
-                              uptr_t wParam, sptr_t lParam) {
+sptr_t scintilla_send_message(void *sci, unsigned int iMessage, uptr_t wParam,
+                              sptr_t lParam) {
   return reinterpret_cast<ScintillaCurses *>(sci)->WndProc(iMessage, wParam,
-                                                         lParam);
+                                                           lParam);
 }
-void scintilla_send_key(Scintilla *sci, int key, bool shift, bool ctrl,
-                        bool alt) {
+void scintilla_send_key(void *sci, int key, bool shift, bool ctrl, bool alt) {
   reinterpret_cast<ScintillaCurses *>(sci)->KeyPress(key, shift, ctrl, alt);
 }
-bool scintilla_send_mouse(Scintilla *sci, int event, unsigned int time,
-                          int button, int y, int x, bool shift, bool ctrl,
-                          bool alt) {
+bool scintilla_send_mouse(void *sci, int event, unsigned int time, int button,
+                          int y, int x, bool shift, bool ctrl, bool alt) {
   ScintillaCurses *scicurses = reinterpret_cast<ScintillaCurses *>(sci);
   WINDOW *w = scicurses->GetWINDOW();
   int begy = getbegy(w), begx = getbegx(w);
@@ -1432,16 +1432,16 @@ bool scintilla_send_mouse(Scintilla *sci, int event, unsigned int time,
     return (scicurses->MouseRelease(time, y, x, ctrl), true);
   return false;
 }
-int scintilla_get_clipboard(Scintilla *sci, char *buffer) {
+int scintilla_get_clipboard(void *sci, char *buffer) {
   return reinterpret_cast<ScintillaCurses *>(sci)->GetClipboard(buffer);
 }
-void scintilla_noutrefresh(Scintilla *sci) {
+void scintilla_noutrefresh(void *sci) {
   reinterpret_cast<ScintillaCurses *>(sci)->NoutRefresh();
 }
-void scintilla_refresh(Scintilla *sci) {
+void scintilla_refresh(void *sci) {
   reinterpret_cast<ScintillaCurses *>(sci)->Refresh();
 }
-void scintilla_delete(Scintilla *sci) {
+void scintilla_delete(void *sci) {
   delete reinterpret_cast<ScintillaCurses *>(sci);
 }
 }
