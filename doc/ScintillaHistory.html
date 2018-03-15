@@ -557,21 +557,11 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1955/">Bug #1955</a>.
 	</li>
 	<li>
-	The Matlab lexer treats 'end' as a number rather than a keyword when used as a index.
-	This also stops incorrect folding.
-	<a href="http://sourceforge.net/p/scintilla/bugs/1951/">Bug #1951</a>.
-	</li>
-	<li>
-	The Matlab folder implements "fold", "fold.comment", and "fold.compact" properties.
-	<a href="http://sourceforge.net/p/scintilla/bugs/1965/">Bug #1965</a>.
-	</li>
-	<li>
-	The Rust lexer recognizes 'usize' numeric literal suffixes.
-	<a href="http://sourceforge.net/p/scintilla/bugs/1919/">Bug #1919</a>.
-	</li>
-	<li>
 	The ILoader interface is defined in its own header ILoader.h as it is not
 	related to lexing so doesn't belong in ILexer.h.
+	</li>
+	<li>
+	The Baan lexer checks that matches to 3rd set of keywords are function calls and leaves as identifiers if not.
 	</li>
 	<li>
 	The C++ lexer improved preprocessor conformance.<br />
@@ -583,6 +573,19 @@
 	<li>
 	The SQL lexer uses sql.backslash.escapes for double quoted strings.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1968/">Bug #1968</a>.
+	</li>
+	<li>
+	The Matlab lexer treats 'end' as a number rather than a keyword when used as a index.
+	This also stops incorrect folding.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1951/">Bug #1951</a>.
+	</li>
+	<li>
+	The Matlab folder implements "fold", "fold.comment", and "fold.compact" properties.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1965/">Bug #1965</a>.
+	</li>
+	<li>
+	The Rust lexer recognizes 'usize' numeric literal suffixes.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1919/">Bug #1919</a>.
 	</li>
 	<li>
 	Ensure redraw when application changes overtype mode so caret change visible even when not blinking.
