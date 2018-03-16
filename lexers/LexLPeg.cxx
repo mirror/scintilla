@@ -622,7 +622,7 @@ public:
 	 * @param buffer The document interface.
 	 */
 	virtual void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc,
-	                             int initStyle, IDocument *buffer) {
+	                             int, IDocument *buffer) {
 		if ((reinit && !Init()) || !L) return;
 		lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
 		lua_setfield(L, LUA_REGISTRYINDEX, "sci_props");
@@ -651,14 +651,14 @@ public:
 		} else l_error(L, "'lexer.fold' function not found");
 	}
 
-	/** Returning the version of the lexer is not implemented. */
-	virtual int SCI_METHOD Version() const { return 0; }
+	/** This lexer implements the original lexer interface. */
+	virtual int SCI_METHOD Version() const { return lvOriginal; }
 	/** Returning property names is not implemented. */
 	virtual const char * SCI_METHOD PropertyNames() { return ""; }
 	/** Returning property types is not implemented. */
-	virtual int SCI_METHOD PropertyType(const char *name) { return 0; }
+	virtual int SCI_METHOD PropertyType(const char *) { return 0; }
 	/** Returning property descriptions is not implemented. */
-	virtual const char * SCI_METHOD DescribeProperty(const char *name) {
+	virtual const char * SCI_METHOD DescribeProperty(const char *) {
 		return "";
 	}
 
@@ -687,7 +687,7 @@ public:
 	/** Returning keyword list descriptions is not implemented. */
 	virtual const char * SCI_METHOD DescribeWordListSets() { return ""; }
 	/** Setting keyword lists is not applicable. */
-	virtual Sci_Position SCI_METHOD WordListSet(int n, const char *wl) {
+	virtual Sci_Position SCI_METHOD WordListSet(int, const char *) {
 		return -1;
 	}
 
@@ -781,8 +781,7 @@ LexerModule lmLPeg(SCLEX_LPEG, LexerLPeg::LexerFactoryLPeg, "lpeg");
 
 using namespace Scintilla;
 
-static void LPegLex(Sci_PositionU startPos, Sci_Position lengthDoc,
-                    int initStyle, WordList *keywordlists[], Accessor &styler) {
+static void LPegLex(Sci_PositionU, Sci_Position, int, WordList*[], Accessor&) {
 	return;
 }
 
