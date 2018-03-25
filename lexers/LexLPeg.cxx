@@ -93,8 +93,6 @@ class LexerLPeg : public ILexer {
 	 * The set of properties for the lexer.
 	 * The `lexer.name`, `lexer.lpeg.home`, and `lexer.lpeg.color.theme`
 	 * properties must be defined before running the lexer.
-	 * For use with SciTE, all of the style property strings generated for the
-	 * current lexer are placed in here.
 	 */
 	PropSetSimple props;
 	/** The function to send Scintilla messages with. */
@@ -312,8 +310,7 @@ class LexerLPeg : public ILexer {
 
 	/**
 	 * Iterates through the lexer's `_TOKENSTYLES`, setting the style properties
-	 * for all defined styles, or for SciTE, generates the set of style properties
-	 * instead of directly setting style properties.
+	 * for all defined styles.
 	 */
 	bool SetStyles() {
 		// If the lexer defines additional styles, set their properties first (if
@@ -674,11 +671,19 @@ public:
 		if (reinit)
 			Init();
 		else if (L && SS && sci && strncmp(key, "style.", 6) == 0) {
+			lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
+			lua_setfield(L, LUA_REGISTRYINDEX, "sci_props");
 			l_getlexerfield(L, "_TOKENSTYLES");
 			lua_pushstring(L, key + 6), lua_rawget(L, -2);
 			lua_pushstring(L, key), lL_getexpanded(L, -1), lua_replace(L, -2);
-			if (lua_isnumber(L, -2))
-				SetStyle(lua_tointeger(L, -2), lua_tostring(L, -1));
+			if (lua_isnumber(L, -2)) {
+				int style_num = lua_tointeger(L, -2);
+				SetStyle(style_num, lua_tostring(L, -1));
+				if (style_num == STYLE_DEFAULT)
+					// Assume a theme change, with the default style being set first.
+					// Subsequent style settings will be based on the default.
+					SS(sci, SCI_STYLECLEARALL, 0, 0);
+			}
 			lua_pop(L, 3); // style, style number, _TOKENSTYLES
 		}
 		return -1; // no need to re-lex
