@@ -1,0 +1,162 @@
+Overview
+========
+
+The LongTerm3 branch gets nearly all of its updates from default via
+backporting. The process is simple:
+
+  hg update LongTerm3
+  hg graft -e [changeset]
+
+This grafts (or cherry-picks) [changeset] from default into LongTerm3. The '-e'
+option allows for editing the commit message. Backported commit messages usually
+have the form:
+
+  Backport: [original commit message]
+
+  Backport of [revision]:[changeset].
+
+Any backport-specific additions, modifications, or deletions from the original
+changeset should be mentioned in the new message.
+
+Note: the '-e' option also gives you a chance to compile and/or test any adverse
+effects produced by the graft prior to commit. Any changes made to files before
+committing will reflect in the final graft.
+
+In order to back out of a graft:
+
+  hg rollback
+  hg revert --all [--no-backup]
+
+This can only be done ONCE, and affects the most recent graft, so make sure you
+test any questionable grafts first before attempting another one.
+
+Backport Status
+===============
+
+This section mentions all upstream changesets that have either NOT been
+backported, beginning at 6289:4c1084a571ff (Starting 3.x long term maintenance
+branch), or have information worth noting.
+
+6290:2378244bf3c7 Converted to Automatic Reference Counting.
+6291:31466630bccc Using instancetype for constructors.
+6292:7f58802368f4 Using modern Objective C literals and indexing.
+6294:e1301b1d2321 Use property dot syntax.
+6295:57988f82bf71 Indented consistently by using astyle.
+  Cocoa platform only.
+  None of these are backported since I am unsure if they are supported in C++11.
+  Despite finding references to ARC and some Modern Objective-C dating back to
+  2013ish, I also see that Clang 4.0 introduced support for some of this.
+  However, Clang 4.0 was released in early 2017.
+
+6304:b6cf154fe8d0 SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6309:2d4cb83e9297 Back down from gnu++17 to gnu++14 so can build with g++ on current Ubuntu.
+  Not backported since only C++11 is supported.
+
+6317:0f15d772bceb SciTE change log.
+6319:a3b66b2525e7 SciTE change log.
+  Not backported, as these apply only to SciTE.
+
+6328:3c87cf6d2599 Update IDocument for version 4. Drop IDocumentWithLineEnd interface to just have IDocument but with all the methods from IDocumentWithLineEnd. This removes version checking (for now). Use dvRelease4 ID. Drop mask argument to StartStyling.
+  Not backported since IDocument and ILexer interfaces should not change once
+  published according to Neil. Since the only substantial change is changing the
+  StartStyling() API, it does not seem worth creating a new IDocument4
+  interface with an option mask argument. It would likely cause compiler issues
+  too.
+
+6329:6468941ee017 Updated documentation to match changes to IDocument and ILexer.
+  Not backported since IDocument has not been changed.
+  It may be worth committed a modification of the first diff though, if 3.8.0
+  ends up using 64-bit types for Sci_Position and Sci_PositionU.
+
+6330:59f341b22087 Deprecate single phase drawing.
+6333:320418de6275 Clean whitespace.
+  Not backported since the curses platform relies on single-phase drawing for
+  now.
+
+6345:faecbd0078e5 Merge Ilexer and ILexerWithSubStyles into ILexer4 to avoid need for version checking in 4.0. Use lvRelease4 ID.
+  Partially backported with 6346:72bd27f81477 minus ILexer4, since the ILexer4
+  interface being added cannot co-exist with the existing ILexer interface.
+  (LexerModule.h uses a single typedef.)
+
+6357:96232b746342 SciTE change log.
+6361:69fddf8f8a15 SciTE changelog.
+  Not backported, as these apply only to SciTE.
+
+6372:cae69b34b92e Preparing for the 4.0.0 release.
+6374:ec8e68de4ddb Delaying a day due to change with Lua in SciTE.
+6375:4aaf170db91a Added tag rel-4-0-0 for changeset ec8e68de4ddb
+  Not backported, since this is LongTerm3.
+
+6394:dae03efac67d Update Xcode project files automatically for Xcode 9.
+  Not backported, since Xcode 9 was released in late 2017.
+
+6403:bd5c44cb0ab8 Updates for 4.0.1 release.
+6404:e04bd73927ea Added tag rel-4-0-1 for changeset bd5c44cb0ab8
+  Not backported, since this is LongTerm3.
+
+6407:f60756d22ff3 Fix bad formatting.
+  Not backported, as the bad formatting was not merged into the previous
+  backport.
+
+6409:c6a13f6eac24 Disable the animated find indicator on macOS 10.13 where it fails.
+6410:29e81816b889 Change log.
+  Not backported, since macOS 10.13 was released late 2017 and
+  NSAppKitVersionNumber10_12_2 is probably not defined on earlier macOSs. I
+  cannot find a good way to #ifdef around it.
+
+6411:96becb885ce4 Updates for 4.0.2.
+6412:ad210d76378f Added tag rel-4-0-2 for changeset 96becb885ce4
+6417:f78045efae20 Add section for 4.0.3 and move posr-4.0.2 items into it.
+  Not backported, since this is LongTerm3.
+
+6425:73343682cbda Start of bidirectional code - implement SCI_SETBIDIRECTIONAL.
+6426:0f7f5a382dbb Add ENABLE_BIDIRECTIONAL option to make files.
+  Not backported, since it is unknown whether or not this feature will have any
+  C++14 or C++17 features in it.
+
+6432:b25c127aa6c5 Ensure build allows C++17. ARC setting is matching same setting at different scope so no effect.
+6433:231ac99e1fdc Allow C++17 in all build and project files.
+6435:5dd1b26df75f Replace Sci::clamp with C++ standard std::clamp function. std::clamp is from C++17.
+  Not backported, since only C++11 is supported.
+
+6438:f635874b303b SciTE changelog.
+6439:0e036d7fa960 SciTE changelog.
+  Not backported, as these apply only to SciTE.
+
+6440:a1731ae83d2a Disable animated find indicator on macOS 10.12 as it causes drawing failures.
+  Not backported, since macOS 10.13 was released late 2017 and
+  NSAppKitVersionNumber10_12_2 is probably not defined on earlier macOSs. I
+  cannot find a good way to #ifdef around it.
+
+6446:f7abec3bbc7a SciTE change log.
+6447:44ff2195a202 SciTE change log.
+  Not backported, as these apply only to SciTE.
+
+6450:7295a806b4c4 Updating for 4.0.3.
+  Not backported, since this is LongTerm3.
+
+6452:1bf8b7c50995 Update Cocoa test app to Xcode 9.2 settings.
+  Not backported, since Xcode 9 was released in late 2017.
+
+6453:71a51a9a6048 Added tag rel-4-0-3 for changeset 1bf8b7c50995
+  Not backported, since this is LongTerm3.
+
+6454:c25d3cb37f7d SciTE change log.
+6455:b9e278677527 SciTE changelog.
+6459:0aef625a6ab0 SciTE changelog.
+  Not backported, as these apply only to SciTE.
+
+6460:b4500f60b593 Added string_view to order.
+  Not backported, since only C++11 is supported.
+
+6464:fe5f45df61ce SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6465:cdfd8b285278 Update to c++17 so make_unique is available.
+6476:59bafd0d2f77 Updated requied compiler versions.
+  Not backported, since only C++11 is supported.
+
+6632:8399b7723701 Change standard flag on MacOS as Xcode clang doesn't yet like c++17.
+  Not backported, since only C++11 is supported.
