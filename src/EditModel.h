@@ -40,7 +40,7 @@ public:
 
 	int foldFlags;
 	int foldDisplayTextStyle;
-	ContractionState cs;
+	std::unique_ptr<IContractionState> pcs;
 	// Hotspot support
 	Range hotspot;
 	Sci::Position hoverIndicatorPos;
