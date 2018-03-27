@@ -117,7 +117,7 @@ Document::Document(int options) :
 	perLineData[ldMargin].reset(new LineAnnotation());
 	perLineData[ldAnnotation].reset(new LineAnnotation());
 
-	decorations = DecorationListCreate();
+	decorations = DecorationListCreate(false);
 
 	cb.SetPerLine(this);
 }
