@@ -7258,8 +7258,10 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     held down in a similar manner to <a class="message" href="#SCN_KEY">SCN_KEY</a>.</p>
 
     <p><b id="SCN_UPDATEUI">SCN_UPDATEUI</b><br />
-     Either the text or styling of the document has changed or the selection range or scroll position has changed.
+     Either the text or styling of the document has changed or the selection range or scroll position may have changed.
      Now would be a good time to update any container UI elements that depend on document or view state.
+     As it is sometimes difficult to determine whether a change has occurred, these events may also fire when there
+     has been no actual change.
      The <code>updated</code> field is set to the bit set of things changed since the previous notification.</p>
     <table class="standard" summary="Modify notification type flags">
       <tbody>
@@ -7279,7 +7281,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="center">0x01</td>
 
-          <td>Contents, styling or markers have been changed.</td>
+          <td>Contents, styling or markers may have been changed.</td>
 
         </tr>
 
@@ -7288,7 +7290,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="center">0x02</td>
 
-          <td>Selection has been changed.</td>
+          <td>Selection may have been changed.</td>
 
         </tr>
 
@@ -7297,7 +7299,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="center">0x04</td>
 
-          <td>Scrolled vertically.</td>
+          <td>May have scrolled vertically.</td>
 
         </tr>
 
@@ -7306,7 +7308,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="center">0x08</td>
 
-          <td>Scrolled horizontally.</td>
+          <td>May have scrolled horizontally.</td>
 
         </tr>
       </tbody>
