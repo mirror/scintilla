@@ -531,12 +531,18 @@
         Icons</a> Copyright(C) 1998 by Dean S. Jones<br />
       </li>
     </ul>
-    <h3>
-       <a href="https://sourceforge.net/projects/scintilla/files/scintilla/3.?/scintilla380.zip/download">Release 3.?</a>
-    </h3>
-    <ul>
+	<h3>
+		 <a href="https://sourceforge.net/projects/scintilla/files/scintilla/3.?/scintilla?.zip/download">Release 3.?</a>
+	</h3>
+	<ul>
 	<li>
 	Released ?.
+	</li>
+	<li>
+	On Win32, a new file, ScintillaDLL.cxx, provides
+	the DllMain function required for a stand-alone Scintilla DLL. Build and project files should include this
+	file when producing a DLL and omit it when producing a static library or linking Scintilla statically.
+	The STATIC_BUILD preprocessor symbol is no longer used.
 	</li>
 	<li>
 	In some cases, invalid UTF-8 is handled in a way that is a little friendlier.
