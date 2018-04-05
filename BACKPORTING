@@ -160,3 +160,13 @@ branch), or have information worth noting.
 
 6632:8399b7723701 Change standard flag on MacOS as Xcode clang doesn't yet like c++17.
   Not backported, since only C++11 is supported.
+
+6643:ebbb4e5aaf93 Update unit test Visual C++ builds to Visual C++ 2017 with /std:c++latest.
+  Not backported, since only C++11 is supported.
+
+6661:d03cd726962c New Xcode 9.3 so ran the updater which turned on some warnings and it fiddled with the projects and schemes.
+6662:3c001296c0a4 Reverted #6488 as Xcode clang 9.1 now likes --std=c++17.
+6664:0f1db0d9a0a6 Standardize on --std=c++17, avoiding GNU extensions and enabling clang 6.0.
+6666:9561714c303b Updated due to allowing C++17 code now.
+  Not backported, since only C++11 is supported.
+
