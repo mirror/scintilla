@@ -17,7 +17,7 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
   private protected public ref sealed static readonly unsafe virtual volatile
   add as assembly base break case catch checked continue default do else finally
   for foreach get goto if in is new remove return set sizeof stackalloc super
-  switch this throw try typeof unchecked value void while yield
+  switch this throw try typeof unchecked value var void while yield
   null true false
 ]]))
 
