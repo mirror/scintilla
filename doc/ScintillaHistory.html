@@ -543,6 +543,14 @@
 	when text insertion followed by caret up or down.
 	</li>
 	<li>
+	Bugs fixed in regular expression searches in Scintilla where some matches did not occur in an
+	effort to avoid infinite loops when replacing on empty matches like "^" and "$".
+	Applications should always handle empty matches in a way that avoids infinite loops, commonly
+	by incrementing the search position after replacing an empty match.
+	SciTE fixes a bug where replacing "^" always matched on the first line even when it was an
+	"in selection" replace and the selection started after the line start.
+	</li>
+	<li>
 	On Win32, a new file, ScintillaDLL.cxx, provides
 	the DllMain function required for a stand-alone Scintilla DLL. Build and project files should include this
 	file when producing a DLL and omit it when producing a static library or linking Scintilla statically.
