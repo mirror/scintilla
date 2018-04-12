@@ -128,10 +128,38 @@ Document::~Document() {
 	}
 }
 
+// Increase reference count and return its previous value.
+int Document::AddRef() {
+	return refCount++;
+}
+
+// Decrease reference count and return its previous value.
+// Delete the document if reference count reaches zero.
+int SCI_METHOD Document::Release() {
+	const int curRefCount = --refCount;
+	if (curRefCount == 0)
+		delete this;
+	return curRefCount;
+}
+
 void Document::Init() {
 	for (const std::unique_ptr<PerLine> &pl : perLineData) {
 		if (pl)
 			pl->Init();
+	}
+}
+
+void Document::InsertLine(Sci::Line line) {
+	for (const std::unique_ptr<PerLine> &pl : perLineData) {
+		if (pl)
+			pl->InsertLine(line);
+	}
+}
+
+void Document::RemoveLine(Sci::Line line) {
+	for (const std::unique_ptr<PerLine> &pl : perLineData) {
+		if (pl)
+			pl->RemoveLine(line);
 	}
 }
 
@@ -187,34 +215,6 @@ bool Document::SetLineEndTypesAllowed(int lineEndBitSet_) {
 	} else {
 		return false;
 	}
-}
-
-void Document::InsertLine(Sci::Line line) {
-	for (const std::unique_ptr<PerLine> &pl : perLineData) {
-		if (pl)
-			pl->InsertLine(line);
-	}
-}
-
-void Document::RemoveLine(Sci::Line line) {
-	for (const std::unique_ptr<PerLine> &pl : perLineData) {
-		if (pl)
-			pl->RemoveLine(line);
-	}
-}
-
-// Increase reference count and return its previous value.
-int Document::AddRef() {
-	return refCount++;
-}
-
-// Decrease reference count and return its previous value.
-// Delete the document if reference count reaches zero.
-int SCI_METHOD Document::Release() {
-	const int curRefCount = --refCount;
-	if (curRefCount == 0)
-		delete this;
-	return curRefCount;
 }
 
 void Document::SetSavePoint() {
