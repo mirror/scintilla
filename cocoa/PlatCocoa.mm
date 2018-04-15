@@ -156,12 +156,12 @@ SurfaceImpl::SurfaceImpl()
 
 SurfaceImpl::~SurfaceImpl()
 {
-  Release();
+  Clear();
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::Release()
+void SurfaceImpl::Clear()
 {
   textLayout->setContext(nullptr);
   if (bitmapData)
@@ -177,6 +177,12 @@ void SurfaceImpl::Release()
   bitmapHeight = 0;
   x = 0;
   y = 0;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::Release() {
+	Clear();
 }
 
 //--------------------------------------------------------------------------------------------------
