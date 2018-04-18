@@ -369,7 +369,6 @@ CellBuffer::CellBuffer(bool hasStyles_, bool largeDocument_) :
 	readOnly = false;
 	utf8LineEnds = 0;
 	collectingUndo = true;
-	plv = std::unique_ptr<LineVector<Sci::Position>>(new LineVector<Sci::Position>());
 	if (largeDocument)
 		plv = std::unique_ptr<LineVector<Sci::Position>>(new LineVector<Sci::Position>());
 	else
