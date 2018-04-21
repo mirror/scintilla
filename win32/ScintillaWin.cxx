@@ -2799,7 +2799,7 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 		GlobalMemory ansiText;
 		ansiText.Allocate(selectedText.LengthWithTerminator());
 		if (ansiText) {
-			memcpy(static_cast<char *>(ansiText.ptr), selectedText.Data(), selectedText.LengthWithTerminator());
+			memcpy(ansiText.ptr, selectedText.Data(), selectedText.LengthWithTerminator());
 			ansiText.SetClip(CF_TEXT);
 		}
 	}
@@ -3156,7 +3156,7 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	} else {
 		text.Allocate(drag.LengthWithTerminator());
 		if (text) {
-			memcpy(static_cast<char *>(text.ptr), drag.Data(), drag.LengthWithTerminator());
+			memcpy(text.ptr, drag.Data(), drag.LengthWithTerminator());
 		}
 	}
 	pSTM->hGlobal = text ? text.Unlock() : 0;
@@ -3245,9 +3245,9 @@ BOOL ScintillaWin::CreateSystemCaret() {
 	sysCaretHeight = vs.lineHeight;
 	int bitmapSize = (((sysCaretWidth + 15) & ~15) >> 3) *
 		sysCaretHeight;
-	std::vector<char> bits(bitmapSize);
+	std::vector<BYTE> bits(bitmapSize);
 	sysCaretBitmap = ::CreateBitmap(sysCaretWidth, sysCaretHeight, 1,
-		1, reinterpret_cast<BYTE *>(&bits[0]));
+		1, &bits[0]);
 	BOOL retval = ::CreateCaret(
 		MainHWND(), sysCaretBitmap,
 		sysCaretWidth, sysCaretHeight);
