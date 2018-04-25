@@ -335,7 +335,6 @@ $(DIR_O)\CellBuffer.obj: \
 	../src/UniConversion.h
 $(DIR_O)\CharacterCategory.obj: \
 	../lexlib/CharacterCategory.cxx \
-	../lexlib/StringCopy.h \
 	../lexlib/CharacterCategory.h
 $(DIR_O)\CharacterSet.obj: \
 	../lexlib/CharacterSet.cxx \
@@ -398,7 +397,8 @@ $(DIR_O)\Document.obj: \
 	../src/CaseFolder.h \
 	../src/Document.h \
 	../src/RESearch.h \
-	../src/UniConversion.h
+	../src/UniConversion.h \
+	../src/ElapsedPeriod.h
 $(DIR_O)\EditModel.obj: \
 	../src/EditModel.cxx \
 	../include/Platform.h \
@@ -435,6 +435,7 @@ $(DIR_O)\Editor.obj: \
 	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
+	../lexlib/CharacterSet.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -490,7 +491,8 @@ $(DIR_O)\EditView.obj: \
 	../src/PositionCache.h \
 	../src/EditModel.h \
 	../src/MarginView.h \
-	../src/EditView.h
+	../src/EditView.h \
+	../src/ElapsedPeriod.h
 $(DIR_O)\ExternalLexer.obj: \
 	../src/ExternalLexer.cxx \
 	../include/Platform.h \
@@ -956,7 +958,10 @@ $(DIR_O)\ScintillaBaseL.obj: \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h
 $(DIR_O)\ScintillaDLL.obj: \
-	ScintillaDLL.cxx
+	ScintillaDLL.cxx \
+	../include/Scintilla.h \
+	../include/Sci_Position.h \
+	ScintillaWin.h
 $(DIR_O)\ScintillaWin.obj: \
 	ScintillaWin.cxx \
 	../include/Platform.h \
@@ -990,10 +995,12 @@ $(DIR_O)\ScintillaWin.obj: \
 	../src/MarginView.h \
 	../src/EditView.h \
 	../src/Editor.h \
+	../src/ElapsedPeriod.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h \
 	PlatWin.h \
-	HanjaDic.h
+	HanjaDic.h \
+	ScintillaWin.h
 $(DIR_O)\ScintillaWinL.obj: \
 	ScintillaWin.cxx \
 	../include/Platform.h \
@@ -1027,10 +1034,12 @@ $(DIR_O)\ScintillaWinL.obj: \
 	../src/MarginView.h \
 	../src/EditView.h \
 	../src/Editor.h \
+	../src/ElapsedPeriod.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h \
 	PlatWin.h \
-	HanjaDic.h
+	HanjaDic.h \
+	ScintillaWin.h
 $(DIR_O)\Selection.obj: \
 	../src/Selection.cxx \
 	../include/Platform.h \
