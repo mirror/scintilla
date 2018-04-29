@@ -337,8 +337,8 @@ public:
                       int flags) {
     for (int x = rc.left, y = rc.top - 1; x < rc.right; x++) {
       attr_t attrs = mvwinch(win, y, x) & A_ATTRIBUTES;
-      short pair = PAIR_NUMBER(attrs), fore = COLOR_WHITE;
-      if (pair > 0) pair_content(pair, &fore, NULL);
+      short pair = PAIR_NUMBER(attrs), fore, unused;
+      if (pair > 0) pair_content(pair, &fore, &unused);
       mvwchgat(win, y, x, 1, attrs, term_color_pair(fore, fill), NULL);
     }
   }
@@ -420,8 +420,8 @@ public:
                            const char *s, int len, ColourDesired fore) {
     if ((int)rc.top >= getmaxy(win) - 1) return;
     attr_t attrs = mvwinch(win, (int)rc.top, (int)rc.left);
-    short pair = PAIR_NUMBER(attrs), back = COLOR_BLACK;
-    if (pair > 0) pair_content(pair, NULL, &back);
+    short pair = PAIR_NUMBER(attrs), unused, back;
+    if (pair > 0) pair_content(pair, &unused, &back);
     DrawTextNoClip(rc, font_, ybase, s, len, fore, SCI_COLORS[back]);
   }
   /**
