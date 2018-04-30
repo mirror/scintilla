@@ -58,22 +58,9 @@
 #define LOAD_LIBRARY_SEARCH_SYSTEM32 0x00000800
 #endif
 
-static void *PointerFromWindow(HWND hWnd) {
-	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
-}
-
-static void SetWindowPointer(HWND hWnd, void *ptr) {
-	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
-}
-
-extern UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
-
-static CRITICAL_SECTION crPlatformLock;
-static HINSTANCE hinstPlatformRes = 0;
-
-static HCURSOR reverseArrowCursor = NULL;
-
 namespace Scintilla {
+
+UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
 
 static RECT RectFromPRectangle(PRectangle prc) {
 	RECT rc = {static_cast<LONG>(prc.left), static_cast<LONG>(prc.top),
@@ -241,6 +228,19 @@ HFONT FormatAndMetrics::HFont() {
 
 namespace {
 
+void *PointerFromWindow(HWND hWnd) {
+	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
+}
+
+void SetWindowPointer(HWND hWnd, void *ptr) {
+	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
+}
+
+CRITICAL_SECTION crPlatformLock;
+HINSTANCE hinstPlatformRes = 0;
+
+HCURSOR reverseArrowCursor = NULL;
+
 FormatAndMetrics *FamFromFontID(void *fid) {
 	return static_cast<FormatAndMetrics *>(fid);
 }
@@ -281,9 +281,7 @@ D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) {
 }
 #endif
 
-}
-
-static void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
+void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	lf = LOGFONTW();
 	// The negative is to allow for leading
 	lf.lfHeight = -(abs(lround(size)));
@@ -299,7 +297,7 @@ static void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, flo
  * If one font is the same as another, its hash will be the same, but if the hash is the
  * same then they may still be different.
  */
-static int HashFont(const FontParameters &fp) noexcept {
+int HashFont(const FontParameters &fp) noexcept {
 	return
 		static_cast<int>(fp.size) ^
 		(fp.characterSet << 10) ^
@@ -308,6 +306,8 @@ static int HashFont(const FontParameters &fp) noexcept {
 		(fp.italic ? 0x20000000 : 0) ^
 		(fp.technology << 15) ^
 		fp.faceName[0];
+}
+
 }
 
 class FontCached : Font {
@@ -1285,7 +1285,7 @@ void SurfaceD2D::SetFont(Font &font_) {
 	yInternalLeading = pfm->yInternalLeading;
 	codePageText = codePage;
 	if (pfm->characterSet) {
-		codePageText = CodePageFromCharSet(pfm->characterSet, codePage);
+		codePageText = Scintilla::CodePageFromCharSet(pfm->characterSet, codePage);
 	}
 	if (pRenderTarget) {
 		D2D1_TEXT_ANTIALIAS_MODE aaMode;
@@ -1807,6 +1807,8 @@ void Window::SetPosition(PRectangle rc) {
 		static_cast<int>(rc.Width()), static_cast<int>(rc.Height()), SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
+namespace {
+
 static RECT RectFromMonitor(HMONITOR hMonitor) {
 	MONITORINFO mi = {};
 	mi.cbSize = sizeof(mi);
@@ -1821,6 +1823,8 @@ static RECT RectFromMonitor(HMONITOR hMonitor) {
 		rc.bottom = 0;
 	}
 	return rc;
+}
+
 }
 
 void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
@@ -1877,16 +1881,14 @@ void Window::InvalidateRectangle(PRectangle rc) {
 	::InvalidateRect(static_cast<HWND>(wid), &rcw, FALSE);
 }
 
-static LRESULT Window_SendMessage(const Window *w, UINT msg, WPARAM wParam=0, LPARAM lParam=0) {
-	return ::SendMessage(static_cast<HWND>(w->GetID()), msg, wParam, lParam);
-}
-
 void Window::SetFont(Font &font) {
-	Window_SendMessage(this, WM_SETFONT,
+	::SendMessage(static_cast<HWND>(wid), WM_SETFONT,
 		reinterpret_cast<WPARAM>(font.GetID()), 0);
 }
 
-static void FlipBitmap(HBITMAP bitmap, int width, int height) {
+namespace {
+
+void FlipBitmap(HBITMAP bitmap, int width, int height) {
 	HDC hdc = ::CreateCompatibleDC(NULL);
 	if (hdc != NULL) {
 		HGDIOBJ prevBmp = ::SelectObject(hdc, bitmap);
@@ -1896,7 +1898,7 @@ static void FlipBitmap(HBITMAP bitmap, int width, int height) {
 	}
 }
 
-static HCURSOR GetReverseArrowCursor() {
+HCURSOR GetReverseArrowCursor() {
 	if (reverseArrowCursor != NULL)
 		return reverseArrowCursor;
 
@@ -1925,6 +1927,8 @@ static HCURSOR GetReverseArrowCursor() {
 	}
 	::LeaveCriticalSection(&crPlatformLock);
 	return cursor;
+}
+
 }
 
 void Window::SetCursor(Cursor curs) {
@@ -2854,7 +2858,9 @@ LRESULT PASCAL ListBoxX::StaticWndProc(
 	}
 }
 
-static bool ListBoxX_Register() {
+namespace {
+
+bool ListBoxX_Register() {
 	WNDCLASSEX wndclassc;
 	wndclassc.cbSize = sizeof(wndclassc);
 	// We need CS_HREDRAW and CS_VREDRAW because of the ellipsis that might be drawn for
@@ -2877,6 +2883,8 @@ static bool ListBoxX_Register() {
 
 bool ListBoxX_Unregister() {
 	return ::UnregisterClass(ListBoxX_ClassName, hinstPlatformRes) != 0;
+}
+
 }
 
 Menu::Menu() : mid(0) {
