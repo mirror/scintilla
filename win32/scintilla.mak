@@ -303,6 +303,7 @@ $(DIR_O)\CallTip.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../src/IntegerRectangle.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
 	../src/CallTip.h
@@ -470,6 +471,7 @@ $(DIR_O)\EditView.obj: \
 	../lexlib/StringCopy.h \
 	../lexlib/CharacterSet.h \
 	../src/Position.h \
+	../src/IntegerRectangle.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -512,6 +514,7 @@ $(DIR_O)\Indicator.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../src/IntegerRectangle.h \
 	../src/Indicator.h \
 	../src/XPM.h
 $(DIR_O)\KeyMap.obj: \
@@ -798,6 +801,7 @@ $(DIR_O)\LineMarker.obj: \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../lexlib/StringCopy.h \
+	../src/IntegerRectangle.h \
 	../src/XPM.h \
 	../src/LineMarker.h
 $(DIR_O)\MarginView.obj: \
@@ -809,6 +813,7 @@ $(DIR_O)\MarginView.obj: \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
+	../src/IntegerRectangle.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -847,7 +852,8 @@ $(DIR_O)\PlatWin.obj: \
 	../src/XPM.h \
 	../src/UniConversion.h \
 	../src/DBCS.h \
-	../src/FontQuality.h
+	../src/FontQuality.h \
+	PlatWin.h
 $(DIR_O)\PositionCache.obj: \
 	../src/PositionCache.cxx \
 	../include/Platform.h \
