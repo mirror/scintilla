@@ -256,7 +256,8 @@ RESearch::RESearch(CharClassify *charClassTable) {
 	charClass = charClassTable;
 	sta = NOP;                  /* status of lastpat */
 	bol = 0;
-	std::fill(bittab, std::end(bittab), static_cast<unsigned char>(0));
+	const unsigned char nul=0;
+	std::fill(bittab, std::end(bittab), nul);
 	std::fill(tagstk, std::end(tagstk), 0);
 	std::fill(nfa, std::end(nfa), '\0');
 	Clear();
@@ -643,7 +644,7 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 				if (tagi > 0 && tagstk[tagi] == n)
 					return badpat("Cyclical reference");
 				if (tagc > n) {
-					*mp++ = static_cast<char>(REF);
+					*mp++ = REF;
 					*mp++ = static_cast<char>(n);
 				} else {
 					return badpat("Undetermined reference");
@@ -662,7 +663,7 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 					if (*sp == BOT)
 						return badpat("Null pattern inside \\(\\)");
 					if (tagi > 0) {
-						*mp++ = static_cast<char>(EOT);
+						*mp++ = EOT;
 						*mp++ = static_cast<char>(tagstk[tagi--]);
 					} else {
 						return badpat("Unmatched \\)");
@@ -698,7 +699,7 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 				if (*sp == BOT)
 					return badpat("Null pattern inside ()");
 				if (tagi > 0) {
-					*mp++ = static_cast<char>(EOT);
+					*mp++ = EOT;
 					*mp++ = static_cast<char>(tagstk[tagi--]);
 				} else {
 					return badpat("Unmatched )");
