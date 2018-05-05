@@ -317,8 +317,7 @@ $(DIR_O)\CaseConvert.obj: \
 	../src/CaseConvert.cxx \
 	../lexlib/StringCopy.h \
 	../src/CaseConvert.h \
-	../src/UniConversion.h \
-	../src/UnicodeFromUTF8.h
+	../src/UniConversion.h
 $(DIR_O)\CaseFolder.obj: \
 	../src/CaseFolder.cxx \
 	../src/CaseFolder.h \
@@ -352,6 +351,8 @@ $(DIR_O)\CharacterSet.obj: \
 $(DIR_O)\CharClassify.obj: \
 	../src/CharClassify.cxx \
 	../src/CharClassify.h
+$(DIR_O)\CheckD2D.obj: \
+	CheckD2D.cxx
 $(DIR_O)\ContractionState.obj: \
 	../src/ContractionState.cxx \
 	../include/Platform.h \
@@ -362,6 +363,9 @@ $(DIR_O)\ContractionState.obj: \
 	../src/RunStyles.h \
 	../src/SparseVector.h \
 	../src/ContractionState.h
+$(DIR_O)\DBCS.obj: \
+	../src/DBCS.cxx \
+	../src/DBCS.h
 $(DIR_O)\Decoration.obj: \
 	../src/Decoration.cxx \
 	../include/Platform.h \
@@ -372,11 +376,24 @@ $(DIR_O)\Decoration.obj: \
 	../src/Partitioning.h \
 	../src/RunStyles.h \
 	../src/Decoration.h
+$(DIR_O)\DefaultLexer.obj: \
+	../lexlib/DefaultLexer.cxx \
+	../include/ILexer.h \
+	../include/Sci_Position.h \
+	../include/Scintilla.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/WordList.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/Accessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h
 $(DIR_O)\Document.obj: \
 	../src/Document.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/CharacterCategory.h \
@@ -391,13 +408,13 @@ $(DIR_O)\Document.obj: \
 	../src/CaseFolder.h \
 	../src/Document.h \
 	../src/RESearch.h \
-	../src/UniConversion.h \
-	../src/UnicodeFromUTF8.h
+	../src/UniConversion.h
 $(DIR_O)\EditModel.obj: \
 	../src/EditModel.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
@@ -409,7 +426,6 @@ $(DIR_O)\EditModel.obj: \
 	../src/CellBuffer.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -424,8 +440,9 @@ $(DIR_O)\EditModel.obj: \
 $(DIR_O)\Editor.obj: \
 	../src/Editor.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
@@ -438,7 +455,6 @@ $(DIR_O)\Editor.obj: \
 	../src/PerLine.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -456,8 +472,9 @@ $(DIR_O)\Editor.obj: \
 $(DIR_O)\EditView.obj: \
 	../src/EditView.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../lexlib/CharacterSet.h \
@@ -471,7 +488,6 @@ $(DIR_O)\EditView.obj: \
 	../src/PerLine.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -495,6 +511,10 @@ $(DIR_O)\ExternalLexer.obj: \
 	../lexlib/LexerModule.h \
 	../src/Catalogue.h \
 	../src/ExternalLexer.h
+$(DIR_O)\HanjaDic.obj: \
+	HanjaDic.cxx \
+	../src/UniConversion.h \
+	HanjaDic.h
 $(DIR_O)\Indicator.obj: \
 	../src/Indicator.cxx \
 	../include/Platform.h \
@@ -791,8 +811,9 @@ $(DIR_O)\LineMarker.obj: \
 $(DIR_O)\MarginView.obj: \
 	../src/MarginView.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
@@ -804,7 +825,6 @@ $(DIR_O)\MarginView.obj: \
 	../src/CellBuffer.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -834,12 +854,14 @@ $(DIR_O)\PlatWin.obj: \
 	../lexlib/StringCopy.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
+	../src/DBCS.h \
 	../src/FontQuality.h
 $(DIR_O)\PositionCache.obj: \
 	../src/PositionCache.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../src/Position.h \
 	../src/UniqueString.h \
@@ -850,7 +872,6 @@ $(DIR_O)\PositionCache.obj: \
 	../src/CellBuffer.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -881,8 +902,9 @@ $(DIR_O)\RunStyles.obj: \
 $(DIR_O)\ScintillaBase.obj: \
 	../src/ScintillaBase.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/PropSetSimple.h \
 	../src/Position.h \
@@ -895,7 +917,6 @@ $(DIR_O)\ScintillaBase.obj: \
 	../src/CallTip.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -914,8 +935,9 @@ $(DIR_O)\ScintillaBase.obj: \
 $(DIR_O)\ScintillaBaseL.obj: \
 	../src/ScintillaBase.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/PropSetSimple.h \
 	../src/Position.h \
@@ -928,7 +950,6 @@ $(DIR_O)\ScintillaBaseL.obj: \
 	../src/CallTip.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -947,8 +968,9 @@ $(DIR_O)\ScintillaBaseL.obj: \
 $(DIR_O)\ScintillaWin.obj: \
 	ScintillaWin.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
@@ -961,7 +983,6 @@ $(DIR_O)\ScintillaWin.obj: \
 	../src/CallTip.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -984,8 +1005,9 @@ $(DIR_O)\ScintillaWin.obj: \
 $(DIR_O)\ScintillaWinL.obj: \
 	ScintillaWin.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
@@ -998,7 +1020,6 @@ $(DIR_O)\ScintillaWinL.obj: \
 	../src/CallTip.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -1021,8 +1042,9 @@ $(DIR_O)\ScintillaWinL.obj: \
 $(DIR_O)\ScintillaWinS.obj: \
 	ScintillaWin.cxx \
 	../include/Platform.h \
-	../include/ILexer.h \
+	../include/ILoader.h \
 	../include/Sci_Position.h \
+	../include/ILexer.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
 	../src/Position.h \
@@ -1035,7 +1057,6 @@ $(DIR_O)\ScintillaWinS.obj: \
 	../src/CallTip.h \
 	../src/KeyMap.h \
 	../src/Indicator.h \
-	../src/XPM.h \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h \
@@ -1099,7 +1120,3 @@ $(DIR_O)\XPM.obj: \
 	../src/XPM.cxx \
 	../include/Platform.h \
 	../src/XPM.h
-$(DIR_O)\HanjaDic.obj: \
-	HanjaDic.cxx \
-	../src/UniConversion.h \
-	HanjaDic.h
