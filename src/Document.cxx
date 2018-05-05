@@ -120,8 +120,6 @@ Document::Document(int options) :
 
 	matchesValid = false;
 
-	UTF8BytesOfLeadInitialise();
-
 	perLineData[ldMarkers].reset(new LineMarkers());
 	perLineData[ldLevels].reset(new LineLevels());
 	perLineData[ldState].reset(new LineState());
