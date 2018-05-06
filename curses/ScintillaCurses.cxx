@@ -1024,7 +1024,7 @@ public:
    * pages. The width is based on the width of the view and the view's scroll
    * width property.
    */
-  bool ModifyScrollBars(int nMax, int nPage) {
+  bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
     if (!wMain.GetID()) return false;
     WINDOW *w = GetWINDOW();
     int maxy = getmaxy(w), maxx = getmaxx(w);

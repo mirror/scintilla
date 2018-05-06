@@ -69,7 +69,7 @@ EditModel::EditModel() {
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	pdoc = new Document(SC_DOCUMENTOPTION_DEFAULT);
 	pdoc->AddRef();
-	pcs = ContractionStateCreate();
+	pcs = ContractionStateCreate(pdoc->IsLarge());
 }
 
 EditModel::~EditModel() {

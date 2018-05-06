@@ -407,8 +407,11 @@ void ContractionState<LINE>::Check() const {
 
 namespace Scintilla {
 
-std::unique_ptr<IContractionState> ContractionStateCreate() {
-	return std::unique_ptr<ContractionState<Sci::Line>>(new ContractionState<Sci::Line>());
+std::unique_ptr<IContractionState> ContractionStateCreate(bool largeDocument) {
+	if (largeDocument)
+		return std::unique_ptr<ContractionState<Sci::Line>>(new ContractionState<Sci::Line>());
+	else
+		return std::unique_ptr<ContractionState<int>>(new ContractionState<int>());
 }
 
 }

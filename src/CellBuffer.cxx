@@ -364,12 +364,16 @@ void UndoHistory::CompletedRedoStep() {
 	currentAction++;
 }
 
-CellBuffer::CellBuffer(bool hasStyles_) :
-	hasStyles(hasStyles_) {
+CellBuffer::CellBuffer(bool hasStyles_, bool largeDocument_) :
+	hasStyles(hasStyles_), largeDocument(largeDocument_) {
 	readOnly = false;
 	utf8LineEnds = 0;
 	collectingUndo = true;
 	plv = std::unique_ptr<LineVector<Sci::Position>>(new LineVector<Sci::Position>());
+	if (largeDocument)
+		plv = std::unique_ptr<LineVector<Sci::Position>>(new LineVector<Sci::Position>());
+	else
+		plv = std::unique_ptr<LineVector<int>>(new LineVector<int>());
 }
 
 CellBuffer::~CellBuffer() {
@@ -554,6 +558,14 @@ bool CellBuffer::IsReadOnly() const {
 
 void CellBuffer::SetReadOnly(bool set) {
 	readOnly = set;
+}
+
+bool CellBuffer::IsLarge() const {
+	return largeDocument;
+}
+
+bool CellBuffer::HasStyles() const {
+	return hasStyles;
 }
 
 void CellBuffer::SetSavePoint() {

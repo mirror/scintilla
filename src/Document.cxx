@@ -86,7 +86,7 @@ int LexInterface::LineEndTypesSupported() {
 }
 
 Document::Document(int options) :
-	cb((options & SC_DOCUMENTOPTION_STYLES_NONE) == 0) {
+	cb((options & SC_DOCUMENTOPTION_STYLES_NONE) == 0, (options & SC_DOCUMENTOPTION_TEXT_LARGE) != 0) {
 	refCount = 0;
 #ifdef _WIN32
 	eolMode = SC_EOL_CRLF;
@@ -117,7 +117,7 @@ Document::Document(int options) :
 	perLineData[ldMargin].reset(new LineAnnotation());
 	perLineData[ldAnnotation].reset(new LineAnnotation());
 
-	decorations = DecorationListCreate(false);
+	decorations = DecorationListCreate(IsLarge());
 
 	cb.SetPerLine(this);
 }
@@ -556,7 +556,7 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, Sc
 }
 
 Sci::Position Document::ClampPositionIntoDocument(Sci::Position pos) const {
-	return Sci::clamp(pos, 0, static_cast<Sci::Position>(Length()));
+	return Sci::clamp(pos, static_cast<Sci::Position>(0), static_cast<Sci::Position>(Length()));
 }
 
 bool Document::IsCrLf(Sci::Position pos) const {
@@ -1522,6 +1522,11 @@ void Document::ConvertLineEnds(int eolModeSet) {
 		}
 	}
 
+}
+
+int Document::Options() const {
+	return (IsLarge() ? SC_DOCUMENTOPTION_TEXT_LARGE : 0) |
+		(cb.HasStyles() ? 0 : SC_DOCUMENTOPTION_STYLES_NONE);
 }
 
 bool Document::IsWhiteLine(Sci::Line line) const {
