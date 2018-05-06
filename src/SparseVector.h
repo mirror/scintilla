@@ -26,8 +26,8 @@ private:
 	}
 public:
 	SparseVector() : empty() {
-		starts.reset(new Partitioning<Sci::Position>(8));
-		values.reset(new SplitVector<T>());
+		starts = std::unique_ptr<Partitioning<Sci::Position>>(new Partitioning<Sci::Position>(8));
+		values = std::unique_ptr<SplitVector<T>>(new SplitVector<T>());
 		values->InsertEmpty(0, 2);
 	}
 	~SparseVector() {
