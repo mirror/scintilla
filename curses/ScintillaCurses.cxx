@@ -852,10 +852,6 @@ void Menu::CreatePopUp() {}
 void Menu::Destroy() {}
 void Menu::Show(Point pt, Window &w) {}
 
-// ElapsedTime is not implemented.
-ElapsedTime::ElapsedTime() : bigBit(0), littleBit(0) {}
-double ElapsedTime::Duration(bool reset) { return 1; }
-
 /** Dynamic library loading is not implemented. */
 DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
   /* TODO */ return 0;
