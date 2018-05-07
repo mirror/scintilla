@@ -30,6 +30,40 @@ In order to back out of a graft:
 This can only be done ONCE, and affects the most recent graft, so make sure you
 test any questionable grafts first before attempting another one.
 
+Testing Backports
+=================
+
+Backporting a change is one thing, but ensuring the backport was successful is
+another. Currently, the measure of "success" is whether Scintilla compiles on
+all platforms after a backported change. This process can be automated using hg
+hooks and the "check.mak" makefile. By adding the following to .hg/hgrc:
+
+  [hooks]
+  pretxncommit.adddeps = test -z "`hg status | grep '^A' | grep '\.\(h\|cxx\)$'`" || make -f check.mak deps
+  pretxncommit.compile = make -f check.mak
+
+whenever a backported change is about to be committed, hg runs "check.mak",
+which attempts to compile Scintilla on all platforms. If successful, the commit
+is made. Otherwise, the commit fails and changes must be made before attempting
+to commit again.
+
+The file "check.mak" is designed to run on a Linux machine that has
+cross-compilers for Win32 and Mac OSX. It does not necessarily produce any
+binary builds of Scintilla that can be used -- it just ensures Scintilla can be
+built without compile errors. How to obtain a set of cross-compilers is beyond
+the scope of this document. At the time of writing, GCC 5.4 is used exclusively.
+
+Not only does "check.mak" perform platform compile checks, but it also has rules
+for manually running Scintilla's unit tests (which take too long to run
+automatically as a pre-commit hook), creating a LongTerm3 release archive set,
+and uploading documentation to the LongTerm3 website on SourceForge:
+
+  make test
+  make zip
+  make upload
+
+The last rule requires user credentials.
+
 Backport Status
 ===============
 
