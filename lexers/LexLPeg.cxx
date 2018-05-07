@@ -126,7 +126,9 @@ class LexerLPeg : public ILexer {
 		lua_getfield(L, LUA_REGISTRYINDEX, "sci_props");
 		PropSetSimple *props = static_cast<PropSetSimple *>(lua_touserdata(L, -1));
 		lua_pop(L, 1); // props
-		props->Set("lexer.lpeg.error", str ? str : lua_tostring(L, -1));
+		const char *key = "lexer.lpeg.error";
+		const char *value = str ? str : lua_tostring(L, -1);
+		props->Set(key, value, strlen(key), strlen(value));
 		fprintf(stderr, "Lua Error: %s.\n", str ? str : lua_tostring(L, -1));
 		lua_settop(L, 0);
 	}
@@ -177,7 +179,8 @@ class LexerLPeg : public ILexer {
 			else if (!newindex)
 				lua_pushstring(L, props->Get(luaL_checkstring(L, 2)));
 			else
-				props->Set(luaL_checkstring(L, 2), luaL_checkstring(L, 3));
+				props->Set(luaL_checkstring(L, 2), luaL_checkstring(L, 3),
+				           lua_rawlen(L, 2), lua_rawlen(L, 3));
 		} else if (strcmp(key, "property_int") == 0) {
 			luaL_argcheck(L, !newindex, 3, "read-only property");
 			if (is_lexer)
@@ -321,7 +324,8 @@ class LexerLPeg : public ILexer {
 			if (lua_isstring(L, -2) && lua_isstring(L, -1)) {
 				lua_pushstring(L, "style."), lua_pushvalue(L, -3), lua_concat(L, 2);
 				if (!*props.Get(lua_tostring(L, -1)))
-					props.Set(lua_tostring(L, -1), lua_tostring(L, -2));
+					props.Set(lua_tostring(L, -1), lua_tostring(L, -2), lua_rawlen(L, -1),
+					          lua_rawlen(L, -2));
 				lua_pop(L, 1); // style name
 			}
 			lua_pop(L, 1); // value
@@ -459,7 +463,7 @@ class LexerLPeg : public ILexer {
 		lua_pop(L, 2); // _CHILDREN and lexer object
 
 		reinit = false;
-		props.Set("lexer.lpeg.error", "");
+		props.Set("lexer.lpeg.error", "", strlen("lexer.lpeg.error"), 0);
 		return true;
 	}
 
@@ -667,7 +671,7 @@ public:
 	 */
 	virtual Sci_Position SCI_METHOD PropertySet(const char *key,
 	                                            const char *value) {
-		props.Set(key, *value ? value : " "); // ensure property is cleared
+		props.Set(key, value, strlen(key), strlen(value));
 		if (reinit)
 			Init();
 		else if (L && SS && sci && strncmp(key, "style.", 6) == 0) {
@@ -728,7 +732,7 @@ public:
 			props.GetExpanded("lexer.name", lexer_name);
 			if (strcmp(lexer_name, reinterpret_cast<const char *>(arg)) != 0) {
 				reinit = true;
-				props.Set("lexer.lpeg.error", "");
+				props.Set("lexer.lpeg.error", "", strlen("lexer.lpeg.error"), 0);
 				PropertySet("lexer.name", reinterpret_cast<const char *>(arg));
 			} else if (L)
 				own_lua ? SetStyles() : Init();
