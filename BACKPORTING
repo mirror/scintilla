@@ -170,3 +170,29 @@ branch), or have information worth noting.
 6666:9561714c303b Updated due to allowing C++17 code now.
   Not backported, since only C++11 is supported.
 
+6676:d48bdae67b33 Updates for 4.0.4.
+6678:95fdb4c19b33 Added tag rel-4-0-4 for changeset d48bdae67b33
+  Not backported, since this is LongTerm3.
+
+6680:0161abb24da4 Bug [#2008]. Avoid warning unsigned >= 0.
+  Not backported, since it is unknown whether or not this feature will have any
+  C++14 or C++17 features in it.
+
+6689:41dbff5a4813 Make method const as it is just a reader.
+  Not backported, since return value depends on interface, which is different
+  from single interface in 4.x.
+
+6746:61e16d5c73cf Change log for SciTE for macOS.
+6749:85d99f7c5c6d SciTE change log.
+6757:56a46ce2e0b4 SciTE change log.
+6779:d5508bacbfd4 SciTE change log.
+  Not backported, as these apply only to SciTE.
+
+6786:68c8592fe333 Specify type of std::clamp to avoid casting arguments.
+  Not backported, since std::clamp is C++17 and Sci::clamp is not typed.
+
+6922:d97cb73c8da7 SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6924:b9ab83221b03 Updates for 4.0.5.
+  Not backported, since this is LongTerm3.
