@@ -438,14 +438,6 @@ public:
 	void Show(Point pt, Window &w);
 };
 
-class ElapsedTime {
-	long bigBit;
-	long littleBit;
-public:
-	ElapsedTime();
-	double Duration(bool reset=false);
-};
-
 /**
  * Dynamic Library (DLL/SO/...) loading
  */
