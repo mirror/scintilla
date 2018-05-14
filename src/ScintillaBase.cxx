@@ -274,7 +274,7 @@ void ScintillaBase::AutoCompleteStart(Sci::Position lenEntered, const char *list
 		Redraw();
 		pt = PointMainCaret();
 	}
-	if (wMargin.GetID()) {
+	if (wMargin.Created()) {
 		const Point ptOrigin = GetVisibleOriginInMain();
 		pt.x += ptOrigin.x;
 		pt.y += ptOrigin.y;
@@ -293,7 +293,7 @@ void ScintillaBase::AutoCompleteStart(Sci::Position lenEntered, const char *list
 	}
 	rcac.right = rcac.left + widthLB;
 	rcac.bottom = static_cast<XYPOSITION>(std::min(static_cast<int>(rcac.top) + heightLB, static_cast<int>(rcPopupBounds.bottom)));
-	ac.lb->SetPositionRelative(rcac, wMain);
+	ac.lb->SetPositionRelative(rcac, &wMain);
 	ac.lb->SetFont(vs.styles[STYLE_DEFAULT].font);
 	const unsigned int aveCharWidth = static_cast<unsigned int>(vs.styles[STYLE_DEFAULT].aveCharWidth);
 	ac.lb->SetAverageCharWidth(aveCharWidth);
@@ -317,7 +317,7 @@ void ScintillaBase::AutoCompleteStart(Sci::Position lenEntered, const char *list
 		rcList.top = pt.y + vs.lineHeight;
 	}
 	rcList.bottom = rcList.top + heightAlloced;
-	ac.lb->SetPositionRelative(rcList, wMain);
+	ac.lb->SetPositionRelative(rcList, &wMain);
 	ac.Show(true);
 	if (lenEntered != 0) {
 		AutoCompleteMoveToCurrentWord();
@@ -461,7 +461,7 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 	if (ct.UseStyleCallTip()) {
 		ct.SetForeBack(vs.styles[STYLE_CALLTIP].fore, vs.styles[STYLE_CALLTIP].back);
 	}
-	if (wMargin.GetID()) {
+	if (wMargin.Created()) {
 		const Point ptOrigin = GetVisibleOriginInMain();
 		pt.x += ptOrigin.x;
 		pt.y += ptOrigin.y;
@@ -491,7 +491,7 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 	}
 	// Now display the window.
 	CreateCallTipWindow(rc);
-	ct.wCallTip.SetPositionRelative(rc, wMain);
+	ct.wCallTip.SetPositionRelative(rc, &wMain);
 	ct.wCallTip.Show();
 }
 

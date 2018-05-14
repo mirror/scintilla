@@ -75,7 +75,7 @@ inline CGRect PRectangleToCGRect(PRectangle& rc)
 
 //----------------- Font ---------------------------------------------------------------------------
 
-Font::Font(): fid(0)
+Font::Font() noexcept : fid(0)
 {
 }
 
@@ -1082,7 +1082,7 @@ static CGFloat ScreenMax()
 
 //--------------------------------------------------------------------------------------------------
 
-PRectangle Window::GetPosition()
+PRectangle Window::GetPosition() const
 {
   if (wid)
   {
@@ -1146,9 +1146,9 @@ void Window::SetPosition(PRectangle rc)
 
 //--------------------------------------------------------------------------------------------------
 
-void Window::SetPositionRelative(PRectangle rc, Window window)
+void Window::SetPositionRelative(PRectangle rc, const Window *window)
 {
-  PRectangle rcOther = window.GetPosition();
+  PRectangle rcOther = window->GetPosition();
   rc.left += rcOther.left;
   rc.right += rcOther.left;
   rc.top += rcOther.top;
@@ -1158,7 +1158,7 @@ void Window::SetPositionRelative(PRectangle rc, Window window)
 
 //--------------------------------------------------------------------------------------------------
 
-PRectangle Window::GetClientPosition()
+PRectangle Window::GetClientPosition() const
 {
   // This means, in MacOS X terms, get the "frame bounds". Call GetPosition, just like on Win32.
   return GetPosition();
@@ -1868,7 +1868,7 @@ void ListBoxImpl::SelectionChange() {
 
 // ListBox is implemented by the ListBoxImpl class.
 
-ListBox::ListBox()
+ListBox::ListBox() noexcept
 {
 }
 
@@ -1926,7 +1926,7 @@ void Window::Destroy()
 
 //----------------- Menu ---------------------------------------------------------------------------
 
-Menu::Menu()
+Menu::Menu() noexcept
   : mid(0)
 {
 }

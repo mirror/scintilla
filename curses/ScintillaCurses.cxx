@@ -72,7 +72,7 @@ using namespace Scintilla;
  * done in `Font::Create()`.
  * @see Font::Create
  */
-Font::Font() : fid(0) {}
+Font::Font() noexcept : fid(0) {}
 /** Deletes the font. Currently empty. */
 Font::~Font() {}
 /**
@@ -620,7 +620,7 @@ void Window::Destroy() {
  * bounds to ensure all of it is painted.
  * @return PRectangle with the window's boundaries.
  */
-PRectangle Window::GetPosition() {
+PRectangle Window::GetPosition() const {
   int maxx = wid ? getmaxx(_WINDOW(wid)) : 0;
   int maxy = wid ? getmaxy(_WINDOW(wid)) : 0;
   return PRectangle(0, 0, maxx, maxy);
@@ -631,10 +631,10 @@ PRectangle Window::GetPosition() {
  * @param rc The position relative to the parent window.
  * @param relativeTo The parent window.
  */
-void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
+void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo) {
   int begx = 0, begy = 0, x = 0, y = 0;
   // Determine the relative position.
-  getbegyx(_WINDOW(relativeTo.GetID()), begy, begx);
+  getbegyx(_WINDOW(relativeTo->GetID()), begy, begx);
   x = begx + rc.left;
   if (x < begx) x = begx;
   y = begy + rc.top;
@@ -642,8 +642,8 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
   // Correct to fit the parent if necessary.
   int sizex = rc.right - rc.left;
   int sizey = rc.bottom - rc.top;
-  int screen_width = getmaxx(_WINDOW(relativeTo.GetID()));
-  int screen_height = getmaxy(_WINDOW(relativeTo.GetID()));
+  int screen_width = getmaxx(_WINDOW(relativeTo->GetID()));
+  int screen_height = getmaxy(_WINDOW(relativeTo->GetID()));
   if (sizex > screen_width)
     x = begx; // align left
   else if (x + sizex > begx + screen_width)
@@ -657,7 +657,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
   mvwin(_WINDOW(wid), y, x);
 }
 /** Identical to `Window::GetPosition()`. */
-PRectangle Window::GetClientPosition() { return GetPosition(); }
+PRectangle Window::GetClientPosition() const { return GetPosition(); }
 void Window::Show(bool show) { /* TODO: */ }
 void Window::InvalidateAll() { /* notify repaint */ }
 void Window::InvalidateRectangle(PRectangle rc) { /* notify repaint*/ }
@@ -840,14 +840,14 @@ public:
 };
 
 /** Creates a new Scintilla ListBox. */
-ListBox::ListBox() {}
+ListBox::ListBox() noexcept {}
 /** Deletes the ListBox. */
 ListBox::~ListBox() {}
 /** Creates a new curses ListBox. */
 ListBox *ListBox::Allocate() { return new ListBoxImpl(); }
 
 // Menus are not implemented.
-Menu::Menu() : mid(0) {}
+Menu::Menu() noexcept : mid(0) {}
 void Menu::CreatePopUp() {}
 void Menu::Destroy() {}
 void Menu::Show(Point pt, Window &w) {}
