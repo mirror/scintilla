@@ -575,6 +575,10 @@
 	"in selection" replace and the selection started after the line start.
 	</li>
 	<li>
+	Crashes fixed on macOS for invalid DBCS characters when dragging text,
+	changing case of text, case-insensitive searching, and retrieving text as UTF-8.
+	</li>
+	<li>
 	On Win32, a new file, ScintillaDLL.cxx, provides
 	the DllMain function required for a stand-alone Scintilla DLL. Build and project files should include this
 	file when producing a DLL and omit it when producing a static library or linking Scintilla statically.
