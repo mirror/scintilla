@@ -134,7 +134,7 @@ SurfaceImpl::SurfaceImpl()
   y = 0;
   gc = NULL;
 
-  textLayout.reset(new QuartzTextLayout(nullptr));
+  textLayout.reset(new QuartzTextLayout());
   codePage = 0;
   verticalDeviceResolution = 0;
 
@@ -156,7 +156,6 @@ SurfaceImpl::~SurfaceImpl()
 
 void SurfaceImpl::Clear()
 {
-  textLayout->setContext(nullptr);
   if (bitmapData)
   {
     bitmapData.reset();
@@ -206,7 +205,6 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID)
   Release();
   gc = static_cast<CGContextRef>(sid);
   CGContextSetLineWidth(gc, 1.0);
-  textLayout->setContext(gc);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -244,7 +242,6 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* surface_, WindowID 
     // and we have no use for the bitmap without the context
     bitmapData.reset();
   }
-  textLayout->setContext (gc);
 
   // the context retains the color space, so we can release it
   CGColorSpaceRelease(colorSpace);
@@ -920,7 +917,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 	CGColorRelease(color);
 
 	textLayout->setText(s, len, encoding, *style);
-	textLayout->draw(rc.left, ybase);
+	textLayout->draw(gc, rc.left, ybase);
 }
 
 //--------------------------------------------------------------------------------------------------
