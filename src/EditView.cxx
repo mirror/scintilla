@@ -458,7 +458,7 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 		ll->positions[0] = 0;
 		bool lastSegItalics = false;
 
-		BreakFinder bfLayout(ll, NULL, Range(0, numCharsInLine), posLineStart, 0, false, model.pdoc, &model.reprs, NULL);
+		BreakFinder bfLayout(ll, nullptr, Range(0, numCharsInLine), posLineStart, 0, false, model.pdoc, &model.reprs, nullptr);
 		while (bfLayout.More()) {
 
 			const TextSegment ts = bfLayout.Next();
@@ -1186,7 +1186,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	}
 }
 
-static bool AnnotationBoxedOrIndented(int annotationVisible) {
+static constexpr bool AnnotationBoxedOrIndented(int annotationVisible) noexcept {
 	return annotationVisible == ANNOTATION_BOXED || annotationVisible == ANNOTATION_INDENTED;
 }
 
@@ -1449,7 +1449,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 	// Does not take margin into account but not significant
 	const int xStartVisible = static_cast<int>(subLineStart)-xStart;
 
-	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, NULL);
+	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, nullptr);
 
 	const bool drawWhitespaceBackground = vsDraw.WhitespaceBackgroundDrawn() && !background.isSet;
 
@@ -2025,7 +2025,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 			(vsDraw.braceBadLightIndicatorSet && (model.bracesMatchStyle == STYLE_BRACEBAD)));
 
 		Sci::Line lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
-		AutoLineLayout ll(llc, 0);
+		AutoLineLayout ll(llc, nullptr);
 		std::vector<DrawPhase> phases;
 		if ((phasesDraw == phasesMultiple) && !bufferedDraw) {
 			for (DrawPhase phase = drawBack; phase <= drawCarets; phase = static_cast<DrawPhase>(phase * 2)) {
@@ -2054,7 +2054,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				ElapsedPeriod ep;
 #endif
 				if (lineDoc != lineDocPrevious) {
-					ll.Set(0);
+					ll.Set(nullptr);
 					ll.Set(RetrieveLineLayout(lineDoc, model));
 					LayoutLine(model, lineDoc, surface, vsDraw, ll, model.wrapWidth);
 					lineDocPrevious = lineDoc;
@@ -2123,7 +2123,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				visibleLine++;
 			}
 		}
-		ll.Set(0);
+		ll.Set(nullptr);
 #if defined(TIME_PAINTING)
 		if (durPaint < 0.00000001)
 			durPaint = 0.00000001;

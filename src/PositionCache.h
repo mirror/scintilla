@@ -10,8 +10,12 @@
 
 namespace Scintilla {
 
-static inline bool IsEOLChar(char ch) {
+inline constexpr bool IsEOLChar(int ch) noexcept {
 	return (ch == '\r') || (ch == '\n');
+}
+
+inline constexpr bool IsSpaceOrTab(int ch) noexcept {
+	return ch == ' ' || ch == '\t';
 }
 
 /**
@@ -237,10 +241,6 @@ public:
 	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
 		const char *s, unsigned int len, XYPOSITION *positions, const Document *pdoc);
 };
-
-inline bool IsSpaceOrTab(int ch) {
-	return ch == ' ' || ch == '\t';
-}
 
 }
 
