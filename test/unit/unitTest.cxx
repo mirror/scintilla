@@ -35,6 +35,8 @@
 #include <cstdio>
 #include <cstdarg>
 
+#include <vector>
+
 #include "Platform.h"
 
 #if defined(__GNUC__)

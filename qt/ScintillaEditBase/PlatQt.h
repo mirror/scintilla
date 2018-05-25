@@ -13,6 +13,8 @@
 
 #include <cstddef>
 
+#include <vector>
+
 #include "Platform.h"
 
 #include <QUrl>

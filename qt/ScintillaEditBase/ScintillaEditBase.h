@@ -14,6 +14,8 @@
 
 #include <cstddef>
 
+#include <vector>
+
 #include "Platform.h"
 #include "Scintilla.h"
 
