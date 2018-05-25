@@ -279,7 +279,8 @@ public:
    * Line markers that Scintilla would normally draw as polygons are handled in
    * `DrawLineMarker()`.
    */
-  void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) {
+  void Polygon(Point *pts, size_t npts, ColourDesired fore,
+               ColourDesired back) {
     wattr_set(win, 0, term_color_pair(back, COLOR_WHITE), NULL); // invert
     if (pts[0].y < pts[npts - 1].y) // up arrow
       mvwaddstr(win, pts[0].y, pts[npts - 1].x + 1, "▲");
@@ -447,8 +448,6 @@ public:
       if (!UTF8IsTrailByte((unsigned char)s[i])) width += grapheme_width(s + i);
     return width;
   }
-  /** Returns 1 since curses characters always have a width of 1. */
-  XYPOSITION WidthChar(Font &font_, char ch) { return 1; }
   /** Returns 0 since curses characters have no ascent. */
   XYPOSITION Ascent(Font &font_) { return 0; }
   /** Returns 0 since curses characters have no descent. */
