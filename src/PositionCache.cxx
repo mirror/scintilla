@@ -507,7 +507,8 @@ TextSegment BreakFinder::Next() {
 				charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(&ll->chars[nextBreak]),
 					static_cast<int>(lineRange.end - nextBreak));
 			else if (encodingFamily == efDBCS)
-				charWidth = pdoc->IsDBCSLeadByteNoExcept(ll->chars[nextBreak]) ? 2 : 1;
+				charWidth = pdoc->DBCSDrawBytes(
+					&ll->chars[nextBreak], static_cast<int>(lineRange.end - nextBreak));
 			const Representation *repr = preprs->RepresentationFromCharacter(&ll->chars[nextBreak], charWidth);
 			if (((nextBreak > 0) && (ll->styles[nextBreak] != ll->styles[nextBreak - 1])) ||
 					repr ||
