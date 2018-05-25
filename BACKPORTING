@@ -229,4 +229,49 @@ branch), or have information worth noting.
   Not backported, as this applies only to SciTE.
 
 6924:b9ab83221b03 Updates for 4.0.5.
+6931:87dc832e3c94 Added tag rel-4-0-5 for changeset b9ab83221b03
+6932:cc470382029e Add stub for next release.
   Not backported, since this is LongTerm3.
+
+6936:c98e38d29c46 Include <string_view> in tests in case needed.
+6937:5200f56c1494 Include <string_view> to allow future use in Platform interface and Unicode.
+6941:8a34096cd01e Modernize Platform.h (4) - update Surface to use string_view for text arguments.
+  Not backported, since only C++11 is supported.
+
+6942:adbc779db70a Modernize Platform.h (5) - remove ElapsedTime.
+  Not backported, since it was already removed in changeset 6876:a057d12cc6b9.
+
+6943:39f2ec3334c1 Use string_view for UniConversion functions.
+  Not backported, since only C++11 is supported.
+
+6946:959308676456 Fix warning.
+  Not backported, since it applies to a previous changeset not backported.
+
+6947:fb52ef66ed47 Remove dependency on StringCopy and simplify constructor.
+  Not backported, since only C++11 is supported.
+
+6949:7747dc29d8a0 Fix warnings in debug assertions.
+  Not backported, since it applies to a previous changeset not backported.
+
+6950:682b634df52b Encapsulate WideCharToMultiByte and MultiByteToWideChar to simplify calling sites and standardize use of options.
+  Not backported, since only C++11 is supported.
+
+6951:b2a17a08a1f8 Replace ELEMENTS with std::size and drop inclusion of StringCopy.h.
+  Backported only the latter bit since C++11 does not have std::size.
+
+6961:d2563c53ab4c SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6962:514fde42ccbf Draw invalid bytes in DBCS when detected as blobs in a similar way to UTF-8.
+  Backported, but replaced std::string_view usage with const char* and size_t
+  components.
+
+6964:d7ec2cdbcd16 If decoding DBCS text fails, use the MacRoman encoding to ensure something is visible.
+  Not backported, as it makes use of a previous changeset not backported and is
+  not easy for me to support if I patched it.
+
+6970:b78f7643ae73 Add definitions for bidirectional support to Platform.h and provide empty implementations for each platform.
+6971:e51e7a972b89 Implement bidirectional mode bidiL2R for DirectDraw on Win32.
+6972:f30d0a228046 Update for bidirectional support.
+6973:7570322b0219 Added credits.
+  Not backported, since previous bidirectional support was not backported.
