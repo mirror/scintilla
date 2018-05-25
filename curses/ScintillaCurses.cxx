@@ -343,6 +343,9 @@ public:
       mvwchgat(win, y, x, 1, attrs, term_color_pair(fore, fill), NULL);
     }
   }
+  /** Drawing gradients is not implemented. */
+  void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops,
+                         GradientOptions options) {}
   /** Drawing images is not implemented. */
   void DrawRGBAImage(PRectangle rc, int width, int height,
                      const unsigned char *pixelsImage) {}
