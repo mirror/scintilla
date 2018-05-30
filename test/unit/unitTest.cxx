@@ -36,6 +36,7 @@
 #include <cstdarg>
 
 #include <vector>
+#include <memory>
 
 #include "Platform.h"
 
