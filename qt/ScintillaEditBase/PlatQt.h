@@ -14,6 +14,7 @@
 #include <cstddef>
 
 #include <vector>
+#include <memory>
 
 #include "Platform.h"
 
