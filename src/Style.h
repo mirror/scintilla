@@ -72,7 +72,7 @@ public:
 
 	Style();
 	Style(const Style &source);
-	Style(Style &&) = delete;
+	Style(Style &&) = default;
 	~Style();
 	Style &operator=(const Style &source);
 	Style &operator=(Style &&) = delete;

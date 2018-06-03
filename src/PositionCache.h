@@ -145,8 +145,8 @@ public:
 	PositionCacheEntry();
 	// Copy constructor not currently used, but needed for being element in std::vector.
 	PositionCacheEntry(const PositionCacheEntry &);
-	// Deleted so PositionCacheEntry objects can not be assigned.
-	PositionCacheEntry(PositionCacheEntry &&) = delete;
+	// PositionCacheEntry objects should not be moved but MSVC 2015 requires this.
+	PositionCacheEntry(PositionCacheEntry &&) = default;
 	void operator=(const PositionCacheEntry &) = delete;
 	void operator=(PositionCacheEntry &&) = delete;
 	~PositionCacheEntry();
