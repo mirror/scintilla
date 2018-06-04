@@ -170,7 +170,7 @@ public:
 
 			if (validLen + (pos - startSeg + 1) >= bufferSize)
 				Flush();
-			char attr = static_cast<char>(chAttr);
+			const char attr = static_cast<char>(chAttr);
 			if (validLen + (pos - startSeg + 1) >= bufferSize) {
 				// Too big for buffer so send directly
 				pAccess->SetStyleFor(pos - startSeg + 1, attr);
