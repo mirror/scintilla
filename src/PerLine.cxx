@@ -60,7 +60,7 @@ bool MarkerHandleSet::InsertHandle(int handle, int markerNum) {
 }
 
 void MarkerHandleSet::RemoveHandle(int handle) {
-	mhList.remove_if([=](const MarkerHandleNumber &mhn) { return mhn.handle == handle; });
+	mhList.remove_if([handle](const MarkerHandleNumber &mhn) { return mhn.handle == handle; });
 }
 
 bool MarkerHandleSet::RemoveNumber(int markerNum, bool all) {
@@ -284,7 +284,7 @@ Sci::Line LineState::GetMaxLineState() const {
 	return static_cast<Sci::Line>(lineStates.Length());
 }
 
-static int NumberLines(const char *text) {
+static int NumberLines(const char *text) noexcept {
 	if (text) {
 		int newLines = 0;
 		while (*text) {
