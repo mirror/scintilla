@@ -1511,6 +1511,8 @@ local function process_legacy_lexer(lexer)
     if lexer._foldsymbols._case_insensitive then
       lexer._CASEINSENSITIVEFOLDPOINTS = true
     end
+  elseif lexer._fold then
+    lexer.fold = function(self, ...) return lexer._fold(...) end
   end
 end
 
