@@ -1074,7 +1074,7 @@ static inline bool IsSpaceOrTab(int ch) noexcept {
 //   2) Break before punctuation
 //   3) Break after whole character
 
-int Document::SafeSegment(const char *text, int length, int lengthSegment) const {
+int Document::SafeSegment(const char *text, int length, int lengthSegment) const noexcept {
 	if (length <= lengthSegment)
 		return length;
 	int lastSpaceBreak = -1;
@@ -1108,7 +1108,7 @@ int Document::SafeSegment(const char *text, int length, int lengthSegment) const
 	return lastEncodingAllowedBreak;
 }
 
-EncodingFamily Document::CodePageFamily() const {
+EncodingFamily Document::CodePageFamily() const noexcept {
 	if (SC_CP_UTF8 == dbcsCodePage)
 		return efUnicode;
 	else if (dbcsCodePage)
@@ -1117,7 +1117,7 @@ EncodingFamily Document::CodePageFamily() const {
 		return efEightBit;
 }
 
-void Document::ModifiedAt(Sci::Position pos) {
+void Document::ModifiedAt(Sci::Position pos) noexcept {
 	if (endStyled > pos)
 		endStyled = pos;
 }
@@ -1909,7 +1909,7 @@ bool Document::MatchesWordOptions(bool word, bool wordStart, Sci::Position pos, 
 			(wordStart && IsWordStartAt(pos));
 }
 
-bool Document::HasCaseFolder() const {
+bool Document::HasCaseFolder() const noexcept {
 	return pcf != nullptr;
 }
 
@@ -2108,7 +2108,7 @@ const char *Document::SubstituteByPosition(const char *text, Sci::Position *leng
 		return 0;
 }
 
-Sci::Line Document::LinesTotal() const {
+Sci::Line Document::LinesTotal() const noexcept {
 	return cb.Lines();
 }
 
@@ -2332,7 +2332,7 @@ void Document::AnnotationClearAll() {
 	Annotations()->ClearAll();
 }
 
-void Document::IncrementStyleClock() {
+void Document::IncrementStyleClock() noexcept {
 	styleClock = (styleClock + 1) % 0x100000;
 }
 
