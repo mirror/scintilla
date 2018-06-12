@@ -1154,22 +1154,23 @@ local grammar_mt = {__index = {
   -- Adds lexer *lexer* and any of its embedded lexers to this grammar.
   -- @param lexer The lexer to add.
   add_lexer = function(self, lexer)
+    local lexer_name = lexer._PARENTNAME or lexer._NAME
     local token_rule = lexer:join_tokens()
     for i = 1, #lexer._CHILDREN do
       local child = lexer._CHILDREN[i]
       if child._CHILDREN then self:add_lexer(child) end
-      local rules = child._EMBEDDEDRULES[lexer._NAME]
+      local rules = child._EMBEDDEDRULES[lexer_name]
       local rules_token_rule = self['__'..child._NAME] or rules.token_rule
       self[child._NAME] = (-rules.end_rule * rules_token_rule)^0 *
-                          rules.end_rule^-1 * lpeg_V(lexer._NAME)
+                          rules.end_rule^-1 * lpeg_V(lexer_name)
       local embedded_child = '_'..child._NAME
       self[embedded_child] = rules.start_rule *
                              (-rules.end_rule * rules_token_rule)^0 *
                              rules.end_rule^-1
       token_rule = lpeg_V(embedded_child) + token_rule
     end
-    self['__'..lexer._NAME] = token_rule -- can contain embedded lexer rules
-    self[lexer._NAME] = token_rule^0
+    self['__'..lexer_name] = token_rule -- can contain embedded lexer rules
+    self[lexer_name] = token_rule^0
   end
 }}
 
@@ -1566,10 +1567,11 @@ function M.load(name, alt_name, cache)
   lexer:add_style((alt_name or name)..'_whitespace', M.STYLE_WHITESPACE)
 
   -- If the lexer is a proxy or a child that embedded itself, set the parent to
-  -- be the main lexer.
+  -- be the main lexer. Keep a reference to the old parent name since embedded
+  -- child rules reference and use that name.
   if lexer._lexer then
     lexer = lexer._lexer
-    lexer._NAME = alt_name or name
+    lexer._PARENTNAME, lexer._NAME = lexer._NAME, alt_name or name
   end
 
   if cache then lexers[alt_name or name] = lexer end
