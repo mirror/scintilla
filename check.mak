@@ -133,7 +133,9 @@ clean:
 	rm -rf /tmp/scintilla
 
 .PHONY: test
-test: | /tmp/scintilla ; make -C $|/test/unit CXX=g++ clean test
+test: | /tmp/scintilla
+	make -C $|/test/unit CXX=g++ clean test
+	cd $|/test && lua5.1 test_lexlua.lua
 
 releasedir = /tmp/scintilla$(shell grep -o '[0-9]\+' version.txt)
 $(releasedir): ; hg archive $@
