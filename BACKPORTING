@@ -274,4 +274,27 @@ branch), or have information worth noting.
 6971:e51e7a972b89 Implement bidirectional mode bidiL2R for DirectDraw on Win32.
 6972:f30d0a228046 Update for bidirectional support.
 6973:7570322b0219 Added credits.
+7006:a6d3cefd4f79 Add TabPositionAfter method to IScreenLine as this calculation is needed on each platform and it allows extension to custom tab stops.
+  Not backported, since previous bidirectional support was not backported.
+  
+7009:e1100c6feaaf Add function to find a UTF-16 position in a UTF-8 string.
+  Not backported, since it is only used in bidirectional support at the moment.
+  
+7011:23a98ab36601 Define IScreenLineLayout as the main interface for implementing bidirectional features by platform code.
+7012:5f4011e010f9 Implement IScreenLineLayout for Cocoa Core Text as ScreenLineLayout.
+7013:0d86879c5ca5 Make virtual space selections visible in bidirectional mode.
+7014:39d3e00c381a UpdateBidiData is called by EditView but doesn't use any EditView fields so make it static.
+7015:6a7459cd08f9 Updated to mention bidirectional works on Cocoa.
+  Not backported, since previous bidirectional support was not backported.
+  
+7026:4377a8d710e1 Update Cocoa enumerations to current names instead of deprecated names.
+  Not backported, since many of these enumerations are not available for older SDKs.
+  
+7027:b71248119e8b Remove compile-time ENABLE_BIDIRECTIONAL option as bidirectional feature is now controlled completely at run-time.
+  Not backported, since previous bidirectional support was not backported.
+
+7033:5da90aad11da Updates for 4.1.0.
+  Not backported, since this is LongTerm3.
+  
+7034:0dc20d87a4f9 Note that Cocoa also supports bidirectional text.
   Not backported, since previous bidirectional support was not backported.
