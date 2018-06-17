@@ -33,6 +33,11 @@ lex:add_rule('blockquote',
                               return (e or #input) + 1
                             end)))
 
+lex:add_rule('list', token('list', lexer.starts_line(S(' \t')^0 * (S('*+-') +
+                                                     R('09')^1 * '.')) *
+                                   S(' \t')))
+lex:add_style('list', lexer.STYLE_CONSTANT)
+
 lex:add_rule('blockcode',
              token('code', lexer.starts_line(P(' ')^4 + P('\t')) * -P('<') *
                            lexer.nonnewline^0 * lexer.newline^-1))
@@ -50,11 +55,6 @@ lex:add_rule('hr',
                               return (input:find('\n', index) or #input) + 1
                             end)))
 lex:add_style('hr', 'back:$(color.black),eolfilled')
-
-lex:add_rule('list', token('list', lexer.starts_line(S(' \t')^0 * (S('*+-') +
-                                                     R('09')^1 * '.')) *
-                                   S(' \t')))
-lex:add_style('list', lexer.STYLE_CONSTANT)
 
 -- Whitespace.
 local ws = token(lexer.WHITESPACE, S(' \t')^1 + S('\v\r\n')^1)
