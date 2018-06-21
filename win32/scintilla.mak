@@ -190,6 +190,7 @@ LEXOBJS=\
 	$(DIR_O)\LexRegistry.obj \
 	$(DIR_O)\LexRuby.obj \
 	$(DIR_O)\LexRust.obj \
+	$(DIR_O)\LexSAS.obj \
 	$(DIR_O)\LexScriptol.obj \
 	$(DIR_O)\LexSmalltalk.obj \
 	$(DIR_O)\LexSML.obj \
@@ -197,6 +198,7 @@ LEXOBJS=\
 	$(DIR_O)\LexSpecman.obj \
 	$(DIR_O)\LexSpice.obj \
 	$(DIR_O)\LexSQL.obj \
+	$(DIR_O)\LexStata.obj \
 	$(DIR_O)\LexSTTXT.obj \
 	$(DIR_O)\LexTACL.obj \
 	$(DIR_O)\LexTADS3.obj \
@@ -701,6 +703,8 @@ $(DIR_O)\LexRuby.obj: ..\lexers\LexRuby.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexRust.obj: ..\lexers\LexRust.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexSAS.obj: ..\lexers\LexSAS.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexScriptol.obj: ..\lexers\LexScriptol.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSmalltalk.obj: ..\lexers\LexSmalltalk.cxx $(LEX_HEADERS)
@@ -714,6 +718,8 @@ $(DIR_O)\LexSpecman.obj: ..\lexers\LexSpecman.cxx $(LEX_HEADERS)
 $(DIR_O)\LexSpice.obj: ..\lexers\LexSpice.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSQL.obj: ..\lexers\LexSQL.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexStata.obj: ..\lexers\LexStata.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSTTXT.obj: ..\lexers\LexSTTXT.cxx $(LEX_HEADERS)
 
