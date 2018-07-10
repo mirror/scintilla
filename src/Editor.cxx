@@ -6017,6 +6017,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			static_cast<Sci::Position>(wParam), lParam),
 			static_cast<Sci::Position>(0), pdoc->Length());
 
+	case SCI_POSITIONRELATIVECODEUNITS:
+		return Sci::clamp(pdoc->GetRelativePositionUTF16(
+			static_cast<Sci::Position>(wParam), lParam),
+			static_cast<Sci::Position>(0), pdoc->Length());
+
 	case SCI_LINESCROLL:
 		ScrollTo(topLine + static_cast<Sci::Line>(lParam));
 		HorizontalScrollTo(xOffset + static_cast<int>(wParam) * static_cast<int>(vs.spaceWidth));
@@ -6773,6 +6778,23 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETIMEINTERACTION:
 		return imeInteraction;
 
+	case SCI_GETLINECHARACTERINDEX:
+		return pdoc->LineCharacterIndex();
+
+	case SCI_ALLOCATELINECHARACTERINDEX:
+		pdoc->AllocateLineCharacterIndex(static_cast<int>(wParam));
+		break;
+
+	case SCI_RELEASELINECHARACTERINDEX:
+		pdoc->ReleaseLineCharacterIndex(static_cast<int>(wParam));
+		break;
+
+	case SCI_LINEFROMINDEXPOSITION:
+		return pdoc->LineFromPositionIndex(static_cast<Sci::Position>(wParam), static_cast<int>(lParam));
+
+	case SCI_INDEXPOSITIONFROMLINE:
+		return pdoc->IndexLineStart(static_cast<Sci::Line>(wParam), static_cast<int>(lParam));
+
 		// Marker definition and setting
 	case SCI_MARKERDEFINE:
 		if (wParam <= MARKER_MAX) {
@@ -7384,7 +7406,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->decorations->AllOnFor(static_cast<Sci::Position>(wParam));
 
 	case SCI_INDICATORVALUEAT:
-		return pdoc->decorations->ValueAt(static_cast<int>(wParam), static_cast<Sci::Position>(lParam));
+		return pdoc->decorations->ValueAt(static_cast<int>(wParam), lParam);
 
 	case SCI_INDICATORSTART:
 		return pdoc->decorations->Start(static_cast<int>(wParam), lParam);
@@ -8178,6 +8200,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_COUNTCHARACTERS:
 		return pdoc->CountCharacters(static_cast<Sci::Position>(wParam), lParam);
+		//return pdoc->CountCharacters(static_cast<Sci::Position>(wParam), static_cast<Sci::Position>(lParam));
+
+	case SCI_COUNTCODEUNITS:
+		return pdoc->CountUTF16(static_cast<Sci::Position>(wParam), lParam);
 
 	default:
 		return DefWndProc(iMessage, wParam, lParam);
