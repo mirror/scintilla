@@ -13,6 +13,7 @@
 #include <cstdarg>
 
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include <memory>
