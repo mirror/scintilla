@@ -27,14 +27,18 @@ lex:add_rule('section', token('section', '\\' * word_match[[
 lex:add_style('section', lexer.STYLE_CLASS)
 
 -- Commands.
-lex:add_rule('command', token(lexer.KEYWORD, '\\' *
-                                             (lexer.alpha^1 + S('#$&~_^%{}'))))
+local command = token('command', '\\' * (lexer.alpha^1 *
+                                         ('\\' * lexer.alpha^0)^-1 +
+                                         S('#$&~_^%{}\\')))
+lex:add_rule('command', command)
+lex:add_style('command', lexer.STYLE_KEYWORD)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('$&#{}[]')))
 
 -- Fold points.
 lex:add_fold_point('environment', '\\start', '\\stop')
+lex:add_fold_point('command', '\\begin', '\\end')
 lex:add_fold_point(lexer.OPERATOR, '{', '}')
 lex:add_fold_point(lexer.COMMENT, '%', lexer.fold_line_comments('%'))
 
