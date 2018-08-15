@@ -1315,7 +1315,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 
     path = [bundle pathForResource: @"mac_cursor_flipped" ofType: @"tiff" inDirectory: nil];
     image = [[[NSImage alloc] initWithContentsOfFile: path] autorelease];
-    reverseArrowCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(12, 2)];
+    reverseArrowCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(15, 2)];
   }
 }
 
