@@ -47,12 +47,12 @@ lex:add_rule('hr',
              token('hr',
                    lpeg.Cmt(lexer.starts_line(S(' \t')^0 * lpeg.C(S('*-_'))),
                             function(input, index, c)
-                              local line = input:match('[^\n]*', index)
+                              local line = input:match('[^\r\n]*', index)
                               line = line:gsub('[ \t]', '')
                               if line:find('[^'..c..']') or #line < 2 then
                                 return nil
                               end
-                              return (input:find('\n', index) or #input) + 1
+                              return (input:find('\r?\n', index) or #input) + 1
                             end)))
 lex:add_style('hr', 'back:$(color.black),eolfilled')
 
