@@ -21,20 +21,26 @@ lex:add_rule('doctype', token('doctype', '<!' * word_match([[doctype]], true) *
 lex:add_style('doctype', lexer.STYLE_COMMENT)
 
 -- Elements.
-local known_element = token('element', '<' * P('/')^-1 * word_match([[
-  a abbr address area article aside audio b base bdi bdo blockquote body br
-  button canvas caption cite code col colgroup content data datalist dd
-  decorator del details dfn div dl dt element em embed fieldset figcaption
-  figure footer form h1 h2 h3 h4 h5 h6 head header hr html i iframe img input
-  ins kbd keygen label legend li link main map mark menu menuitem meta meter nav
-  noscript object ol optgroup option output p param pre progress q rp rt ruby s
-  samp script section select shadow small source spacer span strong style sub
-  summary sup table tbody td template textarea tfoot th thead time title tr
-  track u ul var video wbr
+local single_element = token('single_element', '<' * P('/')^-1 * word_match([[
+  area base br col command embed hr img input keygen link meta param source
+  track wbr
 ]], true))
-local unknown_element = token('unknown_element', '<' * P('/')^-1 * lexer.word)
+local paired_element = token('element', '<' * P('/')^-1 * word_match([[
+  a abbr address article aside audio b bdi bdo blockquote body button canvas
+  caption cite code colgroup content data datalist dd decorator del details
+  dfn div dl dt element em fieldset figcaption figure footer form h1 h2 h3 h4
+  h5 h6 head header html i iframe ins kbd label legend li main map mark menu
+  menuitem meter nav noscript object ol optgroup option output p pre progress
+  q rp rt ruby s samp script section select shadow small spacer span strong
+  style sub summary sup table tbody td template textarea tfoot th thead time
+  title tr u ul var video
+]], true))
+local known_element = single_element + paired_element
+local unknown_element = token('unknown_element', '<' * P('/')^-1 *
+                                                 (lexer.alnum + '-')^1)
 local element = known_element + unknown_element
 lex:add_rule('element', element)
+lex:add_style('single_element', lexer.STYLE_KEYWORD)
 lex:add_style('element', lexer.STYLE_KEYWORD)
 lex:add_style('unknown_element', lexer.STYLE_KEYWORD..',italics')
 
@@ -56,7 +62,7 @@ local known_attribute = token('attribute', word_match([[
   shape size sizes span spellcheck src srcdoc srclang start step style summary
   tabindex target title type usemap value width wrap
 ]], true) + ((P('data-') + 'aria-') * (lexer.alnum + '-')^1))
-local unknown_attribute = token('unknown_attribute', lexer.word)
+local unknown_attribute = token('unknown_attribute', (lexer.alnum + '-')^1)
 local attribute = (known_attribute + unknown_attribute) * #(lexer.space^0 * '=')
 lex:add_rule('attribute', attribute)
 lex:add_style('attribute', lexer.STYLE_TYPE)
@@ -92,12 +98,16 @@ lex:add_style('entity', lexer.STYLE_COMMENT)
 
 -- Fold points.
 local function disambiguate_lt(text, pos, line, s)
-  return not line:find('^</', s) and 1 or -1
+  if line:find('/>', s) then
+    return 0
+  elseif line:find('^</', s) then
+    return -1
+  else
+    return 1
+  end
 end
 lex:add_fold_point('element', '<', disambiguate_lt)
-lex:add_fold_point('element', '/>', -1)
 lex:add_fold_point('unknown_element', '<', disambiguate_lt)
-lex:add_fold_point('unknown_element', '/>', -1)
 lex:add_fold_point(lexer.COMMENT, '<!--', '-->')
 
 -- Tags that start embedded languages.
