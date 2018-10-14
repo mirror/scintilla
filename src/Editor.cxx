@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <chrono>
 
 #include "Platform.h"
 
@@ -54,6 +55,7 @@
 #include "MarginView.h"
 #include "EditView.h"
 #include "Editor.h"
+#include "ElapsedPeriod.h"
 
 using namespace Scintilla;
 
@@ -103,7 +105,7 @@ static inline bool IsAllSpacesOrTabs(const char *s, unsigned int len) {
 	return true;
 }
 
-Editor::Editor() {
+Editor::Editor() : durationWrapOneLine(0.00001, 0.000001, 0.0001) {
 	ctrlID = 0;
 
 	stylesValid = false;
@@ -1533,7 +1535,12 @@ bool Editor::WrapLines(WrapScope ws) {
 				return false;
 			}
 		} else if (ws == WrapScope::wsIdle) {
-			lineToWrapEnd = lineToWrap + LinesOnScreen() + 100;
+			// Try to keep time taken by wrapping reasonable so interaction remains smooth.
+			const double secondsAllowed = 0.01;
+			const Sci::Line linesInAllowedTime = Sci::clamp(
+				static_cast<Sci::Line>(secondsAllowed / durationWrapOneLine.Duration()),
+				LinesOnScreen() + 50, static_cast<Sci::Line>(0x10000));
+			lineToWrapEnd = lineToWrap + linesInAllowedTime;
 		}
 		const Sci::Line lineEndNeedWrap = std::min(wrapPending.end, pdoc->LinesTotal());
 		lineToWrapEnd = std::min(lineToWrapEnd, lineEndNeedWrap);
@@ -1552,6 +1559,8 @@ bool Editor::WrapLines(WrapScope ws) {
 			if (surface) {
 //Platform::DebugPrintf("Wraplines: scope=%0d need=%0d..%0d perform=%0d..%0d\n", ws, wrapPending.start, wrapPending.end, lineToWrap, lineToWrapEnd);
 
+				const Sci::Line linesBeingWrapped = lineToWrapEnd - lineToWrap;
+				ElapsedPeriod epWrapping;
 				while (lineToWrap < lineToWrapEnd) {
 					if (WrapOneLine(surface, lineToWrap)) {
 						wrapOccurred = true;
@@ -1559,6 +1568,7 @@ bool Editor::WrapLines(WrapScope ws) {
 					wrapPending.Wrapped(lineToWrap);
 					lineToWrap++;
 				}
+				durationWrapOneLine.AddSample(linesBeingWrapped, epWrapping.Duration());
 
 				goodTopLine = pcs->DisplayFromDoc(lineDocTop) + std::min(
 					subLineTop, static_cast<Sci::Line>(pcs->GetHeight(lineDocTop)-1));
