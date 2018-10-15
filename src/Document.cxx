@@ -101,7 +101,7 @@ void ActionDuration::AddSample(size_t numberActions, double durationOfActions) n
 	const double alpha = 0.25;
 
 	const double durationOne = durationOfActions / numberActions;
-	duration = Sci::clamp(alpha * durationOne + (1.0 - alpha) * durationOne,
+	duration = Sci::clamp(alpha * durationOne + (1.0 - alpha) * duration,
 		minDuration, maxDuration);
 }
 
