@@ -325,7 +325,7 @@ int Document::AddMark(Sci::Line line, int markerNum) {
 		NotifyModified(mh);
 		return prev;
 	} else {
-		return 0;
+		return -1;
 	}
 }
 

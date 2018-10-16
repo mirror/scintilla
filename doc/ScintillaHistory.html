@@ -556,12 +556,12 @@
 	with UTF-32 or UTF-16 components.
 	</li>
 	<li>
-	Improve efficiency of idle wrapping by wrapping in blocks as large as possible while
-	still remaining responsive.
-	</li>
-	<li>
 	Lexers added for SAS and Stata.
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1185/">Feature #1185.</a>
+	</li>
+	<li>
+	Improve efficiency of idle wrapping by wrapping in blocks as large as possible while
+	still remaining responsive.
 	</li>
 	<li>
 	C++ lexer fixes evaluation of "#elif".
@@ -569,6 +569,10 @@
 	</li>
 	<li>
 	Markdown lexer fixes highlighting of non-ASCII characters in links.
+	</li>
+	<li>
+	SCI_MARKERADD returns -1 for invalid lines as documented instead of 0.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2051/">Bug #2051</a>.
 	</li>
 	<li>
 	Shell folder folds "if", "do", and "case".
