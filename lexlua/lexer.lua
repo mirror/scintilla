@@ -1596,7 +1596,7 @@ M.print = lpeg_R(' ~')
 M.punct = lpeg_R('!/', ':@', '[\'', '{~')
 M.space = lpeg_S('\t\v\f\n\r ')
 
-M.newline = P('\r')^-1 * '\n'
+M.newline = lpeg_P('\r')^-1 * '\n'
 M.nonnewline = 1 - M.newline
 M.nonnewline_esc = 1 - (M.newline + '\\') + '\\' * M.any
 
