@@ -894,7 +894,7 @@ local M = {}
 --   A pattern that matches any whitespace character ('\t', '\v', '\f', '\n',
 --   '\r', space).
 -- @field newline (pattern)
---   A pattern that matches any set of end of line characters.
+--   A pattern that matches a sequence of end of line characters.
 -- @field nonnewline (pattern)
 --   A pattern that matches any single, non-newline character.
 -- @field nonnewline_esc (pattern)
@@ -1596,7 +1596,7 @@ M.print = lpeg_R(' ~')
 M.punct = lpeg_R('!/', ':@', '[\'', '{~')
 M.space = lpeg_S('\t\v\f\n\r ')
 
-M.newline = lpeg_S('\r\n\f')^1
+M.newline = P('\r')^-1 * '\n'
 M.nonnewline = 1 - M.newline
 M.nonnewline_esc = 1 - (M.newline + '\\') + '\\' * M.any
 
