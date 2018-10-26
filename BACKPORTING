@@ -276,25 +276,66 @@ branch), or have information worth noting.
 6973:7570322b0219 Added credits.
 7006:a6d3cefd4f79 Add TabPositionAfter method to IScreenLine as this calculation is needed on each platform and it allows extension to custom tab stops.
   Not backported, since previous bidirectional support was not backported.
-  
+
 7009:e1100c6feaaf Add function to find a UTF-16 position in a UTF-8 string.
   Not backported, since it is only used in bidirectional support at the moment.
-  
+
 7011:23a98ab36601 Define IScreenLineLayout as the main interface for implementing bidirectional features by platform code.
 7012:5f4011e010f9 Implement IScreenLineLayout for Cocoa Core Text as ScreenLineLayout.
 7013:0d86879c5ca5 Make virtual space selections visible in bidirectional mode.
 7014:39d3e00c381a UpdateBidiData is called by EditView but doesn't use any EditView fields so make it static.
 7015:6a7459cd08f9 Updated to mention bidirectional works on Cocoa.
   Not backported, since previous bidirectional support was not backported.
-  
+
 7026:4377a8d710e1 Update Cocoa enumerations to current names instead of deprecated names.
   Not backported, since many of these enumerations are not available for older SDKs.
-  
+
 7027:b71248119e8b Remove compile-time ENABLE_BIDIRECTIONAL option as bidirectional feature is now controlled completely at run-time.
   Not backported, since previous bidirectional support was not backported.
 
 7033:5da90aad11da Updates for 4.1.0.
   Not backported, since this is LongTerm3.
-  
+
 7034:0dc20d87a4f9 Note that Cocoa also supports bidirectional text.
   Not backported, since previous bidirectional support was not backported.
+
+7055:bb3c92f403f7 Added tag rel-4-1-0 for changeset 0dc20d87a4f9
+7059:455f134efbc1 SciTE change log.
+7061:d744568dfaa5 SciTE change log.
+  Not backported, since this is LongTerm3.
+
+7063:0d5edc93e280 Optional indexing of line starts in UTF-8 documents by UTF-32 code points and
+  Backported, but replaced std::string_view usage with const char* and size_t
+  components. Also used const_cast where appropriate to fix compile errors.
+
+7066:ee645426b872 Add SciTE credit.
+7067:43101fb47a25 SciTE change log.
+  Not backported, since this is LongTerm3.
+
+7069:e65cfc5348a5 Change lifetime of textLayout for bidirectional so it is always released in
+7071:d9e28bcc6cf9 Bug [#2030]. Fix Win32 crash setting technology to default after bidirectional
+  Not backported, since previous bidirectional support was not backported.
+
+7074:b190647b5084 SciTE change log.
+7079:744cd6e004ae Updates for 4.1.1.
+7080:59fdd1f4d5cd Updated change list for 4.1.1.
+7082:058cd4b189e6 Added tag rel-4-1-1 for changeset 892c361b3969
+7083:d87b627094ad Fix version number.
+7084:cd27559c2a65 Moved tag because of doc fix.
+7085:fcf47c352832 Updated outdated text.
+7086:c8643589ba1d Added tag rel-4-1-1 for changeset fcf47c352832
+7091:575636ffe226 Added section for next release.
+7095:58524eea6d35 SciTE change log.
+7101:f4988dfccc31 Updates for 4.1.2 release.
+7103:20455b6997e3 Added tag rel-4-1-2 for changeset 927e7d62e917
+  Not backported, since this is LongTerm3.
+
+7104:9b7f24b1b150 Fix crash when particular patterns of invalid UTF-8 led to failure to create a
+  Not backported, since previous bidirectional support was not backported.
+
+7109:29f0ca6d2d1b Improve performance of Editor::RangeText by avoding per-character checks.
+  Backported, but with const_cast to file compile error.
+
+7121:2f5d50043861 Bug [#2055]. Use dark info bar background when system is set to Dark Appearance.
+  Not backported, since its parent changeset 7026:4377a8d710e1 was not
+  backported.
