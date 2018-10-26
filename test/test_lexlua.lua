@@ -870,12 +870,10 @@ function test_html()
   assert_lex(html, code, tokens)
 
   -- Folding tests.
-  local symbols = {'<', '/>', '<!--', '-->', '{', '}', '/*', '*/', '//'}
+  local symbols = {'<', '<!--', '-->', '{', '}', '/*', '*/', '//'}
   for i = 1, #symbols do assert(html._FOLDPOINTS._SYMBOLS[symbols[i]]) end
   assert(html._FOLDPOINTS['element']['<'])
-  assert(html._FOLDPOINTS['element']['/>'])
   assert(html._FOLDPOINTS['unknown_element']['<'])
-  assert(html._FOLDPOINTS['unknown_element']['/>'])
   assert(html._FOLDPOINTS[lexer.COMMENT]['<!--'])
   assert(html._FOLDPOINTS[lexer.COMMENT]['-->'])
   assert(html._FOLDPOINTS[lexer.OPERATOR]['{'])
@@ -939,7 +937,7 @@ function test_php()
   tokens = {
     {lexer.KEYWORD, 'echo'},
     {lexer.STRING, '"hi"'},
-    {lexer.OPERATOR, ';'},  
+    {lexer.OPERATOR, ';'},
   }
   assert_lex(php, code, tokens, initial_style)
 
@@ -1096,7 +1094,7 @@ end
 -- Tests the RHTML lexer, which is a proxy for HTML and Rails.
 function test_rhtml()
   local rhtml = lexer.load('rhtml')
-  
+
   -- Lexing tests.
   -- Start in HTML.
   local code = [[<h1><% puts "hi" %></h1>]]
