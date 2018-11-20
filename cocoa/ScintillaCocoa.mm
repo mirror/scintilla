@@ -2284,7 +2284,18 @@ ptrdiff_t ScintillaCocoa::InsertText(NSString *input) {
 
   if (encoded.length() > 0)
   {
-    AddCharUTF(encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
+    if (encoding == kCFStringEncodingUTF8) {
+      // There may be multiple characters in input so loop over them
+      std::string sv = encoded;
+      while (sv.length()) {
+        const unsigned char leadByte = sv[0];
+        const unsigned int bytesInCharacter = UTF8BytesOfLead[leadByte];
+        AddCharUTF(sv.c_str(), bytesInCharacter, false);
+        sv = sv.substr(bytesInCharacter, sv.length());
+      }
+    } else {
+      AddCharUTF(encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
+		}
   }
   return encoded.length();
 }
