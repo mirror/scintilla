@@ -12,33 +12,37 @@ local beginend = (P('begin') + 'end')
 local startstop = (P('start') + 'stop')
 
 -- Whitespace.
-lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
+local ws = token(lexer.WHITESPACE, lexer.space^1)
+lex:add_rule('whitespace', ws)
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '%' * lexer.nonnewline^0))
+local comment = token(lexer.COMMENT, '%' * lexer.nonnewline^0)
+lex:add_rule('comment', comment)
 
 -- Sections.
 local wm_section = word_match[[
   chapter part section subject subsection subsubject subsubsection subsubsubject
   subsubsubsection subsubsubsubject title
 ]]
-local section = token('section', '\\' * (wm_section + (startstop * wm_section)))
+local section = token(lexer.CLASS,
+                      '\\' * (wm_section + (startstop * wm_section)))
 lex:add_rule('section', section)
-lex:add_style('section', lexer.STYLE_CLASS)
 
 -- TeX and ConTeXt mkiv environments.
-local environment = token(lexer.STRING, '\\' * (beginend + startstop) * lexer.alpha^1)
+local environment = token(lexer.STRING,
+                          '\\' * (beginend + startstop) * lexer.alpha^1)
 lex:add_rule('environment', environment)
 
 -- Commands.
-local command = token('command', '\\' * (lexer.alpha^1 * '\\' * lexer.space^1 +
-                                         lexer.alpha^1 +
-                                         S('!"#$%&\',./;=[\\]_{|}~`^-')))
+local command = token(lexer.KEYWORD,
+                      '\\' * (lexer.alpha^1 * P('\\') * lexer.space^1 +
+                              lexer.alpha^1 +
+                              S('!"#$%&\',./;=[\\]_{|}~`^-')))
 lex:add_rule('command', command)
-lex:add_style('command', lexer.STYLE_KEYWORD)
 
 -- Operators.
-lex:add_rule('operator', token(lexer.OPERATOR, S('#$_[]{}~^')))
+local operator = token(lexer.OPERATOR, S('#$_[]{}~^'))
+lex:add_rule('operator', operator)
 
 -- Fold points.
 lex:add_fold_point('environment', '\\start', '\\stop')
