@@ -930,8 +930,8 @@ Sci::Position Document::GetRelativePositionUTF16(Sci::Position positionStart, Sc
 int SCI_METHOD Document::GetCharacterAndWidth(Sci_Position position, Sci_Position *pWidth) const {
 	int character;
 	int bytesInCharacter = 1;
+	const unsigned char leadByte = cb.UCharAt(position);
 	if (dbcsCodePage) {
-		const unsigned char leadByte = cb.UCharAt(position);
 		if (SC_CP_UTF8 == dbcsCodePage) {
 			if (UTF8IsAscii(leadByte)) {
 				// Single byte character or invalid
@@ -959,7 +959,7 @@ int SCI_METHOD Document::GetCharacterAndWidth(Sci_Position position, Sci_Positio
 			}
 		}
 	} else {
-		character = cb.CharAt(position);
+		character = leadByte;
 	}
 	if (pWidth) {
 		*pWidth = bytesInCharacter;
