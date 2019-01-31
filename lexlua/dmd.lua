@@ -28,8 +28,7 @@ local other_hex_str = '\\x' * (lexer.xdigit * lexer.xdigit)^1
 local del_str = lexer.nested_pair('q"[', ']"') * S('cwd')^-1 +
                 lexer.nested_pair('q"(', ')"') * S('cwd')^-1 +
                 lexer.nested_pair('q"{', '}"') * S('cwd')^-1 +
-                lexer.nested_pair('q"<', '>"') * S('cwd')^-1 +
-                P('q') * lexer.nested_pair('{', '}') * S('cwd')^-1
+                lexer.nested_pair('q"<', '>"') * S('cwd')^-1
 local string = token(lexer.STRING, del_str + sq_str + dq_str + lit_str +
                                    bt_str + hex_str + other_hex_str)
 
@@ -39,7 +38,7 @@ local hex_num = lexer.hex_num * ('_' * lexer.xdigit^1)^0
 local bin_num = '0' * S('bB') * S('01_')^1
 local oct_num = '0' * S('01234567_')^1
 local integer = S('+-')^-1 * (hex_num + oct_num + bin_num + dec)
-local number = token(lexer.NUMBER, (lexer.float + integer) * S('uUlLdDfFi')^-1)
+local number = token(lexer.NUMBER, (lexer.float + integer) * S('uULdDfFi')^-1)
 
 -- Keywords.
 local keyword = token(lexer.KEYWORD, word_match{
@@ -79,7 +78,7 @@ local class_sequence = token(lexer.TYPE, P('class') + P('struct')) * ws^1 *
 local identifier = token(lexer.IDENTIFIER, lexer.word)
 
 -- Operators.
-local operator = token(lexer.OPERATOR, S('?=!<>+-*$/%&|^~.,;()[]{}'))
+local operator = token(lexer.OPERATOR, '..' + S('?=!<>+-*$/%&|^~.,;:()[]{}'))
 
 -- Properties.
 local properties = (type + identifier + operator) * token(lexer.OPERATOR, '.') *
