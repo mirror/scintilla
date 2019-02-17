@@ -355,3 +355,6 @@ branch), or have information worth noting.
 7197:1484a537b380 Updates for version 4.1.3.
 7198:974d0f564d0d Added tag rel-4-1-3 for changeset 1484a537b380
   Not backported, since this is LongTerm3.
+
+7250:f77887e669fc SciTE history.
+  Not backported, since this is LongTerm3.
