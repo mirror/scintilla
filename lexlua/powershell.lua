@@ -1,4 +1,4 @@
--- Copyright 2015-2018 Mitchell mitchell.att.foicica.com. See License.txt.
+-- Copyright 2015-2019 Mitchell mitchell.att.foicica.com. See License.txt.
 -- PowerShell LPeg lexer.
 -- Contributed by Jeff Stone.
 

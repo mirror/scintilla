@@ -1,4 +1,4 @@
--- Copyright 2006-2018 Robert Gieseke, Lars Otter. See License.txt.
+-- Copyright 2006-2019 Robert Gieseke, Lars Otter. See License.txt.
 -- ConTeXt LPeg lexer.
 
 local lexer = require('lexer')

@@ -1,4 +1,4 @@
--- Copyright 2006-2018 Mitchell mitchell.att.foicica.com. See License.txt.
+-- Copyright 2006-2019 Mitchell mitchell.att.foicica.com. See License.txt.
 -- LPeg lexer for the Icon programming language.
 -- http://www.cs.arizona.edu/icon
 -- Contributed by Carl Sturtivant.

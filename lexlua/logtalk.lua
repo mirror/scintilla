@@ -1,4 +1,4 @@
--- Copyright © 2017-2018 Michael T. Richter <ttmrichter@gmail.com>. See License.txt.
+-- Copyright © 2017-2019 Michael T. Richter <ttmrichter@gmail.com>. See License.txt.
 -- Logtalk LPeg lexer.
 
 local lexer = require('lexer')

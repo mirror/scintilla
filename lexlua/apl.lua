@@ -1,4 +1,4 @@
--- Copyright 2015-2018 David B. Lamkins <david@lamkins.net>. See License.txt.
+-- Copyright 2015-2019 David B. Lamkins <david@lamkins.net>. See License.txt.
 -- APL LPeg lexer.
 
 local lexer = require('lexer')

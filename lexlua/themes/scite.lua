@@ -1,4 +1,4 @@
--- Copyright 2006-2018 Mitchell mitchell.att.foicica.com. See License.txt.
+-- Copyright 2006-2019 Mitchell mitchell.att.foicica.com. See License.txt.
 -- SciTE theme for Lua lexers.
 
 local property = require('lexer').property

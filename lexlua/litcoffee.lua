@@ -1,4 +1,4 @@
--- Copyright 2006-2018 Robert Gieseke. See License.txt.
+-- Copyright 2006-2019 Robert Gieseke. See License.txt.
 -- Literate CoffeeScript LPeg lexer.
 -- http://coffeescript.org/#literate
 

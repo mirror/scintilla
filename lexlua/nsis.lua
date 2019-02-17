@@ -1,4 +1,4 @@
--- Copyright 2006-2018 Robert Gieseke. See License.txt.
+-- Copyright 2006-2019 Robert Gieseke. See License.txt.
 -- NSIS LPeg lexer
 -- Based on NSIS 2.46 docs: http://nsis.sourceforge.net/Docs/.
 
