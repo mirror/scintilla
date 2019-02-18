@@ -405,6 +405,38 @@
 
     <p>See also: <a class="message" href="#SCI_SETDOCPOINTER"><code>SCI_SETDOCPOINTER</code></a></p>
 
+    <h2>Using Scintilla as a Lua Library</h3>
+
+    <p>In order to use Scintilla as a Lua library, simply place the <code>lexlua/</code>
+    directory in your Lua path (or modify Lua&rsquo;s <code>package.path</code> accordingly),
+    <code>require()</code> the library and <a href="#lexer.load"><code>load()</code></a> a lexer, and call that lexer&rsquo;s
+    <a href="#lexer.lex"><code>lex()</code></a> function. Here is an example interactive Lua session doing this:</p>
+
+    <pre><code>$&gt; lua
+Lua 5.1.4  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+&gt; lexer_path = '/home/mitchell/code/scintilla/lexlua/?.lua'
+&gt; package.path = package.path..';'..lexer_path
+&gt; c = require('lexer').load('ansi_c')
+&gt; tokens = c:lex('int void main() { return 0; }')
+&gt; for i = 1, #tokens, 2 do print(tokens[i], tokens[i+1]) end
+type    4
+ansi_c_whitespace   5
+type    9
+ansi_c_whitespace   10
+identifier  14
+operator    15
+operator    16
+ansi_c_whitespace   17
+operator    18
+ansi_c_whitespace   19
+keyword 25
+ansi_c_whitespace   26
+number  27
+operator    28
+ansi_c_whitespace   29
+operator    30
+    </code></pre>
+
     <h2 id="lexer">Writing Lua Lexers</h2>
 
     <p>Lexers highlight the syntax of source code. Scintilla (the editing component
