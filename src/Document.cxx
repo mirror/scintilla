@@ -476,7 +476,7 @@ void Document::ClearLevels() {
 	Levels()->ClearLevels();
 }
 
-static bool IsSubordinate(int levelStart, int levelTry) {
+static bool IsSubordinate(int levelStart, int levelTry) noexcept {
 	if (levelTry & SC_FOLDLEVELWHITEFLAG)
 		return true;
 	else
