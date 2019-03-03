@@ -4018,8 +4018,6 @@ public:
 	CaseFolderASCII() noexcept {
 		StandardASCII();
 	}
-	~CaseFolderASCII() override {
-	}
 };
 
 
