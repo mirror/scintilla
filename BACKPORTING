@@ -358,3 +358,22 @@ branch), or have information worth noting.
 
 7250:f77887e669fc SciTE history.
   Not backported, since this is LongTerm3.
+
+7280:9cf6a15d6c85 Use noexcept and constexpr where possible and reasonable.
+  Backported, but removed use of constexpr, since it is a >= C++14 feature for
+  non-return-only functions.
+
+7281:4cb7fa260e77 SciTE changelog.
+7284:b52eed62fda9 SciTE change log.
+  Not backported, since this is LongTerm3.
+  
+7289:3f930310a0de Use constexpr where reasonable and move groups of static functions into unnamed namespace.  
+  Backported, but removed some instances of constexpr, since it is a >= C++14 
+  feature for non-return-only functions
+  
+7290:07b4e4192bb2 Updated version number for release.
+7292:20a944185079 Added tag rel-4-1-4 for changeset cd35899fef5e
+  Not backported, since this is LongTerm3.
+  
+7293:3d4c60be1963 Update download sizes.
+  Not backported, since this is not applicable.
