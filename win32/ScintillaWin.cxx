@@ -836,7 +836,7 @@ sptr_t ScintillaWin::WndPaint() {
 	// Redirect assertions to debug output and save current state
 	const bool assertsPopup = Platform::ShowAssertionPopUps(false);
 	paintState = painting;
-	PAINTSTRUCT ps;
+	PAINTSTRUCT ps = {};
 
 	// Removed since this interferes with reporting other assertions as it occurs repeatedly
 	//PLATFORM_ASSERT(hRgnUpdate == NULL);
@@ -2052,7 +2052,7 @@ public:
 				return 1;
 			}
 
-			unsigned int lenFlat = 0;
+			size_t lenFlat = 0;
 			for (size_t mixIndex=0; mixIndex < nUtf16Mixed; mixIndex++) {
 				if ((lenFlat + 20) > utf16Folded.size())
 					utf16Folded.resize(lenFlat + 60);
@@ -2209,7 +2209,7 @@ public:
 		PLATFORM_ASSERT(ptr);
 		HGLOBAL handCopy = hand;
 		::GlobalUnlock(hand);
-		ptr = 0;
+		ptr = nullptr;
 		hand = 0;
 		return handCopy;
 	}
