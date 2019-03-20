@@ -16,7 +16,7 @@ using namespace Scintilla;
 
 namespace Scintilla {
 
-size_t UTF8Length(const wchar_t *uptr, size_t tlen) {
+size_t UTF8Length(const wchar_t *uptr, size_t tlen) noexcept {
 	size_t len = 0;
 	for (size_t i = 0; i < tlen && uptr[i];) {
 		const unsigned int uch = uptr[i];
@@ -65,7 +65,7 @@ void UTF8FromUTF16(const wchar_t *uptr, size_t tlen, char *putf, size_t len) {
 		putf[k] = '\0';
 }
 
-void UTF8FromUTF32Character(int uch, char *putf) {
+void UTF8FromUTF32Character(int uch, char *putf) noexcept {
 	size_t k = 0;
 	if (uch < 0x80) {
 		putf[k++] = static_cast<char>(uch);
@@ -85,7 +85,7 @@ void UTF8FromUTF32Character(int uch, char *putf) {
 	putf[k] = '\0';
 }
 
-size_t UTF16Length(const char *s, size_t len) {
+size_t UTF16Length(const char *s, size_t len) noexcept {
 	size_t ulen = 0;
 	for (size_t i = 0; i < len;) {
 		const unsigned char ch = s[i];

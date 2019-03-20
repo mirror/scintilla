@@ -14,10 +14,10 @@ const int UTF8MaxBytes = 4;
 
 const int unicodeReplacementChar = 0xFFFD;
 
-size_t UTF8Length(const wchar_t *uptr, size_t tlen);
+size_t UTF8Length(const wchar_t *uptr, size_t tlen) noexcept;
 void UTF8FromUTF16(const wchar_t *uptr, size_t tlen, char *putf, size_t len);
-void UTF8FromUTF32Character(int uch, char *putf);
-size_t UTF16Length(const char *s, size_t len);
+void UTF8FromUTF32Character(int uch, char *putf) noexcept;
+size_t UTF16Length(const char *s, size_t len) noexcept;
 size_t UTF16FromUTF8(const char *s, size_t len, wchar_t *tbuf, size_t tlen);
 size_t UTF32Length(const char *s, size_t len) noexcept;
 size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen);
