@@ -162,6 +162,17 @@ size_t UTF16FromUTF8(const char *s, size_t len, wchar_t *tbuf, size_t tlen) {
 	return ui;
 }
 
+size_t UTF32Length(const char *s, size_t len) noexcept {
+	size_t ulen = 0;
+	for (size_t i = 0; i < len;) {
+		const unsigned char ch = s[i];
+		const unsigned int byteCount = UTF8BytesOfLead[ch];
+		i += byteCount;
+		ulen++;
+	}
+	return ulen;
+}
+
 size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen) {
 	size_t ui = 0;
 	for (size_t i = 0; i < len;) {
@@ -213,6 +224,20 @@ size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen)
 		ui++;
 	}
 	return ui;
+}
+
+std::wstring WStringFromUTF8(const char *s, size_t len) {
+#ifdef _WIN32
+		const size_t len16 = UTF16Length(s, len);
+		std::wstring ws(len16, 0);
+		UTF16FromUTF8(s, len, &ws[0], len16);
+		return ws;
+#else
+		const size_t len32 = UTF32Length(s, len);
+		std::wstring ws(len32, 0);
+		UTF32FromUTF8(s, len, reinterpret_cast<unsigned int *>(&ws[0]), len32);
+		return ws;
+#endif
 }
 
 unsigned int UTF16FromUTF32Character(unsigned int val, wchar_t *tbuf) noexcept {
