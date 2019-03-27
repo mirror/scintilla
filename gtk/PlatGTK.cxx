@@ -96,7 +96,7 @@ FontHandle *FontHandle::CreateNewFont(const FontParameters &fp) {
 		pango_font_description_set_size(pfd, pangoUnitsFromDouble(fp.size));
 		pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
 		pango_font_description_set_style(pfd, fp.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-		return new FontHandle(pfd,fp.characterSet);
+		return new FontHandle(pfd, fp.characterSet);
 	}
 
 	return nullptr;
@@ -701,7 +701,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, con
 			}
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			pango_cairo_update_layout(context, layout);
-			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout,0);
+			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout, 0);
 			cairo_move_to(context, xText, ybase);
 			pango_cairo_show_layout_line(context, pll);
 		}
@@ -821,7 +821,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 						PLATFORM_ASSERT(i == lenPositions);
 					}
 				}
-				if (positionsCalculated < 1 ) {
+				if (positionsCalculated < 1) {
 					// Either 8-bit or DBCS conversion failed so treat as 8-bit.
 					SetConverter(PFont(font_)->characterSet);
 					const bool rtlCheck = PFont(font_)->characterSet == SC_CHARSET_HEBREW ||
@@ -888,7 +888,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 				}
 				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 			}
-			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout,0);
+			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
 			pango_layout_line_get_extents(pangoLine, nullptr, &pos);
 			return floatFromPangoUnits(pos.width);
 		}
@@ -969,7 +969,7 @@ Window::~Window() {}
 
 void Window::Destroy() {
 	if (wid) {
-		ListBox *listbox = dynamic_cast<ListBox*>(this);
+		ListBox *listbox = dynamic_cast<ListBox *>(this);
 		if (listbox) {
 			gtk_widget_hide(GTK_WIDGET(wid));
 			// clear up window content
@@ -1019,7 +1019,7 @@ GdkRectangle MonitorRectangleForWidget(GtkWidget *wid) {
 	GdkMonitor *monitor = gdk_display_get_monitor_at_window(pdisplay, wnd);
 	gdk_monitor_get_geometry(monitor, &rcScreen);
 #else
-	GdkScreen* screen = gtk_widget_get_screen(wid);
+	GdkScreen *screen = gtk_widget_get_screen(wid);
 	const gint monitor_num = gdk_screen_get_monitor_at_window(screen, wnd);
 	gdk_screen_get_monitor_geometry(screen, monitor_num, &rcScreen);
 #endif
@@ -1144,7 +1144,7 @@ PRectangle Window::GetMonitorRect(Point pt) {
 		pt.x + x_offset, pt.y + y_offset);
 	gdk_monitor_get_geometry(monitor, &rect);
 #else
-	GdkScreen* screen = gtk_widget_get_screen(PWidget(wid));
+	GdkScreen *screen = gtk_widget_get_screen(PWidget(wid));
 	const gint monitor_num = gdk_screen_get_monitor_at_point(screen,
 		pt.x + x_offset, pt.y + y_offset);
 	gdk_screen_get_monitor_geometry(screen, monitor_num, &rect);
@@ -1154,7 +1154,7 @@ PRectangle Window::GetMonitorRect(Point pt) {
 	return PRectangle::FromInts(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 }
 
-typedef std::map<int, RGBAImage*> ImageMap;
+typedef std::map<int, RGBAImage *> ImageMap;
 
 struct ListImage {
 	const RGBAImage *rgba_data;
@@ -1186,8 +1186,8 @@ class ListBoxX : public ListBox {
 	WindowID list;
 	WindowID scroller;
 	void *pixhash;
-	GtkCellRenderer* pixbuf_renderer;
-	GtkCellRenderer* renderer;
+	GtkCellRenderer *pixbuf_renderer;
+	GtkCellRenderer *renderer;
 	RGBAImageSet images;
 	int desiredVisibleRows;
 	unsigned int maxItemCharacters;
@@ -1329,11 +1329,11 @@ static void small_scroller_class_init(SmallScrollerClass *klass) {
 #endif
 }
 
-static void small_scroller_init(SmallScroller *){}
+static void small_scroller_init(SmallScroller *) {}
 
-static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
+static gboolean ButtonPress(GtkWidget *, GdkEventButton *ev, gpointer p) {
 	try {
-		ListBoxX* lb = static_cast<ListBoxX*>(p);
+		ListBoxX *lb = static_cast<ListBoxX *>(p);
 		if (ev->type == GDK_2BUTTON_PRESS && lb->delegate) {
 			ListBoxEvent event(ListBoxEvent::EventType::doubleClick);
 			lb->delegate->ListNotify(&event);
@@ -1346,9 +1346,9 @@ static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
 	return FALSE;
 }
 
-static gboolean ButtonRelease(GtkWidget *, GdkEventButton* ev, gpointer p) {
+static gboolean ButtonRelease(GtkWidget *, GdkEventButton *ev, gpointer p) {
 	try {
-		ListBoxX* lb = static_cast<ListBoxX*>(p);
+		ListBoxX *lb = static_cast<ListBoxX *>(p);
 		if (ev->type != GDK_2BUTTON_PRESS && lb->delegate) {
 			ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
 			lb->delegate->ListNotify(&event);
@@ -1362,7 +1362,7 @@ static gboolean ButtonRelease(GtkWidget *, GdkEventButton* ev, gpointer p) {
 
 /* Change the active color to the selected color so the listbox uses the color
 scheme that it would use if it had the focus. */
-static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
+static void StyleSet(GtkWidget *w, GtkStyle *, void *) {
 
 	g_return_if_fail(w != nullptr);
 
@@ -1672,8 +1672,8 @@ static void init_pixmap(ListImage *list_image) {
 void ListBoxX::Append(char *s, int type) {
 	ListImage *list_image = nullptr;
 	if ((type >= 0) && pixhash) {
-		list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash
-		             , (gconstpointer) GINT_TO_POINTER(type)));
+		list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash,
+						      GINT_TO_POINTER(type)));
 	}
 	GtkTreeIter iter;
 	GtkListStore *store =
@@ -1791,7 +1791,7 @@ int ListBoxX::Find(const char *prefix) {
 		gtk_tree_view_get_model(GTK_TREE_VIEW(list));
 	bool valid = gtk_tree_model_get_iter_first(model, &iter) != FALSE;
 	int i = 0;
-	while(valid) {
+	while (valid) {
 		gchar *s;
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &s, -1);
 		if (s && (0 == strncmp(prefix, s, strlen(prefix)))) {
@@ -1833,7 +1833,7 @@ void ListBoxX::RegisterRGBA(int type, RGBAImage *image) {
 		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
 	}
 	ListImage *list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash,
-		(gconstpointer) GINT_TO_POINTER(type)));
+				GINT_TO_POINTER(type)));
 	if (list_image) {
 		// Drop icon already registered
 		if (list_image->pixbuf)
@@ -1942,7 +1942,7 @@ void Menu::Show(Point pt, Window &w) {
 
 class DynamicLibraryImpl : public DynamicLibrary {
 protected:
-	GModule* m;
+	GModule *m;
 public:
 	explicit DynamicLibraryImpl(const char *modulePath) noexcept {
 		m = g_module_open(modulePath, G_MODULE_BIND_LAZY);
@@ -1973,7 +1973,7 @@ public:
 };
 
 DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
-	return static_cast<DynamicLibrary *>( new DynamicLibraryImpl(modulePath) );
+	return static_cast<DynamicLibrary *>(new DynamicLibraryImpl(modulePath));
 }
 
 ColourDesired Platform::Chrome() {
