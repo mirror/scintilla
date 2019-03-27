@@ -307,13 +307,11 @@ $(DIR_O)\CallTip.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
-	../src/IntegerRectangle.h \
-	../lexlib/StringCopy.h \
 	../src/Position.h \
+	../src/IntegerRectangle.h \
 	../src/CallTip.h
 $(DIR_O)\CaseConvert.obj: \
 	../src/CaseConvert.cxx \
-	../lexlib/StringCopy.h \
 	../src/CaseConvert.h \
 	../src/UniConversion.h
 $(DIR_O)\CaseFolder.obj: \
@@ -346,6 +344,7 @@ $(DIR_O)\CharacterSet.obj: \
 	../lexlib/CharacterSet.h
 $(DIR_O)\CharClassify.obj: \
 	../src/CharClassify.cxx \
+	../lexlib/CharacterSet.h \
 	../src/CharClassify.h
 $(DIR_O)\ContractionState.obj: \
 	../src/ContractionState.cxx \
@@ -411,7 +410,6 @@ $(DIR_O)\EditModel.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../lexlib/StringCopy.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -439,7 +437,6 @@ $(DIR_O)\Editor.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../lexlib/StringCopy.h \
 	../lexlib/CharacterSet.h \
 	../src/Position.h \
 	../src/UniqueString.h \
@@ -464,7 +461,8 @@ $(DIR_O)\Editor.obj: \
 	../src/EditModel.h \
 	../src/MarginView.h \
 	../src/EditView.h \
-	../src/Editor.h
+	../src/Editor.h \
+	../src/ElapsedPeriod.h
 $(DIR_O)\EditView.obj: \
 	../src/EditView.cxx \
 	../include/Platform.h \
@@ -472,7 +470,6 @@ $(DIR_O)\EditView.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../lexlib/StringCopy.h \
 	../lexlib/CharacterSet.h \
 	../src/Position.h \
 	../src/IntegerRectangle.h \
@@ -812,7 +809,6 @@ $(DIR_O)\LineMarker.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
-	../lexlib/StringCopy.h \
 	../src/IntegerRectangle.h \
 	../src/XPM.h \
 	../src/LineMarker.h
@@ -823,7 +819,6 @@ $(DIR_O)\MarginView.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../lexlib/StringCopy.h \
 	../src/Position.h \
 	../src/IntegerRectangle.h \
 	../src/UniqueString.h \
@@ -860,7 +855,6 @@ $(DIR_O)\PerLine.obj: \
 $(DIR_O)\PlatWin.obj: \
 	PlatWin.cxx \
 	../include/Platform.h \
-	../lexlib/StringCopy.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
 	../src/DBCS.h \
@@ -987,7 +981,6 @@ $(DIR_O)\ScintillaWin.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../lexlib/StringCopy.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -1026,7 +1019,6 @@ $(DIR_O)\ScintillaWinL.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../lexlib/StringCopy.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -1096,7 +1088,6 @@ $(DIR_O)\ViewStyle.obj: \
 	../src/ViewStyle.h
 $(DIR_O)\WordList.obj: \
 	../lexlib/WordList.cxx \
-	../lexlib/StringCopy.h \
 	../lexlib/WordList.h
 $(DIR_O)\XPM.obj: \
 	../src/XPM.cxx \
