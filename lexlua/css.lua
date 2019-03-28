@@ -38,6 +38,11 @@ lex:add_rule('property', token('property', word_match[[
   pause-after pause cue-before cue-after cue play-during azimuth elevation
   speech-rate voice-family pitch pitch-range stress richness speak-punctuation
   speak-numeral
+  -- CSS 3.
+  flex flex-basis flex-direction flex-flow flex-grow flex-shrink flex-wrap
+  align-content align-items align-self justify-content order border-radius
+  transition transform box-shadow filter opacity resize word-break word-wrap
+  box-sizing animation text-overflow
 ]]))
 lex:add_style('property', lexer.STYLE_KEYWORD)
 
@@ -74,6 +79,8 @@ lex:add_rule('value', token('value', word_match[[
   center-left center-right far-right right-side behind leftwards rightwards
   below level above higher lower x-slow slow medium fast x-fast faster slower
   male female child x-low low high x-high code digits continous
+  -- CSS 3.
+  flex row column ellipsis inline-block
 ]]))
 lex:add_style('value', lexer.STYLE_CONSTANT)
 
@@ -86,7 +93,7 @@ lex:add_rule('function', token(lexer.FUNCTION, word_match[[
   repeating-linear-gradient repeating-radial-gradient rgb rgba rotate rotate3d
   rotateX rotateY rotateZ saturate saturation scale scale3d scaleX scaleY scaleZ
   sepia shade skewX skewY steps tint toggle translate translate3d translateX
-  translateY translateZ url whiteness
+  translateY translateZ url whiteness var
 ]]))
 
 -- Colors.
@@ -154,7 +161,7 @@ lex:add_rule('operator', token(lexer.OPERATOR, S('~!#*>+=|.,:;()[]{}')))
 
 -- At rule.
 lex:add_rule('at_rule', token('at_rule', P('@') * word_match[[
-  charset font-face media page import namespace
+  charset font-face media page import namespace keyframes
 ]]))
 lex:add_style('at_rule', lexer.STYLE_PREPROCESSOR)
 
