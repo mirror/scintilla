@@ -28,6 +28,7 @@
 #endif
 
 #include "PropSetSimple.h"
+#include "CharacterCategory.h"
 
 #ifdef SCI_LEXER
 #include "LexerModule.h"

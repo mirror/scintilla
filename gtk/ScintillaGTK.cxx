@@ -45,6 +45,7 @@
 #include "SciLexer.h"
 #endif
 #include "StringCopy.h"
+#include "CharacterCategory.h"
 #ifdef SCI_LEXER
 #include "LexerModule.h"
 #endif

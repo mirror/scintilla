@@ -24,6 +24,7 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
+#include "CharacterCategory.h"
 #include "Position.h"
 #include "UniqueString.h"
 #include "SplitVector.h"
