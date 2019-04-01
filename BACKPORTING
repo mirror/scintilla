@@ -366,14 +366,59 @@ branch), or have information worth noting.
 7281:4cb7fa260e77 SciTE changelog.
 7284:b52eed62fda9 SciTE change log.
   Not backported, since this is LongTerm3.
-  
-7289:3f930310a0de Use constexpr where reasonable and move groups of static functions into unnamed namespace.  
-  Backported, but removed some instances of constexpr, since it is a >= C++14 
+
+7289:3f930310a0de Use constexpr where reasonable and move groups of static functions into unnamed namespace.
+  Backported, but removed some instances of constexpr, since it is a >= C++14
   feature for non-return-only functions
-  
+
 7290:07b4e4192bb2 Updated version number for release.
 7292:20a944185079 Added tag rel-4-1-4 for changeset cd35899fef5e
   Not backported, since this is LongTerm3.
-  
+
 7293:3d4c60be1963 Update download sizes.
   Not backported, since this is not applicable.
+
+7315:57ea0255c8aa Avoid hangs in idle styling modes caused by high-priority idle work styling.
+  Backported, but removed some instances of constexpr, since it is a >= C++14
+  feature for non-static data members.
+
+7319:6db11117d56f Use noexcept where allowed, not inherited from base class, and not a COM method.
+7320:304d26d7137f Minor warnings fixed - uninitialized, nullptr, type agreement, avoid casts.
+  Backported, but without the C++17 multi-byte helper functions from a previous
+  changeset.
+
+7322:b79d68be7e96 Credit for SciTE change.
+  Not backported, since this is LongTerm3.
+
+7325:6148329fb2f3 Implement WStringFromUTF8 to simplify code that creates wstring objects for regular expressions and calling the Win32 API.
+  Backported, but replaced std::string_view usage with const char* and size_t
+  components. Also used #ifdef instead of C++17 `if constexpr` at suggestion of
+  Neil.
+
+7326:2f9b5e1c97ae Use noexcept where sensible. Rename UTF8 string_view parameters for clarity.
+  Backported, but without the variable renames, since they are not applicable.
+
+7328:521b1e23bfe2 Fix warnings from MSVC Code Analysis.
+  Backported, but without C++17 std::size and `SymbolValue() = default` instead
+  of `SymbolValue() noexcept = default`, since the latter causes a compile
+  error.
+
+7329:2662ef098d93 Use generic versions of ceil, floor, round, lround, trunc from <cmath>.
+  Backported, but without std::round and std::lround, since older Mac OSX SDKs
+  may not have them.
+
+7332:982c5f3833bb Simplify with range for.
+  Not backported, since std::string_view from C++17 is not used.
+
+7333:3f381a0bbeff Use std::make_unique.
+  Not backported, since std::make_unique is not in C++11.
+
+7337:eeaddec85ecc Use size_t for consistency and to avoid casts.
+  Not backported, since std::string_view from C++17 is not used.
+
+7349:0b7800a19ed3 Updated ScintillaFramework internationalization to fix warnings from Xcode 10.2.
+  Backported, but only .cxx file reordering. Internationalization was not
+  backported in case it's not compatible with earlier versions of Xcode.
+
+7350:0b319d73d317 Updated ScintillaTest internationalization to fix warnings from Xcode 10.2.
+  Not backported in case it's not compatible with earlier versions of Xcode.
