@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 
 #include <stdexcept>
 #include <vector>
@@ -455,8 +456,8 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back)
   {
     FillColour(back);
     // Snap rectangle boundaries to nearest int
-    rc.left = lround(rc.left);
-    rc.right = lround(rc.right);
+    rc.left = std::round(rc.left);
+    rc.right = std::round(rc.right);
     CGRect rect = PRectangleToCGRect(rc);
     CGContextFillRect(gc, rect);
   }
@@ -646,8 +647,8 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, Colou
 {
   if ( gc ) {
     // Snap rectangle boundaries to nearest int
-    rc.left = lround(rc.left);
-    rc.right = lround(rc.right);
+    rc.left = std::round(rc.left);
+    rc.right = std::round(rc.right);
     // Set the Fill color to match
     CGContextSetRGBFillColor( gc, fill.GetRed() / 255.0, fill.GetGreen() / 255.0, fill.GetBlue() / 255.0, alphaFill / 255.0 );
     CGContextSetRGBStrokeColor( gc, outline.GetRed() / 255.0, outline.GetGreen() / 255.0, outline.GetBlue() / 255.0, alphaOutline / 255.0 );
@@ -1064,7 +1065,7 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
   const int sizeStringLength = ELEMENTS( sizeString );
   XYPOSITION width = WidthText( font_, sizeString, sizeStringLength  );
 
-  return round(width / sizeStringLength);
+  return std::round(width / sizeStringLength);
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {
@@ -1651,7 +1652,7 @@ void ListBoxImpl::SetFont(Font& font_)
   font.SetID(new QuartzTextStyle(*style));
   NSFont *pfont = (NSFont *)style->getFontRef();
   [[colText dataCell] setFont: pfont];
-  CGFloat itemHeight = ceil([pfont boundingRectForFont].size.height);
+  CGFloat itemHeight = std::ceil([pfont boundingRectForFont].size.height);
   [table setRowHeight:itemHeight];
 }
 

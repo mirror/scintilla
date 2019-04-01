@@ -14,6 +14,8 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#include <cmath>
+
 #include <vector>
 
 #import <Cocoa/Cocoa.h>
@@ -2622,7 +2624,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
     layerFindIndicator = [[FindHighlightLayer alloc] init];
     [content setWantsLayer: YES];
     layerFindIndicator.geometryFlipped = content.layer.geometryFlipped;
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_8)
+    if (std::floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_8)
     {
       // Content layer is unflipped on 10.9, but the indicator shows wrong unless flipped
       layerFindIndicator.geometryFlipped = YES;

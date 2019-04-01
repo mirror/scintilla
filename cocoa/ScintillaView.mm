@@ -9,6 +9,8 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#include <cmath>
+
 #include <vector>
 
 #import "Platform.h"
@@ -811,14 +813,14 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     // Only snap for positions inside the document - allow outside
     // for overshoot.
     long lineHeight = mOwner.backend->WndProc(SCI_TEXTHEIGHT, 0, 0);
-    rc.origin.y = roundf(static_cast<XYPOSITION>(rc.origin.y) / lineHeight) * lineHeight;
+    rc.origin.y = std::round(static_cast<XYPOSITION>(rc.origin.y) / lineHeight) * lineHeight;
   }
 	// Snap to whole points - on retina displays this avoids visual debris
 	// when scrolling horizontally.
 	if ((rc.origin.x > 0) && (NSMaxX(rc) < contentRect.size.width)) {
 		// Only snap for positions inside the document - allow outside
 		// for overshoot.
-		rc.origin.x = roundf(static_cast<XYPOSITION>(rc.origin.x));
+		rc.origin.x = std::round(static_cast<XYPOSITION>(rc.origin.x));
 	}
   return rc;
 }

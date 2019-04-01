@@ -648,7 +648,7 @@ Range EditView::RangeDisplayLine(Surface *surface, const EditModel &model, Sci::
 
 SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditModel &model, PointDocument pt, bool canReturnInvalid, bool charPosition, bool virtualSpace, const ViewStyle &vs) {
 	pt.x = pt.x - vs.textStart;
-	Sci::Line visibleLine = static_cast<int>(floor(pt.y / vs.lineHeight));
+	Sci::Line visibleLine = static_cast<int>(std::floor(pt.y / vs.lineHeight));
 	if (!canReturnInvalid && (visibleLine < 0))
 		visibleLine = 0;
 	const Sci::Line lineDoc = model.pcs->DocFromDisplay(visibleLine);
@@ -815,7 +815,7 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 		surface->FillRectangle(rcSegment, textBack);
 	}
 	FontAlias ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
-	const int normalCharHeight = static_cast<int>(ceil(vsDraw.styles[STYLE_CONTROLCHAR].capitalHeight));
+	const int normalCharHeight = static_cast<int>(std::ceil(vsDraw.styles[STYLE_CONTROLCHAR].capitalHeight));
 	PRectangle rcCChar = rcSegment;
 	rcCChar.left = rcCChar.left + 1;
 	rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
@@ -1711,7 +1711,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							indentCount <= (ll->positions[i + 1] - epsilon) / indentWidth;
 							indentCount++) {
 							if (indentCount > 0) {
-								const XYPOSITION xIndent = floor(indentCount * indentWidth);
+								const XYPOSITION xIndent = std::floor(indentCount * indentWidth);
 								DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
 									(ll->xHighlightGuide == xIndent));
 							}
@@ -1791,7 +1791,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 									indentCount <= (ll->positions[cpos + ts.start + 1] - epsilon) / indentWidth;
 									indentCount++) {
 									if (indentCount > 0) {
-										const XYPOSITION xIndent = floor(indentCount * indentWidth);
+										const XYPOSITION xIndent = std::floor(indentCount * indentWidth);
 										DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
 											(ll->xHighlightGuide == xIndent));
 									}
@@ -1868,7 +1868,7 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 		}
 
 		for (int indentPos = model.pdoc->IndentSize(); indentPos < indentSpace; indentPos += model.pdoc->IndentSize()) {
-			const XYPOSITION xIndent = floor(indentPos * vsDraw.spaceWidth);
+			const XYPOSITION xIndent = std::floor(indentPos * vsDraw.spaceWidth);
 			if (xIndent < xStartText) {
 				DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcLine,
 					(ll->xHighlightGuide == xIndent));
