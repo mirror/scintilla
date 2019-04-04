@@ -77,3 +77,21 @@ EditModel::~EditModel() {
 	pdoc->Release();
 	pdoc = nullptr;
 }
+
+void EditModel::SetDefaultFoldDisplayText(const char *text) {
+	defaultFoldDisplayText = IsNullOrEmpty(text) ? UniqueString() : UniqueStringCopy(text);
+}
+
+const char *EditModel::GetDefaultFoldDisplayText() const noexcept {
+	return defaultFoldDisplayText.get();
+}
+
+const char *EditModel::GetFoldDisplayText(Sci::Line lineDoc) const {
+	if (foldDisplayTextStyle == SC_FOLDDISPLAYTEXT_HIDDEN || pcs->GetExpanded(lineDoc)) {
+		return nullptr;
+	}
+
+	const char *text = pcs->GetFoldDisplayText(lineDoc);
+	return text ? text : defaultFoldDisplayText.get();
+}
+
