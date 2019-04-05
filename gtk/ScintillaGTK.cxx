@@ -866,7 +866,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			if (accessible) {
 				ScintillaGTKAccessible *sciAccessible = ScintillaGTKAccessible::FromAccessible(accessible);
 				if (sciAccessible) {
-					sciAccessible->SetAccessibility();
+					sciAccessible->SetAccessibility(accessibilityEnabled);
 				}
 			}
 			break;
