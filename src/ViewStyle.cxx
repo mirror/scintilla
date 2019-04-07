@@ -28,12 +28,11 @@
 
 using namespace Scintilla;
 
-MarginStyle::MarginStyle(int style_, int width_, int mask_) :
+MarginStyle::MarginStyle(int style_, int width_, int mask_) noexcept :
 	style(style_), width(width_), mask(mask_), sensitive(false), cursor(SC_CURSORREVERSEARROW) {
 }
 
-FontRealised::FontRealised() {
-}
+FontRealised::FontRealised() noexcept = default;
 
 FontRealised::~FontRealised() {
 	font.Release();
@@ -347,7 +346,7 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	textStart = marginInside ? fixedColumnWidth : leftMarginWidth;
 }
 
-void ViewStyle::ReleaseAllExtendedStyles() {
+void ViewStyle::ReleaseAllExtendedStyles() noexcept {
 	nextExtendedStyle = 256;
 }
 
@@ -393,11 +392,11 @@ void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {
 	styles[styleIndex].fontName = fontNames.Save(name);
 }
 
-bool ViewStyle::ProtectionActive() const {
+bool ViewStyle::ProtectionActive() const noexcept {
 	return someStylesProtected;
 }
 
-int ViewStyle::ExternalMarginWidth() const {
+int ViewStyle::ExternalMarginWidth() const noexcept {
 	return marginInside ? 0 : fixedColumnWidth;
 }
 
@@ -412,7 +411,7 @@ int ViewStyle::MarginFromLocation(Point pt) const {
 	return margin;
 }
 
-bool ViewStyle::ValidStyle(size_t styleIndex) const {
+bool ViewStyle::ValidStyle(size_t styleIndex) const noexcept {
 	return styleIndex < styles.size();
 }
 
@@ -432,11 +431,11 @@ void ViewStyle::CalcLargestMarkerHeight() {
 	}
 }
 
-int ViewStyle::GetFrameWidth() const {
+int ViewStyle::GetFrameWidth() const noexcept {
 	return Sci::clamp(caretLineFrame, 1, lineHeight / 3);
 }
 
-bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const {
+bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const noexcept {
 	return caretLineFrame && (caretActive || alwaysShowCaretLineBackground) && showCaretLineBackground &&
 		(caretLineAlpha == SC_ALPHA_NOALPHA) && lineContainsCaret;
 }
@@ -478,16 +477,16 @@ ColourOptional ViewStyle::Background(int marksOfLine, bool caretActive, bool lin
 	return background;
 }
 
-bool ViewStyle::SelectionBackgroundDrawn() const {
+bool ViewStyle::SelectionBackgroundDrawn() const noexcept {
 	return selColours.back.isSet &&
 		((selAlpha == SC_ALPHA_NOALPHA) || (selAdditionalAlpha == SC_ALPHA_NOALPHA));
 }
 
-bool ViewStyle::WhitespaceBackgroundDrawn() const {
+bool ViewStyle::WhitespaceBackgroundDrawn() const noexcept {
 	return (viewWhitespace != wsInvisible) && (whitespaceColours.back.isSet);
 }
 
-bool ViewStyle::WhiteSpaceVisible(bool inIndent) const {
+bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
 	return (!inIndent && viewWhitespace == wsVisibleAfterIndent) ||
 		(inIndent && viewWhitespace == wsVisibleOnlyInIndent) ||
 		viewWhitespace == wsVisibleAlways;
@@ -500,7 +499,7 @@ ColourDesired ViewStyle::WrapColour() const {
 		return styles[STYLE_DEFAULT].fore;
 }
 
-bool ViewStyle::SetWrapState(int wrapState_) {
+bool ViewStyle::SetWrapState(int wrapState_) noexcept {
 	WrapMode wrapStateWanted;
 	switch (wrapState_) {
 	case SC_WRAP_WORD:
@@ -521,25 +520,25 @@ bool ViewStyle::SetWrapState(int wrapState_) {
 	return changed;
 }
 
-bool ViewStyle::SetWrapVisualFlags(int wrapVisualFlags_) {
+bool ViewStyle::SetWrapVisualFlags(int wrapVisualFlags_) noexcept {
 	const bool changed = wrapVisualFlags != wrapVisualFlags_;
 	wrapVisualFlags = wrapVisualFlags_;
 	return changed;
 }
 
-bool ViewStyle::SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_) {
+bool ViewStyle::SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_) noexcept {
 	const bool changed = wrapVisualFlagsLocation != wrapVisualFlagsLocation_;
 	wrapVisualFlagsLocation = wrapVisualFlagsLocation_;
 	return changed;
 }
 
-bool ViewStyle::SetWrapVisualStartIndent(int wrapVisualStartIndent_) {
+bool ViewStyle::SetWrapVisualStartIndent(int wrapVisualStartIndent_) noexcept {
 	const bool changed = wrapVisualStartIndent != wrapVisualStartIndent_;
 	wrapVisualStartIndent = wrapVisualStartIndent_;
 	return changed;
 }
 
-bool ViewStyle::SetWrapIndentMode(int wrapIndentMode_) {
+bool ViewStyle::SetWrapIndentMode(int wrapIndentMode_) noexcept {
 	const bool changed = wrapIndentMode != wrapIndentMode_;
 	wrapIndentMode = wrapIndentMode_;
 	return changed;
