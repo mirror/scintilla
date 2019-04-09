@@ -99,6 +99,7 @@ M._rules = {
   {'key', key},
   {'literal', literal},
   {'timestamp', ts},
+  {'string', string},
   {'number', number},
   {'constant', constant},
   {'type', type},
