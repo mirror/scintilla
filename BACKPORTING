@@ -422,3 +422,35 @@ branch), or have information worth noting.
 
 7350:0b319d73d317 Updated ScintillaTest internationalization to fix warnings from Xcode 10.2.
   Not backported in case it's not compatible with earlier versions of Xcode.
+
+7392:2832adedd0f4 Feature [feature-requests:#1259]. Add SCI_SETCHARACTERCATEGORYOPTIMIZATION API
+  Backported, but with added includes for Sci::clamp().
+
+7402:751b76b567f9 Move UniqueStringCopy into its own source file UniqueString.cxx to hide the implementation.
+7409:a70a4ee51448 Rename FontNames to UniqueStringSet and move into UniqueString.
+  Backported, but with an alternative to C++17's string_view.
+
+7411:c3bc2e4277b2 Make dependencies scripts work when called from scite/scripts/RegenerateSource.py.
+  Not backported, since it is for SciTE and it requires Python 3.x.
+
+7414:599d698f70bf Use noexcept in CaseConvert as well as std::string_view::copy.
+  Backported, but without std::string_view::copy.
+
+7416:76d7aeac3271 Updated required Python version due to differences in how imports work in 2.7.
+  Not backported, since it is for SciTE and it requires Python 3.x.
+
+7417:bbef7c52aecf Use views for input string parameters as that allows calling with more varied values and can avoid allocations.
+7418:bf93fe7f0940 Bug [#2093]. Use wstring_view to unify adding text and eliminate AddCharUTF16.
+  Not backported, since a previous commit to use C++17's std::string_view was
+  not backported.
+
+7423:2e2cf21cee0b Bug [#2093]. Remove restrictions on IME input length.
+  Not backported, since the lack of a previous backport still references
+  maxLenInputIME.
+
+7425:466a7bd45f06 Preparing for 4.1.5 release.
+7427:72074cd809c5 Added 4.1.5 blurb.
+7428:bebdebd489c6 Added tag rel-4-1-5 for changeset 72074cd809c5
+7430:6a6bf370ae9f Removed tag rel-4-1-5
+7431:fcecd4a96700 Added tag rel-4-1-5 for changeset 6a6bf370ae9f
+  Not backported, since this is LongTerm3.
