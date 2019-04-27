@@ -455,7 +455,7 @@ void UndoHistory::SetSavePoint() {
 	savePoint = currentAction;
 }
 
-bool UndoHistory::IsSavePoint() const {
+bool UndoHistory::IsSavePoint() const noexcept {
 	return savePoint == currentAction;
 }
 
@@ -479,7 +479,7 @@ int UndoHistory::TentativeSteps() {
 		return -1;
 }
 
-bool UndoHistory::CanUndo() const {
+bool UndoHistory::CanUndo() const noexcept {
 	return (currentAction > 0) && (maxAction > 0);
 }
 
@@ -504,7 +504,7 @@ void UndoHistory::CompletedUndoStep() {
 	currentAction--;
 }
 
-bool UndoHistory::CanRedo() const {
+bool UndoHistory::CanRedo() const noexcept {
 	return maxAction > currentAction;
 }
 
@@ -594,7 +594,7 @@ const char *CellBuffer::RangePointer(Sci::Position position, Sci::Position range
 	return substance.RangePointer(position, rangeLength);
 }
 
-Sci::Position CellBuffer::GapPosition() const {
+Sci::Position CellBuffer::GapPosition() const noexcept {
 	return substance.GapPosition();
 }
 
@@ -690,7 +690,7 @@ void CellBuffer::SetLineEndTypes(int utf8LineEnds_) {
 	}
 }
 
-bool CellBuffer::ContainsLineEnd(const char *s, Sci::Position length) const {
+bool CellBuffer::ContainsLineEnd(const char *s, Sci::Position length) const noexcept {
 	unsigned char chBeforePrev = 0;
 	unsigned char chPrev = 0;
 	for (Sci::Position i = 0; i < length; i++) {
@@ -755,7 +755,7 @@ Sci::Line CellBuffer::LineFromPositionIndex(Sci::Position pos, int lineCharacter
 	return plv->LineFromPositionIndex(pos, lineCharacterIndex);
 }
 
-bool CellBuffer::IsReadOnly() const {
+bool CellBuffer::IsReadOnly() const noexcept {
 	return readOnly;
 }
 
@@ -763,11 +763,11 @@ void CellBuffer::SetReadOnly(bool set) {
 	readOnly = set;
 }
 
-bool CellBuffer::IsLarge() const {
+bool CellBuffer::IsLarge() const noexcept {
 	return largeDocument;
 }
 
-bool CellBuffer::HasStyles() const {
+bool CellBuffer::HasStyles() const noexcept {
 	return hasStyles;
 }
 
@@ -775,7 +775,7 @@ void CellBuffer::SetSavePoint() {
 	uh.SetSavePoint();
 }
 
-bool CellBuffer::IsSavePoint() const {
+bool CellBuffer::IsSavePoint() const noexcept {
 	return uh.IsSavePoint();
 }
 
@@ -791,7 +791,7 @@ int CellBuffer::TentativeSteps() {
 	return uh.TentativeSteps();
 }
 
-bool CellBuffer::TentativeActive() const {
+bool CellBuffer::TentativeActive() const noexcept {
 	return uh.TentativeActive();
 }
 
@@ -805,7 +805,7 @@ void CellBuffer::RemoveLine(Sci::Line line) {
 	plv->RemoveLine(line);
 }
 
-bool CellBuffer::UTF8LineEndOverlaps(Sci::Position position) const {
+bool CellBuffer::UTF8LineEndOverlaps(Sci::Position position) const noexcept {
 	const unsigned char bytes[] = {
 		static_cast<unsigned char>(substance.ValueAt(position-2)),
 		static_cast<unsigned char>(substance.ValueAt(position-1)),
@@ -1133,7 +1133,7 @@ bool CellBuffer::SetUndoCollection(bool collectUndo) {
 	return collectingUndo;
 }
 
-bool CellBuffer::IsCollectingUndo() const {
+bool CellBuffer::IsCollectingUndo() const noexcept {
 	return collectingUndo;
 }
 
@@ -1154,7 +1154,7 @@ void CellBuffer::DeleteUndoHistory() {
 	uh.DeleteUndoHistory();
 }
 
-bool CellBuffer::CanUndo() const {
+bool CellBuffer::CanUndo() const noexcept {
 	return uh.CanUndo();
 }
 
@@ -1180,7 +1180,7 @@ void CellBuffer::PerformUndoStep() {
 	uh.CompletedUndoStep();
 }
 
-bool CellBuffer::CanRedo() const {
+bool CellBuffer::CanRedo() const noexcept {
 	return uh.CanRedo();
 }
 
