@@ -43,7 +43,7 @@ curses_lexlib_objs = $(addprefix curses/, $(base_lexlib_objs))
 curses_lexer_objs = $(addprefix curses/, $(base_lexer_objs))
 
 all: | /tmp/scintilla
-	make -C $| -f check.mak -j4 bin/scintilla_win32.a \
+	make -C $| -f check.mak -j8 bin/scintilla_win32.a \
 		bin/scintilla_cocoa.a bin/scintilla_gtk.a bin/scintilla_curses.a qt
 /tmp/scintilla: ; cp -rs `pwd` $@
 
