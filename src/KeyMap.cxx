@@ -32,7 +32,7 @@ KeyMap::~KeyMap() {
 	Clear();
 }
 
-void KeyMap::Clear() {
+void KeyMap::Clear() noexcept {
 	kmap.clear();
 }
 
