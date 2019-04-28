@@ -431,8 +431,8 @@ class SurfaceGDI : public Surface {
 
 	int codePage = 0;
 
-	void BrushColor(ColourDesired back);
-	void SetFont(Font &font_);
+	void BrushColor(ColourDesired back) noexcept;
+	void SetFont(const Font &font_) noexcept;
 	void Clear() noexcept;
 
 public:
@@ -569,7 +569,7 @@ void SurfaceGDI::PenColour(ColourDesired fore) {
 	penOld = SelectPen(hdc, pen);
 }
 
-void SurfaceGDI::BrushColor(ColourDesired back) {
+void SurfaceGDI::BrushColor(ColourDesired back) noexcept {
 	if (brush) {
 		::SelectObject(hdc, brushOld);
 		::DeleteObject(brush);
@@ -582,7 +582,7 @@ void SurfaceGDI::BrushColor(ColourDesired back) {
 	brushOld = SelectBrush(hdc, brush);
 }
 
-void SurfaceGDI::SetFont(Font &font_) {
+void SurfaceGDI::SetFont(const Font &font_) noexcept {
 	const FormatAndMetrics *pfm = FamFromFontID(font_.GetID());
 	PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_GDI);
 	if (fontOld) {
@@ -983,7 +983,7 @@ class SurfaceD2D : public Surface {
 	float dpiScaleY;
 
 	void Clear() noexcept;
-	void SetFont(Font &font_);
+	void SetFont(const Font &font_);
 
 public:
 	SurfaceD2D() noexcept;
@@ -1164,7 +1164,7 @@ void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 	}
 }
 
-void SurfaceD2D::SetFont(Font &font_) {
+void SurfaceD2D::SetFont(const Font &font_) {
 	const FormatAndMetrics *pfm = FamFromFontID(font_.GetID());
 	PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_DIRECTWRITE);
 	pTextFormat = pfm->pTextFormat;
