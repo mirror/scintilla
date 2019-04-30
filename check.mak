@@ -85,15 +85,15 @@ bin/scintilla_gtk.a: $(gtk_src_objs) $(gtk_lexlib_objs) $(gtk_lexer_objs) \
 	ar rc $@ $^
 	touch $@
 $(gtk_src_objs): gtk/%.o: src/%.cxx
-	g++ -c $(CXXFLAGS) -DGTK $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DGTK $< -o $@
 $(gtk_lexlib_objs): gtk/%.o: lexlib/%.cxx
-	g++ -c $(CXXFLAGS) -DGTK $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DGTK $< -o $@
 $(gtk_lexer_objs): gtk/%.o: lexers/%.cxx
-	g++ -c $(CXXFLAGS) -DGTK $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DGTK $< -o $@
 gtk/PlatGTK.o gtk/ScintillaGTK.o gtk/ScintillaGTKAccessible.o: gtk/%.o: gtk/%.cxx
-	g++ -c $(CXXFLAGS) -DGTK $(GTK_CFLAGS) $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DGTK $(GTK_CFLAGS) $< -o $@
 gtk/scintilla-marshal.o: gtk/scintilla-marshal.c
-	gcc -c $(CFLAGS) $(GTK_CFLAGS) $< -o $@
+	gcc-4.8 -c $(CFLAGS) $(GTK_CFLAGS) $< -o $@
 
 # Curses platform objects.
 bin/scintilla_curses.a: $(curses_src_objs) $(curses_lexlib_objs) \
@@ -101,13 +101,13 @@ bin/scintilla_curses.a: $(curses_src_objs) $(curses_lexlib_objs) \
 	ar rc $@ $^
 	touch $@
 $(curses_src_objs): curses/%.o: src/%.cxx
-	g++ -c $(CXXFLAGS) -DCURSES -DLPEG_LEXER $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DCURSES -DLPEG_LEXER $< -o $@
 $(curses_lexlib_objs): curses/%.o: lexlib/%.cxx
-	g++ -c $(CXXFLAGS) -DCURSES -DLPEG_LEXER $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DCURSES -DLPEG_LEXER $< -o $@
 $(curses_lexer_objs): curses/%.o: lexers/%.cxx
-	g++ -c $(CXXFLAGS) -DCURSES -DLPEG_LEXER $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DCURSES -DLPEG_LEXER $< -o $@
 curses/ScintillaCurses.o: curses/ScintillaCurses.cxx
-	g++ -c $(CXXFLAGS) -DCURSES -Wno-unused-parameter $< -o $@
+	g++-4.8 -c $(CXXFLAGS) -DCURSES -Wno-unused-parameter $< -o $@
 
 # Qt platform objects. (Note: requires libqt4-dev qt4-qmake.)
 .PHONY: qt
@@ -122,9 +122,9 @@ win32_deps: src/*.cxx lexlib/*.cxx lexers/*.cxx win32/*.cxx
 cocoa_deps: src/*.cxx lexlib/*.cxx lexers/*.cxx #cocoa/*.cxx
 	i386-apple-darwin9-g++ -MM $(CXXFLAGS) $^ | sed -e 's|^\([[:alnum:]-]\+\.o:\)|cocoa/\1|;' >> checkdeps.mak
 gtk_deps: src/*.cxx lexlib/*.cxx lexers/*.cxx gtk/*.cxx
-	g++ -MM $(CXXFLAGS) $^ | sed -e 's|^\([[:alnum:]-]\+\.o:\)|gtk/\1|;' >> checkdeps.mak
+	g++-4.8 -MM $(CXXFLAGS) $^ | sed -e 's|^\([[:alnum:]-]\+\.o:\)|gtk/\1|;' >> checkdeps.mak
 curses_deps: src/*.cxx lexlib/*.cxx lexers/*.cxx curses/*.cxx
-	g++ -MM $(CXXFLAGS) $^ | sed -e 's|^\([[:alnum:]-]\+\.o:\)|curses/\1|;' >> checkdeps.mak
+	g++-4.8 -MM $(CXXFLAGS) $^ | sed -e 's|^\([[:alnum:]-]\+\.o:\)|curses/\1|;' >> checkdeps.mak
 
 include checkdeps.mak
 

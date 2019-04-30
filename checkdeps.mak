@@ -2,8 +2,8 @@ win32/AutoComplete.o: src/AutoComplete.cxx include/Platform.h \
  include/Scintilla.h include/Sci_Position.h lexlib/CharacterSet.h \
  src/Position.h src/AutoComplete.h
 win32/CallTip.o: src/CallTip.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h lexlib/StringCopy.h \
- src/Position.h src/CallTip.h
+ include/Sci_Position.h lexlib/StringCopy.h src/Position.h \
+ src/IntegerRectangle.h src/CallTip.h
 win32/CaseConvert.o: src/CaseConvert.cxx lexlib/StringCopy.h src/CaseConvert.h \
  src/UniConversion.h
 win32/CaseFolder.o: src/CaseFolder.cxx src/CaseFolder.h src/CaseConvert.h
@@ -13,7 +13,8 @@ win32/Catalogue.o: src/Catalogue.cxx include/ILexer.h include/Sci_Position.h \
 win32/CellBuffer.o: src/CellBuffer.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/SplitVector.h \
  src/Partitioning.h src/CellBuffer.h src/UniConversion.h
-win32/CharClassify.o: src/CharClassify.cxx src/CharClassify.h
+win32/CharClassify.o: src/CharClassify.cxx lexlib/CharacterSet.h \
+ src/CharClassify.h
 win32/ContractionState.o: src/ContractionState.cxx include/Platform.h \
  src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
  src/RunStyles.h src/SparseVector.h src/ContractionState.h
@@ -29,37 +30,39 @@ win32/Document.o: src/Document.cxx include/Platform.h include/ILoader.h \
  src/Document.h src/RESearch.h src/UniConversion.h src/ElapsedPeriod.h
 win32/EditModel.o: src/EditModel.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h src/EditModel.h
+ lexlib/CharacterCategory.h src/Position.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h src/EditModel.h
 win32/Editor.o: src/Editor.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/PerLine.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/UniConversion.h src/Selection.h src/PositionCache.h \
+ src/EditModel.h src/MarginView.h src/EditView.h src/Editor.h \
+ src/ElapsedPeriod.h
+win32/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
+ include/Sci_Position.h include/ILexer.h include/Scintilla.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/IntegerRectangle.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/PerLine.h src/KeyMap.h \
  src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
  src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
  src/UniConversion.h src/Selection.h src/PositionCache.h src/EditModel.h \
- src/MarginView.h src/EditView.h src/Editor.h
-win32/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
- include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/IntegerRectangle.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/PerLine.h src/KeyMap.h src/Indicator.h \
- src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
- src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/ElapsedPeriod.h
+ src/MarginView.h src/EditView.h src/ElapsedPeriod.h
 win32/ExternalLexer.o: src/ExternalLexer.cxx include/Platform.h \
  include/ILexer.h include/Sci_Position.h include/Scintilla.h \
  include/SciLexer.h lexlib/LexerModule.h src/Catalogue.h \
  src/ExternalLexer.h
 win32/Indicator.o: src/Indicator.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h src/Indicator.h src/XPM.h
+ include/Sci_Position.h lexlib/StringCopy.h src/IntegerRectangle.h \
+ src/Indicator.h src/XPM.h
 win32/KeyMap.o: src/KeyMap.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/KeyMap.h
 win32/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
@@ -67,7 +70,7 @@ win32/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
  src/XPM.h src/LineMarker.h
 win32/MarginView.o: src/MarginView.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/IntegerRectangle.h \
+ lexlib/CharacterCategory.h src/Position.h src/IntegerRectangle.h \
  src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
  src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
@@ -79,12 +82,12 @@ win32/PerLine.o: src/PerLine.cxx include/Platform.h include/Scintilla.h \
  src/Partitioning.h src/CellBuffer.h src/PerLine.h
 win32/PositionCache.o: src/PositionCache.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
- include/Scintilla.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h
+ include/Scintilla.h lexlib/CharacterCategory.h src/Position.h \
+ src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h
 win32/RESearch.o: src/RESearch.cxx src/Position.h src/CharClassify.h \
  src/RESearch.h
 win32/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
@@ -93,18 +96,20 @@ win32/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
 win32/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
- lexlib/LexerModule.h src/Catalogue.h src/Position.h src/UniqueString.h \
- src/SplitVector.h src/Partitioning.h src/RunStyles.h \
- src/ContractionState.h src/CellBuffer.h src/CallTip.h src/KeyMap.h \
- src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
- src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/Editor.h src/AutoComplete.h src/ScintillaBase.h
+ lexlib/CharacterCategory.h lexlib/LexerModule.h src/Catalogue.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/CallTip.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
+ src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
+ src/ScintillaBase.h
 win32/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 win32/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Style.h
 win32/UniConversion.o: src/UniConversion.cxx src/UniConversion.h
+win32/UniqueString.o: src/UniqueString.cxx src/UniqueString.h
 win32/ViewStyle.o: src/ViewStyle.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/UniqueString.h src/Indicator.h \
  src/XPM.h src/LineMarker.h src/Style.h src/ViewStyle.h
@@ -112,8 +117,8 @@ win32/XPM.o: src/XPM.cxx include/Platform.h src/XPM.h
 win32/Accessor.o: lexlib/Accessor.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h
-win32/CharacterCategory.o: lexlib/CharacterCategory.cxx \
- lexlib/CharacterCategory.h
+win32/CharacterCategory.o: lexlib/CharacterCategory.cxx include/Scintilla.h \
+ include/Sci_Position.h lexlib/CharacterCategory.h src/Position.h
 win32/CharacterSet.o: lexlib/CharacterSet.cxx lexlib/CharacterSet.h
 win32/DefaultLexer.o: lexlib/DefaultLexer.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
@@ -142,7 +147,7 @@ win32/PropSetSimple.o: lexlib/PropSetSimple.cxx lexlib/PropSetSimple.h
 win32/StyleContext.o: lexlib/StyleContext.cxx include/ILexer.h \
  include/Sci_Position.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h
-win32/WordList.o: lexlib/WordList.cxx lexlib/StringCopy.h lexlib/WordList.h
+win32/WordList.o: lexlib/WordList.cxx lexlib/WordList.h
 win32/LexA68k.o: lexers/LexA68k.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -188,9 +193,10 @@ win32/LexBaan.o: lexers/LexBaan.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
 win32/LexBash.o: lexers/LexBash.cxx include/ILexer.h include/Sci_Position.h \
- include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
- lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
- lexlib/CharacterSet.h lexlib/LexerModule.h
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/SubStyles.h lexlib/DefaultLexer.h
 win32/LexBasic.o: lexers/LexBasic.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -211,6 +217,11 @@ win32/LexCaml.o: lexers/LexCaml.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+win32/LexCIL.o: lexers/LexCIL.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 win32/LexCLW.o: lexers/LexCLW.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -321,7 +332,8 @@ win32/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
 win32/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
- lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 win32/LexIndent.o: lexers/LexIndent.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -406,6 +418,11 @@ win32/LexMySQL.o: lexers/LexMySQL.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+win32/LexNim.o: lexers/LexNim.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 win32/LexNimrod.o: lexers/LexNimrod.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -499,6 +516,10 @@ win32/LexRust.o: lexers/LexRust.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
  lexlib/OptionSet.h lexlib/DefaultLexer.h
+win32/LexSAS.o: lexers/LexSAS.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 win32/LexScriptol.o: lexers/LexScriptol.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -528,6 +549,10 @@ win32/LexSQL.o: lexers/LexSQL.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
  lexlib/SparseState.h lexlib/DefaultLexer.h
+win32/LexStata.o: lexers/LexStata.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 win32/LexSTTXT.o: lexers/LexSTTXT.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -583,29 +608,29 @@ win32/LexYAML.o: lexers/LexYAML.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
 win32/HanjaDic.o: win32/HanjaDic.cxx src/UniConversion.h win32/HanjaDic.h
-win32/PlatWin.o: win32/PlatWin.cxx include/Platform.h lexlib/StringCopy.h \
- src/Position.h src/XPM.h src/UniConversion.h src/DBCS.h \
- src/FontQuality.h win32/PlatWin.h
+win32/PlatWin.o: win32/PlatWin.cxx include/Platform.h src/Position.h src/XPM.h \
+ src/UniConversion.h src/DBCS.h src/FontQuality.h win32/PlatWin.h
 win32/ScintillaDLL.o: win32/ScintillaDLL.cxx include/Scintilla.h \
  include/Sci_Position.h win32/ScintillaWin.h
 win32/ScintillaWin.o: win32/ScintillaWin.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
- lexlib/LexerModule.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/CallTip.h src/KeyMap.h src/Indicator.h \
- src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
- src/Decoration.h src/CaseFolder.h src/Document.h src/CaseConvert.h \
- src/UniConversion.h src/Selection.h src/PositionCache.h src/EditModel.h \
- src/MarginView.h src/EditView.h src/Editor.h src/ElapsedPeriod.h \
- src/AutoComplete.h src/ScintillaBase.h src/ExternalLexer.h \
- win32/PlatWin.h win32/HanjaDic.h win32/ScintillaWin.h
+ lexlib/CharacterCategory.h lexlib/LexerModule.h src/Position.h \
+ src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/CallTip.h src/KeyMap.h \
+ src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
+ src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
+ src/CaseConvert.h src/UniConversion.h src/Selection.h \
+ src/PositionCache.h src/EditModel.h src/MarginView.h src/EditView.h \
+ src/Editor.h src/ElapsedPeriod.h src/AutoComplete.h src/ScintillaBase.h \
+ src/ExternalLexer.h win32/PlatWin.h win32/HanjaDic.h \
+ win32/ScintillaWin.h
 cocoa/AutoComplete.o: src/AutoComplete.cxx include/Platform.h \
  include/Scintilla.h include/Sci_Position.h lexlib/CharacterSet.h \
  src/Position.h src/AutoComplete.h
 cocoa/CallTip.o: src/CallTip.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h lexlib/StringCopy.h \
- src/Position.h src/CallTip.h
+ include/Sci_Position.h lexlib/StringCopy.h src/Position.h \
+ src/IntegerRectangle.h src/CallTip.h
 cocoa/CaseConvert.o: src/CaseConvert.cxx lexlib/StringCopy.h src/CaseConvert.h \
  src/UniConversion.h
 cocoa/CaseFolder.o: src/CaseFolder.cxx src/CaseFolder.h src/CaseConvert.h
@@ -615,7 +640,8 @@ cocoa/Catalogue.o: src/Catalogue.cxx include/ILexer.h include/Sci_Position.h \
 cocoa/CellBuffer.o: src/CellBuffer.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/SplitVector.h \
  src/Partitioning.h src/CellBuffer.h src/UniConversion.h
-cocoa/CharClassify.o: src/CharClassify.cxx src/CharClassify.h
+cocoa/CharClassify.o: src/CharClassify.cxx lexlib/CharacterSet.h \
+ src/CharClassify.h
 cocoa/ContractionState.o: src/ContractionState.cxx include/Platform.h \
  src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
  src/RunStyles.h src/SparseVector.h src/ContractionState.h
@@ -631,37 +657,39 @@ cocoa/Document.o: src/Document.cxx include/Platform.h include/ILoader.h \
  src/Document.h src/RESearch.h src/UniConversion.h src/ElapsedPeriod.h
 cocoa/EditModel.o: src/EditModel.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h src/EditModel.h
+ lexlib/CharacterCategory.h src/Position.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h src/EditModel.h
 cocoa/Editor.o: src/Editor.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/PerLine.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/UniConversion.h src/Selection.h src/PositionCache.h \
+ src/EditModel.h src/MarginView.h src/EditView.h src/Editor.h \
+ src/ElapsedPeriod.h
+cocoa/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
+ include/Sci_Position.h include/ILexer.h include/Scintilla.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/IntegerRectangle.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/PerLine.h src/KeyMap.h \
  src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
  src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
  src/UniConversion.h src/Selection.h src/PositionCache.h src/EditModel.h \
- src/MarginView.h src/EditView.h src/Editor.h
-cocoa/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
- include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/IntegerRectangle.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/PerLine.h src/KeyMap.h src/Indicator.h \
- src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
- src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/ElapsedPeriod.h
+ src/MarginView.h src/EditView.h src/ElapsedPeriod.h
 cocoa/ExternalLexer.o: src/ExternalLexer.cxx include/Platform.h \
  include/ILexer.h include/Sci_Position.h include/Scintilla.h \
  include/SciLexer.h lexlib/LexerModule.h src/Catalogue.h \
  src/ExternalLexer.h
 cocoa/Indicator.o: src/Indicator.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h src/Indicator.h src/XPM.h
+ include/Sci_Position.h lexlib/StringCopy.h src/IntegerRectangle.h \
+ src/Indicator.h src/XPM.h
 cocoa/KeyMap.o: src/KeyMap.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/KeyMap.h
 cocoa/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
@@ -669,7 +697,7 @@ cocoa/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
  src/XPM.h src/LineMarker.h
 cocoa/MarginView.o: src/MarginView.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/IntegerRectangle.h \
+ lexlib/CharacterCategory.h src/Position.h src/IntegerRectangle.h \
  src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
  src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
@@ -681,12 +709,12 @@ cocoa/PerLine.o: src/PerLine.cxx include/Platform.h include/Scintilla.h \
  src/Partitioning.h src/CellBuffer.h src/PerLine.h
 cocoa/PositionCache.o: src/PositionCache.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
- include/Scintilla.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h
+ include/Scintilla.h lexlib/CharacterCategory.h src/Position.h \
+ src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h
 cocoa/RESearch.o: src/RESearch.cxx src/Position.h src/CharClassify.h \
  src/RESearch.h
 cocoa/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
@@ -695,18 +723,20 @@ cocoa/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
 cocoa/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
- lexlib/LexerModule.h src/Catalogue.h src/Position.h src/UniqueString.h \
- src/SplitVector.h src/Partitioning.h src/RunStyles.h \
- src/ContractionState.h src/CellBuffer.h src/CallTip.h src/KeyMap.h \
- src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
- src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/Editor.h src/AutoComplete.h src/ScintillaBase.h
+ lexlib/CharacterCategory.h lexlib/LexerModule.h src/Catalogue.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/CallTip.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
+ src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
+ src/ScintillaBase.h
 cocoa/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 cocoa/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Style.h
 cocoa/UniConversion.o: src/UniConversion.cxx src/UniConversion.h
+cocoa/UniqueString.o: src/UniqueString.cxx src/UniqueString.h
 cocoa/ViewStyle.o: src/ViewStyle.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/UniqueString.h src/Indicator.h \
  src/XPM.h src/LineMarker.h src/Style.h src/ViewStyle.h
@@ -714,8 +744,8 @@ cocoa/XPM.o: src/XPM.cxx include/Platform.h src/XPM.h
 cocoa/Accessor.o: lexlib/Accessor.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h
-cocoa/CharacterCategory.o: lexlib/CharacterCategory.cxx \
- lexlib/CharacterCategory.h
+cocoa/CharacterCategory.o: lexlib/CharacterCategory.cxx include/Scintilla.h \
+ include/Sci_Position.h lexlib/CharacterCategory.h src/Position.h
 cocoa/CharacterSet.o: lexlib/CharacterSet.cxx lexlib/CharacterSet.h
 cocoa/DefaultLexer.o: lexlib/DefaultLexer.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
@@ -744,7 +774,7 @@ cocoa/PropSetSimple.o: lexlib/PropSetSimple.cxx lexlib/PropSetSimple.h
 cocoa/StyleContext.o: lexlib/StyleContext.cxx include/ILexer.h \
  include/Sci_Position.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h
-cocoa/WordList.o: lexlib/WordList.cxx lexlib/StringCopy.h lexlib/WordList.h
+cocoa/WordList.o: lexlib/WordList.cxx lexlib/WordList.h
 cocoa/LexA68k.o: lexers/LexA68k.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -790,9 +820,10 @@ cocoa/LexBaan.o: lexers/LexBaan.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
 cocoa/LexBash.o: lexers/LexBash.cxx include/ILexer.h include/Sci_Position.h \
- include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
- lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
- lexlib/CharacterSet.h lexlib/LexerModule.h
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/SubStyles.h lexlib/DefaultLexer.h
 cocoa/LexBasic.o: lexers/LexBasic.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -813,6 +844,11 @@ cocoa/LexCaml.o: lexers/LexCaml.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+cocoa/LexCIL.o: lexers/LexCIL.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 cocoa/LexCLW.o: lexers/LexCLW.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -923,7 +959,8 @@ cocoa/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
 cocoa/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
- lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 cocoa/LexIndent.o: lexers/LexIndent.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1008,6 +1045,11 @@ cocoa/LexMySQL.o: lexers/LexMySQL.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+cocoa/LexNim.o: lexers/LexNim.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 cocoa/LexNimrod.o: lexers/LexNimrod.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1101,6 +1143,10 @@ cocoa/LexRust.o: lexers/LexRust.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
  lexlib/OptionSet.h lexlib/DefaultLexer.h
+cocoa/LexSAS.o: lexers/LexSAS.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 cocoa/LexScriptol.o: lexers/LexScriptol.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -1130,6 +1176,10 @@ cocoa/LexSQL.o: lexers/LexSQL.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
  lexlib/SparseState.h lexlib/DefaultLexer.h
+cocoa/LexStata.o: lexers/LexStata.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 cocoa/LexSTTXT.o: lexers/LexSTTXT.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1188,8 +1238,8 @@ gtk/AutoComplete.o: src/AutoComplete.cxx include/Platform.h \
  include/Scintilla.h include/Sci_Position.h lexlib/CharacterSet.h \
  src/Position.h src/AutoComplete.h
 gtk/CallTip.o: src/CallTip.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h lexlib/StringCopy.h \
- src/Position.h src/CallTip.h
+ include/Sci_Position.h lexlib/StringCopy.h src/Position.h \
+ src/IntegerRectangle.h src/CallTip.h
 gtk/CaseConvert.o: src/CaseConvert.cxx lexlib/StringCopy.h src/CaseConvert.h \
  src/UniConversion.h
 gtk/CaseFolder.o: src/CaseFolder.cxx src/CaseFolder.h src/CaseConvert.h
@@ -1199,7 +1249,8 @@ gtk/Catalogue.o: src/Catalogue.cxx include/ILexer.h include/Sci_Position.h \
 gtk/CellBuffer.o: src/CellBuffer.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/SplitVector.h \
  src/Partitioning.h src/CellBuffer.h src/UniConversion.h
-gtk/CharClassify.o: src/CharClassify.cxx src/CharClassify.h
+gtk/CharClassify.o: src/CharClassify.cxx lexlib/CharacterSet.h \
+ src/CharClassify.h
 gtk/ContractionState.o: src/ContractionState.cxx include/Platform.h \
  src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
  src/RunStyles.h src/SparseVector.h src/ContractionState.h
@@ -1215,37 +1266,39 @@ gtk/Document.o: src/Document.cxx include/Platform.h include/ILoader.h \
  src/Document.h src/RESearch.h src/UniConversion.h src/ElapsedPeriod.h
 gtk/EditModel.o: src/EditModel.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h src/EditModel.h
+ lexlib/CharacterCategory.h src/Position.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h src/EditModel.h
 gtk/Editor.o: src/Editor.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/PerLine.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/UniConversion.h src/Selection.h src/PositionCache.h \
+ src/EditModel.h src/MarginView.h src/EditView.h src/Editor.h \
+ src/ElapsedPeriod.h
+gtk/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
+ include/Sci_Position.h include/ILexer.h include/Scintilla.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/IntegerRectangle.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/PerLine.h src/KeyMap.h \
  src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
  src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
  src/UniConversion.h src/Selection.h src/PositionCache.h src/EditModel.h \
- src/MarginView.h src/EditView.h src/Editor.h
-gtk/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
- include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/IntegerRectangle.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/PerLine.h src/KeyMap.h src/Indicator.h \
- src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
- src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/ElapsedPeriod.h
+ src/MarginView.h src/EditView.h src/ElapsedPeriod.h
 gtk/ExternalLexer.o: src/ExternalLexer.cxx include/Platform.h \
  include/ILexer.h include/Sci_Position.h include/Scintilla.h \
  include/SciLexer.h lexlib/LexerModule.h src/Catalogue.h \
  src/ExternalLexer.h
 gtk/Indicator.o: src/Indicator.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h src/Indicator.h src/XPM.h
+ include/Sci_Position.h lexlib/StringCopy.h src/IntegerRectangle.h \
+ src/Indicator.h src/XPM.h
 gtk/KeyMap.o: src/KeyMap.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/KeyMap.h
 gtk/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
@@ -1253,7 +1306,7 @@ gtk/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
  src/XPM.h src/LineMarker.h
 gtk/MarginView.o: src/MarginView.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/IntegerRectangle.h \
+ lexlib/CharacterCategory.h src/Position.h src/IntegerRectangle.h \
  src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
  src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
@@ -1265,12 +1318,12 @@ gtk/PerLine.o: src/PerLine.cxx include/Platform.h include/Scintilla.h \
  src/Partitioning.h src/CellBuffer.h src/PerLine.h
 gtk/PositionCache.o: src/PositionCache.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
- include/Scintilla.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h
+ include/Scintilla.h lexlib/CharacterCategory.h src/Position.h \
+ src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h
 gtk/RESearch.o: src/RESearch.cxx src/Position.h src/CharClassify.h \
  src/RESearch.h
 gtk/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
@@ -1279,18 +1332,20 @@ gtk/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
 gtk/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
- lexlib/LexerModule.h src/Catalogue.h src/Position.h src/UniqueString.h \
- src/SplitVector.h src/Partitioning.h src/RunStyles.h \
- src/ContractionState.h src/CellBuffer.h src/CallTip.h src/KeyMap.h \
- src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
- src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/Editor.h src/AutoComplete.h src/ScintillaBase.h
+ lexlib/CharacterCategory.h lexlib/LexerModule.h src/Catalogue.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/CallTip.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
+ src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
+ src/ScintillaBase.h
 gtk/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 gtk/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Style.h
 gtk/UniConversion.o: src/UniConversion.cxx src/UniConversion.h
+gtk/UniqueString.o: src/UniqueString.cxx src/UniqueString.h
 gtk/ViewStyle.o: src/ViewStyle.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/UniqueString.h src/Indicator.h \
  src/XPM.h src/LineMarker.h src/Style.h src/ViewStyle.h
@@ -1298,8 +1353,8 @@ gtk/XPM.o: src/XPM.cxx include/Platform.h src/XPM.h
 gtk/Accessor.o: lexlib/Accessor.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h
-gtk/CharacterCategory.o: lexlib/CharacterCategory.cxx \
- lexlib/CharacterCategory.h
+gtk/CharacterCategory.o: lexlib/CharacterCategory.cxx include/Scintilla.h \
+ include/Sci_Position.h lexlib/CharacterCategory.h src/Position.h
 gtk/CharacterSet.o: lexlib/CharacterSet.cxx lexlib/CharacterSet.h
 gtk/DefaultLexer.o: lexlib/DefaultLexer.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
@@ -1328,7 +1383,7 @@ gtk/PropSetSimple.o: lexlib/PropSetSimple.cxx lexlib/PropSetSimple.h
 gtk/StyleContext.o: lexlib/StyleContext.cxx include/ILexer.h \
  include/Sci_Position.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h
-gtk/WordList.o: lexlib/WordList.cxx lexlib/StringCopy.h lexlib/WordList.h
+gtk/WordList.o: lexlib/WordList.cxx lexlib/WordList.h
 gtk/LexA68k.o: lexers/LexA68k.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1374,9 +1429,10 @@ gtk/LexBaan.o: lexers/LexBaan.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
 gtk/LexBash.o: lexers/LexBash.cxx include/ILexer.h include/Sci_Position.h \
- include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
- lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
- lexlib/CharacterSet.h lexlib/LexerModule.h
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/SubStyles.h lexlib/DefaultLexer.h
 gtk/LexBasic.o: lexers/LexBasic.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -1397,6 +1453,11 @@ gtk/LexCaml.o: lexers/LexCaml.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+gtk/LexCIL.o: lexers/LexCIL.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 gtk/LexCLW.o: lexers/LexCLW.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1507,7 +1568,8 @@ gtk/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
 gtk/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
- lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 gtk/LexIndent.o: lexers/LexIndent.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1592,6 +1654,11 @@ gtk/LexMySQL.o: lexers/LexMySQL.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+gtk/LexNim.o: lexers/LexNim.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 gtk/LexNimrod.o: lexers/LexNimrod.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1685,6 +1752,10 @@ gtk/LexRust.o: lexers/LexRust.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
  lexlib/OptionSet.h lexlib/DefaultLexer.h
+gtk/LexSAS.o: lexers/LexSAS.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 gtk/LexScriptol.o: lexers/LexScriptol.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -1714,6 +1785,10 @@ gtk/LexSQL.o: lexers/LexSQL.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
  lexlib/SparseState.h lexlib/DefaultLexer.h
+gtk/LexStata.o: lexers/LexStata.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 gtk/LexSTTXT.o: lexers/LexSTTXT.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1772,8 +1847,8 @@ curses/AutoComplete.o: src/AutoComplete.cxx include/Platform.h \
  include/Scintilla.h include/Sci_Position.h lexlib/CharacterSet.h \
  src/Position.h src/AutoComplete.h
 curses/CallTip.o: src/CallTip.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h lexlib/StringCopy.h \
- src/Position.h src/CallTip.h
+ include/Sci_Position.h lexlib/StringCopy.h src/Position.h \
+ src/IntegerRectangle.h src/CallTip.h
 curses/CaseConvert.o: src/CaseConvert.cxx lexlib/StringCopy.h src/CaseConvert.h \
  src/UniConversion.h
 curses/CaseFolder.o: src/CaseFolder.cxx src/CaseFolder.h src/CaseConvert.h
@@ -1783,7 +1858,8 @@ curses/Catalogue.o: src/Catalogue.cxx include/ILexer.h include/Sci_Position.h \
 curses/CellBuffer.o: src/CellBuffer.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/SplitVector.h \
  src/Partitioning.h src/CellBuffer.h src/UniConversion.h
-curses/CharClassify.o: src/CharClassify.cxx src/CharClassify.h
+curses/CharClassify.o: src/CharClassify.cxx lexlib/CharacterSet.h \
+ src/CharClassify.h
 curses/ContractionState.o: src/ContractionState.cxx include/Platform.h \
  src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
  src/RunStyles.h src/SparseVector.h src/ContractionState.h
@@ -1799,37 +1875,39 @@ curses/Document.o: src/Document.cxx include/Platform.h include/ILoader.h \
  src/Document.h src/RESearch.h src/UniConversion.h src/ElapsedPeriod.h
 curses/EditModel.o: src/EditModel.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h src/EditModel.h
+ lexlib/CharacterCategory.h src/Position.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h src/EditModel.h
 curses/Editor.o: src/Editor.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/PerLine.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/UniConversion.h src/Selection.h src/PositionCache.h \
+ src/EditModel.h src/MarginView.h src/EditView.h src/Editor.h \
+ src/ElapsedPeriod.h
+curses/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
+ include/Sci_Position.h include/ILexer.h include/Scintilla.h \
+ lexlib/StringCopy.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
+ src/Position.h src/IntegerRectangle.h src/UniqueString.h \
+ src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/PerLine.h src/KeyMap.h \
  src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
  src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
  src/UniConversion.h src/Selection.h src/PositionCache.h src/EditModel.h \
- src/MarginView.h src/EditView.h src/Editor.h
-curses/EditView.o: src/EditView.cxx include/Platform.h include/ILoader.h \
- include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h lexlib/CharacterSet.h src/Position.h \
- src/IntegerRectangle.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/PerLine.h src/KeyMap.h src/Indicator.h \
- src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
- src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/ElapsedPeriod.h
+ src/MarginView.h src/EditView.h src/ElapsedPeriod.h
 curses/ExternalLexer.o: src/ExternalLexer.cxx include/Platform.h \
  include/ILexer.h include/Sci_Position.h include/Scintilla.h \
  include/SciLexer.h lexlib/LexerModule.h src/Catalogue.h \
  src/ExternalLexer.h
 curses/Indicator.o: src/Indicator.cxx include/Platform.h include/Scintilla.h \
- include/Sci_Position.h src/IntegerRectangle.h src/Indicator.h src/XPM.h
+ include/Sci_Position.h lexlib/StringCopy.h src/IntegerRectangle.h \
+ src/Indicator.h src/XPM.h
 curses/KeyMap.o: src/KeyMap.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/KeyMap.h
 curses/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
@@ -1837,7 +1915,7 @@ curses/LineMarker.o: src/LineMarker.cxx include/Platform.h include/Scintilla.h \
  src/XPM.h src/LineMarker.h
 curses/MarginView.o: src/MarginView.cxx include/Platform.h include/ILoader.h \
  include/Sci_Position.h include/ILexer.h include/Scintilla.h \
- lexlib/StringCopy.h src/Position.h src/IntegerRectangle.h \
+ lexlib/CharacterCategory.h src/Position.h src/IntegerRectangle.h \
  src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
  src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
  src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
@@ -1849,12 +1927,12 @@ curses/PerLine.o: src/PerLine.cxx include/Platform.h include/Scintilla.h \
  src/Partitioning.h src/CellBuffer.h src/PerLine.h
 curses/PositionCache.o: src/PositionCache.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
- include/Scintilla.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/KeyMap.h src/Indicator.h src/LineMarker.h \
- src/Style.h src/ViewStyle.h src/CharClassify.h src/Decoration.h \
- src/CaseFolder.h src/Document.h src/UniConversion.h src/Selection.h \
- src/PositionCache.h
+ include/Scintilla.h lexlib/CharacterCategory.h src/Position.h \
+ src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/KeyMap.h src/Indicator.h \
+ src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
+ src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
+ src/Selection.h src/PositionCache.h
 curses/RESearch.o: src/RESearch.cxx src/Position.h src/CharClassify.h \
  src/RESearch.h
 curses/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
@@ -1863,18 +1941,20 @@ curses/RunStyles.o: src/RunStyles.cxx include/Platform.h include/Scintilla.h \
 curses/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
- lexlib/LexerModule.h src/Catalogue.h src/Position.h src/UniqueString.h \
- src/SplitVector.h src/Partitioning.h src/RunStyles.h \
- src/ContractionState.h src/CellBuffer.h src/CallTip.h src/KeyMap.h \
- src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
- src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/Editor.h src/AutoComplete.h src/ScintillaBase.h
+ lexlib/CharacterCategory.h lexlib/LexerModule.h src/Catalogue.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/CallTip.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
+ src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
+ src/ScintillaBase.h
 curses/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 curses/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Style.h
 curses/UniConversion.o: src/UniConversion.cxx src/UniConversion.h
+curses/UniqueString.o: src/UniqueString.cxx src/UniqueString.h
 curses/ViewStyle.o: src/ViewStyle.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/UniqueString.h src/Indicator.h \
  src/XPM.h src/LineMarker.h src/Style.h src/ViewStyle.h
@@ -1882,8 +1962,8 @@ curses/XPM.o: src/XPM.cxx include/Platform.h src/XPM.h
 curses/Accessor.o: lexlib/Accessor.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h
-curses/CharacterCategory.o: lexlib/CharacterCategory.cxx \
- lexlib/CharacterCategory.h
+curses/CharacterCategory.o: lexlib/CharacterCategory.cxx include/Scintilla.h \
+ include/Sci_Position.h lexlib/CharacterCategory.h src/Position.h
 curses/CharacterSet.o: lexlib/CharacterSet.cxx lexlib/CharacterSet.h
 curses/DefaultLexer.o: lexlib/DefaultLexer.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
@@ -1912,7 +1992,7 @@ curses/PropSetSimple.o: lexlib/PropSetSimple.cxx lexlib/PropSetSimple.h
 curses/StyleContext.o: lexlib/StyleContext.cxx include/ILexer.h \
  include/Sci_Position.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h
-curses/WordList.o: lexlib/WordList.cxx lexlib/StringCopy.h lexlib/WordList.h
+curses/WordList.o: lexlib/WordList.cxx lexlib/WordList.h
 curses/LexA68k.o: lexers/LexA68k.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1958,9 +2038,10 @@ curses/LexBaan.o: lexers/LexBaan.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
 curses/LexBash.o: lexers/LexBash.cxx include/ILexer.h include/Sci_Position.h \
- include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
- lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
- lexlib/CharacterSet.h lexlib/LexerModule.h
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/SubStyles.h lexlib/DefaultLexer.h
 curses/LexBasic.o: lexers/LexBasic.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -1981,6 +2062,11 @@ curses/LexCaml.o: lexers/LexCaml.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/PropSetSimple.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+curses/LexCIL.o: lexers/LexCIL.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 curses/LexCLW.o: lexers/LexCLW.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -2091,7 +2177,8 @@ curses/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
 curses/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
- lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 curses/LexIndent.o: lexers/LexIndent.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -2176,6 +2263,11 @@ curses/LexMySQL.o: lexers/LexMySQL.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+curses/LexNim.o: lexers/LexNim.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
+ lexlib/OptionSet.h lexlib/DefaultLexer.h
 curses/LexNimrod.o: lexers/LexNimrod.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -2269,6 +2361,10 @@ curses/LexRust.o: lexers/LexRust.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h \
  lexlib/OptionSet.h lexlib/DefaultLexer.h
+curses/LexSAS.o: lexers/LexSAS.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 curses/LexScriptol.o: lexers/LexScriptol.cxx include/ILexer.h \
  include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -2298,6 +2394,10 @@ curses/LexSQL.o: lexers/LexSQL.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
  lexlib/SparseState.h lexlib/DefaultLexer.h
+curses/LexStata.o: lexers/LexStata.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
+ lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h
 curses/LexSTTXT.o: lexers/LexSTTXT.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -2354,11 +2454,11 @@ curses/LexYAML.o: lexers/LexYAML.cxx include/ILexer.h include/Sci_Position.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
 curses/ScintillaCurses.o: curses/ScintillaCurses.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
- include/Scintilla.h src/Position.h src/UniqueString.h src/SplitVector.h \
- src/Partitioning.h src/RunStyles.h src/ContractionState.h \
- src/CellBuffer.h src/CallTip.h src/KeyMap.h src/Indicator.h \
- src/LineMarker.h src/Style.h src/ViewStyle.h src/CharClassify.h \
- src/Decoration.h src/CaseFolder.h src/Document.h src/UniConversion.h \
- src/Selection.h src/PositionCache.h src/EditModel.h src/MarginView.h \
- src/EditView.h src/Editor.h src/AutoComplete.h src/ScintillaBase.h \
- curses/ScintillaCurses.h
+ include/Scintilla.h lexlib/CharacterCategory.h src/Position.h \
+ src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
+ src/ContractionState.h src/CellBuffer.h src/CallTip.h src/KeyMap.h \
+ src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
+ src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
+ src/UniConversion.h src/Selection.h src/PositionCache.h src/EditModel.h \
+ src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
+ src/ScintillaBase.h curses/ScintillaCurses.h
