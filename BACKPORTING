@@ -454,3 +454,13 @@ branch), or have information worth noting.
 7430:6a6bf370ae9f Removed tag rel-4-1-5
 7431:fcecd4a96700 Added tag rel-4-1-5 for changeset 6a6bf370ae9f
   Not backported, since this is LongTerm3.
+  
+7479:be5a36866340 Switch from /std:c++latest to /std:c++17 as Visual C++ 2019 now includes some
+  Not backported, since only C++11 is supported.
+  
+7480:1b7760e143911 SciTE change log.
+  Not backported, since this is LongTerm3.
+  
+7486:a99fa007805f Feature [feature-requests:#1280]. Lexer added for X12.
+  Backported, but with LexerX12::Terminator struct definition not having default
+  values, which is a C++14 feature.
