@@ -88,13 +88,31 @@ lex:add_rule('link',
                            (lexer.any - lexer.space)^1))
 lex:add_style('link', 'underlined')
 
-lex:add_rule('strong', token('strong', P('**') * (lexer.any - '**')^0 *
-                                       P('**')^-1 +
-                                       P('__') * (lexer.any - '__')^0 *
-                                       P('__')^-1))
+local punct_space = lexer.punct + lexer.space
+
+-- Handles flanking delimiters as described in
+-- https://github.github.com/gfm/#emphasis-and-strong-emphasis in the cases
+-- where simple delimited ranges are not sufficient.
+local function flanked_range(s, not_inword)
+  local fl_char = lexer.any - s - lexer.space
+  local left_fl = lpeg.B(punct_space - s) * s * #fl_char +
+                  s * #(fl_char - lexer.punct)
+  local right_fl = lpeg.B(lexer.punct) * s * #(punct_space - s) +
+                   lpeg.B(fl_char) * s
+  return left_fl * (lexer.any - (not_inword and s * #punct_space or s))^0 *
+         right_fl
+end
+
+lex:add_rule('strong',
+             token('strong', flanked_range('**') +
+                             (lpeg.B(punct_space) + #lexer.starts_line('_')) *
+                             flanked_range('__', true) * #(punct_space + -1)))
 lex:add_style('strong', 'bold')
-lex:add_rule('em', token('em', lexer.delimited_range('*', true, true) +
-                               lexer.delimited_range('_', true, true)))
+
+lex:add_rule('em',
+             token('em', flanked_range('*') +
+                         (lpeg.B(punct_space) + #lexer.starts_line('_')) *
+                         flanked_range('_', true) * #(punct_space + -1)))
 lex:add_style('em', 'italics')
 
 -- Embedded HTML.
