@@ -19,7 +19,7 @@ unix {
     }
 }
 
-VERSION = 3.10.5
+VERSION = 3.10.6
 
 SOURCES += \
     PlatQt.cpp \
