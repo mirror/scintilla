@@ -21,7 +21,7 @@ sci = AutoComplete.o CallTip.o CaseConvert.o CaseFolder.o Catalogue.o \
       DBCS.o Decoration.o Document.o EditModel.o Editor.o EditView.o \
       ExternalLexer.o Indicator.o KeyMap.o LineMarker.o MarginView.o PerLine.o \
       PositionCache.o RESearch.o RunStyles.o ScintillaBase.o Selection.o \
-      Style.o UniConversion.o ViewStyle.o XPM.o \
+      Style.o UniConversion.o UniqueString.o ViewStyle.o XPM.o \
       Accessor.o CharacterSet.o DefaultLexer.o LexerBase.o LexerModule.o \
       LexerNoExceptions.o LexerSimple.o PropSetSimple.o StyleContext.o \
       WordList.o
