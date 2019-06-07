@@ -24,7 +24,9 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
+
 using namespace Scintilla;
+
 
 static bool isCmakeNumber(char ch)
 {
@@ -43,7 +45,7 @@ static bool isCmakeLetter(char ch)
 
 static bool CmakeNextLineHasElse(Sci_PositionU start, Sci_PositionU end, Accessor &styler)
 {
-    Sci_Position nNextLine = -1;
+	Sci_PositionU nNextLine = -1;
     for ( Sci_PositionU i = start; i < end; i++ ) {
         char cNext = styler.SafeGetCharAt( i );
         if ( cNext == '\n' ) {
@@ -88,106 +90,111 @@ static int calculateFoldCmake(Sci_PositionU start, Sci_PositionU end, int foldle
          || CompareCaseInsensitive(s, "ELSEIF") == 0 )
         newFoldlevel++;
     else if ( CompareCaseInsensitive(s, "ENDIF") == 0 || CompareCaseInsensitive(s, "ENDWHILE") == 0
-              || CompareCaseInsensitive(s, "ENDMACRO") == 0 || CompareCaseInsensitive(s, "ENDFOREACH") == 0)
-        newFoldlevel--;
-    else if ( bElse && CompareCaseInsensitive(s, "ELSEIF") == 0 )
-        newFoldlevel++;
-    else if ( bElse && CompareCaseInsensitive(s, "ELSE") == 0 )
-        newFoldlevel++;
+			|| CompareCaseInsensitive(s, "ENDMACRO") == 0 || CompareCaseInsensitive(s, "ENDFOREACH") == 0)
+		newFoldlevel--;
+	else if ( bElse && CompareCaseInsensitive(s, "ELSEIF") == 0 )
+		newFoldlevel++;
+	else if ( bElse && CompareCaseInsensitive(s, "ELSE") == 0 )
+		newFoldlevel++;
 
-    return newFoldlevel;
+		return newFoldlevel;
 }
 
-static int classifyWordCmake(Sci_PositionU start, Sci_PositionU end, WordList *keywordLists[], Accessor &styler )
+static int classifyWordCmake(Sci_PositionU start, Sci_PositionU end, WordList *keywordLists[], Accessor &styler)
 {
-    char word[100] = {0};
-    char lowercaseWord[100] = {0};
+	char word[100] = { 0 };
+	char lowercaseWord[100] = { 0 };
 
-    WordList &Commands = *keywordLists[0];
-    WordList &Parameters = *keywordLists[1];
-    WordList &UserDefined = *keywordLists[2];
+	WordList &Commands = *keywordLists[0];
+	WordList &Parameters = *keywordLists[1];
+	WordList &UserDefined = *keywordLists[2];
 
-    for (Sci_PositionU i = 0; i < end - start + 1 && i < 99; i++) {
-        word[i] = static_cast<char>( styler[ start + i ] );
-        lowercaseWord[i] = static_cast<char>(tolower(word[i]));
-    }
+	for (Sci_PositionU i = 0; i < end - start + 1 && i < 99; i++) {
+		word[i] = static_cast<char>(styler[start + i]);
+		lowercaseWord[i] = static_cast<char>(tolower(word[i]));
+	}
 
-    // Check for special words...
-    if ( CompareCaseInsensitive(word, "MACRO") == 0 || CompareCaseInsensitive(word, "ENDMACRO") == 0 )
-        return SCE_CMAKE_MACRODEF;
+	// Check for special words...
+	if (CompareCaseInsensitive(word, "MACRO") == 0 || CompareCaseInsensitive(word, "ENDMACRO") == 0)
+		return SCE_CMAKE_MACRODEF;
 
-    if ( CompareCaseInsensitive(word, "IF") == 0 ||  CompareCaseInsensitive(word, "ENDIF") == 0 )
-        return SCE_CMAKE_IFDEFINEDEF;
+	if (CompareCaseInsensitive(word, "IF") == 0 || CompareCaseInsensitive(word, "ENDIF") == 0)
+		return SCE_CMAKE_IFDEFINEDEF;
 
-    if ( CompareCaseInsensitive(word, "ELSEIF") == 0  || CompareCaseInsensitive(word, "ELSE") == 0 )
-        return SCE_CMAKE_IFDEFINEDEF;
+	if (CompareCaseInsensitive(word, "ELSEIF") == 0 || CompareCaseInsensitive(word, "ELSE") == 0)
+		return SCE_CMAKE_IFDEFINEDEF;
 
-    if ( CompareCaseInsensitive(word, "WHILE") == 0 || CompareCaseInsensitive(word, "ENDWHILE") == 0)
-        return SCE_CMAKE_WHILEDEF;
+	if (CompareCaseInsensitive(word, "WHILE") == 0 || CompareCaseInsensitive(word, "ENDWHILE") == 0)
+		return SCE_CMAKE_WHILEDEF;
 
-    if ( CompareCaseInsensitive(word, "FOREACH") == 0 || CompareCaseInsensitive(word, "ENDFOREACH") == 0)
-        return SCE_CMAKE_FOREACHDEF;
+	if (CompareCaseInsensitive(word, "FOREACH") == 0 || CompareCaseInsensitive(word, "ENDFOREACH") == 0)
+		return SCE_CMAKE_FOREACHDEF;
 
-    if ( Commands.InList(lowercaseWord) )
-        return SCE_CMAKE_COMMANDS;
+	if (Commands.InList(lowercaseWord))
+		return SCE_CMAKE_COMMANDS;
 
-    if ( Parameters.InList(word) )
-        return SCE_CMAKE_PARAMETERS;
+	if (Parameters.InList(word))
+		return SCE_CMAKE_PARAMETERS;
 
 
-    if ( UserDefined.InList(word) )
-        return SCE_CMAKE_USERDEFINED;
+	if (UserDefined.InList(word))
+		return SCE_CMAKE_USERDEFINED;
 
-    if ( strlen(word) > 3 ) {
-        if ( word[1] == '{' && word[strlen(word)-1] == '}' )
-            return SCE_CMAKE_VARIABLE;
-    }
+	if (strlen(word) > 3) {
+		if (word[1] == '{' && word[strlen(word) - 1] == '}')
+			return SCE_CMAKE_VARIABLE;
+	}
 
-    // To check for numbers
-    if ( isCmakeNumber( word[0] ) ) {
-        bool bHasSimpleCmakeNumber = true;
-        for (unsigned int j = 1; j < end - start + 1 && j < 99; j++) {
-            if ( !isCmakeNumber( word[j] ) ) {
-                bHasSimpleCmakeNumber = false;
-                break;
-            }
-        }
+	// To check for numbers
+	if (isCmakeNumber(word[0])) {
+		bool bHasSimpleCmakeNumber = true;
+		for (unsigned int j = 1; j < end - start + 1 && j < 99; j++) {
+			if (!isCmakeNumber(word[j])) {
+				bHasSimpleCmakeNumber = false;
+				break;
+			}
+		}
 
-        if ( bHasSimpleCmakeNumber )
-            return SCE_CMAKE_NUMBER;
-    }
+		if (bHasSimpleCmakeNumber)
+			return SCE_CMAKE_NUMBER;
+	}
 
-    return SCE_CMAKE_DEFAULT;
+	return SCE_CMAKE_DEFAULT;
 }
 
-static void ColouriseCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler)
+static void ColouriseCmakeDoc(Sci_PositionU startPos, Sci_PositionU, int, WordList *keywordLists[], Accessor &styler)
 {
-    int state = SCE_CMAKE_DEFAULT;
-    if ( startPos > 0 )
-        state = styler.StyleAt(startPos-1); // Use the style from the previous line, usually default, but could be commentbox
+	int state = SCE_CMAKE_DEFAULT;
+	if (startPos > 0)
+		state = styler.StyleAt(startPos - 1); // Use the style from the previous line, usually default, but could be commentbox
 
-    styler.StartAt( startPos );
-    styler.GetLine( startPos );
+	styler.StartAt(startPos);
+	styler.GetLine(startPos);
 
-    Sci_PositionU nLengthDoc = startPos + length;
-    styler.StartSegment( startPos );
+	Sci_PositionU nLengthDoc = startPos + length;
+	styler.StartSegment(startPos);
 
-    char cCurrChar;
-    bool bVarInString = false;
-    bool bClassicVarInString = false;
-
-    Sci_PositionU i;
-    for ( i = startPos; i < nLengthDoc; i++ ) {
-        cCurrChar = styler.SafeGetCharAt( i );
-        char cNextChar = styler.SafeGetCharAt(i+1);
-
-        switch (state) {
-        case SCE_CMAKE_DEFAULT:
-            if ( cCurrChar == '#' ) { // we have a comment line
-                styler.ColourTo(i-1, state );
-                state = SCE_CMAKE_COMMENT;
-                break;
-            }
+	char cCurrChar;
+	bool bVarInString = false;
+	bool bClassicVarInString = false;
+	bool bMultiComment = true;
+	
+	Sci_PositionU i;
+	for (i = startPos; i < nLengthDoc; i++) {
+		cCurrChar = styler.SafeGetCharAt(i);
+		char cNextChar = styler.SafeGetCharAt(i + 1);
+		char cAfterNextChar = styler.SafeGetCharAt(i + 2);
+		char cPrevChar = styler.SafeGetCharAt(i - 1);
+		switch (state) {
+		case SCE_CMAKE_DEFAULT:
+			if (cCurrChar == '#') { // we have a comment line
+				styler.ColourTo(i - 1, state);
+				bMultiComment = false;
+				state = SCE_CMAKE_COMMENT;
+				if (cNextChar == '[' && cAfterNextChar == '[')
+					bMultiComment = true; // we have multi comment
+				break;
+			}
             if ( cCurrChar == '"' ) {
                 styler.ColourTo(i-1, state );
                 state = SCE_CMAKE_STRINGDQ;
@@ -223,9 +230,10 @@ static void ColouriseCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, 
             }
 
             break;
-        case SCE_CMAKE_COMMENT:
-            if ( cCurrChar == '\n' || cCurrChar == '\r' ) {
-                if ( styler.SafeGetCharAt(i-1) == '\\' ) {
+        
+		case SCE_CMAKE_COMMENT:
+            if (bMultiComment == false && (cCurrChar == '\n' || cCurrChar == '\r' )) {
+                if ( cPrevChar == '\\' ) {
                     styler.ColourTo(i-2,state);
                     styler.ColourTo(i-1,SCE_CMAKE_DEFAULT);
                 }
@@ -234,12 +242,19 @@ static void ColouriseCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, 
                     state = SCE_CMAKE_DEFAULT;
                 }
             }
+			if (bMultiComment == true && cCurrChar == ']' && cPrevChar == ']') {
+				styler.ColourTo(i - 1, state);
+				styler.ColourTo(i, state);
+				state = SCE_CMAKE_DEFAULT;
+				bMultiComment = false;
+			}
             break;
+
         case SCE_CMAKE_STRINGDQ:
         case SCE_CMAKE_STRINGLQ:
         case SCE_CMAKE_STRINGRQ:
 
-            if ( styler.SafeGetCharAt(i-1) == '\\' && styler.SafeGetCharAt(i-2) == '$' )
+            if ( cPrevChar == '\\' && styler.SafeGetCharAt(i-2) == '$' )
                 break; // Ignore the next character, even if it is a quote of some sort
 
             if ( cCurrChar == '"' && state == SCE_CMAKE_STRINGDQ ) {
@@ -261,8 +276,8 @@ static void ColouriseCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, 
             }
 
             if ( cNextChar == '\r' || cNextChar == '\n' ) {
-                Sci_Position nCurLine = styler.GetLine(i+1);
-                Sci_Position nBack = i;
+				Sci_Position nCurLine = styler.GetLine(i+1);
+				Sci_Position nBack = i;
                 // We need to check if the previous line has a \ in it...
                 bool bNextLine = false;
 
@@ -325,8 +340,11 @@ static void ColouriseCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, 
                     bVarInString = false;
                     bClassicVarInString = false;
                 }
-                else if ( cCurrChar == '#' ) {
+				else if (cCurrChar == '#') {
                     state = SCE_CMAKE_COMMENT;
+					if (cNextChar == '[' && cAfterNextChar == '[')
+						bMultiComment = true;
+
                 }
             }
             break;
@@ -383,13 +401,13 @@ static void FoldCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, WordL
 
     bool foldAtElse = styler.GetPropertyInt("fold.at.else", 0) == 1;
 
-    Sci_Position lineCurrent = styler.GetLine(startPos);
-    Sci_PositionU safeStartPos = styler.LineStart( lineCurrent );
+	Sci_Position lineCurrent = styler.GetLine(startPos);
+	Sci_PositionU safeStartPos = styler.LineStart( lineCurrent );
 
     bool bArg1 = true;
-    Sci_Position nWordStart = -1;
+    int nWordStart = -1;
 
-    int levelCurrent = SC_FOLDLEVELBASE;
+	Sci_Position levelCurrent = SC_FOLDLEVELBASE;
     if (lineCurrent > 0)
         levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
     int levelNext = levelCurrent;
