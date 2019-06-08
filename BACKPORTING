@@ -467,4 +467,6 @@ branch), or have information worth noting.
 
 7550:fb4a24eb8aec Preparing for 4.1.6 release.
 7551:4781ee00f04f Clarified large file support.
+7559:6ccb029fd955 Updated release date for 4.1.6.
+7561:0e040330cb60 Added tag rel-4-1-6 for changeset 6ccb029fd955
   Not backported, since this is LongTerm3.
