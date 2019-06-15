@@ -298,9 +298,9 @@ void SurfaceImpl::FillColour(const ColourDesired& back)
 
 //--------------------------------------------------------------------------------------------------
 
-CGImageRef SurfaceImpl::GetImage()
+CGImageRef SurfaceImpl::CreateImage()
 {
-  // For now, assume that GetImage can only be called on PixMap surfaces.
+  // For now, assume that CreateImage can only be called on PixMap surfaces.
   if (!bitmapData)
     return NULL;
 
@@ -485,7 +485,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
   SurfaceImpl& patternSurface = static_cast<SurfaceImpl &>(surfacePattern);
 
   // For now, assume that copy can only be called on PixMap surfaces. Shows up black.
-  CGImageRef image = patternSurface.GetImage();
+  CGImageRef image = patternSurface.CreateImage();
   if (image == NULL)
   {
     FillRectangle(rc, ColourDesired(0));
@@ -812,7 +812,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)
 void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect, PRectangle dstRect)
 {
   SurfaceImpl& source = static_cast<SurfaceImpl &>(surfaceSource);
-  CGImageRef image = source.GetImage();
+  CGImageRef image = source.CreateImage();
 
   CGRect src = PRectangleToCGRect(srcRect);
   CGRect dst = PRectangleToCGRect(dstRect);
@@ -845,7 +845,7 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
   SurfaceImpl& source = static_cast<SurfaceImpl &>(surfaceSource);
 
   // Get the CGImageRef
-  CGImageRef image = source.GetImage();
+  CGImageRef image = source.CreateImage();
   // If we could not get an image reference, fill the rectangle black
   if ( image == NULL )
   {
@@ -1343,7 +1343,7 @@ static NSImage* ImageFromXPM(XPM* pxpm)
     SurfaceImpl* surfaceIXPM = static_cast<SurfaceImpl*>(surfaceXPM.get());
     CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
     pxpm->Draw(surfaceXPM.get(), rcxpm);
-    CGImageRef imageRef = surfaceIXPM->GetImage();
+    CGImageRef imageRef = surfaceIXPM->CreateImage();
     img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
     CGImageRelease(imageRef);
   }

@@ -1456,7 +1456,7 @@ void ScintillaCocoa::StartDrag()
   //           the full rectangle which may include non-selected text.
 
   NSBitmapImageRep* bitmap = NULL;
-  CGImageRef imagePixmap = pixmap.GetImage();
+  CGImageRef imagePixmap = pixmap.CreateImage();
   if (imagePixmap)
     bitmap = [[[NSBitmapImageRep alloc] initWithCGImage: imagePixmap] autorelease];
   CGImageRelease(imagePixmap);
