@@ -1205,34 +1205,31 @@ UINT ScintillaWin::CodePageOfDocument() const {
 }
 
 sptr_t ScintillaWin::GetTextLength() {
-	if (pdoc->Length() == 0)
-		return 0;
-	std::vector<char> docBytes(pdoc->Length(), '\0');
-	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
-	if (IsUnicodeMode()) {
-		return UTF16Length(&docBytes[0], docBytes.size());
-	} else {
-		return ::MultiByteToWideChar(CodePageOfDocument(), 0, &docBytes[0],
-			static_cast<int>(docBytes.size()), NULL, 0);
-	}
+	return pdoc->CountUTF16(0, pdoc->Length());
 }
 
 sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
+	if (lParam == 0) {
+		return pdoc->CountUTF16(0, pdoc->Length());
+	}
+	if (wParam == 0) {
+		return 0;
+	}
 	wchar_t *ptr = static_cast<wchar_t *>(PtrFromSPtr(lParam));
 	if (pdoc->Length() == 0) {
 		*ptr = L'\0';
 		return 0;
 	}
-	std::vector<char> docBytes(pdoc->Length(), '\0');
-	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
+	const Sci::Position lengthWanted = wParam - 1;
+	Sci::Position sizeRequestedRange = pdoc->GetRelativePositionUTF16(0, lengthWanted);
+	if (sizeRequestedRange < 0) {
+		// Requested more text than there is in the document.
+		sizeRequestedRange = pdoc->CountUTF16(0, pdoc->Length());
+	}
+	std::string docBytes(sizeRequestedRange, '\0');
+	pdoc->GetCharRange(&docBytes[0], 0, sizeRequestedRange);
 	if (IsUnicodeMode()) {
-		const size_t lengthUTF16 = UTF16Length(&docBytes[0], docBytes.size());
-		if (lParam == 0)
-			return lengthUTF16;
-		if (wParam == 0)
-			return 0;
-		size_t uLen = UTF16FromUTF8(&docBytes[0], docBytes.size(),
-			ptr, wParam - 1);
+		const size_t uLen = UTF16FromUTF8(docBytes.c_str(), docBytes.size(), ptr, lengthWanted);
 		ptr[uLen] = L'\0';
 		return uLen;
 	} else {
@@ -1241,8 +1238,8 @@ sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
 		const UINT cpSrc = CodePageOfDocument();
 		int lengthUTF16 = ::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
 			static_cast<int>(docBytes.size()), NULL, 0);
-		if (lengthUTF16 >= static_cast<int>(wParam))
-			lengthUTF16 = static_cast<int>(wParam)-1;
+		if (lengthUTF16 > lengthWanted)
+			lengthUTF16 = static_cast<int>(lengthWanted);
 		::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
 			static_cast<int>(docBytes.size()),
 			ptr, lengthUTF16);
