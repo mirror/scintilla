@@ -469,4 +469,24 @@ branch), or have information worth noting.
 7551:4781ee00f04f Clarified large file support.
 7559:6ccb029fd955 Updated release date for 4.1.6.
 7561:0e040330cb60 Added tag rel-4-1-6 for changeset 6ccb029fd955
+7566:8fdc0159b0df Make a new release due to a regression in SciTE with 4.1.6.
+7567:8094a3e525d3 Added tag rel-4-1-7 for changeset 8fdc0159b0df
+7568:263aa618ce2a Add new section for version 4.1.8.
+  Not backported, since this is LongTerm3.
+
+7569:ab69548334b7 Feature [feature-requests:#1295]. Lexer added for DataFlex.
+  Backported, but with custom `_strnlen` function since `strnlen` is not part of
+  the C or C++ standard.
+  
+7602:fa9114b5ea0e For encodings other than UTF-8, split input up into characters before calling InsertCharacter.
+  Not backported since its a Cocoa platform change I cannot easily test.
+  
+7603:0b85654df4db Updating file download sizes to be in megabytes.
+  Not backported, since this is not applicable to LongTerm3.
+  
+7619:a235c1b87d7e Readying 4.2.0 release.
+7620:7f8d008985d2 Updated version number.
+7622:62b5326b2e9d Added tag rel-4-2-0 for changeset 70fe3bd38a3d
+7623:62d3fe4a3f74 Added section for next release.
+7624:748edf13e588 SciTE changelog.
   Not backported, since this is LongTerm3.
