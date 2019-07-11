@@ -2292,11 +2292,11 @@ ptrdiff_t ScintillaCocoa::InsertText(NSString *input) {
       while (sv.length()) {
         const unsigned char leadByte = sv[0];
         const unsigned int bytesInCharacter = UTF8BytesOfLead[leadByte];
-        AddCharUTF(sv.c_str(), bytesInCharacter, false);
+        InsertCharacter(sv.c_str(), bytesInCharacter);
         sv = sv.substr(bytesInCharacter, sv.length());
       }
     } else {
-      AddCharUTF(encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
+      InsertCharacter(encoded.c_str(), static_cast<unsigned int>(encoded.length()));
 		}
   }
   return encoded.length();

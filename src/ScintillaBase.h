@@ -61,7 +61,10 @@ protected:
 	void Initialise() override {}
 	void Finalise() override;
 
-	void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false) override;
+	// This method is deprecated, use InsertCharacter instead. The treatAsDBCS parameter is no longer used.
+	virtual void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false);
+
+	void InsertCharacter(const char *s, unsigned int len) override;
 	void Command(int cmdId);
 	void CancelModes() override;
 	int KeyCommand(unsigned int iMessage) override;

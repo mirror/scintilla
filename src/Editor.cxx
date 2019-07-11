@@ -1888,7 +1888,7 @@ void Editor::AddChar(char ch) {
 	char s[2];
 	s[0] = ch;
 	s[1] = '\0';
-	AddCharUTF(s, 1);
+	InsertCharacter(s, 1);
 }
 
 void Editor::FilterSelections() {
@@ -1898,8 +1898,8 @@ void Editor::FilterSelections() {
 	}
 }
 
-// AddCharUTF inserts an array of bytes which may or may not be in UTF-8.
-void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
+// InsertCharacter inserts a character encoded in document code page.
+void Editor::InsertCharacter(const char *s, unsigned int len) {
 	if (len == 0) {
 		return;
 	}
@@ -1974,7 +1974,7 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 	}
 
 	int ch = static_cast<unsigned char>(s[0]);
-	if (treatAsDBCS || pdoc->dbcsCodePage != SC_CP_UTF8) {
+	if (pdoc->dbcsCodePage != SC_CP_UTF8) {
 		if (len > 1) {
 			// DBCS code page or DBCS font character set.
 			ch = (ch << 8) | static_cast<unsigned char>(s[1]);
@@ -1994,7 +1994,8 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 	NotifyChar(ch);
 
 	if (recordingMacro) {
-		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<sptr_t>(s));
+		std::string copy(s, len); // ensure NUL-terminated
+		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<sptr_t>(copy.data()));
 	}
 }
 

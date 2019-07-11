@@ -2258,7 +2258,7 @@ void ScintillaGTK::MoveImeCarets(int pos) {
 void ScintillaGTK::DrawImeIndicator(int indicator, int len) {
 	// Emulate the visual style of IME characters with indicators.
 	// Draw an indicator on the character before caret by the character bytes of len
-	// so it should be called after addCharUTF().
+	// so it should be called after InsertCharacter().
 	// It does not affect caret positions.
 	if (indicator < 8 || indicator > INDIC_MAX) {
 		return;
@@ -2350,7 +2350,7 @@ void ScintillaGTK::CommitThis(char *commitStr) {
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			AddCharUTF(docChar.c_str(), docChar.size());
+			InsertCharacter(docChar.c_str(), docChar.size());
 		}
 		g_free(uniStr);
 		ShowCaretAtCurrentPosition();
@@ -2412,7 +2412,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			AddCharUTF(docChar.c_str(), docChar.size());
+			InsertCharacter(docChar.c_str(), docChar.size());
 
 			DrawImeIndicator(indicator[i], docChar.size());
 		}
