@@ -1069,7 +1069,7 @@ public:
         char utf8[6];
         int len;
         toutf8(key, utf8, &len);
-        return (AddCharUTF(utf8, len), 1);
+        return (InsertCharacter(utf8, len), 1);
       } else return (AddChar(key), 1);
     } else {
       SCNotification scn = {};
