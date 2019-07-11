@@ -2350,7 +2350,7 @@ void ScintillaGTK::CommitThis(char *commitStr) {
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			InsertCharacter(docChar.c_str(), docChar.size());
+			InsertCharacter(docChar.c_str(), docChar.size(), CharacterSource::directInput);
 		}
 		g_free(uniStr);
 		ShowCaretAtCurrentPosition();
@@ -2403,8 +2403,6 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 		std::vector<int> indicator = MapImeIndicators(preeditStr.attrs, preeditStr.str);
 
-		const bool tmpRecordingMacro = recordingMacro;
-		recordingMacro = false;
 		for (glong i = 0; i < preeditStr.uniStrLen; i++) {
 			gchar u8Char[UTF8MaxBytes+2] = {0};
 			const gint u8CharLen = g_unichar_to_utf8(preeditStr.uniStr[i], u8Char);
@@ -2412,11 +2410,10 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			InsertCharacter(docChar.c_str(), docChar.size());
+			InsertCharacter(docChar.c_str(), docChar.size(), CharacterSource::tentativeInput);
 
 			DrawImeIndicator(indicator[i], docChar.size());
 		}
-		recordingMacro = tmpRecordingMacro;
 
 		// Move caret to ime cursor position.
 		const int imeEndToImeCaretU32 = preeditStr.cursor_pos - preeditStr.uniStrLen;

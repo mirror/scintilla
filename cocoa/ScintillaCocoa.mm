@@ -2279,7 +2279,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
 /**
  * Used to insert already processed text provided by the Cocoa text input system.
  */
-ptrdiff_t ScintillaCocoa::InsertText(NSString *input) {
+ptrdiff_t ScintillaCocoa::InsertText(NSString *input, CharacterSource charSource) {
   CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                        vs.styles[STYLE_DEFAULT].characterSet);
   std::string encoded = EncodedBytesString((CFStringRef)input, encoding);
@@ -2292,11 +2292,11 @@ ptrdiff_t ScintillaCocoa::InsertText(NSString *input) {
       while (sv.length()) {
         const unsigned char leadByte = sv[0];
         const unsigned int bytesInCharacter = UTF8BytesOfLead[leadByte];
-        InsertCharacter(sv.c_str(), bytesInCharacter);
+        InsertCharacter(sv.c_str(), bytesInCharacter, charSource);
         sv = sv.substr(bytesInCharacter, sv.length());
       }
     } else {
-      InsertCharacter(encoded.c_str(), static_cast<unsigned int>(encoded.length()));
+      InsertCharacter(encoded.c_str(), static_cast<unsigned int>(encoded.length()), charSource);
 		}
   }
   return encoded.length();

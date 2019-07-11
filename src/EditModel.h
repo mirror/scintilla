@@ -37,6 +37,7 @@ public:
 	bool primarySelection;
 
 	enum IMEInteraction { imeWindowed, imeInline } imeInteraction;
+	enum class CharacterSource { directInput, tentativeInput, imeResult };
 
 	int foldFlags;
 	int foldDisplayTextStyle;

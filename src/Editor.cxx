@@ -1888,7 +1888,7 @@ void Editor::AddChar(char ch) {
 	char s[2];
 	s[0] = ch;
 	s[1] = '\0';
-	InsertCharacter(s, 1);
+	InsertCharacter(s, 1, CharacterSource::directInput);
 }
 
 void Editor::FilterSelections() {
@@ -1899,7 +1899,7 @@ void Editor::FilterSelections() {
 }
 
 // InsertCharacter inserts a character encoded in document code page.
-void Editor::InsertCharacter(const char *s, unsigned int len) {
+void Editor::InsertCharacter(const char *s, unsigned int len, CharacterSource charSource) {
 	if (len == 0) {
 		return;
 	}
@@ -1991,9 +1991,9 @@ void Editor::InsertCharacter(const char *s, unsigned int len) {
 			ch = utf32[0];
 		}
 	}
-	NotifyChar(ch);
+	NotifyChar(ch, charSource);
 
-	if (recordingMacro) {
+	if (recordingMacro && charSource != CharacterSource::tentativeInput) {
 		std::string copy(s, len); // ensure NUL-terminated
 		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<sptr_t>(copy.data()));
 	}
@@ -2339,10 +2339,11 @@ void Editor::NotifyErrorOccurred(Document *, void *, int status) {
 	errorStatus = status;
 }
 
-void Editor::NotifyChar(int ch) {
+void Editor::NotifyChar(int ch, CharacterSource charSource) {
 	SCNotification scn = {};
 	scn.nmhdr.code = SCN_CHARADDED;
 	scn.ch = ch;
+	scn.characterSource = static_cast<int>(charSource);
 	NotifyParent(scn);
 }
 
@@ -3088,7 +3089,7 @@ void Editor::NewLine() {
 	for (size_t i = 0; i < countInsertions; i++) {
 		const char *eol = StringFromEOLMode(pdoc->eolMode);
 		while (*eol) {
-			NotifyChar(*eol);
+			NotifyChar(*eol, CharacterSource::directInput);
 			if (recordingMacro) {
 				char txt[2];
 				txt[0] = *eol;

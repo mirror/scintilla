@@ -1069,8 +1069,13 @@ public:
         char utf8[6];
         int len;
         toutf8(key, utf8, &len);
-        return (InsertCharacter(utf8, len), 1);
-      } else return (AddChar(key), 1);
+        InsertCharacter(utf8, len, EditModel::CharacterSource::directInput);
+        return 1;
+      } else {
+        char ch = static_cast<char>(key);
+        InsertCharacter(&ch, 1, EditModel::CharacterSource::directInput);
+        return 1;
+      }
     } else {
       SCNotification scn = {};
       scn.nmhdr.code = SCN_KEY;

@@ -328,7 +328,7 @@ class ScintillaWin :
 	static int MouseModifiers(uptr_t wParam) noexcept;
 
 	Sci::Position TargetAsUTF8(char *text) const;
-	void AddCharUTF16(wchar_t const *wcs, unsigned int wclen);
+	void AddCharUTF16(wchar_t const *wcs, unsigned int wclen, CharacterSource charSource);
 	Sci::Position EncodedFromUTF8(const char *utf8, char *encoded) const;
 	sptr_t WndPaint();
 
@@ -341,7 +341,7 @@ class ScintillaWin :
 	void SelectionToHangul();
 	void EscapeHanja();
 	void ToggleHanja();
-	void AddWString(std::wstring wcs);
+	void AddWString(std::wstring wcs, CharacterSource charSource);
 
 	UINT CodePageOfDocument() const;
 	bool ValidCodePage(int codePage) const override;
@@ -816,20 +816,20 @@ Sci::Position ScintillaWin::EncodedFromUTF8(const char *utf8, char *encoded) con
 
 // Add one character from a UTF-16 string, by converting to either UTF-8 or
 // the current codepage. Code is similar to HandleCompositionWindowed().
-void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
+void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen, CharacterSource charSource) {
 	if (IsUnicodeMode()) {
 		size_t len = UTF8Length(wcs, wclen);
 		char utfval[maxLenInputIME * 3];
 		UTF8FromUTF16(wcs, wclen, utfval, len);
 		utfval[len] = '\0';
-		AddCharUTF(utfval, static_cast<unsigned int>(len));
+		InsertCharacter(utfval, static_cast<unsigned int>(len), charSource);
 	} else {
 		const UINT cpDest = CodePageOfDocument();
 		char inBufferCP[maxLenInputIME * 2];
 		const int size = ::WideCharToMultiByte(cpDest,
 			0, wcs, wclen, inBufferCP, sizeof(inBufferCP) - 1, 0, 0);
 		for (int i=0; i<size; i++) {
-			AddChar(inBufferCP[i]);
+			InsertCharacter(&inBufferCP[i], 1, charSource);
 		}
 	}
 }
@@ -896,7 +896,7 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 	if (lParam & GCS_RESULTSTR) {
 		IMContext imc(MainHWND());
 		if (imc.hIMC) {
-			AddWString(imc.GetCompositionString(GCS_RESULTSTR));
+			AddWString(imc.GetCompositionString(GCS_RESULTSTR), CharacterSource::imeResult);
 
 			// Set new position after converted
 			const Point pos = PointMainCaret();
@@ -1049,7 +1049,7 @@ std::vector<int> MapImeIndicators(std::vector<BYTE> inputStyle) {
 
 }
 
-void ScintillaWin::AddWString(std::wstring wcs) {
+void ScintillaWin::AddWString(std::wstring wcs, CharacterSource charSource) {
 	if (wcs.empty())
 		return;
 
@@ -1059,7 +1059,7 @@ void ScintillaWin::AddWString(std::wstring wcs) {
 		const std::wstring uniChar(wcs, i, ucWidth);
 		std::string docChar = StringEncode(uniChar, codePage);
 
-		InsertCharacter(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
+		InsertCharacter(docChar.c_str(), static_cast<unsigned int>(docChar.size()), charSource);
 		i += ucWidth;
 	}
 }
@@ -1100,20 +1100,17 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		std::vector<int> imeIndicator = MapImeIndicators(imc.GetImeAttributes());
 
-		const bool tmpRecordingMacro = recordingMacro;
-		recordingMacro = false;
 		const int codePage = CodePageOfDocument();
 		for (size_t i = 0; i < wcs.size(); ) {
 			const size_t ucWidth = UTF16CharLength(wcs[i]);
 			const std::wstring uniChar(wcs, i, ucWidth);
 			std::string docChar = StringEncode(uniChar, codePage);
 
-			InsertCharacter(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
+			InsertCharacter(docChar.c_str(), static_cast<unsigned int>(docChar.size()), CharacterSource::tentativeInput);
 
 			DrawImeIndicator(imeIndicator[i], static_cast<unsigned int>(docChar.size()));
 			i += ucWidth;
 		}
-		recordingMacro = tmpRecordingMacro;
 
 		// Move IME caret from current last position to imeCaretPos.
 		const int imeEndToImeCaretU16 = imc.GetImeCaretPos() - static_cast<unsigned int>(wcs.size());
@@ -1125,7 +1122,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			view.imeCaretBlockOverride = true;
 		}
 	} else if (lParam & GCS_RESULTSTR) {
-		AddWString(imc.GetCompositionString(GCS_RESULTSTR));
+		AddWString(imc.GetCompositionString(GCS_RESULTSTR), CharacterSource::imeResult);
 	}
 	EnsureCaretVisible();
 	SetCandidateWindowPos();
@@ -1486,7 +1483,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					lastHighSurrogateChar = 0;
 					wclen = 2;
 				}
-				AddCharUTF16(wcs, wclen);
+				AddCharUTF16(wcs, wclen, CharacterSource::directInput);
 			}
 			return 0;
 
@@ -1498,7 +1495,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			} else {
 				wchar_t wcs[3] = {0};
 				const unsigned int wclen = UTF16FromUTF32Character(static_cast<unsigned int>(wParam), wcs);
-				AddCharUTF16(wcs, wclen);
+				AddCharUTF16(wcs, wclen, CharacterSource::directInput);
 				return FALSE;
 			}
 
