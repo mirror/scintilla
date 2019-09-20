@@ -55,10 +55,8 @@ lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 -- Comments.
 local line_comment = '//' * lexer.nonnewline_esc^0
 local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1 +
-                      lexer.starts_line('#if') * S(' \t')^0 * '0' *
-                      lexer.space *
-                      (lexer.any - lexer.starts_line('#endif'))^0 *
-                      (lexer.starts_line('#endif'))^-1
+                      '#if' * S(' \t')^0 * '0' * lexer.space *
+                      (lexer.any - '#endif')^0 * P('#endif')^-1
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
@@ -69,7 +67,6 @@ local preproc_word = word_match[[
   define elif else endif if ifdef ifndef line pragma undef
 ]]
 lex:add_rule('preprocessor',
-             #lexer.starts_line('#') *
              (token(lexer.PREPROCESSOR, '#' * S('\t ')^0 * preproc_word) +
               token(lexer.PREPROCESSOR, '#' * S('\t ')^0 * 'include') *
               (token(lexer.WHITESPACE, S('\t ')^1) *
