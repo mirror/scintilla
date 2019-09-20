@@ -3,7 +3,8 @@
 
 local lexer = require("lexer")
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local B, P, R, S, V = lpeg.B, lpeg.P, lpeg.R, lpeg.S, lpeg.V
+local C, Cmt = lpeg.C, lpeg.Cmt
 
 local lex = lexer.new('rust')
 
@@ -11,44 +12,71 @@ local lex = lexer.new('rust')
 lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Keywords.
-lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
-  abstract alignof as become box break const continue crate do else enum extern
-  false final fn for if impl in let loop macro match mod move mut offsetof
-  override priv proc pub pure ref return Self self sizeof static struct super
-  trait true type typeof unsafe unsized use virtual where while yield
+-- https://github.com/rust-lang/rust/blob/stable/src/libsyntax_pos/symbol.rs
+lex:add_rule('keyword', token(lexer.KEYWORD, B(-P('r#')) * word_match[[
+  Self abstract as async auto await become box break catch const continue crate
+  default do dyn else enum extern false final fn for if impl in let loop macro
+  match mod move mut override priv pub ref return self static struct super
+  trait true try type typeof union unsafe unsized use virtual where while yield
 ]]))
 
--- Functions.
-lex:add_rule('function', token(lexer.FUNCTION, lexer.word^1 * S("!")))
+-- Macro names.
+lex:add_rule('macro', token(lexer.FUNCTION, lexer.word * S("!")))
 
 -- Library types
 lex:add_rule('library', token(lexer.LABEL, lexer.upper *
                                            (lexer.lower + lexer.dec_num)^1))
 
+-- Numbers.
+local identifier = P('r#')^-1 * lexer.word
+local digit = lexer.digit
+local decimal_literal = digit * (digit + '_')^0
+local function integer_suffix(digit)
+  return P('_')^0 * digit * (digit + '_')^0
+end
+local function opt_cap(patt)
+  return C(patt^-1)
+end
+local float = decimal_literal *
+              (Cmt(opt_cap('.' * decimal_literal) *
+                   opt_cap(S('eE') * S('+-')^-1 * integer_suffix(digit)) *
+                   opt_cap(P('f32') + 'f64'),
+                   function (input, index, decimals, exponent, type)
+                     return decimals ~= "" or exponent ~= "" or type ~= ""
+                   end) +
+               '.' * -(S('._') + identifier))
+local function prefixed_integer(prefix, digit)
+  return P(prefix) * integer_suffix(digit)
+end
+local integer = (prefixed_integer('0b', S('01')) +
+                 prefixed_integer('0o', R('07')) +
+                 prefixed_integer('0x', lexer.xdigit) +
+                 decimal_literal) *
+                (S('iu') * (P('8') + '16' + '32' + '64' + '128' + 'size'))^-1
+lex:add_rule('number', token(lexer.NUMBER, float + integer))
+
 -- Types.
 lex:add_rule('type', token(lexer.TYPE, word_match[[
- () bool isize usize char str u8 u16 u32 u64 i8 i16 i32 i64 f32 f64
+ () bool isize usize char str u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64
 ]]))
 
 -- Strings.
-local sq_str = P('L')^-1 * lexer.delimited_range("'")
-local dq_str = P('L')^-1 * lexer.delimited_range('"')
-local raw_str = '#"' * (lexer.any - '#')^0 * P('#')^-1
-lex:add_rule('string', token(lexer.STRING, dq_str + raw_str))
+local sq_str = P('b')^-1 * lexer.delimited_range("'", true)
+local dq_str = P('b')^-1 * lexer.delimited_range('"')
+local raw_str = Cmt(P('b')^-1 * P('r') * C(P('#')^0) * '"',
+                    function(input, index, hashes)
+                      local _, e = input:find('"'..hashes, index, true)
+                      return (e or #input) + 1
+                    end)
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str + raw_str))
 
 -- Identifiers.
-lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
+lex:add_rule('identifier', token(lexer.IDENTIFIER, identifier))
 
 -- Comments.
 local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local block_comment = lexer.nested_pair('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
-
--- Numbers.
-lex:add_rule('number', token(lexer.NUMBER,
-                             lexer.float +
-                             P('0b')^-1 * (lexer.dec_num + "_")^1 +
-                             lexer.integer))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR,
