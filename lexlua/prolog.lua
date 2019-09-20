@@ -34,8 +34,6 @@ local dialects = setmetatable({gprolog = 'gprolog', swipl = 'swipl'},
                               {__index = function(_, _) return 'iso' end})
 local dialect = dialects[lexer.property['prolog.dialect']]
 
-print(lexer.property['prolog.dialect'])
-
 -- Directives.
 local directives = {}
 directives.iso = [[
