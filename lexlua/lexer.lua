@@ -1342,7 +1342,7 @@ function M.fold(lexer, text, start_pos, start_line, start_level)
                 end
               end
             end
-            s = line:find(symbol, s + 1, true)
+            s, e = line:find(symbol, s + 1, true)
           end
         end
         folds[line_num] = prev_level
