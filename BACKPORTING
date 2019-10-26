@@ -477,16 +477,23 @@ branch), or have information worth noting.
 7569:ab69548334b7 Feature [feature-requests:#1295]. Lexer added for DataFlex.
   Backported, but with custom `_strnlen` function since `strnlen` is not part of
   the C or C++ standard.
-  
+
 7602:fa9114b5ea0e For encodings other than UTF-8, split input up into characters before calling InsertCharacter.
   Not backported since its a Cocoa platform change I cannot easily test.
-  
+
 7603:0b85654df4db Updating file download sizes to be in megabytes.
   Not backported, since this is not applicable to LongTerm3.
-  
+
 7619:a235c1b87d7e Readying 4.2.0 release.
 7620:7f8d008985d2 Updated version number.
 7622:62b5326b2e9d Added tag rel-4-2-0 for changeset 70fe3bd38a3d
 7623:62d3fe4a3f74 Added section for next release.
 7624:748edf13e588 SciTE changelog.
+  Not backported, since this is LongTerm3.
+
+7698:12655cf90e70 Update project to Xcode 11.
+  Not backported, since Xcode 11 was released in 2019.
+
+7709:4f8c3b19095a Readying 4.2.1 release.
+7710:3a9f0580c75e Added tag rel-4-2-1 for changeset 4f8c3b19095a
   Not backported, since this is LongTerm3.
