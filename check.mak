@@ -7,7 +7,7 @@
 
 .SUFFIXES: .cxx .c .o .h .a
 
-INCLUDEDIRS = -Iinclude -Isrc -Ilexlib
+INCLUDEDIRS = -Iinclude -Isrc -Ilexlib -I/usr/include/lua5.1
 CC = gcc
 CXX = g++
 AR = ar
