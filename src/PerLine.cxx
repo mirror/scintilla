@@ -80,7 +80,6 @@ void MarkerHandleSet::CombineWith(MarkerHandleSet *other) {
 }
 
 LineMarkers::~LineMarkers() {
-	markers.DeleteAll();
 }
 
 void LineMarkers::Init() {
@@ -310,7 +309,6 @@ struct AnnotationHeader {
 };
 
 LineAnnotation::~LineAnnotation() {
-	ClearAll();
 }
 
 void LineAnnotation::Init() {
@@ -433,7 +431,6 @@ int LineAnnotation::Lines(Sci::Line line) const {
 }
 
 LineTabstops::~LineTabstops() {
-	tabstops.DeleteAll();
 }
 
 void LineTabstops::Init() {

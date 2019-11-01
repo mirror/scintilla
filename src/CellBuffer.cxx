@@ -98,7 +98,6 @@ public:
 	void operator=(const LineStartIndex &) = delete;
 	void operator=(LineStartIndex &&) = delete;
 	virtual ~LineStartIndex() {
-		starts.DeleteAll();
 	}
 	bool Allocate(Sci::Line lines) {
 		refCount++;
