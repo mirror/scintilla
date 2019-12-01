@@ -27,7 +27,7 @@ using namespace Scintilla;
 // to simplify checks.
 static std::string Representation(const SparseVector<UniqueString> &st) {
 	std::string ret;
-	for (int i = 0;i < st.Length();i++) {
+	for (int i = 0;i <= st.Length();i++) {
 		const char *value = st.ValueAt(i).get();
 		if (value && *value)
 			ret += value;
@@ -44,6 +44,7 @@ TEST_CASE("SparseVector") {
 	SECTION("IsEmptyInitially") {
 		REQUIRE(1 == st.Elements());
 		REQUIRE(0 == st.Length());
+		REQUIRE("-" == Representation(st));
 		st.Check();
 	}
 
@@ -60,7 +61,7 @@ TEST_CASE("SparseVector") {
 		st.InsertSpace(0, 5);
 		st.SetValueAt(3, UniqueStringCopy("3"));
 		REQUIRE(2 == st.Elements());
-		REQUIRE("---3-" == Representation(st));
+		REQUIRE("---3--" == Representation(st));
 		st.Check();
 	}
 
@@ -74,7 +75,7 @@ TEST_CASE("SparseVector") {
 		st.DeletePosition(3);
 		REQUIRE(1 == st.Elements());
 		REQUIRE(4 == st.Length());
-		REQUIRE("----" == Representation(st));
+		REQUIRE("-----" == Representation(st));
 		st.Check();
 	}
 
@@ -83,7 +84,13 @@ TEST_CASE("SparseVector") {
 		st.InsertSpace(0, 5);
 		st.SetValueAt(0, UniqueStringCopy("3"));
 		REQUIRE(1 == st.Elements());
-		REQUIRE("3----" == Representation(st));
+		REQUIRE("3-----" == Representation(st));
+		st.DeletePosition(0);
+		REQUIRE(1 == st.Elements());
+		REQUIRE("-----" == Representation(st));
+		st.SetValueAt(0, UniqueStringCopy("4"));
+		REQUIRE(1 == st.Elements());
+		REQUIRE("4----" == Representation(st));
 		st.DeletePosition(0);
 		REQUIRE(1 == st.Elements());
 		REQUIRE("----" == Representation(st));
@@ -101,10 +108,10 @@ TEST_CASE("SparseVector") {
 		st.InsertSpace(0, 5);
 		st.SetValueAt(0, UniqueStringCopy("3"));
 		REQUIRE(1 == st.Elements());
-		REQUIRE("3----" == Representation(st));
+		REQUIRE("3-----" == Representation(st));
 		st.InsertSpace(0, 1);
 		REQUIRE(2 == st.Elements());
-		REQUIRE("-3----" == Representation(st));
+		REQUIRE("-3-----" == Representation(st));
 		st.Check();
 	}
 
@@ -113,10 +120,10 @@ TEST_CASE("SparseVector") {
 		st.InsertSpace(0, 5);
 		st.SetValueAt(1, UniqueStringCopy("1"));
 		REQUIRE(2 == st.Elements());
-		REQUIRE("-1---" == Representation(st));
+		REQUIRE("-1----" == Representation(st));
 		st.InsertSpace(1, 1);
 		REQUIRE(2 == st.Elements());
-		REQUIRE("--1---" == Representation(st));
+		REQUIRE("--1----" == Representation(st));
 		st.Check();
 	}
 
@@ -125,10 +132,10 @@ TEST_CASE("SparseVector") {
 		st.InsertSpace(0, 5);
 		st.SetValueAt(1, UniqueStringCopy("9"));
 		REQUIRE(2 == st.Elements());
-		REQUIRE("-9---" == Representation(st));
+		REQUIRE("-9----" == Representation(st));
 		st.InsertSpace(0, 1);
 		REQUIRE(2 == st.Elements());
-		REQUIRE("--9---" == Representation(st));
+		REQUIRE("--9----" == Representation(st));
 		// Initial st has allocation of 9 values so this should cause reallocation
 		const std::string letters("ABCDEFGHIJKLMNOP");	// 16 letters
 		for (const char letter : letters) {
@@ -136,7 +143,7 @@ TEST_CASE("SparseVector") {
 			st.InsertSpace(0, 1);
 			st.SetValueAt(1, UniqueStringCopy(sLetter));
 		}
-		REQUIRE("-PONMLKJIHGFEDCBA-9---" == Representation(st));
+		REQUIRE("-PONMLKJIHGFEDCBA-9----" == Representation(st));
 		st.Check();
 	}
 
@@ -145,10 +152,16 @@ TEST_CASE("SparseVector") {
 		st.InsertSpace(0, 5);
 		st.SetValueAt(4, UniqueStringCopy("5"));
 		REQUIRE(2 == st.Elements());
-		REQUIRE("----5" == Representation(st));
+		REQUIRE("----5-" == Representation(st));
+		st.SetValueAt(5, UniqueStringCopy("6"));
+		REQUIRE(2 == st.Elements());
+		REQUIRE("----56" == Representation(st));
 		st.DeletePosition(4);
 		REQUIRE(1 == st.Elements());
-		REQUIRE("----" == Representation(st));
+		REQUIRE("----6" == Representation(st));
+		st.SetValueAt(4, UniqueStringCopy("7"));
+		REQUIRE(1 == st.Elements());
+		REQUIRE("----7" == Representation(st));
 		st.Check();
 	}
 
@@ -157,10 +170,10 @@ TEST_CASE("SparseVector") {
 		st.InsertSpace(0, 5);
 		st.SetValueAt(4, UniqueStringCopy("5"));
 		REQUIRE(2 == st.Elements());
-		REQUIRE("----5" == Representation(st));
+		REQUIRE("----5-" == Representation(st));
 		st.SetValueAt(4, nullptr);
 		REQUIRE(1 == st.Elements());
-		REQUIRE("-----" == Representation(st));
+		REQUIRE("------" == Representation(st));
 		st.Check();
 	}
 
@@ -168,16 +181,16 @@ TEST_CASE("SparseVector") {
 		REQUIRE(1 == st.Elements());
 		st.InsertSpace(0, 1);
 		st.SetValueAt(0, UniqueStringCopy("1"));
-		REQUIRE("1" == Representation(st));
+		REQUIRE("1-" == Representation(st));
 		REQUIRE(1 == st.Elements());
 		st.InsertSpace(1, 1);
 		st.SetValueAt(1, UniqueStringCopy("2"));
-		REQUIRE("12" == Representation(st));
+		REQUIRE("12-" == Representation(st));
 		st.DeletePosition(0);
-		REQUIRE("2" == Representation(st));
+		REQUIRE("2-" == Representation(st));
 		REQUIRE(1 == st.Elements());
 		st.DeletePosition(0);
-		REQUIRE("" == Representation(st));
+		REQUIRE("-" == Representation(st));
 	}
 
 	SECTION("DeleteAll") {
@@ -188,8 +201,20 @@ TEST_CASE("SparseVector") {
 		st.SetValueAt(4, UniqueStringCopy("4"));
 		st.SetValueAt(3, UniqueStringCopy("3"));
 		REQUIRE(5 == st.Elements());
-		REQUIRE("---34--7-9" == Representation(st));
+		REQUIRE("---34--7-9-" == Representation(st));
 		st.Check();
+	}
+
+	SECTION("DeleteStarting") {
+		REQUIRE(1 == st.Elements());
+		st.InsertSpace(0, 2);
+		st.SetValueAt(0, UniqueStringCopy("1"));
+		st.SetValueAt(1, UniqueStringCopy("2"));
+		REQUIRE("12-" == Representation(st));
+		st.DeletePosition(0);
+		REQUIRE("2-" == Representation(st));
+		st.DeletePosition(0);
+		REQUIRE("-" == Representation(st));
 	}
 
 }
