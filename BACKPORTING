@@ -497,3 +497,9 @@ branch), or have information worth noting.
 7709:4f8c3b19095a Readying 4.2.1 release.
 7710:3a9f0580c75e Added tag rel-4-2-1 for changeset 4f8c3b19095a
   Not backported, since this is LongTerm3.
+
+7740:d72fb2dcb9dd Change from SciTE.
+7747:61057496b3e0 Change from SciTE.
+7783:1b8ce5991cb9 Readying 4.2.2 release.
+7784:60e957153834 Added tag rel-4-2-2 for changeset 1b8ce5991cb9
+  Not backported, since this is LongTerm3.
