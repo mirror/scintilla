@@ -259,6 +259,10 @@ win32/LexCSS.o: lexers/LexCSS.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+win32/LexDataflex.o: lexers/LexDataflex.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
 win32/LexD.o: lexers/LexD.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -329,6 +333,11 @@ win32/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+win32/LexHollywood.o: lexers/LexHollywood.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/DefaultLexer.h
 win32/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -603,6 +612,9 @@ win32/LexVisualProlog.o: lexers/LexVisualProlog.cxx include/ILexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
+win32/LexX12.o: lexers/LexX12.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/LexerModule.h \
+ lexlib/DefaultLexer.h
 win32/LexYAML.o: lexers/LexYAML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -886,6 +898,10 @@ cocoa/LexCSS.o: lexers/LexCSS.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+cocoa/LexDataflex.o: lexers/LexDataflex.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
 cocoa/LexD.o: lexers/LexD.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -956,6 +972,11 @@ cocoa/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+cocoa/LexHollywood.o: lexers/LexHollywood.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/DefaultLexer.h
 cocoa/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -1230,6 +1251,9 @@ cocoa/LexVisualProlog.o: lexers/LexVisualProlog.cxx include/ILexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
+cocoa/LexX12.o: lexers/LexX12.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/LexerModule.h \
+ lexlib/DefaultLexer.h
 cocoa/LexYAML.o: lexers/LexYAML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -1495,6 +1519,10 @@ gtk/LexCSS.o: lexers/LexCSS.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+gtk/LexDataflex.o: lexers/LexDataflex.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
 gtk/LexD.o: lexers/LexD.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -1565,6 +1593,11 @@ gtk/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+gtk/LexHollywood.o: lexers/LexHollywood.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/DefaultLexer.h
 gtk/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -1839,6 +1872,9 @@ gtk/LexVisualProlog.o: lexers/LexVisualProlog.cxx include/ILexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
+gtk/LexX12.o: lexers/LexX12.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/LexerModule.h \
+ lexlib/DefaultLexer.h
 gtk/LexYAML.o: lexers/LexYAML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
@@ -2104,6 +2140,10 @@ curses/LexCSS.o: lexers/LexCSS.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+curses/LexDataflex.o: lexers/LexDataflex.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
+ lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/LexerModule.h
 curses/LexD.o: lexers/LexD.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/StyleContext.h lexlib/CharacterSet.h \
@@ -2174,6 +2214,11 @@ curses/LexHex.o: lexers/LexHex.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
  lexlib/CharacterSet.h lexlib/LexerModule.h
+curses/LexHollywood.o: lexers/LexHollywood.cxx include/ILexer.h \
+ include/Sci_Position.h include/Scintilla.h include/SciLexer.h \
+ lexlib/WordList.h lexlib/LexAccessor.h lexlib/StyleContext.h \
+ lexlib/CharacterSet.h lexlib/LexerModule.h lexlib/OptionSet.h \
+ lexlib/DefaultLexer.h
 curses/LexHTML.o: lexers/LexHTML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
@@ -2448,6 +2493,9 @@ curses/LexVisualProlog.o: lexers/LexVisualProlog.cxx include/ILexer.h \
  lexlib/WordList.h lexlib/LexAccessor.h lexlib/Accessor.h \
  lexlib/StyleContext.h lexlib/CharacterSet.h lexlib/CharacterCategory.h \
  lexlib/LexerModule.h lexlib/OptionSet.h lexlib/DefaultLexer.h
+curses/LexX12.o: lexers/LexX12.cxx include/ILexer.h include/Sci_Position.h \
+ include/Scintilla.h include/SciLexer.h lexlib/LexerModule.h \
+ lexlib/DefaultLexer.h
 curses/LexYAML.o: lexers/LexYAML.cxx include/ILexer.h include/Sci_Position.h \
  include/Scintilla.h include/SciLexer.h lexlib/WordList.h \
  lexlib/LexAccessor.h lexlib/Accessor.h lexlib/StyleContext.h \
