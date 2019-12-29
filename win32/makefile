@@ -4,6 +4,9 @@
 # The License.txt file describes the conditions under which this software may be distributed.
 # This makefile assumes the MinGW32 version of GCC 4.8+ is used and changes will
 # be needed to use other compilers.
+# Clang 3.4+ can be used with CLANG=1 on command line.
+
+.PHONY: all clean analyze depend
 
 .SUFFIXES: .cxx .c .o .h .a
 
@@ -78,7 +81,7 @@ LUAOBJS:=lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o linit.o \
          lpcap.o lpcode.o lpprint.o lptree.o lpvm.o
 endif
 
-.cxx.o:
+%.o: %.cxx
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
 
 analyze:
