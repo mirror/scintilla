@@ -1,4 +1,4 @@
--- Copyright 2006-2019 Robert Gieseke. See License.txt.
+-- Copyright 2006-2020 Robert Gieseke. See License.txt.
 -- Less CSS LPeg lexer.
 -- http://lesscss.org
 

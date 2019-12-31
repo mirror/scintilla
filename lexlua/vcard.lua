@@ -1,4 +1,4 @@
--- Copyright (c) 2015-2019 Piotr Orzechowski [drzewo.org]. See License.txt.
+-- Copyright (c) 2015-2020 Piotr Orzechowski [drzewo.org]. See License.txt.
 -- vCard 2.1, 3.0 and 4.0 LPeg lexer.
 
 local lexer = require('lexer')

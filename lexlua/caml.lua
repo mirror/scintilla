@@ -1,4 +1,4 @@
--- Copyright 2006-2019 Mitchell mitchell.att.foicica.com. See License.txt.
+-- Copyright 2006-2020 Mitchell mitchell.att.foicica.com. See License.txt.
 -- OCaml LPeg lexer.
 
 local lexer = require('lexer')

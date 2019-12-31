@@ -1,4 +1,4 @@
-# Copyright 2018-2019 Mitchell mitchell.att.foicica.com. See License.txt.
+# Copyright 2018-2020 Mitchell mitchell.att.foicica.com. See License.txt.
 # This makefile is used only for catching compile and test errors when
 # backporting fixes and features from the main branch of Scintilla. It likely
 # will not produce compiled targets that can be used by a Scintilla-based
@@ -11,8 +11,8 @@ INCLUDEDIRS = -Iinclude -Isrc -Ilexlib
 CC = gcc
 CXX = g++
 AR = ar
-CLANG_CC = clang --gcc-toolchain=$(shell pwd)/gcc/4.8.1
-CLANG_CXX = clang++ --gcc-toolchain=$(shell pwd)/gcc/4.8.1
+CLANG_CC = clang --gcc-toolchain=$(shell pwd)/gcc/4.8.4
+CLANG_CXX = clang++ --gcc-toolchain=$(shell pwd)/gcc/4.8.4
 CFLAGS = -pedantic -Wall
 CXXFLAGS = -std=c++11 -pedantic -pedantic-errors -DSCI_LEXER $(INCLUDEDIRS) \
            -DNDEBUG -Os -Wall
