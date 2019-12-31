@@ -6857,6 +6857,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char
     *language)</a><br />
      <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language) &rarr; int</a><br />
+     <a class="message" href="#SCI_SETILEXER">SCI_SETILEXER(bool iLexer5, pointer lexer)</a><br />
      <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(bool iLexer5, const char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(position start, position end)</a><br />
@@ -6907,7 +6908,15 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>Lex*.cxx</code> file and search for <code>LexerModule</code>. The third argument in the
     <code>LexerModule</code> constructor is the name to use.</p>
 
-    <p>To test if your lexer assignment worked, use <a class="seealso"
+     <p class="provisional"><b id="SCI_SETILEXER">SCI_SETILEXER(bool iLexer5, pointer lexer)</b><br />
+     <code>SCI_SETILEXER</code> allows setting a lexer as an <code>ILexer*</code>.
+     The lexer may be implemented by an application or a shared library such as Lexilla.
+     <code>iLexer5</code> indicates whether or not the library contains Scintilla lexers that implement
+    the ILexer5 interface defined in Scintilla 4.3+ (e.g. Lexilla). The default is to assume lexers
+    implement the ILexer interface defined in Scintilla 3.x. This flag must be set explicitly and
+    cannot be inferred.</p>
+
+    <p>To test if your lexer assignment worked, use <a class="message"
     href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a> before and after setting the new lexer to
     see if the lexer number changed.</p>
 
