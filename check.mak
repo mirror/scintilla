@@ -68,18 +68,18 @@ curses_lexer_objs_clang = $(addprefix curses/clang-, $(base_lexer_objs))
 curses_plat_objs_clang = $(addprefix curses/clang-, $(notdir $(curses_plat_objs)))
 
 all: | /tmp/scintilla
-	$(MAKE) -C $| -f check.mak -j8 bin/scintilla_win32.a bin/scintilla_cocoa.a \
+	$(MAKE) -C $| -f check.mak -j4 bin/scintilla_win32.a bin/scintilla_cocoa.a \
 	  bin/scintilla_gtk.a bin/clang-scintilla_gtk.a bin/scintilla_curses.a \
 		bin/clang-scintilla_curses.a qt qt-clang
 /tmp/scintilla:
 	cp -rs `pwd` $@
 	cp -r $@/qt $@/qt-clang
-	mkdir -p $@/gcc/4.8.1/include/c++/4.8.1
-	cp -rs /usr/include/c++/4.8.1/* $@/gcc/4.8.1/include/c++/4.8.1
-	cp -rs /usr/include/x86_64-linux-gnu/c++/4.8/* $@/gcc/4.8.1/include/c++/4.8.1
-	mkdir -p $@/gcc/4.8.1/lib/gcc/x86_64-linux-gnu/4.8.1
-	cp -rs /usr/lib/gcc/x86_64-linux-gnu/4.8.1/* \
-	  $@/gcc/4.8.1/lib/gcc/x86_64-linux-gnu/4.8.1/
+	mkdir -p $@/gcc/4.8.4/include/c++/4.8.4
+	cp -rs /usr/include/c++/4.8.4/* $@/gcc/4.8.4/include/c++/4.8.4
+	cp -rs /usr/include/x86_64-linux-gnu/c++/4.8/* $@/gcc/4.8.4/include/c++/4.8.4
+	mkdir -p $@/gcc/4.8.4/lib/gcc/x86_64-linux-gnu/4.8.4
+	cp -rs /usr/lib/gcc/x86_64-linux-gnu/4.8.4/* \
+	  $@/gcc/4.8.4/lib/gcc/x86_64-linux-gnu/4.8.4/
 
 # Windows platform objects.
 bin/scintilla_win32.a: $(win32_src_objs) $(win32_lexlib_objs) \
