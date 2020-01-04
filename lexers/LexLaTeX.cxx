@@ -26,6 +26,7 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 #include "LexerBase.h"
 
 using namespace Scintilla;
@@ -88,6 +89,14 @@ public:
 	}
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;
+
+	// ILexerWithIdentity methods
+	const char * SCI_METHOD GetName() override {
+		return "latex";
+	}
+	int SCI_METHOD  GetIdentifier() override {
+		return SCLEX_LATEX;
+	}
 };
 
 static bool latexIsSpecial(int ch) {

@@ -499,7 +499,7 @@ LexicalClass lexicalClasses[] = {
 
 }
 
-class LexerCPP : public ILexerWithMetaData {
+class LexerCPP : public ILexerWithIdentity {
 	bool caseSensitive;
 	CharacterSet setWord;
 	CharacterSet setNegationOp;
@@ -562,7 +562,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const noexcept override {
-		return lvMetaData;
+		return lvIdentity;
 	}
 	const char * SCI_METHOD PropertyNames() override {
 		return osCPP.PropertyNames();
@@ -672,6 +672,15 @@ public:
 		return "";
 	}
 
+	// ILexerWithIdentity methods
+	const char * SCI_METHOD GetName() override {
+		return caseSensitive ? "cpp" : "cppnocase";
+	}
+	int SCI_METHOD  GetIdentifier() override {
+		return caseSensitive ? SCLEX_CPP : SCLEX_CPPNOCASE;
+	}
+	const char * SCI_METHOD PropertyGet(const char *key) override;
+
 	static ILexer *LexerFactoryCPP() {
 		return new LexerCPP(true);
 	}
@@ -697,6 +706,10 @@ Sci_Position SCI_METHOD LexerCPP::PropertySet(const char *key, const char *val) 
 		return 0;
 	}
 	return -1;
+}
+
+const char * SCI_METHOD LexerCPP::PropertyGet(const char *key) {
+	return osCPP.PropertyGet(key);
 }
 
 Sci_Position SCI_METHOD LexerCPP::WordListSet(int n, const char *wl) {
