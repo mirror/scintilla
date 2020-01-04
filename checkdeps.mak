@@ -103,7 +103,7 @@ win32/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
  src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
  src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
- src/ScintillaBase.h
+ src/ScintillaBase.h src/ExternalLexer.h
 win32/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 win32/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
@@ -626,17 +626,15 @@ win32/ScintillaDLL.o: win32/ScintillaDLL.cxx include/Scintilla.h \
  include/Sci_Position.h win32/ScintillaWin.h
 win32/ScintillaWin.o: win32/ScintillaWin.cxx include/Platform.h \
  include/ILoader.h include/Sci_Position.h include/ILexer.h \
- include/Scintilla.h include/SciLexer.h lexlib/StringCopy.h \
- lexlib/CharacterCategory.h lexlib/LexerModule.h src/Position.h \
- src/UniqueString.h src/SplitVector.h src/Partitioning.h src/RunStyles.h \
- src/ContractionState.h src/CellBuffer.h src/CallTip.h src/KeyMap.h \
- src/Indicator.h src/LineMarker.h src/Style.h src/ViewStyle.h \
- src/CharClassify.h src/Decoration.h src/CaseFolder.h src/Document.h \
- src/CaseConvert.h src/UniConversion.h src/Selection.h \
+ include/Scintilla.h lexlib/StringCopy.h lexlib/CharacterCategory.h \
+ src/Position.h src/UniqueString.h src/SplitVector.h src/Partitioning.h \
+ src/RunStyles.h src/ContractionState.h src/CellBuffer.h src/CallTip.h \
+ src/KeyMap.h src/Indicator.h src/LineMarker.h src/Style.h \
+ src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
+ src/Document.h src/CaseConvert.h src/UniConversion.h src/Selection.h \
  src/PositionCache.h src/EditModel.h src/MarginView.h src/EditView.h \
  src/Editor.h src/ElapsedPeriod.h src/AutoComplete.h src/ScintillaBase.h \
- src/ExternalLexer.h win32/PlatWin.h win32/HanjaDic.h \
- win32/ScintillaWin.h
+ win32/PlatWin.h win32/HanjaDic.h win32/ScintillaWin.h
 cocoa/AutoComplete.o: src/AutoComplete.cxx include/Platform.h \
  include/Scintilla.h include/Sci_Position.h lexlib/CharacterSet.h \
  src/Position.h src/AutoComplete.h
@@ -742,7 +740,7 @@ cocoa/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
  src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
  src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
- src/ScintillaBase.h
+ src/ScintillaBase.h src/ExternalLexer.h
 cocoa/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 cocoa/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
@@ -1363,7 +1361,7 @@ gtk/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
  src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
  src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
- src/ScintillaBase.h
+ src/ScintillaBase.h src/ExternalLexer.h
 gtk/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 gtk/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
@@ -1984,7 +1982,7 @@ curses/ScintillaBase.o: src/ScintillaBase.cxx include/Platform.h \
  src/ViewStyle.h src/CharClassify.h src/Decoration.h src/CaseFolder.h \
  src/Document.h src/Selection.h src/PositionCache.h src/EditModel.h \
  src/MarginView.h src/EditView.h src/Editor.h src/AutoComplete.h \
- src/ScintillaBase.h
+ src/ScintillaBase.h src/ExternalLexer.h
 curses/Selection.o: src/Selection.cxx include/Platform.h include/Scintilla.h \
  include/Sci_Position.h src/Position.h src/Selection.h
 curses/Style.o: src/Style.cxx include/Platform.h include/Scintilla.h \
