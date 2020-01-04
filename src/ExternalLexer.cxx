@@ -38,6 +38,16 @@ typedef int (EXT_LEXER_DECL *GetLexerCountFn)();
 typedef void (EXT_LEXER_DECL *GetLexerNameFn)(unsigned int Index, char *name, int buflength);
 typedef LexerFactoryFunction(EXT_LEXER_DECL *GetLexerFactoryFunction)(unsigned int Index);
 
+/// Generic function to convert from a void* to a function pointer.
+/// This avoids undefined and conditionally defined behaviour.
+template<typename T>
+T FunctionPointer(void *function) noexcept {
+	static_assert(sizeof(T) == sizeof(function), "size mismatch");
+	T fp;
+	memcpy(&fp, &function, sizeof(T));
+	return fp;
+}
+
 /// Sub-class of LexerModule to use an external lexer.
 class ExternalLexerModule : public LexerModule {
 protected:
@@ -50,7 +60,7 @@ public:
 		fneFactory(nullptr), name(languageName_){
 		languageName = name.c_str();
 	}
-	virtual void SetExternal(GetLexerFactoryFunction fFactory, int index);
+	void SetExternal(GetLexerFactoryFunction fFactory, int index) noexcept;
 };
 
 /// LexerLibrary exists for every External Lexer DLL, contains ExternalLexerModules.
@@ -70,10 +80,10 @@ public:
 	~LexerManager();
 
 	static LexerManager *GetInstance();
-	static void DeleteInstance();
+	static void DeleteInstance() noexcept;
 
 	void Load(const char *path);
-	void Clear();
+	void Clear() noexcept;
 
 private:
 	LexerManager();
@@ -94,7 +104,7 @@ std::unique_ptr<LexerManager> LexerManager::theInstance;
 //
 //------------------------------------------
 
-void ExternalLexerModule::SetExternal(GetLexerFactoryFunction fFactory, int index) {
+void ExternalLexerModule::SetExternal(GetLexerFactoryFunction fFactory, int index) noexcept {
 	fneFactory = fFactory;
 	fnFactory = fFactory(index);
 }
@@ -110,13 +120,16 @@ LexerLibrary::LexerLibrary(const char *moduleName_) {
 	lib.reset(DynamicLibrary::Load(moduleName_));
 	if (lib->IsValid()) {
 		moduleName = moduleName_;
-		//Cannot use reinterpret_cast because: ANSI C++ forbids casting between pointers to functions and objects
-		GetLexerCountFn GetLexerCount = (GetLexerCountFn)(sptr_t)lib->FindFunction("GetLexerCount");
+		GetLexerCountFn GetLexerCount = FunctionPointer<GetLexerCountFn>(lib->FindFunction("GetLexerCount"));
 
 		if (GetLexerCount) {
 			// Find functions in the DLL
-			GetLexerNameFn GetLexerName = (GetLexerNameFn)(sptr_t)lib->FindFunction("GetLexerName");
-			GetLexerFactoryFunction fnFactory = (GetLexerFactoryFunction)(sptr_t)lib->FindFunction("GetLexerFactory");
+			GetLexerNameFn GetLexerName = FunctionPointer<GetLexerNameFn>(lib->FindFunction("GetLexerName"));
+			GetLexerFactoryFunction fnFactory = FunctionPointer<GetLexerFactoryFunction>(lib->FindFunction("GetLexerFactory"));
+
+			if (!GetLexerName || !fnFactory) {
+				return;
+			}
 
 			const int nl = GetLexerCount();
 
@@ -157,7 +170,7 @@ LexerManager *LexerManager::GetInstance() {
 }
 
 /// Delete any LexerManager instance...
-void LexerManager::DeleteInstance() {
+void LexerManager::DeleteInstance() noexcept {
 	theInstance.reset();
 }
 
@@ -178,7 +191,7 @@ void LexerManager::Load(const char *path) {
 	libraries.push_back(std::unique_ptr<LexerLibrary>(lib));
 }
 
-void LexerManager::Clear() {
+void LexerManager::Clear() noexcept {
 	libraries.clear();
 }
 
