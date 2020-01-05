@@ -2,8 +2,7 @@
 # @file makefile
 # Copyright 1998-2010 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile assumes the MinGW32 version of GCC 4.8+ is used and changes will
-# be needed to use other compilers.
+# This makefile assumes Mingw GCC 4.8+ is used and changes will be needed to use other compilers.
 # Clang 3.4+ can be used with CLANG=1 on command line.
 
 .PHONY: all clean analyze depend

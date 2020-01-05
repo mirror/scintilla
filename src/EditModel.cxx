@@ -94,4 +94,3 @@ const char *EditModel::GetFoldDisplayText(Sci::Line lineDoc) const {
 	const char *text = pcs->GetFoldDisplayText(lineDoc);
 	return text ? text : defaultFoldDisplayText.get();
 }
-

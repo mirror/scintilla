@@ -521,8 +521,8 @@ XYPOSITION SurfaceImpl::WidthText(Font &font, const char *s, int len)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);
 	SetCodec(font);
-	QString string = codec->toUnicode(s, len);
-	return metrics.width(string);
+	QString su = codec->toUnicode(s, len);
+	return metrics.width(su);
 }
 
 XYPOSITION SurfaceImpl::Ascent(Font &font)

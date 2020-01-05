@@ -675,7 +675,15 @@ void LexState::SetWordList(int n, const char *wl) {
 }
 
 const char *LexState::GetName() const {
-	return lexCurrent ? lexCurrent->languageName : "";
+	if (lexCurrent) {
+		return lexCurrent->languageName;
+	}
+	if (instance) {
+		if (instance->Version() >= lvIdentity) {
+			return static_cast<ILexerWithIdentity *>(instance)->GetName();
+		}
+	}
+	return "";
 }
 
 void *LexState::PrivateCall(int operation, void *pointer) {

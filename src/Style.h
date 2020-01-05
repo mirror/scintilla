@@ -72,6 +72,7 @@ public:
 
 	Style();
 	Style(const Style &source);
+	// Style objects should not be moved but MSVC 2015 requires this.
 	Style(Style &&) = default;
 	~Style();
 	Style &operator=(const Style &source);

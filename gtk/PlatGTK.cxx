@@ -645,7 +645,7 @@ std::string UTF8FromLatin1(const char *s, int len) {
 	std::string utfForm(len*2 + 1, '\0');
 	size_t lenU = 0;
 	for (int i=0; i<len; i++) {
-		unsigned int uch = static_cast<unsigned char>(s[i]);
+		const unsigned char uch = static_cast<unsigned char>(s[i]);
 		if (uch < 0x80) {
 			utfForm[lenU++] = uch;
 		} else {

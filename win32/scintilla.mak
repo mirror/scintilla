@@ -231,7 +231,7 @@ LEXLIB_OBJS = \
 	$(DIR_O)\LexerModule.obj \
 	$(DIR_O)\LexerSimple.obj \
 	$(DIR_O)\StyleContext.obj \
-	$(DIR_O)\WordList.obj \
+	$(DIR_O)\WordList.obj
 
 # Required by libraries and DLLs that include lexing
 SCILEX_OBJS = \
@@ -291,3 +291,4 @@ $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx
 !INCLUDE nmdeps.mak
 
 !ENDIF
+

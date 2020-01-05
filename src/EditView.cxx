@@ -59,7 +59,7 @@
 
 using namespace Scintilla;
 
-static inline bool IsControlCharacter(int ch) {
+static constexpr bool IsControlCharacter(int ch) noexcept {
 	// iscntrl returns true for lots of chars > 127 which are displayable
 	return ch >= 0 && ch < ' ';
 }
@@ -1563,6 +1563,7 @@ static void DrawMarkUnderline(Surface *surface, const EditModel &model, const Vi
 		marks >>= 1;
 	}
 }
+
 static void DrawTranslucentSelection(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 	Sci::Line line, PRectangle rcLine, int subLine, Range lineRange, int xStart) {
 	if ((vsDraw.selAlpha != SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha != SC_ALPHA_NOALPHA)) {

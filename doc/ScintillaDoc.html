@@ -1808,7 +1808,7 @@ struct Sci_TextToFind {
      <b id="SCI_GETSELECTIONNEND">SCI_GETSELECTIONNEND(int selection) &rarr; position</b><br />
      <b id="SCI_GETSELECTIONNENDVIRTUALSPACE">SCI_GETSELECTIONNENDVIRTUALSPACE(int selection) &rarr; position</b><br />
      Set or query the start and end position of each already existing selection.
-     Query the virtual space at start and end of each selection.
+     Query the virtual space at start and end of each selection. 
      Mostly of use to query each range for its text. The selection parameter is zero-based. </p>
 
     <p>
@@ -7122,9 +7122,7 @@ SCI_METHOD<span class="S0"> </span>PropertyNames<span class="S10">()</span>
 
 <p>
 The types <code>Sci_Position</code> and <code>Sci_PositionU</code> are used for positions and line numbers in the document.
-Before release 3.6.0 the types <code>int</code> and <code>unsigned int</code> were used instead and, for 3.6.0,
-<code>Sci_Position</code> is defined as <code>int</code> and <code>Sci_PositionU</code> is defined as <code>unsigned int</code>.
-In a future release, 64-bit builds will define these as 64-bit types to allow documents larger than 2 GB.
+With release 3.8.0, 64-bit builds define these as 64-bit types to allow future implementation of documents larger than 2 GB.
 </p>
 
 <p>
@@ -8459,8 +8457,6 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     Provisional features may even be removed if experience shows they are a mistake.</p>
 
     <p>Provisional features are displayed in this document with <span class="provisional">a distinctive background colour</span>.</p>
-
-    <p>There are currently no provisional messages or values.</p>
 
     <p>Some developers may want to only use features that are stable and have graduated from
     provisional status. To avoid using provisional messages compile with the symbol
