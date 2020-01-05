@@ -127,7 +127,7 @@ public:
 	void SetDBCSMode(int codePage_) override;
 
 	void BrushColour(ColourDesired back);
-	void SetCodec(Font &font);
+	void SetCodec(const Font &font);
 	void SetFont(Font &font);
 
 	QPaintDevice *GetPaintDevice();
