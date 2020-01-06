@@ -1173,8 +1173,8 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 		if (model.foldDisplayTextStyle == SC_FOLDDISPLAYTEXT_BOXED) {
 			surface->PenColour(textFore);
 			PRectangle rcBox = rcSegment;
-			rcBox.left = round(rcSegment.left);
-			rcBox.right = round(rcSegment.right);
+			rcBox.left = Sci::round(rcSegment.left);
+			rcBox.right = Sci::round(rcSegment.right);
 			const IntegerRectangle ircBox(rcBox);
 			surface->MoveTo(ircBox.left, ircBox.top);
 			surface->LineTo(ircBox.left, ircBox.bottom);
@@ -1333,7 +1333,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 	for (size_t r = 0; (r<model.sel.Count()) || drawDrag; r++) {
 		const bool mainCaret = r == model.sel.Main();
 		SelectionPosition posCaret = (drawDrag ? model.posDrag : model.sel.Range(r).caret);
-		if ((vsDraw.DrawCaretInsideSelection(model.inOverstrike, imeCaretBlockOverride)) && 
+		if ((vsDraw.DrawCaretInsideSelection(model.inOverstrike, imeCaretBlockOverride)) &&
 			!drawDrag &&
 			posCaret > model.sel.Range(r).anchor) {
 			if (posCaret.VirtualSpace() > 0)
@@ -1381,7 +1381,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 				const ViewStyle::CaretShape caretShape = drawDrag ? ViewStyle::CaretShape::line : vsDraw.CaretShapeForMode(model.inOverstrike);
 				if (drawDrag) {
 					/* Dragging text, use a line caret */
-					rcCaret.left = round(xposCaret - caretWidthOffset);
+					rcCaret.left = Sci::round(xposCaret - caretWidthOffset);
 					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
 				} else if ((caretShape == ViewStyle::CaretShape::bar) && drawOverstrikeCaret) {
 					/* Overstrike (insert mode), use a modified bar caret */
@@ -1399,7 +1399,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 					}
 				} else {
 					/* Line caret */
-					rcCaret.left = round(xposCaret - caretWidthOffset);
+					rcCaret.left = Sci::round(xposCaret - caretWidthOffset);
 					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
 				}
 				const ColourDesired caretColour = mainCaret ? vsDraw.caretcolour : vsDraw.additionalCaretColour;

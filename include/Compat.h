@@ -6,12 +6,25 @@
 
 #ifdef __cplusplus
 
+#include <cmath>
 #include <cstddef>
 #include <memory>
 #include <type_traits>
 #include <utility>
 
 namespace Sci {
+
+// std::round (not present on older MacOSX SDKs)
+template<class T>
+T round(T arg) {
+  return round(arg);
+}
+
+// std::lround (not present on older MacOSX SDKs)
+template<class T>
+long lround(T arg) {
+  return lround(arg);
+}
 
 // std::make_unique
 template<class T> struct _Unique_if {
@@ -37,7 +50,7 @@ template<class T>
 template<class T, class... Args>
   typename _Unique_if<T>::_Known_bound
   make_unique(Args&&...) = delete;
-  
+
 // std::size
 template <typename T, size_t N>
 constexpr size_t size(const T (&)[N]) noexcept {
