@@ -16,7 +16,6 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
-#include "StringCopy.h"
 #include "IntegerRectangle.h"
 #include "Indicator.h"
 #include "XPM.h"
@@ -210,7 +209,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 				Point(ix + pixelHeight, iy + pixelHeight),	// Right
 				Point(ix, iy)								// Top
 			};
-			surface->Polygon(pts, ELEMENTS(pts), sacDraw.fore, sacDraw.fore);
+			surface->Polygon(pts, Sci::size(pts), sacDraw.fore, sacDraw.fore);
 		}
 	} else {	// Either INDIC_PLAIN or unknown
 		surface->MoveTo(irc.left, ymid);

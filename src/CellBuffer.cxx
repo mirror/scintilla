@@ -282,7 +282,7 @@ void Action::Create(actionType at_, Sci::Position position_, const char *data_, 
 	position = position_;
 	at = at_;
 	if (lenData_) {
-		data = std::unique_ptr<char []>(new char[lenData_]);
+		data = Sci::make_unique<char[]>(lenData_);
 		memcpy(&data[0], data_, lenData_);
 	}
 	lenData = lenData_;
@@ -534,9 +534,9 @@ CellBuffer::CellBuffer(bool hasStyles_, bool largeDocument_) :
 	utf8LineEnds = 0;
 	collectingUndo = true;
 	if (largeDocument)
-		plv = std::unique_ptr<LineVector<Sci::Position>>(new LineVector<Sci::Position>());
+		plv = Sci::make_unique<LineVector<Sci::Position>>();
 	else
-		plv = std::unique_ptr<LineVector<int>>(new LineVector<int>());
+		plv = Sci::make_unique<LineVector<int>>();
 }
 
 CellBuffer::~CellBuffer() {

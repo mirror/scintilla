@@ -1266,4 +1266,6 @@ struct SCNotification {
 
 #endif
 
+#include "Compat.h"
+
 #endif

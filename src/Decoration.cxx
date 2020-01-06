@@ -143,7 +143,7 @@ Decoration<POS> *DecorationList<POS>::DecorationFromIndicator(int indicator) {
 template <typename POS>
 Decoration<POS> *DecorationList<POS>::Create(int indicator, Sci::Position length) {
 	currentIndicator = indicator;
-	std::unique_ptr<Decoration<POS>> decoNew = std::unique_ptr<Decoration<POS>>(new Decoration<POS>(indicator));
+	std::unique_ptr<Decoration<POS>> decoNew = Sci::make_unique<Decoration<POS>>(indicator);
 	decoNew->rs.InsertSpace(0, static_cast<POS>(length));
 
 	typename std::vector<std::unique_ptr<Decoration<POS>>>::iterator it = std::lower_bound(
@@ -300,16 +300,16 @@ namespace Scintilla {
 
 std::unique_ptr<IDecoration> DecorationCreate(bool largeDocument, int indicator) {
 	if (largeDocument)
-		return std::unique_ptr<Decoration<Sci::Position>>(new Decoration<Sci::Position>(indicator));
+		return Sci::make_unique<Decoration<Sci::Position>>(indicator);
 	else
-		return std::unique_ptr<Decoration<int>>(new Decoration<int>(indicator));
+		return Sci::make_unique<Decoration<int>>(indicator);
 }
 
 std::unique_ptr<IDecorationList> DecorationListCreate(bool largeDocument) {
 	if (largeDocument)
-		return std::unique_ptr<DecorationList<Sci::Position>>(new DecorationList<Sci::Position>());
+		return Sci::make_unique<DecorationList<Sci::Position>>();
 	else
-		return std::unique_ptr<DecorationList<int>>(new DecorationList<int>());
+		return Sci::make_unique<DecorationList<int>>();
 }
 
 }

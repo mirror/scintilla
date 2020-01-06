@@ -19,6 +19,8 @@
 #include "CaseConvert.h"
 #include "UniConversion.h"
 
+#include "Compat.h"
+
 using namespace Scintilla;
 
 namespace {
@@ -692,7 +694,7 @@ void AddSymmetric(enum CaseConversion conversion, int lower,int upper) {
 
 void SetupConversions(enum CaseConversion conversion) {
 	// First initialize for the symmetric ranges
-	for (size_t i=0; i<ELEMENTS(symmetricCaseConversionRanges);) {
+	for (size_t i=0; i<Sci::size(symmetricCaseConversionRanges);) {
 		const int lower = symmetricCaseConversionRanges[i++];
 		const int upper = symmetricCaseConversionRanges[i++];
 		const int length = symmetricCaseConversionRanges[i++];
@@ -702,7 +704,7 @@ void SetupConversions(enum CaseConversion conversion) {
 		}
 	}
 	// Add the symmetric singletons
-	for (size_t i=0; i<ELEMENTS(symmetricCaseConversions);) {
+	for (size_t i=0; i<Sci::size(symmetricCaseConversions);) {
 		const int lower = symmetricCaseConversions[i++];
 		const int upper = symmetricCaseConversions[i++];
 		AddSymmetric(conversion, lower, upper);

@@ -28,7 +28,6 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "StringCopy.h"
 #include "CharacterSet.h"
 #include "CharacterCategory.h"
 #include "Position.h"
@@ -229,7 +228,7 @@ bool EditView::ClearTabstops(Sci::Line line) {
 
 bool EditView::AddTabstop(Sci::Line line, int x) {
 	if (!ldTabstops) {
-		ldTabstops.reset(new LineTabstops());
+		ldTabstops = Sci::make_unique<LineTabstops>();
 	}
 	return ldTabstops && ldTabstops->AddTabstop(line, x);
 }
@@ -287,7 +286,7 @@ static const char *ControlCharacterString(unsigned char ch) noexcept {
 		"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
 		"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"
 	};
-	if (ch < ELEMENTS(reps)) {
+	if (ch < Sci::size(reps)) {
 		return reps[ch];
 	} else {
 		return "BAD";

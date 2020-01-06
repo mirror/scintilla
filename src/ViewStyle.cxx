@@ -582,7 +582,7 @@ void ViewStyle::CreateAndAddFont(const FontSpecification &fs) {
 	if (fs.fontName) {
 		FontMap::iterator it = fonts.find(fs);
 		if (it == fonts.end()) {
-			fonts[fs] = std::unique_ptr<FontRealised>(new FontRealised());
+			fonts[fs] = Sci::make_unique<FontRealised>();
 		}
 	}
 }

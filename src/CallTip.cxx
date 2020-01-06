@@ -21,7 +21,6 @@
 
 #include "Scintilla.h"
 
-#include "StringCopy.h"
 #include "Position.h"
 #include "IntegerRectangle.h"
 #include "CallTip.h"
@@ -135,14 +134,14 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
     						Point::FromInts(centreX + halfWidth, centreY + quarterWidth),
     						Point::FromInts(centreX, centreY - halfWidth + quarterWidth),
 						};
-						surface->Polygon(pts, ELEMENTS(pts), colourBG, colourBG);
+						surface->Polygon(pts, Sci::size(pts), colourBG, colourBG);
 					} else {            // Down arrow
 						Point pts[] = {
     						Point::FromInts(centreX - halfWidth, centreY - quarterWidth),
     						Point::FromInts(centreX + halfWidth, centreY - quarterWidth),
     						Point::FromInts(centreX, centreY + halfWidth - quarterWidth),
 						};
-						surface->Polygon(pts, ELEMENTS(pts), colourBG, colourBG);
+						surface->Polygon(pts, Sci::size(pts), colourBG, colourBG);
 					}
 				}
 				offsetMain = xEnd;

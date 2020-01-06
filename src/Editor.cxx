@@ -28,7 +28,6 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "StringCopy.h"
 #include "CharacterSet.h"
 #include "CharacterCategory.h"
 #include "Position.h"
@@ -218,7 +217,7 @@ void Editor::SetRepresentations() {
 		"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
 		"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"
 	};
-	for (size_t j=0; j < ELEMENTS(reps); j++) {
+	for (size_t j=0; j < Sci::size(reps); j++) {
 		const char c[2] = { static_cast<char>(j), 0 };
 		reprs.SetRepresentation(c, reps[j]);
 	}
@@ -232,7 +231,7 @@ void Editor::SetRepresentations() {
 			"DCS", "PU1", "PU2", "STS", "CCH", "MW", "SPA", "EPA",
 			"SOS", "SGCI", "SCI", "CSI", "ST", "OSC", "PM", "APC"
 		};
-		for (size_t j=0; j < ELEMENTS(repsC1); j++) {
+		for (size_t j=0; j < Sci::size(repsC1); j++) {
 			const char c1[3] = { '\xc2',  static_cast<char>(0x80+j), 0 };
 			reprs.SetRepresentation(c1, repsC1[j]);
 		}
@@ -1989,7 +1988,7 @@ void Editor::InsertCharacter(const char *s, unsigned int len, CharacterSource ch
 			// characters representing themselves.
 		} else {
 			unsigned int utf32[1] = { 0 };
-			UTF32FromUTF8(s, len, utf32, ELEMENTS(utf32));
+			UTF32FromUTF8(s, len, utf32, Sci::size(utf32));
 			ch = utf32[0];
 		}
 	}

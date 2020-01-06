@@ -52,7 +52,6 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "StringCopy.h"
 #include "CharacterCategory.h"
 #include "Position.h"
 #include "UniqueString.h"
@@ -2098,7 +2097,7 @@ public:
 					wchar_t wFolded[20];
 					const size_t charsConverted = UTF16FromUTF8(foldedUTF8,
 							strlen(foldedUTF8),
-							wFolded, ELEMENTS(wFolded));
+							wFolded, Sci::size(wFolded));
 					for (size_t j=0; j<charsConverted; j++)
 						utf16Folded[lenFlat++] = wFolded[j];
 				} else {
@@ -2136,19 +2135,19 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 				sCharacter[0] = static_cast<char>(i);
 				wchar_t wCharacter[20];
 				const unsigned int lengthUTF16 = ::MultiByteToWideChar(cpDest, 0, sCharacter, 1,
-					wCharacter, ELEMENTS(wCharacter));
+					wCharacter, Sci::size(wCharacter));
 				if (lengthUTF16 == 1) {
 					const char *caseFolded = CaseConvert(wCharacter[0], CaseConversionFold);
 					if (caseFolded) {
 						wchar_t wLower[20];
 						const size_t charsConverted = UTF16FromUTF8(caseFolded,
 							strlen(caseFolded),
-							wLower, ELEMENTS(wLower));
+							wLower, Sci::size(wLower));
 						if (charsConverted == 1) {
 							char sCharacterLowered[20];
 							const unsigned int lengthConverted = ::WideCharToMultiByte(cpDest, 0,
 								wLower, static_cast<int>(charsConverted),
-								sCharacterLowered, ELEMENTS(sCharacterLowered), NULL, 0);
+								sCharacterLowered, Sci::size(sCharacterLowered), NULL, 0);
 							if ((lengthConverted == 1) && (sCharacter[0] != sCharacterLowered[0])) {
 								pcf->SetTranslation(sCharacter[0], sCharacterLowered[0]);
 							}
@@ -2578,10 +2577,10 @@ STDMETHODIMP DataObject_EnumFormatEtc(DataObject *pd, DWORD dwDirection, IEnumFO
 		FormatEnumerator *pfe;
 		if (pd->sci->IsUnicodeMode()) {
 			CLIPFORMAT formats[] = {CF_UNICODETEXT, CF_TEXT};
-			pfe = new FormatEnumerator(0, formats, ELEMENTS(formats));
+			pfe = new FormatEnumerator(0, formats, Sci::size(formats));
 		} else {
 			CLIPFORMAT formats[] = {CF_TEXT};
-			pfe = new FormatEnumerator(0, formats, ELEMENTS(formats));
+			pfe = new FormatEnumerator(0, formats, Sci::size(formats));
 		}
 		return FormatEnumerator_QueryInterface(pfe, IID_IEnumFORMATETC,
 											   reinterpret_cast<void **>(ppEnum));

@@ -74,11 +74,11 @@ LineLayout::~LineLayout() {
 void LineLayout::Resize(int maxLineLength_) {
 	if (maxLineLength_ > maxLineLength) {
 		Free();
-		chars.reset(new char[maxLineLength_ + 1]);
-		styles.reset(new unsigned char[maxLineLength_ + 1]);
+		chars = Sci::make_unique<char[]>(maxLineLength_ + 1);
+		styles = Sci::make_unique<unsigned char []>(maxLineLength_ + 1);
 		// Extra position allocated as sometimes the Windows
 		// GetTextExtentExPoint API writes an extra element.
-		positions.reset(new XYPOSITION[maxLineLength_ + 1 + 1]);
+		positions = Sci::make_unique<XYPOSITION []>(maxLineLength_ + 1 + 1);
 		maxLineLength = maxLineLength_;
 	}
 }
@@ -126,15 +126,15 @@ bool LineLayout::InLine(int offset, int line) const {
 
 void LineLayout::SetLineStart(int line, int start) {
 	if ((line >= lenLineStarts) && (line != 0)) {
-		int newMaxLines = line + 20;
-		int *newLineStarts = new int[newMaxLines];
+		const int newMaxLines = line + 20;
+		std::unique_ptr<int[]> newLineStarts = Sci::make_unique<int[]>(newMaxLines);
 		for (int i = 0; i < newMaxLines; i++) {
 			if (i < lenLineStarts)
 				newLineStarts[i] = lineStarts[i];
 			else
 				newLineStarts[i] = 0;
 		}
-		lineStarts.reset(newLineStarts);
+		lineStarts = std::move(newLineStarts);
 		lenLineStarts = newMaxLines;
 	}
 	lineStarts[line] = start;
@@ -341,7 +341,7 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 				}
 			}
 			if (!cache[pos]) {
-				cache[pos].reset(new LineLayout(maxChars));
+				cache[pos] = Sci::make_unique<LineLayout>(maxChars);
 			}
 			cache[pos]->lineNumber = lineNumber;
 			cache[pos]->inCache = true;
@@ -570,7 +570,7 @@ PositionCacheEntry::PositionCacheEntry(const PositionCacheEntry &other) :
 	styleNumber(other.styleNumber), len(other.styleNumber), clock(other.styleNumber), positions(nullptr) {
 	if (other.positions) {
 		const size_t lenData = len + (len / sizeof(XYPOSITION)) + 1;
-		positions.reset(new XYPOSITION[lenData]);
+		positions = Sci::make_unique<XYPOSITION[]>(lenData);
 		memcpy(positions.get(), other.positions.get(), lenData * sizeof(XYPOSITION));
 	}
 }
@@ -582,7 +582,7 @@ void PositionCacheEntry::Set(unsigned int styleNumber_, const char *s_,
 	len = len_;
 	clock = clock_;
 	if (s_ && positions_) {
-		positions.reset(new XYPOSITION[len + (len / sizeof(XYPOSITION)) + 1]);
+		positions = Sci::make_unique<XYPOSITION[]>(len + (len / sizeof(XYPOSITION)) + 1);
 		for (unsigned int i=0; i<len; i++) {
 			positions[i] = positions_[i];
 		}

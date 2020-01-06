@@ -135,11 +135,11 @@ Document::Document(int options) :
 
 	matchesValid = false;
 
-	perLineData[ldMarkers].reset(new LineMarkers());
-	perLineData[ldLevels].reset(new LineLevels());
-	perLineData[ldState].reset(new LineState());
-	perLineData[ldMargin].reset(new LineAnnotation());
-	perLineData[ldAnnotation].reset(new LineAnnotation());
+	perLineData[ldMarkers] = Sci::make_unique<LineMarkers>();
+	perLineData[ldLevels] = Sci::make_unique<LineLevels>();
+	perLineData[ldState] = Sci::make_unique<LineState>();
+	perLineData[ldMargin] = Sci::make_unique<LineAnnotation>();
+	perLineData[ldAnnotation] = Sci::make_unique<LineAnnotation>();
 
 	decorations = DecorationListCreate(IsLarge());
 

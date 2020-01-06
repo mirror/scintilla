@@ -100,11 +100,11 @@ ContractionState<LINE>::~ContractionState() {
 template <typename LINE>
 void ContractionState<LINE>::EnsureData() {
 	if (OneToOne()) {
-		visible = std::unique_ptr<RunStyles<LINE, char>>(new RunStyles<LINE, char>());
-		expanded = std::unique_ptr<RunStyles<LINE, char>>(new RunStyles<LINE, char>());
-		heights = std::unique_ptr<RunStyles<LINE, int>>(new RunStyles<LINE, int>());
-		foldDisplayTexts = std::unique_ptr<SparseVector<UniqueString>>(new SparseVector<UniqueString>());
-		displayLines = std::unique_ptr<Partitioning<LINE>>(new Partitioning<LINE>(4));
+		visible = Sci::make_unique<RunStyles<LINE, char>>();
+		expanded = Sci::make_unique<RunStyles<LINE, char>>();
+		heights = Sci::make_unique<RunStyles<LINE, int>>();
+		foldDisplayTexts = Sci::make_unique<SparseVector<UniqueString>>();
+		displayLines = Sci::make_unique<Partitioning<LINE>>(4);
 		InsertLines(0, linesInDocument);
 	}
 }
@@ -412,9 +412,9 @@ namespace Scintilla {
 
 std::unique_ptr<IContractionState> ContractionStateCreate(bool largeDocument) {
 	if (largeDocument)
-		return std::unique_ptr<ContractionState<Sci::Line>>(new ContractionState<Sci::Line>());
+		return Sci::make_unique<ContractionState<Sci::Line>>();
 	else
-		return std::unique_ptr<ContractionState<int>>(new ContractionState<int>());
+		return Sci::make_unique<ContractionState<int>>();
 }
 
 }
