@@ -503,3 +503,42 @@ branch), or have information worth noting.
 7783:1b8ce5991cb9 Readying 4.2.2 release.
 7784:60e957153834 Added tag rel-4-2-2 for changeset 1b8ce5991cb9
   Not backported, since this is LongTerm3.
+
+7835:bebc5e0eb82a Bug [#2115]. Avoid Clang warnings with COM_DECLSPEC_NOTHROW from declaration.
+  Not backported, as its changes are in RTL code, which was not backported.
+
+7841:023ad180a294 Update comments.
+  Backported, but noted use with GCC 4.8 and Clang 3.4.
+
+7843:f5d966795469 Remove Clang option that is not needed with Clang 9.
+  Not backported, as this option was added in 2018.
+
+7854:ab518c9df18e Builds without GNU extensions so set to standard C++17.
+  Backported, but with c++11, not c++17.
+
+7858:f7e61139f379 gcc 9 has a new warning deprecated-copy which occurs many times in Qt headers.
+  Not backported, as GCC 9 is not supported.
+
+7862:f4cf92e43f48 Use safe mechanism to convert to function pointers.
+7863:507307a6c315 Use safe mechanism for converting between function pointers and void*.
+  Backported, but with the c++11 version of static_assert().
+
+7868:3b33632cad16 Lexilla implemented as loadable lexer.
+  Not backported, as there is no point supporting Lexilla until Scintilla 5.
+  Note: there is change to ScintillaBase.cxx at the end of the changeset that I
+  am unsure what to do with.
+
+7870:6ffcbd42288c Define ILexer5 with methods for retrieving name, ID, and property values.
+  Backported, but with new ILexerWithIdentity class that inherits from ILexer.
+  This is for compatibility and in-line with prior lexer versioning.
+
+7871:ff54e1fc74f3 Implement SCI_SETILEXER.
+  Not backported, since it utilizes the new ILexer5 interface, which is not
+  compatible with ILexerWithIdentity. Since Lexilla and external lexers only
+  create ILexer5* instances, supporting this does not make sense.
+
+7872:9aff497315aa Lexilla testing framework.
+7873:38866a74f665 Lexilla tests.
+7898:9e6fceb9c791 Add lexilla/src to include directories to find "Lexilla.h".
+7899:84655f8588ed Implement negative relative positions in GetRelativePosition.
+  Not backported, as Lexilla is not supported.
