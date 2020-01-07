@@ -516,7 +516,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 		                  Point(rc.left, rc.bottom - 2),
 		                  Point(rc.left, rc.top + 2),
 		              };
-		Polygon(pts, ELEMENTS(pts), fore, back);
+		Polygon(pts, Sci::size(pts), fore, back);
 	} else {
 		RectangleDraw(rc, fore, back);
 	}

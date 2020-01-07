@@ -11,9 +11,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include "Scintilla.h" // for ptrdiff_t in Position.h
 #include "CharacterCategory.h"
-#include "Position.h" // for Sci::clamp
+
+#include "Compat.h"
 
 namespace Scintilla {
 

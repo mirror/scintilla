@@ -14,6 +14,12 @@
 
 namespace Sci {
 
+// std::clamp
+template <typename T>
+inline constexpr T clamp(T val, T minVal, T maxVal) {
+	return (val > maxVal) ? maxVal : ((val < minVal) ? minVal : val);
+}
+
 // std::round (not present on older MacOSX SDKs)
 template<class T>
 T round(T arg) {

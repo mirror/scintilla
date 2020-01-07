@@ -42,13 +42,14 @@
 #endif
 
 #include "Platform.h"
-#include "Position.h"
 #include "XPM.h"
 #include "UniConversion.h"
 #include "DBCS.h"
 #include "FontQuality.h"
 
 #include "PlatWin.h"
+
+#include "Compat.h"
 
 #ifndef SPI_GETFONTSMOOTHINGCONTRAST
 #define SPI_GETFONTSMOOTHINGCONTRAST	0x200C

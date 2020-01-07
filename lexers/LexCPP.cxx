@@ -497,6 +497,8 @@ LexicalClass lexicalClasses[] = {
 	27, "SCE_C_ESCAPESEQUENCE", "literal string escapesequence", "Escape sequence",
 };
 
+const int sizeLexicalClasses = static_cast<int>(Sci::size(lexicalClasses));
+
 }
 
 class LexerCPP : public ILexerWithIdentity {
@@ -620,13 +622,13 @@ public:
 	}
 	int SCI_METHOD NamedStyles() override {
 		return std::max(subStyles.LastAllocated() + 1,
-			static_cast<int>(ELEMENTS(lexicalClasses))) +
+			sizeLexicalClasses) +
 			inactiveFlag;
 	}
 	const char * SCI_METHOD NameOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
-		if (style < static_cast<int>(ELEMENTS(lexicalClasses)))
+		if (style < sizeLexicalClasses)
 			return lexicalClasses[style].name;
 		// TODO: inactive and substyles
 		return "";
@@ -650,12 +652,12 @@ public:
 				return returnBuffer.c_str();
 			}
 		}
-		if (style < static_cast<int>(ELEMENTS(lexicalClasses)))
+		if (style < sizeLexicalClasses)
 			return lexicalClasses[style].tags;
 		if (style >= inactiveFlag) {
 			returnBuffer = "inactive ";
 			const int styleActive = style - inactiveFlag;
-			if (styleActive < static_cast<int>(ELEMENTS(lexicalClasses)))
+			if (styleActive < sizeLexicalClasses)
 				returnBuffer += lexicalClasses[styleActive].tags;
 			else
 				returnBuffer = "";
@@ -666,7 +668,7 @@ public:
 	const char * SCI_METHOD DescriptionOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
-		if (style < static_cast<int>(ELEMENTS(lexicalClasses)))
+		if (style < sizeLexicalClasses)
 			return lexicalClasses[style].description;
 		// TODO: inactive and substyles
 		return "";
