@@ -3,7 +3,7 @@
 
 local lexer = require("lexer")
 local token, word_match = lexer.token, lexer.word_match
-local B, P, R, S, V = lpeg.B, lpeg.P, lpeg.R, lpeg.S, lpeg.V
+local P, R, S, V = lpeg.P, lpeg.R, lpeg.S, lpeg.V
 local C, Cmt = lpeg.C, lpeg.Cmt
 
 local lex = lexer.new('rust')
@@ -13,7 +13,7 @@ lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Keywords.
 -- https://github.com/rust-lang/rust/blob/stable/src/libsyntax_pos/symbol.rs
-lex:add_rule('keyword', token(lexer.KEYWORD, B(-P('r#')) * word_match[[
+lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
   Self abstract as async auto await become box break catch const continue crate
   default do dyn else enum extern false final fn for if impl in let loop macro
   match mod move mut override priv pub ref return self static struct super
