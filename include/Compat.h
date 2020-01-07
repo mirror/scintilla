@@ -23,13 +23,13 @@ inline constexpr T clamp(T val, T minVal, T maxVal) {
 // std::round (not present on older MacOSX SDKs)
 template<class T>
 T round(T arg) {
-  return round(arg);
+  return ::round(arg);
 }
 
 // std::lround (not present on older MacOSX SDKs)
 template<class T>
 long lround(T arg) {
-  return lround(arg);
+  return ::lround(arg);
 }
 
 // std::make_unique
