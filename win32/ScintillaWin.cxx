@@ -2204,11 +2204,7 @@ void ScintillaWin::CopyAllowLine() {
 bool ScintillaWin::CanPaste() {
 	if (!Editor::CanPaste())
 		return false;
-	if (::IsClipboardFormatAvailable(CF_TEXT))
-		return true;
-	if (IsUnicodeMode())
-		return ::IsClipboardFormatAvailable(CF_UNICODETEXT) != 0;
-	return false;
+	return ::IsClipboardFormatAvailable(CF_UNICODETEXT) != FALSE;
 }
 
 namespace {
@@ -2323,38 +2319,6 @@ void ScintillaWin::Paste() {
 			InsertPasteShape(&putf[0], len, pasteShape);
 		}
 		memUSelection.Unlock();
-	} else {
-		// CF_UNICODETEXT not available, paste ANSI text
-		GlobalMemory memSelection(::GetClipboardData(CF_TEXT));
-		if (memSelection) {
-			const char *ptr = static_cast<const char *>(memSelection.ptr);
-			if (ptr) {
-				const size_t bytes = memSelection.Size();
-				size_t len = bytes;
-				for (size_t i = 0; i < bytes; i++) {
-					if ((len == bytes) && (0 == ptr[i]))
-						len = i;
-				}
-
-				// In Unicode mode, convert clipboard text to UTF-8
-				if (IsUnicodeMode()) {
-					std::vector<wchar_t> uptr(len+1);
-
-					const int ilen = static_cast<int>(len);
-					const size_t ulen = ::MultiByteToWideChar(CP_ACP, 0,
-					                    ptr, ilen, &uptr[0], ilen +1);
-
-					const size_t mlen = UTF8Length(&uptr[0], ulen);
-					std::vector<char> putf(mlen+1);
-					UTF8FromUTF16(&uptr[0], ulen, &putf[0], mlen);
-
-					InsertPasteShape(&putf[0], mlen, pasteShape);
-				} else {
-					InsertPasteShape(ptr, len, pasteShape);
-				}
-			}
-			memSelection.Unlock();
-		}
 	}
 	::CloseClipboard();
 	Redraw();
@@ -2867,14 +2831,6 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 
 	if (uniText) {
 		uniText.SetClip(CF_UNICODETEXT);
-	} else {
-		// There was a failure - try to copy at least ANSI text
-		GlobalMemory ansiText;
-		ansiText.Allocate(selectedText.LengthWithTerminator());
-		if (ansiText) {
-			memcpy(ansiText.ptr, selectedText.Data(), selectedText.LengthWithTerminator());
-			ansiText.SetClip(CF_TEXT);
-		}
 	}
 
 	if (selectedText.rectangular) {
