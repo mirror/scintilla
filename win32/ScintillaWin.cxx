@@ -357,7 +357,7 @@ class ScintillaWin :
 	void ToggleHanja();
 	void AddWString(std::wstring wcs, CharacterSource charSource);
 
-	UINT CodePageOfDocument() const;
+	UINT CodePageOfDocument() const noexcept;
 	bool ValidCodePage(int codePage) const override;
 	sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 	void IdleWork() override;
@@ -1262,7 +1262,7 @@ UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) noexcept {
 
 }
 
-UINT ScintillaWin::CodePageOfDocument() const {
+UINT ScintillaWin::CodePageOfDocument() const noexcept {
 	return CodePageFromCharSet(vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
 }
 
