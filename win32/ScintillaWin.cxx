@@ -1570,6 +1570,12 @@ sptr_t ScintillaWin::FocusMessage(unsigned int iMessage, uptr_t wParam, sptr_t) 
 sptr_t ScintillaWin::IMEMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	switch (iMessage) {
 
+	case WM_INPUTLANGCHANGE:
+		return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
+
+	case WM_INPUTLANGCHANGEREQUEST:
+		return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
+
 	case WM_IME_KEYDOWN: {
 			if (wParam == VK_HANJA) {
 				ToggleHanja();
@@ -1584,7 +1590,7 @@ sptr_t ScintillaWin::IMEMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 		}
 
-	case WM_IME_STARTCOMPOSITION: 	// dbcs
+	case WM_IME_STARTCOMPOSITION:
 		if (KoreanIME() || imeInteraction == imeInline) {
 			return 0;
 		} else {
@@ -1592,7 +1598,7 @@ sptr_t ScintillaWin::IMEMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 		}
 
-	case WM_IME_ENDCOMPOSITION: 	// dbcs
+	case WM_IME_ENDCOMPOSITION:
 		ImeEndComposition();
 		return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
@@ -1882,11 +1888,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case WM_CONTEXTMENU:
 			return ShowContextMenu(iMessage, wParam, lParam);
 
-		case WM_INPUTLANGCHANGE:
-			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
-		case WM_INPUTLANGCHANGEREQUEST:
-			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
-
 		case WM_ERASEBKGND:
 			return 1;   // Avoid any background erasure as whole window painted.
 
@@ -1914,6 +1915,17 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_GETTEXT:
 			return GetText(wParam, lParam);
+
+		case WM_INPUTLANGCHANGE:
+		case WM_INPUTLANGCHANGEREQUEST:
+		case WM_IME_KEYDOWN:
+		case WM_IME_REQUEST:
+		case WM_IME_STARTCOMPOSITION:
+		case WM_IME_ENDCOMPOSITION:
+		case WM_IME_COMPOSITION:
+		case WM_IME_SETCONTEXT:
+		case WM_IME_NOTIFY:
+			return IMEMessage(iMessage, wParam, lParam);
 
 		case EM_LINEFROMCHAR:
 		case EM_EXLINEFROMCHAR:
