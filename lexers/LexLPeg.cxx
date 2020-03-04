@@ -85,10 +85,10 @@ class LexerLPeg : public ILexer {
 	 */
 	lua_State *L;
 	/**
-	 * The flag indicating whether or not an existing Lua state was supplied as
-	 * the lexer's Lua state.
+	 * The flag indicating whether or not an existing Lua state is owned by the
+	 * lexer.
 	 */
-	bool own_lua;
+	bool own_lua = true;
 	/**
 	 * The set of properties for the lexer.
 	 * The `lexer.name`, `lexer.lpeg.home`, and `lexer.lpeg.color.theme`
@@ -96,18 +96,18 @@ class LexerLPeg : public ILexer {
 	 */
 	PropSetSimple props;
 	/** The function to send Scintilla messages with. */
-	SciFnDirect SS;
+	SciFnDirect SS = nullptr;
 	/** The Scintilla object the lexer belongs to. */
-	sptr_t sci;
+	sptr_t sci = 0;
 	/**
 	 * The flag indicating whether or not the lexer needs to be re-initialized.
 	 * Re-initialization is required after the lexer language changes.
 	 */
-	bool reinit;
+	bool reinit = true;
 	/**
 	 * The flag indicating whether or not the lexer language has embedded lexers.
 	 */
-	bool multilang;
+	bool multilang = false;
 	/**
 	 * The list of style numbers considered to be whitespace styles.
 	 * This is used in multi-language lexers when backtracking to whitespace to
@@ -119,10 +119,10 @@ class LexerLPeg : public ILexer {
 	 * Logs the given error message or a Lua error message, prints it, and clears
 	 * the stack.
 	 * Error messages are logged to the "lexer.lpeg.error" property.
-	 * @param str The error message to log and print. If `NULL`, logs and prints
-	 *   the Lua error message at the top of the stack.
+	 * @param str The error message to log and print. If `nullptr`, logs and
+	 *   prints the Lua error message at the top of the stack.
 	 */
-	static void l_error(lua_State *L, const char *str=NULL) {
+	static void l_error(lua_State *L, const char *str=nullptr) {
 		lua_getfield(L, LUA_REGISTRYINDEX, "sci_props");
 		PropSetSimple *props = static_cast<PropSetSimple *>(lua_touserdata(L, -1));
 		lua_pop(L, 1); // props
@@ -238,7 +238,7 @@ class LexerLPeg : public ILexer {
 	 */
 	void SetStyle(int num, const char *style) {
 		char *style_copy = static_cast<char *>(malloc(strlen(style) + 1));
-		char *option = strcpy(style_copy, style), *next = NULL, *p = NULL;
+		char *option = strcpy(style_copy, style), *next = nullptr, *p = nullptr;
 		while (option) {
 			if ((next = strchr(option, ','))) *next++ = '\0';
 			if ((p = strchr(option, ':'))) *p++ = '\0';
@@ -284,9 +284,9 @@ class LexerLPeg : public ILexer {
 #endif
 			} else if ((streq(option, "fore") || streq(option, "back")) && p) {
 				int msg = (*option == 'f') ? SCI_STYLESETFORE : SCI_STYLESETBACK;
-				int color = static_cast<int>(strtol(p, NULL, 0));
+				int color = static_cast<int>(strtol(p, nullptr, 0));
 				if (*p == '#') { // #RRGGBB format; Scintilla format is 0xBBGGRR
-					color = static_cast<int>(strtol(p + 1, NULL, 16));
+					color = static_cast<int>(strtol(p + 1, nullptr, 16));
 					color = ((color & 0xFF0000) >> 16) | (color & 0xFF00) |
 					        ((color & 0xFF) << 16); // convert to 0xBBGGRR
 				}
@@ -362,11 +362,11 @@ class LexerLPeg : public ILexer {
 	/**
 	 * Returns the style name for the given style number.
 	 * @param style The style number to get the style name for.
-	 * @return style name or NULL
+	 * @return style name or nullptr
 	 */
 	const char *GetStyleName(int style) {
-		if (!L) return NULL;
-		const char *name = NULL;
+		if (!L) return nullptr;
+		const char *name = nullptr;
 		l_getlexerfield(L, "_TOKENSTYLES");
 		lua_pushnil(L);
 		while (lua_next(L, -2))
@@ -483,39 +483,40 @@ class LexerLPeg : public ILexer {
 
 public:
 	/** Constructor. */
-	LexerLPeg() : own_lua(true), reinit(true), multilang(false) {
+	LexerLPeg() : L(luaL_newstate()) {
 		// Initialize the Lua state, load libraries, and set platform variables.
-		if ((L = luaL_newstate())) {
-			l_openlib(luaopen_base, LUA_BASELIBNAME);
-			l_openlib(luaopen_table, LUA_TABLIBNAME);
-			l_openlib(luaopen_string, LUA_STRLIBNAME);
+		if (!L) {
+			fprintf(stderr, "Lua failed to initialize.\n");
+			return;
+		}
+		l_openlib(luaopen_base, LUA_BASELIBNAME);
+		l_openlib(luaopen_table, LUA_TABLIBNAME);
+		l_openlib(luaopen_string, LUA_STRLIBNAME);
 #if LUA_VERSION_NUM < 502
-			l_openlib(luaopen_io, LUA_IOLIBNAME); // for `package.searchpath()`
+		l_openlib(luaopen_io, LUA_IOLIBNAME); // for `package.searchpath()`
 #endif
-			l_openlib(luaopen_package, LUA_LOADLIBNAME);
-			l_openlib(luaopen_lpeg, "lpeg");
+		l_openlib(luaopen_package, LUA_LOADLIBNAME);
+		l_openlib(luaopen_lpeg, "lpeg");
 #if _WIN32
-			lua_pushboolean(L, 1), lua_setglobal(L, "WIN32");
+		lua_pushboolean(L, 1), lua_setglobal(L, "WIN32");
 #endif
 #if __APPLE__
-			lua_pushboolean(L, 1), lua_setglobal(L, "OSX");
+		lua_pushboolean(L, 1), lua_setglobal(L, "OSX");
 #endif
 #if GTK
-			lua_pushboolean(L, 1), lua_setglobal(L, "GTK");
+		lua_pushboolean(L, 1), lua_setglobal(L, "GTK");
 #endif
 #if CURSES
-			lua_pushboolean(L, 1), lua_setglobal(L, "CURSES");
+		lua_pushboolean(L, 1), lua_setglobal(L, "CURSES");
 #endif
-			lua_newtable(L), lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexers");
-		} else fprintf(stderr, "Lua failed to initialize.\n");
-		SS = NULL, sci = 0;
+		lua_newtable(L), lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexers");
 	}
 
 	/** Destructor. */
-	virtual ~LexerLPeg() {}
+	virtual ~LexerLPeg() = default;
 
 	/** Destroys the lexer object. */
-	virtual void SCI_METHOD Release() {
+	void SCI_METHOD Release() override {
 		if (own_lua && L)
 			lua_close(L);
 		else if (!own_lua) {
@@ -523,7 +524,6 @@ public:
 			lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
 			lua_pushnil(L), lua_settable(L, -3), lua_pop(L, 1); // sci_lexers
 		}
-		L = NULL;
 		delete this;
 	}
 
@@ -534,8 +534,8 @@ public:
 	 * @param initStyle The initial style at position *startPos* in the document.
 	 * @param buffer The document interface.
 	 */
-	virtual void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc,
-	                            int initStyle, IDocument *buffer) {
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc,
+	                    int initStyle, IDocument *buffer) override {
 		LexAccessor styler(buffer);
 		if ((reinit && !Init()) || !L) {
 			// Style everything in the default style.
@@ -622,8 +622,8 @@ public:
 	 * @param initStyle The initial style at position *startPos* in the document.
 	 * @param buffer The document interface.
 	 */
-	virtual void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc,
-	                             int, IDocument *buffer) {
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc,
+	                     int, IDocument *buffer) override {
 		if ((reinit && !Init()) || !L) return;
 		lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
 		lua_setfield(L, LUA_REGISTRYINDEX, "sci_props");
@@ -653,15 +653,13 @@ public:
 	}
 
 	/** This lexer implements the original lexer interface. */
-	virtual int SCI_METHOD Version() const { return lvOriginal; }
+	int SCI_METHOD Version() const override { return lvOriginal; }
 	/** Returning property names is not implemented. */
-	virtual const char * SCI_METHOD PropertyNames() { return ""; }
+	const char * SCI_METHOD PropertyNames() override { return ""; }
 	/** Returning property types is not implemented. */
-	virtual int SCI_METHOD PropertyType(const char *) { return 0; }
+	int SCI_METHOD PropertyType(const char *) override { return 0; }
 	/** Returning property descriptions is not implemented. */
-	virtual const char * SCI_METHOD DescribeProperty(const char *) {
-		return "";
-	}
+	const char * SCI_METHOD DescribeProperty(const char *) override { return ""; }
 
 	/**
 	 * Sets the *key* lexer property to *value*.
@@ -669,8 +667,8 @@ public:
 	 * @param key The string keyword.
 	 * @param val The string value.
 	 */
-	virtual Sci_Position SCI_METHOD PropertySet(const char *key,
-	                                            const char *value) {
+	Sci_Position SCI_METHOD PropertySet(const char *key,
+	                                    const char *value) override {
 		props.Set(key, value, strlen(key), strlen(value));
 		if (reinit)
 			Init();
@@ -694,11 +692,9 @@ public:
 	}
 
 	/** Returning keyword list descriptions is not implemented. */
-	virtual const char * SCI_METHOD DescribeWordListSets() { return ""; }
+	const char * SCI_METHOD DescribeWordListSets() override { return ""; }
 	/** Setting keyword lists is not applicable. */
-	virtual Sci_Position SCI_METHOD WordListSet(int, const char *) {
-		return -1;
-	}
+	Sci_Position SCI_METHOD WordListSet(int, const char *) override { return -1; }
 
 	/**
 	 * Allows for direct communication between the application and the lexer.
@@ -708,16 +704,16 @@ public:
 	 * @param arg The argument.
 	 * @return void *data
 	 */
-	virtual void * SCI_METHOD PrivateCall(int code, void *arg) {
+	void * SCI_METHOD PrivateCall(int code, void *arg) override {
 		sptr_t lParam = reinterpret_cast<sptr_t>(arg);
-		const char *val = NULL;
+		const char *val = nullptr;
 		switch(code) {
 		case SCI_GETDIRECTFUNCTION:
 			SS = reinterpret_cast<SciFnDirect>(lParam);
-			return NULL;
+			return nullptr;
 		case SCI_SETDOCPOINTER:
 			sci = lParam;
-			return NULL;
+			return nullptr;
 		case SCI_CHANGELEXERSTATE:
 			if (own_lua) lua_close(L);
 			L = reinterpret_cast<lua_State *>(lParam);
@@ -726,7 +722,7 @@ public:
 				lua_newtable(L), lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexers");
 			lua_pop(L, 1); // sci_lexers or nil
 			own_lua = false;
-			return NULL;
+			return nullptr;
 		case SCI_SETLEXERLANGUAGE:
 			char lexer_name[50];
 			props.GetExpanded("lexer.name", lexer_name);
@@ -736,14 +732,14 @@ public:
 				PropertySet("lexer.name", reinterpret_cast<const char *>(arg));
 			} else if (L)
 				own_lua ? SetStyles() : Init();
-			return NULL;
+			return nullptr;
 		case SCI_GETLEXERLANGUAGE:
 			if (L) {
 				l_getlexerfield(L, "_NAME");
 				if (SS && sci && multilang) {
 					int pos = SS(sci, SCI_GETCURRENTPOS, 0, 0);
 					while (pos >= 0 && !ws[SS(sci, SCI_GETSTYLEAT, pos, 0)]) pos--;
-					const char *name = NULL, *p = NULL;
+					const char *name = nullptr, *p = nullptr;
 					if (pos >= 0) {
 						name = GetStyleName(SS(sci, SCI_GETSTYLEAT, pos, 0));
 						if (name) p = strstr(name, "_whitespace");
@@ -764,7 +760,7 @@ public:
 			if (code >= 0 && code <= STYLE_MAX) { // retrieve style names
 				val = GetStyleName(code);
 				return StringResult(lParam, val ? val : "Not Available");
-			} else return NULL;
+			} else return nullptr;
 		}
 	}
 
