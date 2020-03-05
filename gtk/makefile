@@ -78,8 +78,8 @@ BASE_FLAGS += $(if $(DEBUG),-g,-Os)
 CXX_BASE_FLAGS =--std=c++11 $(BASE_FLAGS)
 CXX_ALL_FLAGS =$(DEFINES) $(INCLUDES) $(CXX_BASE_FLAGS) $(CONFIG_FLAGS)
 ifdef LPEG_LEXER
-CXX_BASE_FLAGS += -DLPEG_LEXER -I ../src/lua
-LUA_CFLAGS:=-std=c99 -pedantic -Wall -I ../src/lua -DLUA_USE_POSIX -DLUA_USE_DLOPEN
+CXX_BASE_FLAGS += -DLPEG_LEXER -I ../lua/src
+LUA_CFLAGS:=-fPIC -std=c99 -pedantic -Wall -I ../lua/src -DLUA_USE_POSIX -DLUA_USE_DLOPEN
 LUA_OBJS:=lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o linit.o \
          llex.o lmem.o lobject.o lopcodes.o lparser.o lstate.o lstring.o \
          ltable.o ltm.o lundump.o lvm.o lzio.o \
