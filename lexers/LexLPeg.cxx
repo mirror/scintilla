@@ -34,7 +34,15 @@ LUALIB_API int luaopen_lpeg(lua_State *L);
 
 using namespace Scintilla;
 
+#ifndef NDEBUG
+#define RECORD_STACK_TOP(l) int orig_stack_top = lua_gettop(l)
+#define ASSERT_STACK_TOP(l) assert(lua_gettop(l) == orig_stack_top)
+#else
+#define RECORD_STACK_TOP(_) (void)0
+#define ASSERT_STACK_TOP(_) (void)0
+#endif
 #if LUA_VERSION_NUM < 502
+#define luaL_traceback(_,__,___,____) (void)0
 #define luaL_requiref(l, s, f, _) \
   (lua_pushcfunction(l, f), lua_pushstring(l, s), lua_call(l, 1, 1))
 #define lua_rawlen lua_objlen
@@ -47,6 +55,12 @@ using namespace Scintilla;
 #define lua_getfield(l, i, k) (lua_getfield(l, i, k), lua_type(l, -1))
 #define lua_rawget(l, i) (lua_rawget(l, i), lua_type(l, -1))
 #endif
+
+/** Lua pcall error message handler that adds a traceback. */
+static int lua_error_handler(lua_State *L) {
+  luaL_traceback(L, L, lua_tostring(L, -1), 1);
+  return 1;
+}
 
 /** lexer.property[key] metamethod. */
 static int lexer_property_index(lua_State *L) {
@@ -125,7 +139,7 @@ static int lexer_index(lua_State *L) {
   if (strcmp(key, "fold_level") == 0 || strcmp(key, "indent_amount") == 0 ||
       strcmp(key, "property") == 0 || strcmp(key, "property_int") == 0 ||
       strcmp(key, "style_at") == 0 || strcmp(key, "line_state") == 0) {
-    lua_createtable(L, 0, 0);
+    lua_newtable(L);
     lua_createtable(L, 0, 2);
     lua_pushvalue(L, 2), lua_pushcclosure(L, lexer_property_index, 1);
     lua_setfield(L, -2, "__index");
@@ -160,12 +174,12 @@ static int lexer_newindex(lua_State *L) {
  * @param L The Lua State.
  */
 static void expand_property(lua_State *L) {
-  //int orig_stack_top = lua_gettop(L);
+  RECORD_STACK_TOP(L);
   lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED"), lua_getfield(L, -1, "lexer");
   lua_getfield(L, -1, "property_expanded");
   lua_pushvalue(L, -4), lua_gettable(L, -2), lua_replace(L, -5);
   lua_pop(L, 3); // property_expanded, lexer, _LOADED
-  //assert(lua_gettop(L) == orig_stack_top);
+  ASSERT_STACK_TOP(L);
 }
 
 /** The LPeg Scintilla lexer. */
@@ -225,6 +239,8 @@ class LexerLPeg : public ILexer {
   /**
    * Parses the given style string to set the properties for the given style
    * number.
+   * Style strings mimic SciTE's "style.*.stylenumber" properties.
+   * (https://scintilla.org/SciTEDoc.html)
    * @param num The style number to set properties for.
    * @param style The style string containing properties to set.
    */
@@ -316,8 +332,8 @@ class LexerLPeg : public ILexer {
    * Iterates through the lexer's `_TOKENSTYLES`, setting the style properties
    * for all defined styles.
    */
-  bool SetStyles() {
-    //int orig_stack_top = lua_gettop(L);
+  void SetStyles() {
+    RECORD_STACK_TOP(L);
     // If the lexer defines additional styles, set their properties first (if
     // the user has not already defined them).
     lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
@@ -341,8 +357,8 @@ class LexerLPeg : public ILexer {
       // Skip, but do not report an error since `reinit` would remain `false`
       // and subsequent calls to `Lex()` and `Fold()` would repeatedly call this
       // function and error.
-      //assert(lua_gettop(L) == orig_stack_top);
-      return true;
+      ASSERT_STACK_TOP(L);
+      return;
     }
     lua_pushstring(L, "style.default"), expand_property(L);
     SetStyle(STYLE_DEFAULT, lua_tostring(L, -1));
@@ -361,8 +377,7 @@ class LexerLPeg : public ILexer {
       lua_pop(L, 1); // value
     }
     lua_pop(L, 2); // _TOKENSTYLES, lexer object
-    //assert(lua_gettop(L) == orig_stack_top);
-    return true;
+    ASSERT_STACK_TOP(L);
   }
 
   /**
@@ -371,8 +386,7 @@ class LexerLPeg : public ILexer {
    * @return style name or nullptr
    */
   const char *GetStyleName(int style) {
-    if (!L) return nullptr;
-    //int orig_stack_top = lua_gettop(L);
+    RECORD_STACK_TOP(L);
     const char *name = nullptr;
     lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
     lua_getfield(L, -1, "_TOKENSTYLES");
@@ -384,7 +398,7 @@ class LexerLPeg : public ILexer {
         break;
       } else lua_pop(L, 1); // value
     lua_pop(L, 2); // _TOKENSTYLES, lexer object
-    //assert(lua_gettop(L) == orig_stack_top);
+    ASSERT_STACK_TOP(L);
     return name;
   }
 
@@ -398,7 +412,7 @@ class LexerLPeg : public ILexer {
     props.GetExpanded("lexer.name", lexer);
     props.GetExpanded("lexer.lpeg.color.theme", theme);
     if (!*home || !*lexer || !L) return false;
-    //int orig_stack_top = lua_gettop(L);
+    RECORD_STACK_TOP(L);
 
     // Designate the currently running LexerLPeg instance.
     // This needs to be done prior to calling any Lua lexer code, particularly
@@ -420,9 +434,11 @@ class LexerLPeg : public ILexer {
       lua_setfield(L, -2, "path"), lua_pop(L, 1); // package
 
       // Load the lexer module.
+      lua_pushcfunction(L, lua_error_handler);
       lua_getglobal(L, "require");
       lua_pushstring(L, "lexer");
-      if (lua_pcall(L, 1, 1, 0) != LUA_OK) return (log_error(L), false);
+      if (lua_pcall(L, 1, 1, -3) != LUA_OK) return (log_error(L), false);
+      lua_remove(L, -2); // lua_error_handler
       lua_pushinteger(L, SC_FOLDLEVELBASE);
       lua_setfield(L, -2, "FOLD_BASE");
       lua_pushinteger(L, SC_FOLDLEVELWHITEFLAG);
@@ -445,8 +461,10 @@ class LexerLPeg : public ILexer {
     // Load the language lexer.
     if (lua_getfield(L, -1, "load") != LUA_TFUNCTION)
       return (log_error(L, "'lexer.load' function not found"), false);
+    lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
     lua_pushstring(L, lexer), lua_pushnil(L), lua_pushboolean(L, 1);
-    if (lua_pcall(L, 3, 1, 0) != LUA_OK) return (log_error(L), false);
+    if (lua_pcall(L, 3, 1, -5) != LUA_OK) return (log_error(L), false);
+    lua_remove(L, -2); // lua_error_handler
     lua_remove(L, -2); // lexer module
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
     lua_setfield(L, -2, "_PROPS");
@@ -454,6 +472,7 @@ class LexerLPeg : public ILexer {
 
     // Load the theme and set up styles.
     if (*theme) {
+      lua_pushcfunction(L, lua_error_handler);
       if (!(strstr(theme, "/") || strstr(theme, "\\"))) { // theme name
         lua_pushstring(L, home);
         lua_pushstring(L, "/themes/");
@@ -462,18 +481,19 @@ class LexerLPeg : public ILexer {
         lua_concat(L, 4);
       } else lua_pushstring(L, theme); // path to theme
       if (luaL_loadfile(L, lua_tostring(L, -1)) != LUA_OK ||
-          lua_pcall(L, 0, 0, 0) != LUA_OK) return (log_error(L), false);
-      lua_pop(L, 1); // theme
+          lua_pcall(L, 0, 0, -2) != LUA_OK)
+        return (log_error(L), false);
+      lua_pop(L, 2); // theme, lua_error_handler
     }
-    if (!SetStyles()) return false;
+    SetStyles();
 
     // If the lexer is a parent, it will have children in its _CHILDREN table.
+    // In that case, determine which styles are language whitespace styles
+    // ([lang]_whitespace). This is necessary for determining which language
+    // to start lexing with.
     lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
     if (lua_getfield(L, -1, "_CHILDREN") == LUA_TTABLE) {
       multilang = true;
-      // Determine which styles are language whitespace styles
-      // ([lang]_whitespace). This is necessary for determining which language
-      // to start lexing with.
       char style_name[50];
       for (int i = 0; i <= STYLE_MAX; i++) {
         PrivateCall(i, reinterpret_cast<void *>(style_name));
@@ -484,7 +504,7 @@ class LexerLPeg : public ILexer {
 
     reinit = false;
     props.Set("lexer.lpeg.error", "", strlen("lexer.lpeg.error"), 0);
-    //assert(lua_gettop(L) == orig_stack_top);
+    ASSERT_STACK_TOP(L);
     return true;
   }
 
@@ -547,6 +567,7 @@ public:
     else if (!own_lua) {
       lua_pushnil(L);
       lua_rawsetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
+      lua_pushnil(L), lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
     }
     delete this;
   }
@@ -571,7 +592,7 @@ public:
       styler.Flush();
       return;
     }
-    //int orig_stack_top = lua_gettop(L);
+    RECORD_STACK_TOP(L);
     lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
     lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
     lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
@@ -605,10 +626,11 @@ public:
 
     if (lua_getfield(L, -1, "lex") != LUA_TFUNCTION)
       return log_error(L, "'lexer.lex' function not found");
-    lua_pushvalue(L, -2);
+    lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
+    lua_pushvalue(L, -3);
     lua_pushlstring(L, buffer->BufferPointer() + startPos, lengthDoc);
     lua_pushinteger(L, styler.StyleAt(startPos));
-    if (lua_pcall(L, 3, 1, 0) != LUA_OK) return log_error(L);
+    if (lua_pcall(L, 3, 1, -5) != LUA_OK) return log_error(L);
     if (!lua_istable(L, -1))
       return log_error(L, "Table of tokens expected from 'lexer.lex'");
     // Style the text from the token table returned.
@@ -617,7 +639,7 @@ public:
       int style = STYLE_DEFAULT;
       styler.StartAt(startPos);
       styler.StartSegment(startPos);
-      lua_getfield(L, -2, "_TOKENSTYLES");
+      lua_getfield(L, -3, "_TOKENSTYLES");
       // Loop through token-position pairs.
       for (int i = 1; i < len; i += 2) {
         style = STYLE_DEFAULT;
@@ -629,16 +651,18 @@ public:
         lua_pop(L, 1); // pos
         if (style >= 0 && style <= STYLE_MAX)
           styler.ColourTo(startPos + position - 1, style);
-        else
-          log_error(L, "Bad style number");
+        else {
+          lua_pushfstring(L, "Bad style number: %d", style);
+          log_error(L);
+        }
         if (position > startPos + lengthDoc) break;
       }
       lua_pop(L, 1); // _TOKENSTYLES
       styler.ColourTo(startPos + lengthDoc - 1, style);
       styler.Flush();
     }
-    lua_pop(L, 2); // token table returned, lexer object
-    //assert(lua_gettop(L) == orig_stack_top);
+    lua_pop(L, 3); // token table returned, lua_error_handler, lexer object
+    ASSERT_STACK_TOP(L);
   }
 
   /**
@@ -653,7 +677,7 @@ public:
     override
   {
     if ((reinit && !Init()) || !L) return;
-    //int orig_stack_top = lua_gettop(L);
+    RECORD_STACK_TOP(L);
     lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
     lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
     lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
@@ -663,13 +687,14 @@ public:
 
     if (lua_getfield(L, -1, "fold") != LUA_TFUNCTION)
       return log_error(L, "'lexer.fold' function not found");
-    lua_insert(L, -2);
+    lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
+    lua_pushvalue(L, -3);
     Sci_Position currentLine = styler.GetLine(startPos);
     lua_pushlstring(L, buffer->BufferPointer() + startPos, lengthDoc);
     lua_pushinteger(L, startPos);
     lua_pushinteger(L, currentLine);
     lua_pushinteger(L, styler.LevelAt(currentLine) & SC_FOLDLEVELNUMBERMASK);
-    if (lua_pcall(L, 5, 1, 0) != LUA_OK) return log_error(L);
+    if (lua_pcall(L, 5, 1, -7) != LUA_OK) return log_error(L);
     if (!lua_istable(L, -1))
       return log_error(L, "Table of folds expected from 'lexer.fold'");
     // Fold the text from the fold table returned.
@@ -678,8 +703,8 @@ public:
       styler.SetLevel(lua_tointeger(L, -2), lua_tointeger(L, -1));
       lua_pop(L, 1); // level
     }
-    lua_pop(L, 1); // fold table returned
-    //assert(lua_gettop(L) == orig_stack_top);
+    lua_pop(L, 3); // fold table returned, lua_error_handler, lexer object
+    ASSERT_STACK_TOP(L);
   }
 
   /** This lexer implements the original lexer interface. */
@@ -704,12 +729,13 @@ public:
     if (reinit)
       Init();
     else if (L && SS && sci && strncmp(key, "style.", 6) == 0) {
-      //int orig_stack_top = lua_gettop(L);
+      RECORD_STACK_TOP(L);
       lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
       lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
       lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
       lua_getfield(L, -1, "_TOKENSTYLES");
-      if (lua_pushstring(L, key + 6), lua_rawget(L, -2) == LUA_TNUMBER) {
+      lua_pushstring(L, key + 6);
+      if (lua_rawget(L, -2) == LUA_TNUMBER) {
         lua_pushstring(L, key), expand_property(L);
         int style_num = lua_tointeger(L, -2);
         SetStyle(style_num, lua_tostring(L, -1));
@@ -719,7 +745,7 @@ public:
           SS(sci, SCI_STYLECLEARALL, 0, 0);
       }
       lua_pop(L, 4); // style, style number, _TOKENSTYLES, lexer object
-      //assert(lua_gettop(L) == orig_stack_top);
+      ASSERT_STACK_TOP(L);
     }
     return -1; // no need to re-lex
   }
@@ -739,7 +765,6 @@ public:
    */
   void * SCI_METHOD PrivateCall(int code, void *arg) override {
     auto lParam = reinterpret_cast<sptr_t>(arg);
-    const char *val = nullptr;
     switch(code) {
     case SCI_GETDIRECTFUNCTION:
       SS = reinterpret_cast<SciFnDirect>(lParam);
@@ -749,8 +774,7 @@ public:
       return nullptr;
     case SCI_CHANGELEXERSTATE:
       if (own_lua) lua_close(L);
-      L = reinterpret_cast<lua_State *>(lParam);
-      own_lua = false;
+      L = reinterpret_cast<lua_State *>(lParam), own_lua = false;
       return nullptr;
     case SCI_SETLEXERLANGUAGE:
       char lexer_name[50];
@@ -760,39 +784,37 @@ public:
         props.Set("lexer.lpeg.error", "", strlen("lexer.lpeg.error"), 0);
         PropertySet("lexer.name", reinterpret_cast<const char *>(arg));
       } else if (L)
-        own_lua ? SetStyles() : Init();
+        own_lua ? SetStyles() : static_cast<void>(Init());
       return nullptr;
-    case SCI_GETLEXERLANGUAGE:
-      if (L) {
-        //int orig_stack_top = lua_gettop(L);
-        lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
-        lua_getfield(L, -1, "_NAME");
-        if (SS && sci && multilang) {
-          int pos = SS(sci, SCI_GETCURRENTPOS, 0, 0);
-          while (pos >= 0 && !ws[SS(sci, SCI_GETSTYLEAT, pos, 0)]) pos--;
-          const char *name = nullptr, *p = nullptr;
-          if (pos >= 0) {
-            name = GetStyleName(SS(sci, SCI_GETSTYLEAT, pos, 0));
-            if (name) p = strstr(name, "_whitespace");
-          }
-          if (!name) name = lua_tostring(L, -1); // "lexer:lexer" fallback
-          if (!p) p = name + strlen(name); // "lexer:lexer" fallback
-          lua_pushstring(L, "/");
-          lua_pushlstring(L, name, p - name);
-          lua_concat(L, 3);
+    case SCI_GETLEXERLANGUAGE: {
+      if (!L) return StringResult(lParam, "null");
+      RECORD_STACK_TOP(L);
+      lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
+      lua_getfield(L, -1, "_NAME");
+      if (SS && sci && multilang) {
+        int pos = SS(sci, SCI_GETCURRENTPOS, 0, 0);
+        while (pos >= 0 && !ws[SS(sci, SCI_GETSTYLEAT, pos, 0)]) pos--;
+        const char *name = nullptr, *p = nullptr;
+        if (pos >= 0) {
+          name = GetStyleName(SS(sci, SCI_GETSTYLEAT, pos, 0));
+          if (name) p = strstr(name, "_whitespace");
         }
-        val = lua_tostring(L, -1); // no need to copy; will remain in memory
-        lua_pop(L, 2); // lexer_name or lexer language string, lexer object
-        //assert(lua_gettop(L) == orig_stack_top);
+        if (!name) name = lua_tostring(L, -1); // "lexer:lexer" fallback
+        if (!p) p = name + strlen(name); // "lexer:lexer" fallback
+        lua_pushstring(L, "/");
+        lua_pushlstring(L, name, p - name);
+        lua_concat(L, 3);
       }
-      return StringResult(lParam, val ? val : "null");
-    case SCI_GETSTATUS:
+      const char *val = lua_tostring(L, -1); // no copy needed; remains in mem
+      lua_pop(L, 2); // lexer_name or lexer language string, lexer object
+      ASSERT_STACK_TOP(L);
+      return StringResult(lParam, val);
+    } case SCI_GETSTATUS:
       return StringResult(lParam, props.Get("lexer.lpeg.error"));
-    default: // style-related
-      if (code >= 0 && code <= STYLE_MAX) { // retrieve style names
-        val = GetStyleName(code);
-        return StringResult(lParam, val ? val : "Not Available");
-      } else return nullptr;
+    default: // retrieve style names
+      if (code < 0 || code > STYLE_MAX) return nullptr;
+      const char *val = L ? GetStyleName(code) : nullptr;
+      return StringResult(lParam, val ? val : "Not Available");
     }
   }
 
