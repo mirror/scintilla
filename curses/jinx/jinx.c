@@ -37,11 +37,12 @@ int main(int argc, char **argv) {
   SSM(SCI_STYLESETBOLD, SCE_C_OPERATOR, 1);
 #else
   SSM(SCI_SETLEXER, SCLEX_LPEG, 0);
-  SSM(SCI_SETPROPERTY, (uptr_t)"lexer.lpeg.home", (sptr_t)"../../lexlua");
+  //SSM(SCI_SETPROPERTY, (uptr_t)"lexer.lpeg.home", (sptr_t)"../../lexlua");
   SSM(SCI_SETPROPERTY, (uptr_t)"lexer.lpeg.color.theme", (sptr_t)"curses");
   SSM(SCI_PRIVATELEXERCALL, SCI_GETDIRECTFUNCTION,
       SSM(SCI_GETDIRECTFUNCTION, 0, 0));
   SSM(SCI_PRIVATELEXERCALL, SCI_SETDOCPOINTER, SSM(SCI_GETDIRECTPOINTER, 0, 0));
+  SSM(SCI_PRIVATELEXERCALL, SCI_LOADLEXERLIBRARY, (sptr_t)"../../lexlua");
   SSM(SCI_PRIVATELEXERCALL, SCI_SETLEXERLANGUAGE, (sptr_t)"ansi_c");
 #endif
   SSM(SCI_INSERTTEXT, 0, (sptr_t)
