@@ -772,10 +772,6 @@ local M = {}
 -- that inspired me, and thanks to Roberto Ierusalimschy for LPeg.
 --
 -- [lexer post]: http://lua-users.org/lists/lua-l/2007-04/msg00116.html
--- @field path (string)
---   The path used to search for a lexer to load.
---   Identical in format to Lua's `package.path` string.
---   The default value is `package.path`.
 -- @field DEFAULT (string)
 --   The token name for default tokens.
 -- @field WHITESPACE (string)
@@ -948,31 +944,31 @@ local M = {}
 --   Table of style names at positions in the buffer starting from 1.
 module('lexer')]=]
 
+if not require then
+  -- Substitute for Lua's require() function, which does not require the package
+  -- module to be loaded.
+  -- Note: all modules must be in the global namespace, which is the case in
+  -- LexerLPeg's default Lua State.
+  function require(name) return name == 'lexer' and M or _G[name] end
+end
+
 local lpeg = require('lpeg')
 local lpeg_P, lpeg_R, lpeg_S, lpeg_V = lpeg.P, lpeg.R, lpeg.S, lpeg.V
 local lpeg_Ct, lpeg_Cc, lpeg_Cp = lpeg.Ct, lpeg.Cc, lpeg.Cp
 local lpeg_Cmt, lpeg_C = lpeg.Cmt, lpeg.C
 local lpeg_match = lpeg.match
 
-M.path = package.path
-
-if not package.searchpath then
-  -- Searches for the given *name* in the given *path*.
-  -- This is an implementation of Lua 5.2's `package.searchpath()` function for
-  -- Lua 5.1.
-  function package.searchpath(name, path)
-    local tried = {}
-    for part in path:gmatch('[^;]+') do
-      local filename = part:gsub('%?', name)
-      local f = io.open(filename, 'r')
-      if f then
-        f:close()
-        return filename
-      end
-      tried[#tried + 1] = string.format("no file '%s'", filename)
-    end
-    return nil, table.concat(tried, '\n')
+-- Searches for the given *name* in the given *path*.
+-- This is a safe implementation of Lua 5.2's `package.searchpath()` function
+-- that does not require the package module to be loaded.
+local function searchpath(name, path)
+  local tried = {}
+  for part in path:gmatch('[^;]+') do
+    local filename = part:gsub('%?', name)
+    if loadfile(filename) then return filename end
+    tried[#tried + 1] = string.format("no file '%s'", filename)
   end
+  return nil, table.concat(tried, '\n')
 end
 
 local string_upper = string.upper
@@ -1540,7 +1536,8 @@ function M.load(name, alt_name, cache)
   -- `property_int` tables do not exist (they are not useful). Create them in
   -- order prevent errors from occurring.
   if not M.property then
-    M.property, M.property_int = {}, setmetatable({}, {
+    M.property = {['lexer.lpeg.home'] = package.path:gsub('/%?%.lua', '')}
+    M.property_int = setmetatable({}, {
       __index = function(t, k) return tonumber(M.property[k]) or 0 end,
       __newindex = function() error('read-only property') end
     })
@@ -1553,7 +1550,8 @@ function M.load(name, alt_name, cache)
   -- loading embedded lexers changes `WHITESPACE` again, so when adding it
   -- later, do not reference the potentially incorrect value.
   M.WHITESPACE = (alt_name or name)..'_whitespace'
-  local lexer = dofile(assert(package.searchpath(name, M.path)))
+  local path = M.property['lexer.lpeg.home']:gsub(';', '/?.lua;')..'/?.lua'
+  local lexer = dofile(assert(searchpath(name, path)))
   assert(lexer, string.format("'%s.lua' did not return a lexer", name))
   if alt_name then lexer._NAME = alt_name end
   if not getmetatable(lexer) or lexer._LEGACY then

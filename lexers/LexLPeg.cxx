@@ -17,6 +17,8 @@
 #include <curses.h>
 #endif
 
+#include <vector>
+
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
@@ -47,7 +49,8 @@ using namespace Scintilla;
   (lua_pushcfunction(l, f), lua_pushstring(l, s), lua_call(l, 1, 1))
 #define lua_rawlen lua_objlen
 #define LUA_OK 0
-#define lua_rawgetp(l, i, p) (lua_pushlightuserdata(l, p), lua_rawget(l, i))
+#define lua_rawgetp(l, i, p) \
+  (lua_pushlightuserdata(l, p), lua_rawget(l, i), lua_type(l, -1))
 #define lua_rawsetp(l, i, p) \
   (lua_pushlightuserdata(l, p), lua_insert(l, -2), lua_rawset(l, i))
 #endif
@@ -113,6 +116,7 @@ static int lexer_property_newindex(lua_State *L) {
   if (strcmp(property, "property") == 0) {
     lua_getfield(L, -1, "_PROPS");
     auto props = static_cast<PropSetSimple *>(lua_touserdata(L, -1));
+    // TODO: ideally would use lexer->PropertySet().
     props->Set(
       luaL_checkstring(L, 2), luaL_checkstring(L, 3), lua_rawlen(L, 2),
       lua_rawlen(L, 3));
@@ -184,6 +188,12 @@ static void expand_property(lua_State *L) {
 
 /** The LPeg Scintilla lexer. */
 class LexerLPeg : public ILexer {
+  // Lexer property keys.
+  const char * const LexerErrorKey = "lexer.lpeg.error";
+  const char * const LexerHomeKey = "lexer.lpeg.home";
+  const char * const LexerNameKey = "lexer.name";
+  const char * const LexerThemeKey = "lexer.lpeg.color.theme";
+
   /**
    * The lexer's Lua state.
    * It is cleared each time the lexer language changes unless `own_lua` is
@@ -196,8 +206,8 @@ class LexerLPeg : public ILexer {
   bool own_lua = true;
   /**
    * The set of properties for the lexer.
-   * The `lexer.name`, `lexer.lpeg.home`, and `lexer.lpeg.color.theme`
-   * properties must be defined before running the lexer.
+   * The LexerHomeKey and LexerNameKey properties must be defined before running
+   * the lexer.
    */
   PropSetSimple props;
   /** The function to send Scintilla messages with. */
@@ -223,15 +233,14 @@ class LexerLPeg : public ILexer {
   /**
    * Logs the given error message or a Lua error message, prints it, and clears
    * the stack.
-   * Error messages are logged to the "lexer.lpeg.error" property.
+   * Error messages are logged to the LexerErrorKey property.
    * @param L The Lua State.
    * @param str The error message to log and print. If `nullptr`, logs and
    *   prints the Lua error message at the top of the stack.
    */
   void log_error(lua_State *L, const char *str = nullptr) {
-    const char *key = "lexer.lpeg.error";
     const char *value = str ? str : lua_tostring(L, -1);
-    props.Set(key, value, strlen(key), strlen(value));
+    PropertySet(LexerErrorKey, value);
     fprintf(stderr, "Lua Error: %s.\n", value);
     lua_settop(L, 0);
   }
@@ -343,9 +352,7 @@ class LexerLPeg : public ILexer {
       if (lua_isstring(L, -2) && lua_isstring(L, -1)) {
         lua_pushstring(L, "style."), lua_pushvalue(L, -3), lua_concat(L, 2);
         if (!*props.Get(lua_tostring(L, -1)))
-          props.Set(
-            lua_tostring(L, -1), lua_tostring(L, -2), lua_rawlen(L, -1),
-            lua_rawlen(L, -2));
+          PropertySet(lua_tostring(L, -1), lua_tostring(L, -2));
         lua_pop(L, 1); // style name
       }
       lua_pop(L, 1); // value
@@ -403,15 +410,17 @@ class LexerLPeg : public ILexer {
   }
 
   /**
-   * Initializes the lexer once the `lexer.lpeg.home` and `lexer.name`
-   * properties are set.
+   * Initializes the lexer once the LexerHomeKey and LexerNameKey properties are
+   * set.
    */
   bool Init() {
-    char home[FILENAME_MAX], lexer[50], theme[FILENAME_MAX];
-    props.GetExpanded("lexer.lpeg.home", home);
-    props.GetExpanded("lexer.name", lexer);
-    props.GetExpanded("lexer.lpeg.color.theme", theme);
-    if (!*home || !*lexer || !L) return false;
+    if (!props.GetExpanded(LexerHomeKey, nullptr) ||
+        !*props.Get(LexerNameKey) || !L)
+      return false;
+    char *home = reinterpret_cast<char *>(
+      malloc(props.GetExpanded(LexerHomeKey, nullptr) + 1));
+    props.GetExpanded(LexerHomeKey, home);
+    const char *lexer = props.Get(LexerNameKey);
     RECORD_STACK_TOP(L);
 
     // Designate the currently running LexerLPeg instance.
@@ -422,48 +431,61 @@ class LexerLPeg : public ILexer {
     lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
     lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
 
-    // If necessary, load the lexer module and theme.
+    // Determine where to look for the lexer module and themes.
+    std::vector<char *> dirs;
+    dirs.push_back(home);
+    for (char *p = strstr(home, ";"); p; p = strstr(p, ";")) {
+      *p++ = '\0';
+      dirs.push_back(p);
+    }
+
+    // If necessary, load the lexer module.
     lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
     if (lua_getfield(L, -1, "lexer") == LUA_TNIL) {
-      lua_pop(L, 2); // nil and _LOADED
-
-      // Modify `package.path` to find lexers.
-      lua_getglobal(L, "package"), lua_getfield(L, -1, "path");
-      int orig_path = luaL_ref(L, LUA_REGISTRYINDEX); // restore later
-      lua_pushstring(L, home), lua_pushstring(L, "/?.lua"), lua_concat(L, 2);
-      lua_setfield(L, -2, "path"), lua_pop(L, 1); // package
-
-      // Load the lexer module.
-      lua_pushcfunction(L, lua_error_handler);
-      lua_getglobal(L, "require");
-      lua_pushstring(L, "lexer");
-      if (lua_pcall(L, 1, 1, -3) != LUA_OK) return (log_error(L), false);
+      for (char *dir : dirs) {
+        lua_pushstring(L, dir);
+        lua_pushstring(L, "/lexer.lua");
+        lua_concat(L, 2);
+        int status = luaL_loadfile(L, lua_tostring(L, -1));
+        if (status == LUA_ERRFILE) {
+          lua_pop(L, 2); // error message, filename
+          continue; // try next directory
+        }
+        lua_remove(L, -2); // filename
+        lua_pushcfunction(L, lua_error_handler);
+        lua_insert(L, -2);
+        if (status == LUA_OK && lua_pcall(L, 0, 1, -2) == LUA_OK) break;
+        return (free(home), log_error(L), false);
+      }
       lua_remove(L, -2); // lua_error_handler
+      lua_replace(L, -2); // nil
       lua_pushinteger(L, SC_FOLDLEVELBASE);
       lua_setfield(L, -2, "FOLD_BASE");
       lua_pushinteger(L, SC_FOLDLEVELWHITEFLAG);
       lua_setfield(L, -2, "FOLD_BLANK");
       lua_pushinteger(L, SC_FOLDLEVELHEADERFLAG);
       lua_setfield(L, -2, "FOLD_HEADER");
-      if (luaL_newmetatable(L, "sci_lexer")) {
-        lua_pushcfunction(L, lexer_index), lua_setfield(L, -2, "__index");
-        lua_pushcfunction(L, lexer_newindex), lua_setfield(L, -2, "__newindex");
-      }
+      lua_createtable(L, 0, 2);
+      lua_pushcfunction(L, lexer_index), lua_setfield(L, -2, "__index");
+      lua_pushcfunction(L, lexer_newindex), lua_setfield(L, -2, "__newindex");
       lua_setmetatable(L, -2);
-
-      // Restore `package.path`.
-      lua_getglobal(L, "package");
-      lua_getfield(L, -1, "path"), lua_setfield(L, -3, "path"); // lexer.path =
-      lua_rawgeti(L, LUA_REGISTRYINDEX, orig_path), lua_setfield(L, -2, "path");
-      luaL_unref(L, LUA_REGISTRYINDEX, orig_path), lua_pop(L, 1); // package
-    } else lua_remove(L, -2); // _LOADED
+      lua_pushvalue(L, -1), lua_setfield(L, -3, "lexer");
+    }
+    lua_replace(L, -2);
+    // Update the userdata needed by lexer metamethods.
+    lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
+    lua_setfield(L, -2, "_PROPS");
+    lua_pushvalue(L, -1);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
 
     // Load the language lexer.
     if (lua_getfield(L, -1, "load") != LUA_TFUNCTION)
-      return (log_error(L, "'lexer.load' function not found"), false);
+      return (
+        free(home), log_error(L, "'lexer.load' function not found"), false);
     lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
     lua_pushstring(L, lexer), lua_pushnil(L), lua_pushboolean(L, 1);
-    if (lua_pcall(L, 3, 1, -5) != LUA_OK) return (log_error(L), false);
+    if (lua_pcall(L, 3, 1, -5) != LUA_OK)
+      return (free(home), log_error(L), false);
     lua_remove(L, -2); // lua_error_handler
     lua_remove(L, -2); // lexer module
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
@@ -471,19 +493,33 @@ class LexerLPeg : public ILexer {
     lua_rawsetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
 
     // Load the theme and set up styles.
-    if (*theme) {
-      lua_pushcfunction(L, lua_error_handler);
-      if (!(strstr(theme, "/") || strstr(theme, "\\"))) { // theme name
-        lua_pushstring(L, home);
-        lua_pushstring(L, "/themes/");
-        lua_pushstring(L, theme);
-        lua_pushstring(L, ".lua");
-        lua_concat(L, 4);
+    if (props.GetExpanded(LexerThemeKey, nullptr)) {
+      char *theme = reinterpret_cast<char *>(
+        malloc(props.GetExpanded(LexerThemeKey, nullptr) + 1));
+      props.GetExpanded(LexerThemeKey, theme);
+      if (!strstr(theme, "/") && !strstr(theme, "\\")) { // theme name
+        for (char *dir : dirs) {
+          lua_pushstring(L, dir);
+          lua_pushstring(L, "/themes/");
+          lua_pushstring(L, theme);
+          lua_pushstring(L, ".lua");
+          lua_concat(L, 4);
+          if (luaL_loadfile(L, lua_tostring(L, -1)) != LUA_ERRFILE ||
+              dir == dirs.back()) {
+            lua_pop(L, 1); // function, leaving filename on top
+            break;
+          }
+          lua_pop(L, 2); // error message, filename
+        }
       } else lua_pushstring(L, theme); // path to theme
-      if (luaL_loadfile(L, lua_tostring(L, -1)) != LUA_OK ||
-          lua_pcall(L, 0, 0, -2) != LUA_OK)
-        return (log_error(L), false);
-      lua_pop(L, 2); // theme, lua_error_handler
+      lua_pushcfunction(L, lua_error_handler);
+      lua_insert(L, -2);
+      if (luaL_loadfile(L, lua_tostring(L, -1)) == LUA_OK &&
+          lua_pcall(L, 0, 0, -3) == LUA_OK)
+        lua_pop(L, 2); // theme, lua_error_handler
+      else
+        log_error(L);
+      free(theme);
     }
     SetStyles();
 
@@ -503,7 +539,8 @@ class LexerLPeg : public ILexer {
     lua_pop(L, 2); // _CHILDREN, lexer object
 
     reinit = false;
-    props.Set("lexer.lpeg.error", "", strlen("lexer.lpeg.error"), 0);
+    PropertySet(LexerErrorKey, "");
+    free(home);
     ASSERT_STACK_TOP(L);
     return true;
   }
@@ -537,12 +574,8 @@ public:
 #endif
     luaL_requiref(L, LUA_TABLIBNAME, luaopen_table, 1), lua_pop(L, 1);
     luaL_requiref(L, LUA_STRLIBNAME, luaopen_string, 1), lua_pop(L, 1);
-#if LUA_VERSION_NUM < 502
-    // `package.searchpath()` emulation requires io.
-    luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1), lua_pop(L, 1);
-#endif
-    luaL_requiref(L, LUA_LOADLIBNAME, luaopen_package, 1), lua_pop(L, 1);
-    luaL_requiref(L, "lpeg", luaopen_lpeg, 1), lua_pop(L, 1);
+    // TODO: figure out why lua_setglobal() is needed for lpeg.
+    luaL_requiref(L, "lpeg", luaopen_lpeg, 1), lua_setglobal(L, "lpeg");
 #if _WIN32
     lua_pushboolean(L, 1), lua_setglobal(L, "WIN32");
 #endif
@@ -726,25 +759,29 @@ public:
     const char *key, const char *value) override
   {
     props.Set(key, value, strlen(key), strlen(value));
-    if (reinit)
+    if (reinit &&
+        (strcmp(key, LexerHomeKey) == 0 || strcmp(key, LexerNameKey) == 0))
       Init();
     else if (L && SS && sci && strncmp(key, "style.", 6) == 0) {
+      // The container is managing styles manually.
       RECORD_STACK_TOP(L);
       lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
       lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
-      lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
-      lua_getfield(L, -1, "_TOKENSTYLES");
-      lua_pushstring(L, key + 6);
-      if (lua_rawget(L, -2) == LUA_TNUMBER) {
-        lua_pushstring(L, key), expand_property(L);
-        int style_num = lua_tointeger(L, -2);
-        SetStyle(style_num, lua_tostring(L, -1));
-        if (style_num == STYLE_DEFAULT)
-          // Assume a theme change, with the default style being set first.
-          // Subsequent style settings will be based on the default.
-          SS(sci, SCI_STYLECLEARALL, 0, 0);
+      if (lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this))) {
+        lua_getfield(L, -1, "_TOKENSTYLES");
+        lua_pushstring(L, key + 6);
+        if (lua_rawget(L, -2) == LUA_TNUMBER) {
+          lua_pushstring(L, key), expand_property(L);
+          int style_num = lua_tointeger(L, -2);
+          SetStyle(style_num, lua_tostring(L, -1));
+          if (style_num == STYLE_DEFAULT)
+            // Assume a theme change, with the default style being set first.
+            // Subsequent style settings will be based on the default.
+            SS(sci, SCI_STYLECLEARALL, 0, 0);
+        }
+        lua_pop(L, 3); // style, style number, _TOKENSTYLES
       }
-      lua_pop(L, 4); // style, style number, _TOKENSTYLES, lexer object
+      lua_pop(L, 1); // lexer object or nil
       ASSERT_STACK_TOP(L);
     }
     return -1; // no need to re-lex
@@ -776,13 +813,27 @@ public:
       if (own_lua) lua_close(L);
       L = reinterpret_cast<lua_State *>(lParam), own_lua = false;
       return nullptr;
-    case SCI_SETLEXERLANGUAGE:
-      char lexer_name[50];
-      props.GetExpanded("lexer.name", lexer_name);
-      if (strcmp(lexer_name, reinterpret_cast<const char *>(arg)) != 0) {
+    case SCI_LOADLEXERLIBRARY: {
+      const char *path = reinterpret_cast<const char*>(arg);
+      const char *old_home = props.Get(LexerHomeKey);
+      char *home = reinterpret_cast<char *>(
+        malloc(strlen(old_home) + 1 + strlen(path) + 1));
+      char *p = home;
+      if (*old_home) {
+        strcpy(p, old_home), p += strlen(old_home);
+        *p++ = ';';
+      }
+      strcpy(p, path);
+      PropertySet(LexerHomeKey, home);
+      free(home);
+      return nullptr;
+    } case SCI_SETLEXERLANGUAGE:
+      if (strcmp(
+            props.Get(LexerNameKey),
+            reinterpret_cast<const char *>(arg)) != 0) {
         reinit = true;
-        props.Set("lexer.lpeg.error", "", strlen("lexer.lpeg.error"), 0);
-        PropertySet("lexer.name", reinterpret_cast<const char *>(arg));
+        PropertySet(LexerErrorKey, "");
+        PropertySet(LexerNameKey, reinterpret_cast<const char *>(arg));
       } else if (L)
         own_lua ? SetStyles() : static_cast<void>(Init());
       return nullptr;
@@ -810,7 +861,7 @@ public:
       ASSERT_STACK_TOP(L);
       return StringResult(lParam, val);
     } case SCI_GETSTATUS:
-      return StringResult(lParam, props.Get("lexer.lpeg.error"));
+      return StringResult(lParam, props.Get(LexerErrorKey));
     default: // retrieve style names
       if (code < 0 || code > STYLE_MAX) return nullptr;
       const char *val = L ? GetStyleName(code) : nullptr;
