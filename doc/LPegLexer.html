@@ -147,7 +147,19 @@
     selecting it as the lexer to use via
     <a class="message" href="ScintillaDoc.html#SCI_SETLEXER">SCI_SETLEXER</a> or
     <a class="message" href="ScintillaDoc.html#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE</a>,
-    the following property <em>must</em> be set via
+    you <em>must</em> call
+    <a class="message" href="ScintillaDoc.html#SCI_PRIVATELEXERCALL">SCI_PRIVATELEXERCALL</a>
+    with
+    <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY</a>
+    and the path to where you included Scintilla's <code>lexlua/</code>
+    directory in your application's installation location. If you prefer not to
+    use <code>SCI_PRIVATELEXERCALL</code>, you may instead set via
+    <a class="message" href="ScintillaDoc.html#SCI_SETPROPERTY">SCI_SETPROPERTY</a>
+    the <code>lexer.lpeg.home</code> lexer property to the location of
+    <code>lexlua/</code>.
+
+    <p>The following properties are recognized by the LPeg lexer and can be set
+    via
     <a class="message" href="ScintillaDoc.html#SCI_SETPROPERTY">SCI_SETPROPERTY</a>:</p>
 
     <table class="standard" summary="Search flags">
@@ -157,21 +169,23 @@
 
           <td>The directory containing the Lua lexers. This is the path
           where you included Scintilla's <code>lexlua/</code> directory in
-          your application's installation location.</td>
+          your application's installation location. It is automatically set when
+          calling
+          <a class="message" href="ScintillaDoc.html#SCI_PRIVATELEXERCALL">SCI_PRIVATELEXERCALL</a>
+          with
+          <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY</a>.
+          Lexers across multiple directories can be used by separating
+          directories with a <code>;</code> character.</td>
         </tr>
-      </tbody>
-    </table>
 
-    <p>The following properties are optional and may or may not be set:</p>
-
-    <table class="standard" summary="Search flags">
-      <tbody>
         <tr>
           <td><code>lexer.lpeg.color.theme</code></td>
 
           <td>The color theme to use. Color themes are located in the
-          <code>lexlua/themes/</code> directory. Currently supported themes
-          are <code>light</code>, <code>dark</code>, <code>scite</code>, and
+          <code>lexlua/themes/</code> directory. (They can also be located in
+          any <code>themes</code> subdirectories of additional paths specified
+          in <code>lexer.lpeg.home</code>.) Currently supported themes are
+          <code>light</code>, <code>dark</code>, <code>scite</code>, and
           <code>curses</code>. Your application can define colors and styles
           manually through Scintilla properties. The theme files have
           examples.</td>
@@ -243,13 +257,13 @@
       doc = SendScintilla(sci, SCI_CREATEDOCUMENT, 0, 0)
       SendScintilla(sci, SCI_SETDOCPOINTER, 0, doc)
       SendScintilla(sci, SCI_SETLEXERLANGUAGE, 0, "lpeg")
-      home = "/home/mitchell/app/lua_lexers"
-      SendScintilla(sci, SCI_SETPROPERTY, "lexer.lpeg.home", home)
       SendScintilla(sci, SCI_SETPROPERTY, "lexer.lpeg.color.theme", "light")
       fn = SendScintilla(sci, SCI_GETDIRECTFUNCTION, 0, 0)
       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_GETDIRECTFUNCTION, fn)
       psci = SendScintilla(sci, SCI_GETDIRECTPOINTER, 0, 0)
       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETDOCPOINTER, psci)
+      home = "/home/mitchell/app/lua_lexers"
+      SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_LOADLEXERLIBRARY, home);
       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETLEXERLANGUAGE, "lua")
     }
 
@@ -264,6 +278,8 @@
     <a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_PRIVATELEXERCALL(SCI_GETDIRECTFUNCTION, int SciFnDirect)</a><br/>
     <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_PRIVATELEXERCALL(SCI_GETLEXERLANGUAGE, char *languageName) &rarr; int</a><br/>
     <a class="message" href="#SCI_GETSTATUS">SCI_PRIVATELEXERCALL(SCI_GETSTATUS, char *errorMessage) &rarr; int</a><br/>
+    <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_PRIVATELEXERCALL(SCI_LOADLEXERLIBRARY, const char *path)</a><br/>
+    <a class="message" href="#SCI_PROPERTYNAMES">SCI_PRIVATELEXERCALL(SCI_PROPERTYNAMES, char *names) &rarr; int</a><br/>
     <a class="message" href="#styleNum">SCI_PRIVATELEXERCALL(int styleNum, char *styleName) &rarr; int</a><br/>
     <a class="message" href="#SCI_SETDOCPOINTER">SCI_PRIVATELEXERCALL(SCI_SETDOCPOINTER, int sci)</a><br/>
     <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_PRIVATELEXERCALL(SCI_SETLEXERLANGUAGE, languageName)</a><br/>
@@ -352,6 +368,39 @@
     if (strlen(errmsg) &gt; 0) { /* handle error */ }
     </code></pre>
 
+    <p><b id="SCI_LOADLEXERLIBRARY">SCI_PRIVATELEXERCALL(SCI_LOADLEXERLIBRARY, const char *path)</b><br/>
+    Tells the LPeg lexer that the given path is where a copy of Scintilla's
+    <code>lexlua/</code> is located, or is a path that contains additional
+    lexers and/or themes to load (e.g. user-defined lexers/themes).</p>
+
+    <p>This call may be made multiple times in order to support lexers and
+    themes across multiple directories.</p>
+
+    <p>Usage:</p>
+
+    <pre><code>
+    SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_LOADLEXERLIBRARY, "path/to/lexlua")
+    </code></pre>
+
+    <p><b id="SCI_PROPERTYNAMES">SCI_PRIVATELEXERCALL(SCI_PRIVATELEXERCALL, char *names) &rarr; int</b><br/>
+    Returns the length of a '\n'-separated list of known lexer names, or stores
+    the lexer list into the given buffer. If the buffer is long enough, the
+    string is terminated by a <code>0</code> character.</p>
+
+    <p>The lexers in this list can be passed to the
+    <a class="message" href="#SCI_SETLEXERLANGUAGE"><code>SCI_SETLEXERLANGUAGE</code></a>
+    LPeg Lexer API call.</p>
+
+    <p>Usage:</p>
+
+    <pre><code>
+    SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_PROPERTYNAMES, lexers)
+    // lexers now contains a '\n'-separated list of known lexer names
+    </code></pre>
+
+    <p>See also:
+    <a class="message" href="#SCI_SETLEXERLANGUAGE"><code>SCI_SETLEXERLANGUAGE</code></a></p>
+
     <p><b id="SCI_PRIVATELEXERCALL">SCI_PRIVATELEXERCALL(int styleNum, char *styleName) &rarr; int</b><br/>
     Returns the length of the token name associated with the given style number
     or stores the style name into the given buffer. If the buffer is long
@@ -403,7 +452,9 @@
     SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETLEXERLANGUAGE, "lua")
     </code></pre>
 
-    <p>See also: <a class="message" href="#SCI_SETDOCPOINTER"><code>SCI_SETDOCPOINTER</code></a></p>
+    <p>See also:
+    <a class="message" href="#SCI_SETDOCPOINTER"><code>SCI_SETDOCPOINTER</code></a>,
+    <a class="message" href="#SCI_PROPERTYNAMES"><code>SCI_PROPERTYNAMES</code></a></p>
 
     <h2>Using Scintilla as a Lua Library</h3>
 

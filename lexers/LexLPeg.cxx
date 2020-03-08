@@ -17,7 +17,15 @@
 #include <curses.h>
 #endif
 
+#include <set>
+#include <sstream>
 #include <vector>
+
+#if !_WIN32
+#include <dirent.h>
+#else
+#include <io.h>
+#endif
 
 #include "ILexer.h"
 #include "Scintilla.h"
@@ -191,7 +199,7 @@ class LexerLPeg : public ILexer {
   // Lexer property keys.
   const char * const LexerErrorKey = "lexer.lpeg.error";
   const char * const LexerHomeKey = "lexer.lpeg.home";
-  const char * const LexerNameKey = "lexer.name";
+  const char * const LexerNameKey = "lexer.lpeg.name";
   const char * const LexerThemeKey = "lexer.lpeg.color.theme";
 
   /**
@@ -229,6 +237,34 @@ class LexerLPeg : public ILexer {
    * determine which lexer grammar to use.
    */
   bool ws[STYLE_MAX + 1];
+  /** List of known lexer names. */
+  std::set<std::string> lexer_names;
+
+  /**
+   * Searches the given directory for lexers and records their names.
+   * @param path Path to a directory containing lexers.
+   */
+  void ReadLexerNames(const char *path) {
+#if !_WIN32
+    DIR *dir = opendir(path);
+    if (!dir) return;
+    struct dirent *entry;
+    while ((entry = readdir(dir))) {
+      char *p = strstr(entry->d_name, ".lua");
+      if (p) lexer_names.emplace(entry->d_name, p - entry->d_name);
+    }
+    closedir(dir);
+#else
+    struct __finddata_t file;
+    intptr_t handle = _findfirst(path + "/*", &file); // TODO:
+    while (handle != -1) {
+      char *p = strstr(file.name, ".lua");
+      if (p) lexer_names.emplace(file.name, p - file.name);
+      handle = _findnext(handle, &file)
+    }
+    _findclose(handle);
+#endif
+  }
 
   /**
    * Logs the given error message or a Lua error message, prints it, and clears
@@ -238,7 +274,7 @@ class LexerLPeg : public ILexer {
    * @param str The error message to log and print. If `nullptr`, logs and
    *   prints the Lua error message at the top of the stack.
    */
-  void log_error(lua_State *L, const char *str = nullptr) {
+  void LogError(lua_State *L, const char *str = nullptr) {
     const char *value = str ? str : lua_tostring(L, -1);
     PropertySet(LexerErrorKey, value);
     fprintf(stderr, "Lua Error: %s.\n", value);
@@ -417,9 +453,11 @@ class LexerLPeg : public ILexer {
     if (!props.GetExpanded(LexerHomeKey, nullptr) ||
         !*props.Get(LexerNameKey) || !L)
       return false;
-    char *home = reinterpret_cast<char *>(
+    char *_home = reinterpret_cast<char *>(
       malloc(props.GetExpanded(LexerHomeKey, nullptr) + 1));
-    props.GetExpanded(LexerHomeKey, home);
+    props.GetExpanded(LexerHomeKey, _home);
+    std::string home(_home);
+    free(_home);
     const char *lexer = props.Get(LexerNameKey);
     RECORD_STACK_TOP(L);
 
@@ -432,18 +470,19 @@ class LexerLPeg : public ILexer {
     lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
 
     // Determine where to look for the lexer module and themes.
-    std::vector<char *> dirs;
-    dirs.push_back(home);
-    for (char *p = strstr(home, ";"); p; p = strstr(p, ";")) {
-      *p++ = '\0';
-      dirs.push_back(p);
+    std::vector<std::string> dirs;
+    size_t start = 0, end;
+    while ((end = home.find(';', start)) != std::string::npos) {
+      dirs.emplace_back(home, start, end - start);
+      start = end + 1;
     }
+    dirs.emplace_back(home, start);
 
     // If necessary, load the lexer module.
     lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
     if (lua_getfield(L, -1, "lexer") == LUA_TNIL) {
-      for (char *dir : dirs) {
-        lua_pushstring(L, dir);
+      for (const std::string& dir : dirs) {
+        lua_pushstring(L, dir.c_str());
         lua_pushstring(L, "/lexer.lua");
         lua_concat(L, 2);
         int status = luaL_loadfile(L, lua_tostring(L, -1));
@@ -455,7 +494,7 @@ class LexerLPeg : public ILexer {
         lua_pushcfunction(L, lua_error_handler);
         lua_insert(L, -2);
         if (status == LUA_OK && lua_pcall(L, 0, 1, -2) == LUA_OK) break;
-        return (free(home), log_error(L), false);
+        return (LogError(L), false);
       }
       lua_remove(L, -2); // lua_error_handler
       lua_replace(L, -2); // nil
@@ -480,12 +519,10 @@ class LexerLPeg : public ILexer {
 
     // Load the language lexer.
     if (lua_getfield(L, -1, "load") != LUA_TFUNCTION)
-      return (
-        free(home), log_error(L, "'lexer.load' function not found"), false);
+      return (LogError(L, "'lexer.load' function not found"), false);
     lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
     lua_pushstring(L, lexer), lua_pushnil(L), lua_pushboolean(L, 1);
-    if (lua_pcall(L, 3, 1, -5) != LUA_OK)
-      return (free(home), log_error(L), false);
+    if (lua_pcall(L, 3, 1, -5) != LUA_OK) return (LogError(L), false);
     lua_remove(L, -2); // lua_error_handler
     lua_remove(L, -2); // lexer module
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
@@ -498,8 +535,8 @@ class LexerLPeg : public ILexer {
         malloc(props.GetExpanded(LexerThemeKey, nullptr) + 1));
       props.GetExpanded(LexerThemeKey, theme);
       if (!strstr(theme, "/") && !strstr(theme, "\\")) { // theme name
-        for (char *dir : dirs) {
-          lua_pushstring(L, dir);
+        for (const std::string& dir : dirs) {
+          lua_pushstring(L, dir.c_str());
           lua_pushstring(L, "/themes/");
           lua_pushstring(L, theme);
           lua_pushstring(L, ".lua");
@@ -518,7 +555,7 @@ class LexerLPeg : public ILexer {
           lua_pcall(L, 0, 0, -3) == LUA_OK)
         lua_pop(L, 2); // theme, lua_error_handler
       else
-        log_error(L);
+        LogError(L);
       free(theme);
     }
     SetStyles();
@@ -540,7 +577,6 @@ class LexerLPeg : public ILexer {
 
     reinit = false;
     PropertySet(LexerErrorKey, "");
-    free(home);
     ASSERT_STACK_TOP(L);
     return true;
   }
@@ -658,14 +694,14 @@ public:
     }
 
     if (lua_getfield(L, -1, "lex") != LUA_TFUNCTION)
-      return log_error(L, "'lexer.lex' function not found");
+      return LogError(L, "'lexer.lex' function not found");
     lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
     lua_pushvalue(L, -3);
     lua_pushlstring(L, buffer->BufferPointer() + startPos, lengthDoc);
     lua_pushinteger(L, styler.StyleAt(startPos));
-    if (lua_pcall(L, 3, 1, -5) != LUA_OK) return log_error(L);
+    if (lua_pcall(L, 3, 1, -5) != LUA_OK) return LogError(L);
     if (!lua_istable(L, -1))
-      return log_error(L, "Table of tokens expected from 'lexer.lex'");
+      return LogError(L, "Table of tokens expected from 'lexer.lex'");
     // Style the text from the token table returned.
     int len = lua_rawlen(L, -1);
     if (len > 0) {
@@ -684,10 +720,8 @@ public:
         lua_pop(L, 1); // pos
         if (style >= 0 && style <= STYLE_MAX)
           styler.ColourTo(startPos + position - 1, style);
-        else {
-          lua_pushfstring(L, "Bad style number: %d", style);
-          log_error(L);
-        }
+        else
+          lua_pushfstring(L, "Bad style number: %d", style), LogError(L);
         if (position > startPos + lengthDoc) break;
       }
       lua_pop(L, 1); // _TOKENSTYLES
@@ -719,7 +753,7 @@ public:
     LexAccessor styler(buffer);
 
     if (lua_getfield(L, -1, "fold") != LUA_TFUNCTION)
-      return log_error(L, "'lexer.fold' function not found");
+      return LogError(L, "'lexer.fold' function not found");
     lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
     lua_pushvalue(L, -3);
     Sci_Position currentLine = styler.GetLine(startPos);
@@ -727,9 +761,9 @@ public:
     lua_pushinteger(L, startPos);
     lua_pushinteger(L, currentLine);
     lua_pushinteger(L, styler.LevelAt(currentLine) & SC_FOLDLEVELNUMBERMASK);
-    if (lua_pcall(L, 5, 1, -7) != LUA_OK) return log_error(L);
+    if (lua_pcall(L, 5, 1, -7) != LUA_OK) return LogError(L);
     if (!lua_istable(L, -1))
-      return log_error(L, "Table of folds expected from 'lexer.fold'");
+      return LogError(L, "Table of folds expected from 'lexer.fold'");
     // Fold the text from the fold table returned.
     lua_pushnil(L);
     while (lua_next(L, -2)) { // line = level
@@ -759,6 +793,8 @@ public:
     const char *key, const char *value) override
   {
     props.Set(key, value, strlen(key), strlen(value));
+    if (strcmp(key, LexerHomeKey) == 0 && lexer_names.empty())
+      ReadLexerNames(value); // not using SCI_LOADLEXERLIBRARY private call
     if (reinit &&
         (strcmp(key, LexerHomeKey) == 0 || strcmp(key, LexerNameKey) == 0))
       Init();
@@ -815,18 +851,16 @@ public:
       return nullptr;
     case SCI_LOADLEXERLIBRARY: {
       const char *path = reinterpret_cast<const char*>(arg);
-      const char *old_home = props.Get(LexerHomeKey);
-      char *home = reinterpret_cast<char *>(
-        malloc(strlen(old_home) + 1 + strlen(path) + 1));
-      char *p = home;
-      if (*old_home) {
-        strcpy(p, old_home), p += strlen(old_home);
-        *p++ = ';';
-      }
-      strcpy(p, path);
-      PropertySet(LexerHomeKey, home);
-      free(home);
+      ReadLexerNames(path);
+      std::string home(props.Get(LexerHomeKey));
+      if (!home.empty()) home.push_back(';');
+      home.append(path);
+      PropertySet(LexerHomeKey, home.c_str());
       return nullptr;
+    } case SCI_PROPERTYNAMES: {
+      std::stringstream names;
+      for (const std::string& name : lexer_names) names << name << '\n';
+      return StringResult(lParam, names.str().c_str());
     } case SCI_SETLEXERLANGUAGE:
       if (strcmp(
             props.Get(LexerNameKey),
@@ -842,24 +876,22 @@ public:
       RECORD_STACK_TOP(L);
       lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
       lua_getfield(L, -1, "_NAME");
-      if (SS && sci && multilang) {
-        int pos = SS(sci, SCI_GETCURRENTPOS, 0, 0);
-        while (pos >= 0 && !ws[SS(sci, SCI_GETSTYLEAT, pos, 0)]) pos--;
-        const char *name = nullptr, *p = nullptr;
-        if (pos >= 0) {
-          name = GetStyleName(SS(sci, SCI_GETSTYLEAT, pos, 0));
-          if (name) p = strstr(name, "_whitespace");
-        }
-        if (!name) name = lua_tostring(L, -1); // "lexer:lexer" fallback
-        if (!p) p = name + strlen(name); // "lexer:lexer" fallback
-        lua_pushstring(L, "/");
-        lua_pushlstring(L, name, p - name);
-        lua_concat(L, 3);
-      }
-      const char *val = lua_tostring(L, -1); // no copy needed; remains in mem
-      lua_pop(L, 2); // lexer_name or lexer language string, lexer object
+      std::string val(lua_tostring(L, -1));
+      lua_pop(L, 2); // lexer name, lexer object
       ASSERT_STACK_TOP(L);
-      return StringResult(lParam, val);
+      if (!SS || !sci || !multilang) return StringResult(lParam, val.c_str());
+      val.push_back('/');
+      int pos = SS(sci, SCI_GETCURRENTPOS, 0, 0);
+      while (pos >= 0 && !ws[SS(sci, SCI_GETSTYLEAT, pos, 0)]) pos--;
+      if (pos >= 0) {
+        const char *name = GetStyleName(SS(sci, SCI_GETSTYLEAT, pos, 0)), *p;
+        if (name && (p = strstr(name, "_whitespace"))) {
+          val.append(name, p - name);
+          return StringResult(lParam, val.c_str());
+        }
+      }
+      val.append(val, 0, val.length() - 1); // "lexer/lexer" fallback
+      return StringResult(lParam, val.c_str());
     } case SCI_GETSTATUS:
       return StringResult(lParam, props.Get(LexerErrorKey));
     default: // retrieve style names
