@@ -255,13 +255,15 @@ class LexerLPeg : public ILexer {
     }
     closedir(dir);
 #else
-    struct __finddata_t file;
-    intptr_t handle = _findfirst(path + "/*", &file); // TODO:
-    while (handle != -1) {
+    struct _finddata_t file;
+    std::string glob(path);
+    glob += "/*";
+    intptr_t handle = _findfirst(glob.c_str(), &file);
+    if (handle == -1) return;
+    do {
       char *p = strstr(file.name, ".lua");
       if (p) lexer_names.emplace(file.name, p - file.name);
-      handle = _findnext(handle, &file)
-    }
+    } while (_findnext(handle, &file) != -1);
     _findclose(handle);
 #endif
   }
