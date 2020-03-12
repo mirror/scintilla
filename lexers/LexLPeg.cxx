@@ -34,6 +34,7 @@
 #include "PropSetSimple.h"
 #include "LexAccessor.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 
 extern "C" {
 #include "lua.h"
@@ -195,7 +196,7 @@ static void expand_property(lua_State *L) {
 }
 
 /** The LPeg Scintilla lexer. */
-class LexerLPeg : public ILexer {
+class LexerLPeg : public DefaultLexer {
   // Lexer property keys.
   const char * const LexerErrorKey = "lexer.lpeg.error";
   const char * const LexerHomeKey = "lexer.lpeg.home";
@@ -204,14 +205,14 @@ class LexerLPeg : public ILexer {
 
   /**
    * The lexer's Lua state.
-   * It is cleared each time the lexer language changes unless `own_lua` is
+   * It is cleared each time the lexer language changes unless `ownLua` is
    * `true`.
    */
   lua_State *L;
   /**
    * The flag indicating whether or not the Lua State is owned by the lexer.
    */
-  bool own_lua = true;
+  bool ownLua = true;
   /**
    * The set of properties for the lexer.
    * The LexerHomeKey and LexerNameKey properties must be defined before running
@@ -238,7 +239,9 @@ class LexerLPeg : public ILexer {
    */
   bool ws[STYLE_MAX + 1];
   /** List of known lexer names. */
-  std::set<std::string> lexer_names;
+  std::set<std::string> lexerNames;
+  /** Style name to return for `NameOfStyle()`. */
+  std::string styleName;
 
   /**
    * Searches the given directory for lexers and records their names.
@@ -251,7 +254,7 @@ class LexerLPeg : public ILexer {
     struct dirent *entry;
     while ((entry = readdir(dir))) {
       char *p = strstr(entry->d_name, ".lua");
-      if (p) lexer_names.emplace(entry->d_name, p - entry->d_name);
+      if (p) lexerNames.emplace(entry->d_name, p - entry->d_name);
     }
     closedir(dir);
 #else
@@ -262,7 +265,7 @@ class LexerLPeg : public ILexer {
     if (handle == -1) return;
     do {
       char *p = strstr(file.name, ".lua");
-      if (p) lexer_names.emplace(file.name, p - file.name);
+      if (p) lexerNames.emplace(file.name, p - file.name);
     } while (_findnext(handle, &file) != -1);
     _findclose(handle);
 #endif
@@ -426,28 +429,6 @@ class LexerLPeg : public ILexer {
   }
 
   /**
-   * Returns the style name for the given style number.
-   * @param style The style number to get the style name for.
-   * @return style name or nullptr
-   */
-  const char *GetStyleName(int style) {
-    RECORD_STACK_TOP(L);
-    const char *name = nullptr;
-    lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
-    lua_getfield(L, -1, "_TOKENSTYLES");
-    lua_pushnil(L);
-    while (lua_next(L, -2))
-      if (lua_tointeger(L, -1) == style) {
-        name = lua_tostring(L, -2); // no need to copy; will remain in memory
-        lua_pop(L, 2); // value and key
-        break;
-      } else lua_pop(L, 1); // value
-    lua_pop(L, 2); // _TOKENSTYLES, lexer object
-    ASSERT_STACK_TOP(L);
-    return name;
-  }
-
-  /**
    * Initializes the lexer once the LexerHomeKey and LexerNameKey properties are
    * set.
    */
@@ -465,7 +446,7 @@ class LexerLPeg : public ILexer {
 
     // Designate the currently running LexerLPeg instance.
     // This needs to be done prior to calling any Lua lexer code, particularly
-    // when `own_lua` is `false`, as there may be multiple LexerLPeg instances
+    // when `ownLua` is `false`, as there may be multiple LexerLPeg instances
     // floating around, and the lexer module methods and metamethods need to
     // know which instance to use.
     lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
@@ -569,11 +550,8 @@ class LexerLPeg : public ILexer {
     lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
     if (lua_getfield(L, -1, "_CHILDREN") == LUA_TTABLE) {
       multilang = true;
-      char style_name[50];
-      for (int i = 0; i <= STYLE_MAX; i++) {
-        PrivateCall(i, reinterpret_cast<void *>(style_name));
-        ws[i] = strstr(style_name, "whitespace") ? true : false;
-      }
+      for (int i = 0; i <= STYLE_MAX; i++)
+        ws[i] = strstr(NameOfStyle(i), "whitespace") ? true : false;
     }
     lua_pop(L, 2); // _CHILDREN, lexer object
 
@@ -599,7 +577,7 @@ class LexerLPeg : public ILexer {
 
 public:
   /** Constructor. */
-  LexerLPeg() : L(luaL_newstate()) {
+  LexerLPeg() : DefaultLexer("lpeg", SCLEX_LPEG), L(luaL_newstate()) {
     // Initialize the Lua state, load libraries, and set platform variables.
     if (!L) {
       fprintf(stderr, "Lua failed to initialize.\n");
@@ -633,9 +611,9 @@ public:
 
   /** Destroys the lexer object. */
   void SCI_METHOD Release() override {
-    if (own_lua && L)
+    if (ownLua && L)
       lua_close(L);
-    else if (!own_lua) {
+    else if (!ownLua) {
       lua_pushnil(L);
       lua_rawsetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
       lua_pushnil(L), lua_setfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
@@ -776,26 +754,17 @@ public:
     ASSERT_STACK_TOP(L);
   }
 
-  /** This lexer implements the original lexer interface. */
-  int SCI_METHOD Version() const override { return lvOriginal; }
-  /** Returning property names is not implemented. */
-  const char * SCI_METHOD PropertyNames() override { return ""; }
-  /** Returning property types is not implemented. */
-  int SCI_METHOD PropertyType(const char *) override { return 0; }
-  /** Returning property descriptions is not implemented. */
-  const char * SCI_METHOD DescribeProperty(const char *) override { return ""; }
-
   /**
    * Sets the *key* lexer property to *value*.
    * If *key* starts with "style.", also set the style for the token.
-   * @param key The string keyword.
+   * @param key The string property key.
    * @param val The string value.
    */
   Sci_Position SCI_METHOD PropertySet(
     const char *key, const char *value) override
   {
     props.Set(key, value, strlen(key), strlen(value));
-    if (strcmp(key, LexerHomeKey) == 0 && lexer_names.empty())
+    if (strcmp(key, LexerHomeKey) == 0 && lexerNames.empty())
       ReadLexerNames(value); // not using SCI_LOADLEXERLIBRARY private call
     if (reinit &&
         (strcmp(key, LexerHomeKey) == 0 || strcmp(key, LexerNameKey) == 0))
@@ -825,11 +794,6 @@ public:
     return -1; // no need to re-lex
   }
 
-  /** Returning keyword list descriptions is not implemented. */
-  const char * SCI_METHOD DescribeWordListSets() override { return ""; }
-  /** Setting keyword lists is not applicable. */
-  Sci_Position SCI_METHOD WordListSet(int, const char *) override { return -1; }
-
   /**
    * Allows for direct communication between the application and the lexer.
    * The application uses this to set `SS`, `sci`, `L`, and lexer properties,
@@ -848,8 +812,8 @@ public:
       sci = lParam;
       return nullptr;
     case SCI_CHANGELEXERSTATE:
-      if (own_lua) lua_close(L);
-      L = reinterpret_cast<lua_State *>(lParam), own_lua = false;
+      if (ownLua) lua_close(L);
+      L = reinterpret_cast<lua_State *>(lParam), ownLua = false;
       return nullptr;
     case SCI_LOADLEXERLIBRARY: {
       const char *path = reinterpret_cast<const char*>(arg);
@@ -861,7 +825,7 @@ public:
       return nullptr;
     } case SCI_PROPERTYNAMES: {
       std::stringstream names;
-      for (const std::string& name : lexer_names) names << name << '\n';
+      for (const std::string& name : lexerNames) names << name << '\n';
       return StringResult(lParam, names.str().c_str());
     } case SCI_SETLEXERLANGUAGE:
       if (strcmp(
@@ -871,7 +835,7 @@ public:
         PropertySet(LexerErrorKey, "");
         PropertySet(LexerNameKey, reinterpret_cast<const char *>(arg));
       } else if (L)
-        own_lua ? SetStyles() : static_cast<void>(Init());
+        ownLua ? SetStyles() : static_cast<void>(Init());
       return nullptr;
     case SCI_GETLEXERLANGUAGE: {
       if (!L) return StringResult(lParam, "null");
@@ -886,7 +850,7 @@ public:
       int pos = SS(sci, SCI_GETCURRENTPOS, 0, 0);
       while (pos >= 0 && !ws[SS(sci, SCI_GETSTYLEAT, pos, 0)]) pos--;
       if (pos >= 0) {
-        const char *name = GetStyleName(SS(sci, SCI_GETSTYLEAT, pos, 0)), *p;
+        const char *name = NameOfStyle(SS(sci, SCI_GETSTYLEAT, pos, 0)), *p;
         if (name && (p = strstr(name, "_whitespace"))) {
           val.append(name, p - name);
           return StringResult(lParam, val.c_str());
@@ -896,11 +860,41 @@ public:
       return StringResult(lParam, val.c_str());
     } case SCI_GETSTATUS:
       return StringResult(lParam, props.Get(LexerErrorKey));
-    default: // retrieve style names
-      if (code < 0 || code > STYLE_MAX) return nullptr;
-      const char *val = L ? GetStyleName(code) : nullptr;
-      return StringResult(lParam, val ? val : "Not Available");
     }
+    return nullptr;
+  }
+
+  /**
+   * Returns the style name for the given style number.
+   * Note: the returned pointer is not guaranteed to exist after the next call
+   * to `NameOfStyle()`, so its contents should be immediately copied.
+   * @param style The style number to get the style name for.
+   * @return style name or nullptr
+   */
+  const char * SCI_METHOD NameOfStyle(int style) override {
+    if (style < 0 || style > STYLE_MAX || !L) return nullptr;
+    RECORD_STACK_TOP(L);
+    styleName = "Not Available";
+    lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
+    lua_getfield(L, -1, "_TOKENSTYLES");
+    lua_pushnil(L);
+    while (lua_next(L, -2))
+      if (lua_tointeger(L, -1) == style) {
+      styleName = lua_tostring(L, -2);
+      lua_pop(L, 2); // value and key
+      break;
+      } else lua_pop(L, 1); // value
+    lua_pop(L, 2); // _TOKENSTYLES, lexer object
+    ASSERT_STACK_TOP(L);
+    return styleName.c_str();
+  }
+
+  /**
+   * Returns the lexer property for *key*.
+   * @param key The string property key.
+   */
+  const char * SCI_METHOD PropertyGet(const char *key) override {
+    return props.Get(key);
   }
 
   /** Constructs a new instance of the lexer. */
