@@ -156,7 +156,7 @@ $(curses_lexlib_objs_clang): curses/clang-%.o: lexlib/%.cxx
 $(curses_lexer_objs_clang): curses/clang-%.o: lexers/%.cxx
 $(curses_plat_objs): curses/%.o: curses/%.cxx
 $(curses_plat_objs_clang): curses/clang-%.o: curses/%.cxx
-$(curses_src_objs) $(curses_lexlib_objs) $(curses_lexer_objs): CXX := $(LINUX_CXX)
+$(curses_src_objs) $(curses_lexlib_objs) $(curses_lexer_objs) $(curses_plat_objs): CXX := $(LINUX_CXX)
 $(curses_src_objs_clang) $(curses_lexlib_objs_clang) $(curses_lexer_objs_clang) $(curses_plat_objs_clang): CXX := $(CLANG_CXX)
 bin/scintilla_curses.a bin/clang-scintilla_curses.a:
 	ar rc $@ $^
