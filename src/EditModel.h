@@ -18,7 +18,7 @@ public:
 	bool on;
 	int period;
 
-	Caret();
+	Caret() noexcept;
 };
 
 class EditModel {
