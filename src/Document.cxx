@@ -373,7 +373,7 @@ Sci::Line Document::LineFromHandle(int markerHandle) const {
 }
 
 Sci_Position SCI_METHOD Document::LineStart(Sci_Position line) const {
-	return cb.LineStart(static_cast<Sci::Line>(line));
+	return cb.LineStart(line);
 }
 
 bool Document::IsLineStartPosition(Sci::Position position) const {
@@ -457,10 +457,10 @@ Sci::Line Document::LineFromPositionIndex(Sci::Position pos, int lineCharacterIn
 }
 
 int SCI_METHOD Document::SetLevel(Sci_Position line, int level) {
-	const int prev = Levels()->SetLevel(static_cast<Sci::Line>(line), level, LinesTotal());
+	const int prev = Levels()->SetLevel(line, level, LinesTotal());
 	if (prev != level) {
 		DocModification mh(SC_MOD_CHANGEFOLD | SC_MOD_CHANGEMARKER,
-		                   LineStart(line), 0, 0, nullptr, static_cast<Sci::Line>(line));
+		                   LineStart(line), 0, 0, nullptr, line);
 		mh.foldLevelNow = level;
 		mh.foldLevelPrev = prev;
 		NotifyModified(mh);
@@ -469,7 +469,7 @@ int SCI_METHOD Document::SetLevel(Sci_Position line, int level) {
 }
 
 int SCI_METHOD Document::GetLevel(Sci_Position line) const {
-	return Levels()->GetLevel(static_cast<Sci::Line>(line));
+	return Levels()->GetLevel(line);
 }
 
 void Document::ClearLevels() {
@@ -879,9 +879,9 @@ Document::CharacterExtracted Document::CharacterBefore(Sci::Position position) c
 			Sci::Position startUTF = position;
 			Sci::Position endUTF = position;
 			if (InGoodUTF8(position, startUTF, endUTF)) {
-				const int widthCharBytes = static_cast<int>(endUTF - startUTF);
+				const Sci::Position widthCharBytes = endUTF - startUTF;
 				unsigned char charBytes[UTF8MaxBytes] = { 0, 0, 0, 0 };
-				for (int b = 0; b<widthCharBytes; b++)
+				for (Sci::Position b = 0; b<widthCharBytes; b++)
 					charBytes[b] = cb.UCharAt(startUTF + b);
 				const int utf8status = UTF8Classify(charBytes, widthCharBytes);
 				if (utf8status & UTF8MaskInvalid) {
@@ -2274,7 +2274,7 @@ void Document::SetLexInterface(LexInterface *pLexInterface) {
 }
 
 int SCI_METHOD Document::SetLineState(Sci_Position line, int state) {
-	const int statePrevious = States()->SetLineState(static_cast<Sci::Line>(line), state);
+	const int statePrevious = States()->SetLineState(line, state);
 	if (state != statePrevious) {
 		const DocModification mh(SC_MOD_CHANGELINESTATE, LineStart(line), 0, 0, nullptr,
 			static_cast<Sci::Line>(line));
@@ -2284,7 +2284,7 @@ int SCI_METHOD Document::SetLineState(Sci_Position line, int state) {
 }
 
 int SCI_METHOD Document::GetLineState(Sci_Position line) const {
-	return States()->GetLineState(static_cast<Sci::Line>(line));
+	return States()->GetLineState(line);
 }
 
 Sci::Line Document::GetMaxLineState() const {
