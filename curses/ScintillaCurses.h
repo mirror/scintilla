@@ -16,7 +16,7 @@ extern "C" {
  * @param callback A callback function for Scintilla notifications.
  */
 void *scintilla_new(
-  void (*callback)(void *sci, int iMessage, void *wParam, void *lParam));
+  void (*callback)(void *sci, int iMessage, SCNotification *n, void *userdata), void *userdata);
 /**
  * Returns the curses `WINDOW` associated with the given Scintilla window.
  * Curses must have been initialized prior to calling this function.

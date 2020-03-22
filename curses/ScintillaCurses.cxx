@@ -900,7 +900,8 @@ void Platform::Assert(const char *c, const char *file, int line) {
 class ScintillaCurses : public ScintillaBase {
   Surface *sur; // window surface to draw on
   int width = 0, height = 0; // window dimensions
-  void (*callback)(void *, int, void *, void *); // SCNotification callback
+  void (*callback)(void *, int, SCNotification *, void *); // SCNotification cb
+  void *userdata; // userdata for SCNotification callbacks
   int scrollBarVPos, scrollBarHPos; // positions of the scroll bars
   int scrollBarHeight = 1, scrollBarWidth = 1; // scroll bar height and width
   SelectionText clipboard; // current clipboard text
@@ -941,8 +942,10 @@ public:
    * necessary. When the `WINDOW` is created, it will initially be full-screen.
    * @param callback_ Callback function for Scintilla notifications.
    */
-  ScintillaCurses(void (*callback_)(void *, int, void *, void *)) :
-    sur(Surface::Allocate(SC_TECHNOLOGY_DEFAULT)), callback(callback_)
+  ScintillaCurses(
+    void (*callback_)(void *, int, SCNotification *, void *), void *userdata_) :
+    sur(Surface::Allocate(SC_TECHNOLOGY_DEFAULT)), callback(callback_),
+    userdata(userdata_)
   {
     // Defaults for curses.
     marginView.wrapMarkerPaddingRight = 0; // no padding for margin wrap markers
@@ -1074,9 +1077,8 @@ public:
   void NotifyChange() override {}
   /** Send Scintilla notifications to the parent. */
   void NotifyParent(SCNotification scn) override {
-    if (!callback) return;
-    (*callback)(
-      reinterpret_cast<void *>(this), 0, reinterpret_cast<void *>(&scn), 0);
+    if (callback)
+      (*callback)(reinterpret_cast<void *>(this), 0, &scn, userdata);
   }
   /**
    * Handles an unconsumed key.
@@ -1426,8 +1428,10 @@ public:
 
 // Link with C. Documentation in Scintilla.h.
 extern "C" {
-void *scintilla_new(void (*callback)(void *, int, void *, void *)) {
-  return reinterpret_cast<void *>(new ScintillaCurses(callback));
+void *scintilla_new(
+  void (*callback)(void *, int, SCNotification *, void *), void *userdata)
+{
+  return reinterpret_cast<void *>(new ScintillaCurses(callback, userdata));
 }
 WINDOW *scintilla_get_window(void *sci) {
   return reinterpret_cast<ScintillaCurses *>(sci)->GetWINDOW();
