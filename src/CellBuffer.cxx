@@ -61,16 +61,16 @@ struct CountWidths {
 class ILineVector {
 public:
 	virtual void Init() = 0;
-	virtual void SetPerLine(PerLine *pl) = 0;
-	virtual void InsertText(Sci::Line line, Sci::Position delta) = 0;
+	virtual void SetPerLine(PerLine *pl) noexcept = 0;
+	virtual void InsertText(Sci::Line line, Sci::Position delta) noexcept = 0;
 	virtual void InsertLine(Sci::Line line, Sci::Position position, bool lineStart) = 0;
 	virtual void SetLineStart(Sci::Line line, Sci::Position position) noexcept = 0;
 	virtual void RemoveLine(Sci::Line line) = 0;
 	virtual Sci::Line Lines() const noexcept = 0;
 	virtual Sci::Line LineFromPosition(Sci::Position pos) const noexcept = 0;
 	virtual Sci::Position LineStart(Sci::Line line) const noexcept = 0;
-	virtual void InsertCharacters(Sci::Line line, CountWidths delta) = 0;
-	virtual void SetLineCharactersWidth(Sci::Line line, CountWidths width) = 0;
+	virtual void InsertCharacters(Sci::Line line, CountWidths delta) noexcept = 0;
+	virtual void SetLineCharactersWidth(Sci::Line line, CountWidths width) noexcept = 0;
 	virtual int LineCharacterIndex() const noexcept = 0;
 	virtual bool AllocateLineCharacterIndex(int lineCharacterIndex, Sci::Line lines) = 0;
 	virtual bool ReleaseLineCharacterIndex(int lineCharacterIndex) = 0;
@@ -123,7 +123,7 @@ public:
 		return starts.PositionFromPartition(static_cast<POS>(line) + 1) -
 			starts.PositionFromPartition(static_cast<POS>(line));
 	}
-	void SetLineWidth(Sci::Line line, Sci::Position width) {
+	void SetLineWidth(Sci::Line line, Sci::Position width) noexcept {
 		const Sci::Position widthCurrent = LineWidth(line);
 		starts.InsertText(static_cast<POS>(line), static_cast<POS>(width - widthCurrent));
 	}
@@ -153,10 +153,10 @@ public:
 		startsUTF32.starts.DeleteAll();
 		startsUTF16.starts.DeleteAll();
 	}
-	void SetPerLine(PerLine *pl) override {
+	void SetPerLine(PerLine *pl) noexcept override {
 		perLine = pl;
 	}
-	void InsertText(Sci::Line line, Sci::Position delta) override {
+	void InsertText(Sci::Line line, Sci::Position delta) noexcept override {
 		starts.InsertText(static_cast<POS>(line), static_cast<POS>(delta));
 	}
 	void InsertLine(Sci::Line line, Sci::Position position, bool lineStart) override {
@@ -200,7 +200,7 @@ public:
 	Sci::Position LineStart(Sci::Line line) const noexcept override {
 		return starts.PositionFromPartition(static_cast<POS>(line));
 	}
-	void InsertCharacters(Sci::Line line, CountWidths delta) override {
+	void InsertCharacters(Sci::Line line, CountWidths delta) noexcept override {
 		if (startsUTF32.Active()) {
 			startsUTF32.starts.InsertText(static_cast<POS>(line), static_cast<POS>(delta.WidthUTF32()));
 		}
@@ -208,7 +208,7 @@ public:
 			startsUTF16.starts.InsertText(static_cast<POS>(line), static_cast<POS>(delta.WidthUTF16()));
 		}
 	}
-	void SetLineCharactersWidth(Sci::Line line, CountWidths width) override {
+	void SetLineCharactersWidth(Sci::Line line, CountWidths width) noexcept override {
 		if (startsUTF32.Active()) {
 			assert(startsUTF32.starts.Partitions() == starts.Partitions());
 			startsUTF32.SetLineWidth(line, width.WidthUTF32());
@@ -267,7 +267,7 @@ public:
 	}
 };
 
-Action::Action() {
+Action::Action() noexcept {
 	at = startAction;
 	position = 0;
 	lenData = 0;
@@ -289,7 +289,7 @@ void Action::Create(actionType at_, Sci::Position position_, const char *data_, 
 	mayCoalesce = mayCoalesce_;
 }
 
-void Action::Clear() {
+void Action::Clear() noexcept {
 	data = nullptr;
 	lenData = 0;
 }
@@ -449,7 +449,7 @@ void UndoHistory::DeleteUndoHistory() {
 	tentativePoint = -1;
 }
 
-void UndoHistory::SetSavePoint() {
+void UndoHistory::SetSavePoint() noexcept {
 	savePoint = currentAction;
 }
 
@@ -467,7 +467,11 @@ void UndoHistory::TentativeCommit() {
 	maxAction = currentAction;
 }
 
-int UndoHistory::TentativeSteps() {
+bool UndoHistory::TentativeActive() const noexcept {
+	return tentativePoint >= 0; 
+}
+
+int UndoHistory::TentativeSteps() noexcept {
 	// Drop any trailing startAction
 	if (actions[currentAction].at == startAction && currentAction > 0)
 		currentAction--;
@@ -592,7 +596,7 @@ const char *CellBuffer::BufferPointer() {
 	return substance.BufferPointer();
 }
 
-const char *CellBuffer::RangePointer(Sci::Position position, Sci::Position rangeLength) {
+const char *CellBuffer::RangePointer(Sci::Position position, Sci::Position rangeLength) noexcept {
 	return substance.RangePointer(position, rangeLength);
 }
 
@@ -616,7 +620,7 @@ const char *CellBuffer::InsertString(Sci::Position position, const char *s, Sci:
 	return data;
 }
 
-bool CellBuffer::SetStyleAt(Sci::Position position, char styleValue) {
+bool CellBuffer::SetStyleAt(Sci::Position position, char styleValue) noexcept {
 	if (!hasStyles) {
 		return false;
 	}
@@ -676,7 +680,7 @@ void CellBuffer::Allocate(Sci::Position newSize) {
 	}
 }
 
-void CellBuffer::SetUTF8Substance(bool utf8Substance_) {
+void CellBuffer::SetUTF8Substance(bool utf8Substance_) noexcept {
 	utf8Substance = utf8Substance_;
 }
 
@@ -708,7 +712,7 @@ bool CellBuffer::ContainsLineEnd(const char *s, Sci::Position length) const noex
 	return false;
 }
 
-void CellBuffer::SetPerLine(PerLine *pl) {
+void CellBuffer::SetPerLine(PerLine *pl) noexcept {
 	plv->SetPerLine(pl);
 }
 
@@ -758,7 +762,7 @@ bool CellBuffer::IsReadOnly() const noexcept {
 	return readOnly;
 }
 
-void CellBuffer::SetReadOnly(bool set) {
+void CellBuffer::SetReadOnly(bool set) noexcept {
 	readOnly = set;
 }
 
@@ -786,7 +790,7 @@ void CellBuffer::TentativeCommit() {
 	uh.TentativeCommit();
 }
 
-int CellBuffer::TentativeSteps() {
+int CellBuffer::TentativeSteps() noexcept {
 	return uh.TentativeSteps();
 }
 
