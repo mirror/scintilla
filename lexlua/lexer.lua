@@ -916,7 +916,7 @@ local M = {}
 -- @field FOLD_HEADER (number)
 --   Flag indicating the line is fold point.
 -- @field fold_level (table, Read-only)
---   Table of fold level bit-masks for line numbers starting from zero.
+--   Table of fold level bit-masks for line numbers starting from 1.
 --   Fold level masks are composed of an integer level combined with any of the
 --   following bits:
 --
@@ -928,9 +928,9 @@ local M = {}
 --     The line is a header, or fold point.
 -- @field indent_amount (table, Read-only)
 --   Table of indentation amounts in character columns, for line numbers
---   starting from zero.
+--   starting from 1.
 -- @field line_state (table)
---   Table of integer line states for line numbers starting from zero.
+--   Table of integer line states for line numbers starting from 1.
 --   Line states can be used by lexers for keeping track of persistent states.
 -- @field property (table)
 --   Map of key-value string pairs.
@@ -1287,9 +1287,9 @@ end
 -- beginning fold level of *start_level* in the buffer.
 -- @param lexer The lexer to fold text with.
 -- @param text The text in the buffer to fold.
--- @param start_pos The position in the buffer *text* starts at, starting at
---   zero.
--- @param start_line The line number *text* starts on.
+-- @param start_pos The position in the buffer *text* starts at, counting from
+--   1.
+-- @param start_line The line number *text* starts on, counting from 1.
 -- @param start_level The fold level *text* starts on.
 -- @return table of fold levels associated with line numbers.
 -- @name fold
@@ -1324,7 +1324,7 @@ function M.fold(lexer, text, start_pos, start_line, start_level)
             --if not word or line:find('^%f[%w_]'..symbol..'%f[^%w_]', s) then
             if not word or not ((s > 1 and line:find('^[%w_]', s - 1)) or
                                 line:find('^[%w_]', e + 1)) then
-              local symbols = fold_points[style_at[start_pos + pos + s - 1]]
+              local symbols = fold_points[style_at[start_pos + pos - 1 + s - 1]]
               local level = symbols and symbols[symbol]
               if type(level) == 'function' then
                 level = level(text, pos, line, s, symbol)
@@ -1350,7 +1350,7 @@ function M.fold(lexer, text, start_pos, start_line, start_level)
             folds[line_num] = prev_level - 1 + FOLD_HEADER
           else
             -- Typing within a zero-sum line.
-            local level = fold_level[line_num - 1] - 1
+            local level = fold_level[line_num] - 1
             if level > FOLD_HEADER then level = level - FOLD_HEADER end
             if level > FOLD_BLANK then level = level - FOLD_BLANK end
             folds[line_num] = level + FOLD_HEADER
@@ -1377,7 +1377,7 @@ function M.fold(lexer, text, start_pos, start_line, start_level)
     -- blank lines inbetween. If the current line is blank, match the level of
     -- the previous non-blank line.
     local current_level = start_level
-    for i = start_line - 1, 0, -1 do
+    for i = start_line, 1, -1 do
       local level = M.fold_level[i]
       if level >= FOLD_HEADER then level = level - FOLD_HEADER end
       if level < FOLD_BLANK then
@@ -1858,8 +1858,8 @@ M.property_expanded = setmetatable({}, {
 --[[ The functions and fields below were defined in C.
 
 ---
--- Returns the line number of the line that contains position *pos*, which
--- starts from 1.
+-- Returns the line number (starting from 1) of the line that contains position
+-- *pos*, which starts from 1.
 -- @param pos The position to get the line number of.
 -- @return number
 local function line_from_position(pos) end

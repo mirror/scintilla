@@ -85,10 +85,10 @@ static int lexer_property_index(lua_State *L) {
   auto buffer = static_cast<IDocument *>(lua_touserdata(L, -1));
   if (strcmp(property, "fold_level") == 0) {
     luaL_argcheck(L, buffer, 1, "must be lexing or folding");
-    lua_pushinteger(L, buffer->GetLevel(luaL_checkinteger(L, 2)));
+    lua_pushinteger(L, buffer->GetLevel(luaL_checkinteger(L, 2) - 1));
   } else if (strcmp(property, "indent_amount") == 0) {
     luaL_argcheck(L, buffer, 1, "must be lexing or folding");
-    lua_pushinteger(L, buffer->GetLineIndentation(luaL_checkinteger(L, 2)));
+    lua_pushinteger(L, buffer->GetLineIndentation(luaL_checkinteger(L, 2) - 1));
   } else if (strcmp(property, "property") == 0) {
     lua_pushstring(L, props->Get(luaL_checkstring(L, 2)));
   } else if (strcmp(property, "property_int") == 0) {
@@ -106,7 +106,7 @@ static int lexer_property_index(lua_State *L) {
     lua_pop(L, 1); // style_num, leaving name on top
   } else if (strcmp(property, "line_state") == 0) {
     luaL_argcheck(L, buffer, 1, "must be lexing or folding");
-    lua_pushinteger(L, buffer->GetLineState(luaL_checkinteger(L, 2)));
+    lua_pushinteger(L, buffer->GetLineState(luaL_checkinteger(L, 2) - 1));
   }
   return 1;
 }
@@ -133,7 +133,7 @@ static int lexer_property_newindex(lua_State *L) {
     luaL_argcheck(
       L, lua_getfield(L, -1, "_BUFFER"), 1, "must be lexing or folding");
     auto buffer = static_cast<IDocument *>(lua_touserdata(L, -1));
-    buffer->SetLineState(luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
+    buffer->SetLineState(luaL_checkinteger(L, 2) - 1, luaL_checkinteger(L, 3));
   }
   return 0;
 }
@@ -142,7 +142,7 @@ static int lexer_property_newindex(lua_State *L) {
 static int line_from_position(lua_State *L) {
   auto buffer = static_cast<IDocument *>(
     lua_touserdata(L, lua_upvalueindex(1)));
-  lua_pushinteger(L, buffer->LineFromPosition(luaL_checkinteger(L, 1) - 1));
+  lua_pushinteger(L, buffer->LineFromPosition(luaL_checkinteger(L, 1) - 1) + 1);
   return 1;
 }
 
@@ -738,8 +738,8 @@ public:
     lua_pushvalue(L, -3);
     Sci_Position currentLine = styler.GetLine(startPos);
     lua_pushlstring(L, buffer->BufferPointer() + startPos, lengthDoc);
-    lua_pushinteger(L, startPos);
-    lua_pushinteger(L, currentLine);
+    lua_pushinteger(L, startPos + 1);
+    lua_pushinteger(L, currentLine + 1);
     lua_pushinteger(L, styler.LevelAt(currentLine) & SC_FOLDLEVELNUMBERMASK);
     if (lua_pcall(L, 5, 1, -7) != LUA_OK) return LogError(L);
     if (!lua_istable(L, -1))
@@ -747,7 +747,7 @@ public:
     // Fold the text from the fold table returned.
     lua_pushnil(L);
     while (lua_next(L, -2)) { // line = level
-      styler.SetLevel(lua_tointeger(L, -2), lua_tointeger(L, -1));
+      styler.SetLevel(lua_tointeger(L, -2) - 1, lua_tointeger(L, -1));
       lua_pop(L, 1); // level
     }
     lua_pop(L, 3); // fold table returned, lua_error_handler, lexer object

@@ -1798,7 +1798,7 @@ operator    30
 
     <h3><code>lexer.fold_level</code> (table, Read-only)</h3>
 
-    <p>Table of fold level bit-masks for line numbers starting from zero.
+    <p>Table of fold level bit-masks for line numbers starting from 1.
       Fold level masks are composed of an integer level combined with any of the
       following bits:</p>
 
@@ -1829,7 +1829,7 @@ operator    30
     <h3><code>lexer.indent_amount</code> (table, Read-only)</h3>
 
     <p>Table of indentation amounts in character columns, for line numbers
-      starting from zero.</p>
+      starting from 1.</p>
 
     <p><a id="lexer.integer"></a></p>
 
@@ -1841,7 +1841,7 @@ operator    30
 
     <h3><code>lexer.line_state</code> (table)</h3>
 
-    <p>Table of integer line states for line numbers starting from zero.
+    <p>Table of integer line states for line numbers starting from 1.
       Line states can be used by lexers for keeping track of persistent states.</p>
 
     <p><a id="lexer.lower"></a></p>
@@ -2164,9 +2164,9 @@ operator    30
     <ul>
     <li><code>lexer</code>: The lexer to fold text with.</li>
     <li><code>text</code>: The text in the buffer to fold.</li>
-    <li><code>start_pos</code>: The position in the buffer <em>text</em> starts at, starting at
-    zero.</li>
-    <li><code>start_line</code>: The line number <em>text</em> starts on.</li>
+    <li><code>start_pos</code>: The position in the buffer <em>text</em> starts at, counting from
+    1.</li>
+    <li><code>start_line</code>: The line number <em>text</em> starts on, counting from 1.</li>
     <li><code>start_level</code>: The fold level <em>text</em> starts on.</li>
     </ul>
 

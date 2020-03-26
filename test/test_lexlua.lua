@@ -159,7 +159,7 @@ function assert_fold_points(lex, code, expected_fold_points, initial_style)
     })
   end
   lexer.property['fold'] = 1
-  local levels = lex:fold(code, 0, 1, lexer.FOLD_BASE)
+  local levels = lex:fold(code, 1, 1, lexer.FOLD_BASE)
   local j = 1
   for i = 1, #levels do
     if i == expected_fold_points[j] then
@@ -544,8 +544,8 @@ function test_fold_by_indentation()
     else:
       baz
   ]]
-  lexer.fold_level = {[0] = lexer.FOLD_BASE} -- Scintilla normally creates this
-  lexer.indent_amount = {[0] = 0} -- Scintilla normally creates this
+  lexer.fold_level = {lexer.FOLD_BASE} -- Scintilla normally creates this
+  lexer.indent_amount = {0} -- Scintilla normally creates this
   local folds = {1, 3}
   assert_fold_points(lex, code, folds)
 end
