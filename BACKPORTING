@@ -542,3 +542,53 @@ branch), or have information worth noting.
 7898:9e6fceb9c791 Add lexilla/src to include directories to find "Lexilla.h".
 7899:84655f8588ed Implement negative relative positions in GetRelativePosition.
   Not backported, as Lexilla is not supported.
+
+7951:e7a1fca621ee Clean up the code changed with 7883 dropping CF_TEXT.
+  Not backported, as it relies on std::wstring_view and only C++11 is supported.
+
+7952:7137777f9be8 Readying 4.3.0 release.
+7953:2ff0c9f88f1c Added tag rel-4-3-0 for changeset 7137777f9be8
+  Not backported, since this is LongTerm3.
+
+7955:7a9b0cfd9e92 Adding test for batch lexer.
+  Not backported, as Lexilla is not supported.
+
+7956:c38e1a816a53 Bug [#2151]. Fix drag and drop between different encodings.
+  Not backported, as it relies on 7951:e7a1fca621ee, which was not backported.
+
+7957:14e6c7beab83 Don't include lexilla.so in source archive.
+7959:0f40bc8cf1ed Adding test for makefile lexer.
+7963:7acfe8254e53 Add version information resource to Lexilla.DLL on Win32.
+  Not backported, as Lexilla is not supported.
+
+7964:e01e845c6daa Small simplification and spelling fix.
+  Not backported, as it applies to non-LongTerm3 versioning.
+
+7969:6bef6331c9bb SciTE change log.
+  Not backported, as this is LongTerm3.
+
+7971:2b47b4061b51 Bug [#2139]. Add test case for compound decorator.
+7972:e4ee9ccc1be0 Add batch file to test lexers.
+7973:a299df5f83de Bug [#2143]. Add test case for comment start in number.
+  Not backported, as Lexilla is not supported.
+
+7983:5d4c40a72a72 Bug [#2151]. Minor improvements.
+  Not backported, as it relies on 7951:e7a1fca621ee, which was not backported.
+
+7994:32e2c934bcc6 Readying 4.3.1 release.
+7995:d7d6106e0cf6 Added tag rel-4-3-1 for changeset 32e2c934bcc6
+  Not backported, as this is LongTerm3.
+
+7996:d24ffc808e59 Fix bug where all drops were treated as rectangular.
+  Not backported, as it relies on 7951:e7a1fca621ee, which was not backported.
+
+7997:c4e53c985ef6 Readying 4.3.1 release.
+7998:91340ea3f89e Added tag rel-4-3-2 for changeset c4e53c985ef6
+  Not backported, as this is LongTerm3.
+
+8014:5e621040222d Use dynamic_cast and assertion to make bugs more obvious.
+  Backported, but without "static inline GdkAtom ... {}" declarations, which
+  are not supported in C++11.
+
+8027:6b1d13c2a6b9 SciTE change log.
+  Not backported, as this is LongTerm3.
