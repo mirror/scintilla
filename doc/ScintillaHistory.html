@@ -584,6 +584,12 @@
 	CF_UNICODETEXT.
 	</li>
 	<li>
+	On Win32, the numeric keypad with Alt pressed can be used to enter characters by number.
+	This can produce unexpected results in non-numlock mode when function keys are assigned.
+	Potentially problematic keys like Alt+KeypadUp are now ignored.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2152/">Bug #2152</a>.
+	</li>
+	<li>
 	Improve IME behaviour on GTK.
 	Set candidate position for windowed IME.
 	Improve location of candidate window.
