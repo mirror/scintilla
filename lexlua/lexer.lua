@@ -187,7 +187,7 @@ local M = {}
 --
 --     local shell_comment = token(lexer.COMMENT, '#' * lexer.nonnewline^0)
 --     local c_line_comment = token(lexer.COMMENT,
---                                  '//' * lexer.nonnewline_esc^0)
+--       '//' * lexer.nonnewline_esc^0)
 --
 -- The comments above start with a '#' or "//" and go to the end of the line.
 -- The second comment recognizes the next line also as a comment if the current
@@ -196,8 +196,8 @@ local M = {}
 -- C-style "block" comments with a start and end delimiter are also easy to
 -- express:
 --
---     local c_comment = token(lexer.COMMENT,
---                             '/*' * (lexer.any - '*/')^0 * P('*/')^-1)
+--     local c_comment = token(lexer.COMMENT, '/*' * (lexer.any - '*/')^0 *
+--       P('*/')^-1)
 --
 -- This comment starts with a "/\*" sequence and contains anything up to and
 -- including an ending "\*/" sequence. The ending "\*/" is optional so the lexer
@@ -372,14 +372,14 @@ local M = {}
 -- If you want the same style, but also with an italic font face, define the new
 -- style in terms of the old one:
 --
---     local style_bold_italic = style_bold..',italics'
+--     local style_bold_italic = style_bold .. ',italics'
 --
 -- This allows you to derive new styles from predefined ones without having to
 -- rewrite them. This operation leaves the old style unchanged. Thus if you
 -- had a "static variable" token whose style you wanted to base off of
 -- `lexer.STYLE_VARIABLE`, it would probably look like:
 --
---     local style_static_var = lexer.STYLE_VARIABLE..',italics'
+--     local style_static_var = lexer.STYLE_VARIABLE .. ',italics'
 --
 -- The color theme files in the *lexers/themes/* folder give more examples of
 -- style definitions.
@@ -409,7 +409,7 @@ local M = {}
 -- prefer to color the background of whitespace a shade of grey, it might look
 -- like:
 --
---     local custom_style = lexer.STYLE_WHITESPACE..',back:$(color.grey)'
+--     local custom_style = lexer.STYLE_WHITESPACE .. ',back:$(color.grey)'
 --     lex:add_style('custom_whitespace', custom_style)
 --
 -- Notice that the lexer peforms Scintilla-style "$()" property expansion. You
@@ -691,7 +691,7 @@ local M = {}
 --     }
 --
 --     M._tokenstyles = {
---       'custom' = l.STYLE_KEYWORD..',bold'
+--       'custom' = l.STYLE_KEYWORD .. ',bold'
 --     }
 --
 --     M._foldsymbols = {
@@ -712,7 +712,7 @@ local M = {}
 --     lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 --     lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[foo bar baz]]))
 --     lex:add_rule('custom', token('custom', P('quux')))
---     lex:add_style('custom', lexer.STYLE_KEYWORD..',bold')
+--     lex:add_style('custom', lexer.STYLE_KEYWORD .. ',bold')
 --     lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 --     lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"')))
 --     lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
@@ -971,25 +971,24 @@ local function searchpath(name, path)
   return nil, table.concat(tried, '\n')
 end
 
-local string_upper = string.upper
 -- Default styles.
 local default = {
   'nothing', 'whitespace', 'comment', 'string', 'number', 'keyword',
   'identifier', 'operator', 'error', 'preprocessor', 'constant', 'variable',
   'function', 'class', 'type', 'label', 'regex', 'embedded'
 }
-for i = 1, #default do
-  local name, upper_name = default[i], string_upper(default[i])
-  M[upper_name], M['STYLE_'..upper_name] = name, '$(style.'..name..')'
+for _, name in ipairs(default) do
+  M[name:upper()] = name
+  M['STYLE_' .. name:upper()] = string.format('$(style.%s)', name)
 end
 -- Predefined styles.
 local predefined = {
   'default', 'linenumber', 'bracelight', 'bracebad', 'controlchar',
   'indentguide', 'calltip', 'folddisplaytext'
 }
-for i = 1, #predefined do
-  local name, upper_name = predefined[i], string_upper(predefined[i])
-  M[upper_name], M['STYLE_'..upper_name] = name, '$(style.'..name..')'
+for _, name in ipairs(predefined) do
+  M[name:upper()] = name
+  M['STYLE_' .. name:upper()] = string.format('$(style.%s)', name)
 end
 
 ---
@@ -1067,14 +1066,14 @@ end
 -- @param token_name The name of the token to associated with the style.
 -- @param style A style string for Scintilla.
 -- @usage lex:add_style('longstring', lexer.STYLE_STRING)
--- @usage lex:add_style('deprecated_function', lexer.STYLE_FUNCTION..',italics')
+-- @usage lex:add_style('deprecated_func', lexer.STYLE_FUNCTION .. ',italics')
 -- @usage lex:add_style('visible_ws',
---   lexer.STYLE_WHITESPACE..',back:$(color.grey)')
+--   lexer.STYLE_WHITESPACE .. ',back:$(color.grey)')
 -- @name add_style
 function M.add_style(lexer, token_name, style)
   local num_styles = lexer._numstyles
-  if num_styles == 32 then num_styles = num_styles + 8 end -- skip predefined
-  if num_styles >= 255 then print('Too many styles defined (255 MAX)') end
+  if num_styles == 33 then num_styles = num_styles + 8 end -- skip predefined
+  if num_styles >= 256 then print('Too many styles defined (256 MAX)') end
   lexer._TOKENSTYLES[token_name], lexer._numstyles = num_styles, num_styles + 1
   lexer._EXTRASTYLES[token_name] = style
   -- If the lexer is a proxy or a child that embedded itself, copy this style to
@@ -1152,20 +1151,18 @@ local grammar_mt = {__index = {
   add_lexer = function(self, lexer)
     local lexer_name = lexer._PARENTNAME or lexer._NAME
     local token_rule = lexer:join_tokens()
-    for i = 1, #lexer._CHILDREN do
-      local child = lexer._CHILDREN[i]
+    for _, child in ipairs(lexer._CHILDREN) do
       if child._CHILDREN then self:add_lexer(child) end
       local rules = child._EMBEDDEDRULES[lexer_name]
-      local rules_token_rule = self['__'..child._NAME] or rules.token_rule
+      local rules_token_rule = self['__' .. child._NAME] or rules.token_rule
       self[child._NAME] = (-rules.end_rule * rules_token_rule)^0 *
-                          rules.end_rule^-1 * lpeg_V(lexer_name)
-      local embedded_child = '_'..child._NAME
+        rules.end_rule^-1 * lpeg_V(lexer_name)
+      local embedded_child = '_' .. child._NAME
       self[embedded_child] = rules.start_rule *
-                             (-rules.end_rule * rules_token_rule)^0 *
-                             rules.end_rule^-1
+        (-rules.end_rule * rules_token_rule)^0 * rules.end_rule^-1
       token_rule = lpeg_V(embedded_child) + token_rule
     end
-    self['__'..lexer_name] = token_rule -- can contain embedded lexer rules
+    self['__' .. lexer_name] = token_rule -- can contain embedded lexer rules
     self[lexer_name] = token_rule^0
   end
 }}
@@ -1301,7 +1298,7 @@ function M.fold(lexer, text, start_pos, start_line, start_level)
   local FOLD_HEADER, FOLD_BLANK  = M.FOLD_HEADER, M.FOLD_BLANK
   if fold and lexer._FOLDPOINTS then
     local lines = {}
-    for p, l in (text..'\n'):gmatch('()(.-)\r?\n') do
+    for p, l in (text .. '\n'):gmatch('()(.-)\r?\n') do
       lines[#lines + 1] = {p, l}
     end
     local fold_zero_sum_lines = M.property_int['fold.on.zero.sum.lines'] > 0
@@ -1311,19 +1308,20 @@ function M.fold(lexer, text, start_pos, start_line, start_level)
     local style_at, fold_level = M.style_at, M.fold_level
     local line_num, prev_level = start_line, start_level
     local current_level = prev_level
-    for i = 1, #lines do
-      local pos, line = lines[i][1], lines[i][2]
+    for _, captures in ipairs(lines) do
+      local pos, line = captures[1], captures[2]
       if line ~= '' then
         if lexer._CASEINSENSITIVEFOLDPOINTS then line = line:lower() end
         local level_decreased = false
-        for j = 1, #fold_point_symbols do
-          local symbol = fold_point_symbols[j]
+        for _, symbol in ipairs(fold_point_symbols) do
           local word = not symbol:find('[^%w_]')
           local s, e = line:find(symbol, 1, true)
           while s and e do
-            --if not word or line:find('^%f[%w_]'..symbol..'%f[^%w_]', s) then
-            if not word or not ((s > 1 and line:find('^[%w_]', s - 1)) or
-                                line:find('^[%w_]', e + 1)) then
+            --if not word or
+            --   line:find('^%f[%w_]' .. symbol .. '%f[^%w_]', s) then
+            local word_before = s > 1 and line:find('^[%w_]', s - 1)
+            local word_after = line:find('^[%w_]', e + 1)
+            if not word or not (word_before or word_after) then
               local symbols = fold_points[style_at[start_pos + pos - 1 + s - 1]]
               local level = symbols and symbols[symbol]
               if type(level) == 'function' then
@@ -1369,7 +1367,7 @@ function M.fold(lexer, text, start_pos, start_line, start_level)
     -- Indentation based folding.
     -- Calculate indentation per line.
     local indentation = {}
-    for indent, line in (text..'\n'):gmatch('([\t ]*)([^\r\n]*)\r?\n') do
+    for indent, line in (text .. '\n'):gmatch('([\t ]*)([^\r\n]*)\r?\n') do
       indentation[#indentation + 1] = line ~= '' and #indent
     end
     -- Find the first non-blank line before start_line. If the current line is
@@ -1452,9 +1450,9 @@ function M.new(name, opts)
 
   -- Create the initial maps for token names to style numbers and styles.
   local token_styles = {}
-  for i = 1, #default do token_styles[default[i]] = i - 1 end
-  for i = 1, #predefined do token_styles[predefined[i]] = i + 31 end
-  lexer._TOKENSTYLES, lexer._numstyles = token_styles, #default
+  for i = 1, #default do token_styles[default[i]] = i end
+  for i = 1, #predefined do token_styles[predefined[i]] = i + 32 end
+  lexer._TOKENSTYLES, lexer._numstyles = token_styles, #default + 1
   lexer._EXTRASTYLES = {}
 
   return setmetatable(lexer, {__index = {
@@ -1476,15 +1474,15 @@ local function process_legacy_lexer(lexer)
     lexer._LEGACY = true
     warn("lexers as tables are deprecated; use 'lexer.new()'")
     local token_styles = {}
-    for i = 1, #default do token_styles[default[i]] = i - 1 end
-    for i = 1, #predefined do token_styles[predefined[i]] = i + 31 end
-    lexer._TOKENSTYLES, lexer._numstyles = token_styles, #default
+    for i = 1, #default do token_styles[default[i]] = i end
+    for i = 1, #predefined do token_styles[predefined[i]] = i + 32 end
+    lexer._TOKENSTYLES, lexer._numstyles = token_styles, #default + 1
     lexer._EXTRASTYLES = {}
     setmetatable(lexer, getmetatable(M.new('')))
     if lexer._rules then
       warn("lexer '_rules' table is deprecated; use 'add_rule()'")
-      for i = 1, #lexer._rules do
-        lexer:add_rule(lexer._rules[i][1], lexer._rules[i][2])
+      for _, rule in ipairs(lexer._rules) do
+        lexer:add_rule(rule[1], rule[2])
       end
     end
   end
@@ -1549,8 +1547,8 @@ function M.load(name, alt_name, cache)
   -- embedded lexing relies on these unique whitespace style names. Note that
   -- loading embedded lexers changes `WHITESPACE` again, so when adding it
   -- later, do not reference the potentially incorrect value.
-  M.WHITESPACE = (alt_name or name)..'_whitespace'
-  local path = M.property['lexer.lpeg.home']:gsub(';', '/?.lua;')..'/?.lua'
+  M.WHITESPACE = (alt_name or name) .. '_whitespace'
+  local path = M.property['lexer.lpeg.home']:gsub(';', '/?.lua;') .. '/?.lua'
   local lexer = dofile(assert(searchpath(name, path)))
   assert(lexer, string.format("'%s.lua' did not return a lexer", name))
   if alt_name then lexer._NAME = alt_name end
@@ -1562,7 +1560,7 @@ function M.load(name, alt_name, cache)
       process_legacy_lexer(lexer._lexer) -- mainly for `_foldsymbols` edits
     end
   end
-  lexer:add_style((alt_name or name)..'_whitespace', M.STYLE_WHITESPACE)
+  lexer:add_style((alt_name or name) .. '_whitespace', M.STYLE_WHITESPACE)
 
   -- If the lexer is a proxy or a child that embedded itself, set the parent to
   -- be the main lexer. Keep a reference to the old parent name since embedded
@@ -1602,11 +1600,10 @@ M.dec_num = M.digit^1
 M.hex_num = '0' * lpeg_S('xX') * M.xdigit^1
 M.oct_num = '0' * lpeg_R('07')^1
 M.integer = lpeg_S('+-')^-1 * (M.hex_num + M.oct_num + M.dec_num)
-M.float = lpeg_S('+-')^-1 *
-          ((M.digit^0 * '.' * M.digit^1 + M.digit^1 * '.' * M.digit^0 *
-            -lpeg_P('.')) *
-           (lpeg_S('eE') * lpeg_S('+-')^-1 * M.digit^1)^-1 +
-           (M.digit^1 * lpeg_S('eE') * lpeg_S('+-')^-1 * M.digit^1))
+M.float = lpeg_S('+-')^-1 * (
+  (M.digit^0 * '.' * M.digit^1 + M.digit^1 * '.' * M.digit^0 * -lpeg_P('.')) *
+  (lpeg_S('eE') * lpeg_S('+-')^-1 * M.digit^1)^-1 +
+  (M.digit^1 * lpeg_S('eE') * lpeg_S('+-')^-1 * M.digit^1))
 
 M.word = (M.alpha + '_') * (M.alnum + '_')^0
 
@@ -1658,10 +1655,10 @@ function M.delimited_range(chars, single_line, no_escape, balanced)
   local b = balanced and s or ''
   local n = single_line and '\n' or ''
   if no_escape then
-    local invalid = lpeg_S(e..n..b)
+    local invalid = lpeg_S(e .. n .. b)
     range = M.any - invalid
   else
-    local invalid = lpeg_S(e..n..b) + '\\'
+    local invalid = lpeg_S(e .. n .. b) + '\\'
     range = M.any - invalid + '\\' * M.any
   end
   if balanced and s ~= e then
@@ -1697,7 +1694,7 @@ end
 --   lexer.delimited_range('/')
 -- @name last_char_includes
 function M.last_char_includes(s)
-  s = '['..s:gsub('[-%%%[]', '%%%1')..']'
+  s = string.format('[%s]', s:gsub('[-%%%[]', '%%%1'))
   return lpeg_P(function(input, index)
     if index == 1 then return index end
     local i = index
@@ -1710,7 +1707,7 @@ end
 -- Returns a pattern that matches a balanced range of text that starts with
 -- string *start_chars* and ends with string *end_chars*.
 -- With single-character delimiters, this function is identical to
--- `delimited_range(start_chars..end_chars, false, true, true)`.
+-- `delimited_range(start_chars .. end_chars, false, true, true)`.
 -- @param start_chars The string starting a nested sequence.
 -- @param end_chars The string ending a nested sequence.
 -- @return pattern
@@ -1750,7 +1747,7 @@ function M.word_match(words, case_insensitive, word_chars)
     word_list[case_insensitive and word:lower() or word] = true
     for char in word:gmatch('[^%w_]') do
       if not (word_chars or ''):find(char, 1, true) then
-        word_chars = (word_chars or '')..char
+        word_chars = (word_chars or '') .. char
       end
     end
   end

@@ -27,7 +27,7 @@ function assert_default_styles(lex)
     local style = default_styles[i]
     assert(lex._TOKENSTYLES[style],
            string.format("style '%s' does not exist", style))
-    assert(lex._TOKENSTYLES[style] == i - 1, 'default styles out of order')
+    assert(lex._TOKENSTYLES[style] == i, 'default styles out of order')
   end
   local predefined_styles = {
     'default', 'linenumber', 'bracelight', 'bracebad', 'controlchar',
@@ -37,7 +37,7 @@ function assert_default_styles(lex)
     local style = predefined_styles[i]
     assert(lex._TOKENSTYLES[style],
            string.format("style '%s' does not exist", style))
-    assert(lex._TOKENSTYLES[style] == i + 31, 'predefined styles out of order')
+    assert(lex._TOKENSTYLES[style] == i + 32, 'predefined styles out of order')
   end
 end
 
@@ -573,8 +573,8 @@ function test_legacy()
     'indentguide', 'calltip', 'folddisplaytext'
   }
   local token_styles = {}
-  for i = 1, #default do token_styles[default[i]] = i - 1 end
-  for i = 1, #predefined do token_styles[predefined[i]] = i + 31 end
+  for i = 1, #default do token_styles[default[i]] = i end
+  for i = 1, #predefined do token_styles[predefined[i]] = i + 32 end
   lex._TOKENSTYLES, lex._numstyles = token_styles, #default
   lex._EXTRASTYLES = {}
   assert_default_styles(lex)
