@@ -121,6 +121,11 @@ enum {
 	TARGET_URI
 };
 
+GdkAtom ScintillaGTK::atomUTF8 = nullptr;
+GdkAtom ScintillaGTK::atomString = nullptr;
+GdkAtom ScintillaGTK::atomUriList = nullptr;
+GdkAtom ScintillaGTK::atomDROPFILES_DND = nullptr;
+
 static const GtkTargetEntry clipboardCopyTargets[] = {
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
