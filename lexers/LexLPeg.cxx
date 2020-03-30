@@ -678,7 +678,7 @@ public:
     lua_pushcfunction(L, lua_error_handler), lua_insert(L, -2);
     lua_pushvalue(L, -3);
     lua_pushlstring(L, buffer->BufferPointer() + startPos, lengthDoc);
-    lua_pushinteger(L, styler.StyleAt(startPos));
+    lua_pushinteger(L, styler.StyleAt(startPos) + 1);
     if (lua_pcall(L, 3, 1, -5) != LUA_OK) return LogError(L);
     if (!lua_istable(L, -1))
       return LogError(L, "Table of tokens expected from 'lexer.lex'");
