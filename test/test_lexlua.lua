@@ -931,6 +931,8 @@ function test_php()
   }
   local initial_style = php._TOKENSTYLES['html_whitespace']
   assert_lex(php, code, tokens, initial_style)
+  initial_style = php._TOKENSTYLES['default'] -- also test non-ws init style
+  assert_lex(php, code, tokens, initial_style)
   -- Starting in PHP.
   code = [[echo "hi";]]
   initial_style = php._TOKENSTYLES['php_whitespace']

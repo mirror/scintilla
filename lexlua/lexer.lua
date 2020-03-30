@@ -1245,7 +1245,8 @@ function M.lex(lexer, text, init_style)
     if lexer._CHILDREN then
       for style, style_num in pairs(lexer._TOKENSTYLES) do
         if style_num == init_style then
-          local lexer_name = style:match('^(.+)_whitespace') or lexer._NAME
+          local lexer_name = style:match('^(.+)_whitespace') or
+            lexer._PARENTNAME or lexer._NAME
           if lexer._INITIALRULE ~= lexer_name then
             lexer:build_grammar(lexer_name)
           end
