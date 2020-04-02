@@ -1223,13 +1223,14 @@ public:
     Paint(sur, rcPaint);
     SetVerticalScrollPos(), SetHorizontalScrollPos();
     wnoutrefresh(w);
-#if PDCURSES
-    touchwin(w); // pdcurses sometimes has problems drawing overlapping windows
-#endif
     if (ac.Active())
       ac.lb->Select(ac.lb->GetSelection()); // redraw
     else if (ct.inCallTipMode)
       CreateCallTipWindow(PRectangle(0, 0, 0, 0)); // redraw
+#if PDCURSES
+    else
+      touchwin(w); // pdcurses has problems after drawing overlapping windows
+#endif
     if (hasFocus) {
       // Update cursor position, even if it's not visible, as the container may
       // have a use for it.
