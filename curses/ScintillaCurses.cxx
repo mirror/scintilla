@@ -1457,7 +1457,7 @@ bool scintilla_send_mouse(
   int maxy = getmaxy(w), maxx = getmaxx(w);
   // Ignore most events outside the window.
   if ((x < begx || x > begx + maxx - 1 || y < begy || y > begy + maxy - 1) &&
-      button != 4 && button != 5)
+      button != 4 && button != 5 && event != SCM_DRAG)
     return false;
   y = y - begy, x = x - begx;
   if (event == SCM_PRESS)
