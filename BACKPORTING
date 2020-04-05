@@ -591,4 +591,6 @@ branch), or have information worth noting.
   are not supported in C++11.
 
 8027:6b1d13c2a6b9 SciTE change log.
+8107:19db953baba2 Fix typo.
+8108:5d8ef45011be Add Visual C++ project files for Lexilla.DLL and Scintilla.DLL with no lexers.
   Not backported, as this is LongTerm3.
