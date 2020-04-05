@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 #include <wchar.h>
 
 #include <stdexcept>
