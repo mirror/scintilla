@@ -247,7 +247,7 @@ void SurfaceImpl::SetCodec(const Font &font)
 	}
 }
 
-void SurfaceImpl::SetFont(Font &font)
+void SurfaceImpl::SetFont(const Font &font)
 {
 	if (font.GetID()) {
 		GetPainter()->setFont(*FontPointer(font));
