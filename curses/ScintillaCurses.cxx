@@ -965,7 +965,7 @@ public:
     vs.selColours.fore = ColourDesired(0, 0, 0); // black on white selection
     vs.selColours.fore.isSet = true; // setting selection foreground above
     vs.caretcolour = ColourDesired(0xFF, 0xFF, 0xFF); // white caret
-    vs.caretStyle = CARETSTYLE_BLOCK; // block caret
+    vs.caretStyle = CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK; // blk caret
     vs.leftMarginWidth = 0, vs.rightMarginWidth = 0; // no margins
     vs.ms[1].width = 1; // marker margin width should be 1
     vs.extraDescent = -1; // hack to make lineHeight 1 instead of 2
