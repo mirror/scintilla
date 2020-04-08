@@ -314,7 +314,7 @@ int Document::GetMark(Sci::Line line) const noexcept {
 	return Markers()->MarkValue(line);
 }
 
-Sci::Line Document::MarkerNext(Sci::Line lineStart, int mask) const {
+Sci::Line Document::MarkerNext(Sci::Line lineStart, int mask) const noexcept {
 	return Markers()->MarkerNext(lineStart, mask);
 }
 
@@ -368,15 +368,15 @@ void Document::DeleteAllMarks(int markerNum) {
 	}
 }
 
-Sci::Line Document::LineFromHandle(int markerHandle) const {
+Sci::Line Document::LineFromHandle(int markerHandle) const noexcept {
 	return Markers()->LineFromHandle(markerHandle);
 }
 
-int Document::MarkerNumberFromLine(Sci::Line line, int which) const {
+int Document::MarkerNumberFromLine(Sci::Line line, int which) const noexcept {
 	return Markers()->NumberFromLine(line, which);
 }
 
-int Document::MarkerHandleFromLine(Sci::Line line, int which) const {
+int Document::MarkerHandleFromLine(Sci::Line line, int which) const noexcept {
 	return Markers()->HandleFromLine(line, which);
 }
 
@@ -2295,7 +2295,7 @@ int SCI_METHOD Document::GetLineState(Sci_Position line) const {
 	return States()->GetLineState(line);
 }
 
-Sci::Line Document::GetMaxLineState() const {
+Sci::Line Document::GetMaxLineState() const noexcept {
 	return States()->GetMaxLineState();
 }
 
@@ -2305,7 +2305,7 @@ void SCI_METHOD Document::ChangeLexerState(Sci_Position start, Sci_Position end)
 	NotifyModified(mh);
 }
 
-StyledText Document::MarginStyledText(Sci::Line line) const {
+StyledText Document::MarginStyledText(Sci::Line line) const noexcept {
 	const LineAnnotation *pla = Margins();
 	return StyledText(pla->Length(line), pla->Text(line),
 		pla->MultipleStyles(line), pla->Style(line), pla->Styles(line));
@@ -2338,7 +2338,7 @@ void Document::MarginClearAll() {
 	Margins()->ClearAll();
 }
 
-StyledText Document::AnnotationStyledText(Sci::Line line) const {
+StyledText Document::AnnotationStyledText(Sci::Line line) const noexcept {
 	const LineAnnotation *pla = Annotations();
 	return StyledText(pla->Length(line), pla->Text(line),
 		pla->MultipleStyles(line), pla->Style(line), pla->Styles(line));
@@ -2369,7 +2369,7 @@ void Document::AnnotationSetStyles(Sci::Line line, const unsigned char *styles) 
 	}
 }
 
-int Document::AnnotationLines(Sci::Line line) const {
+int Document::AnnotationLines(Sci::Line line) const noexcept {
 	return Annotations()->Lines(line);
 }
 
