@@ -486,9 +486,9 @@ bool ScintillaQt::ChangeIdle(bool on)
 			idler.state = false;
 			qIdle = static_cast<QTimer *>(idler.idlerID);
 			qIdle->stop();
-			disconnect(qIdle, SIGNAL(timeout()), 0, 0);
+			disconnect(qIdle, SIGNAL(timeout()), nullptr, nullptr);
 			delete qIdle;
-			idler.idlerID = 0;
+			idler.idlerID = {};
 		}
 	}
 	return true;
@@ -572,7 +572,7 @@ CaseFolder *ScintillaQt::CaseFolderForEncoding()
 				// Only for single byte encodings
 				for (int i=0x80; i<0x100; i++) {
 					char sCharacter[2] = "A";
-					sCharacter[0] = i;
+					sCharacter[0] = static_cast<char>(i);
 					QString su = codec->toUnicode(sCharacter, 1);
 					QString suFolded = su.toCaseFolded();
 					if (codec->canEncode(suFolded)) {
@@ -587,7 +587,7 @@ CaseFolder *ScintillaQt::CaseFolderForEncoding()
 				return new CaseFolderDBCS(QTextCodec::codecForName(charSetBuffer));
 			}
 		}
-		return 0;
+		return nullptr;
 	}
 }
 
