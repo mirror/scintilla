@@ -304,30 +304,37 @@ Sci::Line LineState::GetMaxLineState() const noexcept {
 	return lineStates.Length();
 }
 
-static int NumberLines(const char *text) noexcept {
-	if (text) {
-		int newLines = 0;
-		while (*text) {
-			if (*text == '\n')
-				newLines++;
-			text++;
-		}
-		return newLines+1;
-	} else {
-		return 0;
-	}
-}
-
 // Each allocated LineAnnotation is a char array which starts with an AnnotationHeader
 // and then has text and optional styles.
-
-static constexpr int IndividualStyles = 0x100;
 
 struct AnnotationHeader {
 	short style;	// Style IndividualStyles implies array of styles
 	short lines;
 	int length;
 };
+
+namespace {
+
+constexpr int IndividualStyles = 0x100;
+
+size_t NumberLines(const char *text) noexcept {
+	int lines = 1;
+	if (text) {
+		while (*text) {
+			if (*text == '\n')
+				lines++;
+			text++;
+		}
+	}
+	return lines;
+}
+
+std::unique_ptr<char[]>AllocateAnnotation(size_t length, int style) {
+	const size_t len = sizeof(AnnotationHeader) + length + ((style == IndividualStyles) ? length : 0);
+	return Sci::make_unique<char[]>(len);
+}
+
+}
 
 LineAnnotation::~LineAnnotation() {
 }
@@ -376,11 +383,6 @@ const unsigned char *LineAnnotation::Styles(Sci::Line line) const noexcept {
 		return reinterpret_cast<unsigned char *>(annotations[line].get() + sizeof(AnnotationHeader) + Length(line));
 	else
 		return nullptr;
-}
-
-static std::unique_ptr<char[]>AllocateAnnotation(size_t length, int style) {
-	const size_t len = sizeof(AnnotationHeader) + length + ((style == IndividualStyles) ? length : 0);
-	return Sci::make_unique<char[]>(len);
 }
 
 void LineAnnotation::SetText(Sci::Line line, const char *text) {
