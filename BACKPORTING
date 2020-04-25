@@ -594,3 +594,23 @@ branch), or have information worth noting.
 8107:19db953baba2 Fix typo.
 8108:5d8ef45011be Add Visual C++ project files for Lexilla.DLL and Scintilla.DLL with no lexers.
   Not backported, as this is LongTerm3.
+
+8122:daf3a21a961e Change log.
+  Not backported, as SCI_SETILEXER has not been impemented.
+
+8135:463c3cd3d8b2 Fix some warnings from Clang-Tidy.
+  Backported, but without [[maybe_unused]], which is C++17 only.
+
+8136:5b6c787f30d4 Fix warning from g++.
+  Not backported, since [[maybe_unused]] is C++17 only.
+
+8145:0755bd39b628 Add test for differing styles between \r and \n.
+8146:db55dac10cfe Fix inverted test.
+8147:44af0edda8c3 Add test that illustrates all Python styles.
+8150:18be701f19b6 Remove dead code.
+  Not backported, as Lexilla is not supported.
+
+8152:3481e13acf88 Making dependencies now requires Python 3.6+.
+8153:5dfb47531eef Update Python versions.
+8154:7a8ff85aa5a8 Update Python versions for files that may involve PySide on Linux
+  Not backported in an attempt to keep support for  Python 2.7.
