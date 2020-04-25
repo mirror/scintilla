@@ -54,17 +54,18 @@ lex:add_style('action', lexer.STYLE_VARIABLE)
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           lexer.delimited_range('"')))
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '!' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('!')))
 
 -- Numbers.
 local inform_hex = '$' * lexer.xdigit^1
 local inform_bin = '$$' * S('01')^1
 lex:add_rule('number', token(lexer.NUMBER, lexer.integer + inform_hex +
-                                           inform_bin))
+  inform_bin))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('@~=+-*/%^#=<>;:,.{}[]()&|?')))

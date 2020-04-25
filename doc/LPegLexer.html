@@ -226,6 +226,13 @@
           as fold points. For example, the C line <code>} else {</code> would be
           marked as a fold point. The default is <code>0</code>.</td>
         </tr>
+
+        <tr>
+          <td><code>fold.compact</code></td>
+
+          <td>If <code>fold.compact</code> is set to <code>1</code>, blank lines
+          after an ending fold point are included in that fold.
+        </tr>
       </tbody>
     </table>
 
@@ -672,7 +679,7 @@ operator    30
     <a href="#lexer.punct"><code>lexer.punct</code></a>, <a href="#lexer.space"><code>lexer.space</code></a>, <a href="#lexer.newline"><code>lexer.newline</code></a>,
     <a href="#lexer.nonnewline"><code>lexer.nonnewline</code></a>, <a href="#lexer.nonnewline_esc"><code>lexer.nonnewline_esc</code></a>, <a href="#lexer.dec_num"><code>lexer.dec_num</code></a>,
     <a href="#lexer.hex_num"><code>lexer.hex_num</code></a>, <a href="#lexer.oct_num"><code>lexer.oct_num</code></a>, <a href="#lexer.integer"><code>lexer.integer</code></a>,
-    <a href="#lexer.float"><code>lexer.float</code></a>, and <a href="#lexer.word"><code>lexer.word</code></a>. You may use your own token names if
+    <a href="#lexer.float"><code>lexer.float</code></a>, <a href="#lexer.number"><code>lexer.number</code></a>, and <a href="#lexer.word"><code>lexer.word</code></a>. You may use your own token names if
     none of the above fit your language, but an advantage to using predefined
     token names is that your lexer's tokens will inherit the universal syntax
     highlighting color theme used by your text editor.</p>
@@ -725,9 +732,8 @@ operator    30
     <p>Line-style comments with a prefix character(s) are easy to express with LPeg:</p>
 
     <pre><code>
-    local shell_comment = token(lexer.COMMENT, '#' * lexer.nonnewline^0)
-    local c_line_comment = token(lexer.COMMENT,
-                                 '//' * lexer.nonnewline_esc^0)
+    local shell_comment = token(lexer.COMMENT, lexer.to_eol('#'))
+    local c_line_comment = token(lexer.COMMENT, lexer.to_eol('//', true))
     </code></pre>
 
     <p>The comments above start with a '#' or "//" and go to the end of the line.
@@ -738,8 +744,7 @@ operator    30
     express:</p>
 
     <pre><code>
-    local c_comment = token(lexer.COMMENT,
-                            '/*' * (lexer.any - '*/')^0 * P('*/')^-1)
+    local c_comment = token(lexer.COMMENT, lexer.range('/*', '*/'))
     </code></pre>
 
     <p>This comment starts with a "/*" sequence and contains anything up to and
@@ -748,24 +753,14 @@ operator    30
 
     <p><strong>Strings</strong></p>
 
-    <p>It is tempting to think that a string is not much different from the block
-    comment shown above in that both have start and end delimiters:</p>
+    <p>Most programming languages allow escape sequences in strings such that a
+    sequence like &ldquo;\&quot;&rdquo; in a double-quoted string indicates that the
+    &lsquo;&quot;&rsquo; is not the end of the string. <a href="#lexer.range"><code>lexer.range()</code></a> handles escapes
+    inherently.</p>
 
     <pre><code>
-    local dq_str = '"' * (lexer.any - '"')^0 * P('"')^-1
-    local sq_str = "'" * (lexer.any - "'")^0 * P("'")^-1
-    local simple_string = token(lexer.STRING, dq_str + sq_str)
-    </code></pre>
-
-    <p>However, most programming languages allow escape sequences in strings such
-    that a sequence like "\&quot;" in a double-quoted string indicates that the
-    '&quot;' is not the end of the string. The above token incorrectly matches
-    such a string. Instead, use the <a href="#lexer.delimited_range"><code>lexer.delimited_range()</code></a> convenience
-    function.</p>
-
-    <pre><code>
-    local dq_str = lexer.delimited_range('"')
-    local sq_str = lexer.delimited_range("'")
+    local dq_str = lexer.range('"')
+    local sq_str = lexer.range("'")
     local string = token(lexer.STRING, dq_str + sq_str)
     </code></pre>
 
@@ -775,10 +770,10 @@ operator    30
     <p><strong>Numbers</strong></p>
 
     <p>Most programming languages have the same format for integer and float tokens,
-    so it might be as simple as using a couple of predefined LPeg patterns:</p>
+    so it might be as simple as using a predefined LPeg pattern:</p>
 
     <pre><code>
-    local number = token(lexer.NUMBER, lexer.float + lexer.integer)
+    local number = token(lexer.NUMBER, lexer.number)
     </code></pre>
 
     <p>However, some languages allow postfix characters on integers.</p>
@@ -1391,11 +1386,11 @@ operator    30
     lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
     lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[foo bar baz]]))
     lex:add_rule('custom', token('custom', P('quux')))
-    lex:add_style('custom', lexer.STYLE_KEYWORD..',bold')
+    lex:add_style('custom', lexer.STYLE_KEYWORD .. ',bold')
     lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
-    lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"')))
-    lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
-    lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+    lex:add_rule('string', token(lexer.STRING, lexer.range('"')))
+    lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
+    lex:add_rule('number', token(lexer.NUMBER, lexer.number))
     lex:add_rule('operator', token(lexer.OPERATOR, S('+-*/%^=&lt;&gt;,.()[]{}')))
 
     lex:add_fold_point(lexer.OPERATOR, '{', '}')
@@ -1463,7 +1458,7 @@ operator    30
     <h4>Acknowledgements</h4>
 
     <p>Thanks to Peter Odding for his <a href="http://lua-users.org/lists/lua-l/2007-04/msg00116.html">lexer post</a> on the Lua mailing list
-    that inspired me, and thanks to Roberto Ierusalimschy for LPeg.</p>
+    that provided inspiration, and thanks to Roberto Ierusalimschy for LPeg.</p>
 
     <h2>Lua <code>lexer</code> module API fields</h2>
 
@@ -1869,6 +1864,13 @@ operator    30
     <p>A pattern that matches any single, non-newline character or any set of end
       of line characters escaped with '\'.</p>
 
+    <p><a id="lexer.number"></a></p>
+
+    <h3><code>lexer.number</code> (pattern)</h3>
+
+    <p>A pattern that matches a typical number, either a floating point, decimal,
+    hexadecimal, or octal number.</p>
+
     <p><a id="lexer.oct_num"></a></p>
 
     <h3><code>lexer.oct_num</code> (pattern)</h3>
@@ -2071,58 +2073,6 @@ operator    30
     </ul>
 
 
-    <p><a id="lexer.delimited_range"></a></p>
-
-    <h3><code>lexer.delimited_range</code> (chars, single_line, no_escape, balanced)</h3>
-
-    <p>Creates and returns a pattern that matches a range of text bounded by
-    <em>chars</em> characters.
-    This is a convenience function for matching more complicated delimited ranges
-    like strings with escape characters and balanced parentheses. <em>single_line</em>
-    indicates whether or not the range must be on a single line, <em>no_escape</em>
-    indicates whether or not to ignore '\' as an escape character, and <em>balanced</em>
-    indicates whether or not to handle balanced ranges like parentheses and
-    requires <em>chars</em> to be composed of two characters.</p>
-
-    <p>Fields:</p>
-
-    <ul>
-    <li><code>chars</code>: The character(s) that bound the matched range.</li>
-    <li><code>single_line</code>: Optional flag indicating whether or not the range must be
-    on a single line.</li>
-    <li><code>no_escape</code>: Optional flag indicating whether or not the range end
-    character may be escaped by a '\' character.</li>
-    <li><code>balanced</code>: Optional flag indicating whether or not to match a balanced
-    range, like the "%b" Lua pattern. This flag only applies if <em>chars</em>
-    consists of two different characters (e.g. "()").</li>
-    </ul>
-
-
-    <p>Usage:</p>
-
-    <ul>
-    <li><code>local dq_str_escapes = lexer.delimited_range('"')</code></li>
-    <li><code>local dq_str_noescapes = lexer.delimited_range('"', false, true)</code></li>
-    <li><code>local unbalanced_parens = lexer.delimited_range('()')</code></li>
-    <li><code>local balanced_parens = lexer.delimited_range('()', false, false,
-    true)</code></li>
-    </ul>
-
-
-    <p>Return:</p>
-
-    <ul>
-    <li>pattern</li>
-    </ul>
-
-
-    <p>See also:</p>
-
-    <ul>
-    <li><a href="#lexer.nested_pair"><code>lexer.nested_pair</code></a></li>
-    </ul>
-
-
     <p><a id="lexer.embed"></a></p>
 
     <h3><code>lexer.embed</code> (lexer, child, start_rule, end_rule)</h3>
@@ -2241,7 +2191,7 @@ operator    30
 
     <ul>
     <li><code>local regex = lexer.last_char_includes('+-*!%^&amp;|=,([{') *
-    lexer.delimited_range('/')</code></li>
+    lexer.range('/')</code></li>
     </ul>
 
 
@@ -2344,44 +2294,6 @@ operator    30
     </ul>
 
 
-    <p><a id="lexer.nested_pair"></a></p>
-
-    <h3><code>lexer.nested_pair</code> (start_chars, end_chars)</h3>
-
-    <p>Returns a pattern that matches a balanced range of text that starts with
-    string <em>start_chars</em> and ends with string <em>end_chars</em>.
-    With single-character delimiters, this function is identical to
-    <code>delimited_range(start_chars..end_chars, false, true, true)</code>.</p>
-
-    <p>Fields:</p>
-
-    <ul>
-    <li><code>start_chars</code>: The string starting a nested sequence.</li>
-    <li><code>end_chars</code>: The string ending a nested sequence.</li>
-    </ul>
-
-
-    <p>Usage:</p>
-
-    <ul>
-    <li><code>local nested_comment = lexer.nested_pair('/*', '*/')</code></li>
-    </ul>
-
-
-    <p>Return:</p>
-
-    <ul>
-    <li>pattern</li>
-    </ul>
-
-
-    <p>See also:</p>
-
-    <ul>
-    <li><a href="#lexer.delimited_range"><code>lexer.delimited_range</code></a></li>
-    </ul>
-
-
     <p><a id="lexer.new"></a></p>
 
     <h3><code>lexer.new</code> (name, opts)</h3>
@@ -2420,6 +2332,54 @@ operator    30
     </ul>
 
 
+    <p><a id="lexer.range"></a></p>
+
+    <h3><code>lexer.range</code>(<em>s, e, single_line, escapes, balanced</em>)</h3>
+
+    <p>Creates and returns a pattern that matches a range of text bounded by strings
+    or patterns <em>s</em> and <em>e</em>.
+    This is a convenience function for matching more complicated ranges like
+    strings with escape characters, balanced parentheses, and block comments
+    (nested or not). <em>e</em> is optional and defaults to <em>s</em>. <em>single_line</em> indicates
+    whether or not the range must be on a single line; <em>escapes</em> indicates
+    whether or not to allow &lsquo;\&rsquo; as an escape character; and <em>balanced</em> indicates
+    whether or not to handle balanced ranges like parentheses, and requires <em>s</em>
+    and <em>e</em> to be different.</p>
+
+    <p>Parameters:</p>
+
+    <ul>
+    <li><em><code>s</code></em>: String or pattern start of a range.</li>
+    <li><em><code>e</code></em>: Optional string or pattern end of a range. The default value is <em>s</em>.</li>
+    <li><em><code>single_line</code></em>: Optional flag indicating whether or not the range must be
+    on a single line.</li>
+    <li><em><code>escapes</code></em>: Optional flag indicating whether or not the range end may
+    be escaped by a &lsquo;\&rsquo; character.
+    The default value is <code>false</code> unless <em>s</em> and <em>e</em> are identical, single-character strings.
+    In that case, the default value is <code>true</code>.</li>
+    <li><em><code>balanced</code></em>: Optional flag indicating whether or not to match a balanced
+    range, like the &ldquo;%b&rdquo; Lua pattern. This flag only applies if <em>s</em> and <em>e</em> are
+    different.</li>
+    </ul>
+
+
+    <p>Usage:</p>
+
+    <ul>
+    <li><code>local dq_str_escapes = lexer.range('"')</code></li>
+    <li><code>local dq_str_noescapes = lexer.range('"', false, false)</code></li>
+    <li><code>local unbalanced_parens = lexer.range('(', ')')</code></li>
+    <li><code>local balanced_parens = lexer.range('(', ')', false, false, true)</code></li>
+    </ul>
+
+
+    <p>Return:</p>
+
+    <ul>
+    <li>pattern</li>
+    </ul>
+
+
     <p><a id="lexer.starts_line"></a></p>
 
     <h3><code>lexer.starts_line</code> (patt)</h3>
@@ -2439,6 +2399,39 @@ operator    30
     <ul>
     <li><code>local preproc = token(lexer.PREPROCESSOR, lexer.starts_line('#') *
     lexer.nonnewline^0)</code></li>
+    </ul>
+
+
+    <p>Return:</p>
+
+    <ul>
+    <li>pattern</li>
+    </ul>
+
+
+    <p><a id="lexer.to_eol"></a></p>
+
+    <h3><code>lexer.to_eol</code>(<em>prefix, escape</em>)</h3>
+
+    <p>Creates and returns a pattern that matches from string or pattern <em>prefix</em>
+    until the end of the line.
+    <em>escape</em> indicates whether the end of the line can be escaped with a &lsquo;\&rsquo;
+    character.</p>
+
+    <p>Parameters:</p>
+
+    <ul>
+    <li><em><code>prefix</code></em>: String or pattern prefix to start matching at.</li>
+    <li><em><code>escape</code></em>: Optional flag indicating whether or not newlines can be escaped
+    by a &lsquo;\&rsquo; character. The default value is <code>false</code>.</li>
+    </ul>
+
+
+    <p>Usage:</p>
+
+    <ul>
+    <li><code>local line_comment = lexer.to_eol('//')</code></li>
+    <li><code>local line_comment = lexer.to_eol(P('#') + ';')</code></li>
     </ul>
 
 

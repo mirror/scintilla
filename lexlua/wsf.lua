@@ -13,12 +13,11 @@ local ws = token(lexer.WHITESPACE, lexer.space^1)
 lex:add_rule('whitespace', ws)
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '<!--' * (lexer.any - '-->')^0 *
-                                             P('-->')^-1))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.range('<!--', '-->')))
 
 local alpha = R('az', 'AZ', '\127\255')
-local word_char = lexer.alnum + S('_-:.??')
-local identifier = (alpha + S('_-:.??')) * word_char^0
+local word_char = lexer.alnum + S('_-:.?')
+local identifier = (alpha + S('_-:.?')) * word_char^0
 
 -- Elements.
 local element = token('element', '<' * P('/')^-1 * identifier)
@@ -47,14 +46,15 @@ local equals = token(lexer.OPERATOR, '=') * in_tag
 lex:add_rule('equals', equals)
 
 -- Strings.
+local sq_str = lexer.range("'", false, false)
+local dq_str = lexer.range('"', false, false)
 local string = #S('\'"') * lexer.last_char_includes('=') *
-               token(lexer.STRING, lexer.delimited_range("'", false, true) +
-                                   lexer.delimited_range('"', false, true))
+  token(lexer.STRING, sq_str + dq_str)
 lex:add_rule('string', string)
 
 -- Numbers.
 lex:add_rule('number', #lexer.digit * lexer.last_char_includes('=') *
-                       token(lexer.NUMBER, lexer.digit^1 * P('%')^-1) * in_tag)
+  token(lexer.NUMBER, lexer.digit^1 * P('%')^-1) * in_tag)
 
 -- Entities.
 lex:add_rule('entity', token('entity', '&' * word_match[[
@@ -74,8 +74,7 @@ lex:add_fold_point(lexer.COMMENT, '<!--', '-->')
 
 -- Tags that start embedded languages.
 local embed_start_tag = element *
-                        (ws^1 * attribute * ws^0 * equals * ws^0 * string)^0 *
-                        ws^0 * tag_close
+  (ws^1 * attribute * ws^0 * equals * ws^0 * string)^0 * ws^0 * tag_close
 local embed_end_tag = element * tag_close
 
 -- Embedded JavaScript.

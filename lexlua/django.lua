@@ -32,16 +32,15 @@ lex:add_rule('function', token(lexer.FUNCTION, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING,
-                             lexer.delimited_range('"', false, true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"', false, false)))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S(':,.|')))
 
 -- Embed Django in HTML.
 local html = lexer.load('html')
-local html_comment = '<!--' * (lexer.any - '-->')^0 * P('-->')^-1
-local django_comment = '{#' * (lexer.any - lexer.newline - '#}')^0 * P('#}')^-1
+local html_comment = lexer.range('<!--', '-->')
+local django_comment = lexer.range('{#', '#}', true)
 html:modify_rule('comment', token(lexer.COMMENT, html_comment + django_comment))
 local django_start_rule = token('django_tag', '{' * S('{%'))
 local django_end_rule = token('django_tag', S('%}') * '}')

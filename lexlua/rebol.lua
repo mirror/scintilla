@@ -11,9 +11,8 @@ local lex = lexer.new('rebol')
 lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Comments.
-local line_comment = ';' * lexer.nonnewline^0;
-local block_comment = 'comment' * P(' ')^-1 *
-                      lexer.delimited_range('{}', false, true)
+local line_comment = lexer.to_eol(';')
+local block_comment = 'comment' * P(' ')^-1 * lexer.range('{', '}')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Keywords.
@@ -80,12 +79,13 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, (lexer.alpha + '-') *
-                                                   (lexer.alnum + '-')^0))
+  (lexer.alnum + '-')^0))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"', true) +
-                                           lexer.delimited_range('{}') +
-                                           "'" * lexer.word))
+local dq_str = lexer.range('"', true)
+local br_str = lexer.range('{', '}', false, false, true)
+local word_str = "'" * lexer.word
+lex:add_rule('string', token(lexer.STRING, dq_str + br_str + word_str))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('=<>+/*:()[]')))

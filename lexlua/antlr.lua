@@ -31,18 +31,17 @@ lex:add_rule('func', token(lexer.FUNCTION, 'assert'))
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//')
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Actions.
 lex:add_rule('action', token(lexer.OPERATOR, P('{')) *
-                       token('action', (1 - P('}'))^0) *
-                       token(lexer.OPERATOR, P('}'))^-1)
+  token('action', (1 - P('}'))^0) * token(lexer.OPERATOR, P('}'))^-1)
 lex:add_style('action', lexer.STYLE_NOTHING)
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'", true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range("'", true)))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('$@:;|.=+*?~!^>-()[]{}')))

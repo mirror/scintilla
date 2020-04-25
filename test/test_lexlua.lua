@@ -178,13 +178,50 @@ end
 
 -- Unit tests.
 
+function test_to_eol()
+  local code = '#foo\\\nbar\\\nbaz'
+  assert(lpeg.match(lexer.to_eol('#'), code) == 6)
+  assert(lpeg.match(lexer.to_eol('#', true), code) == #code + 1)
+end
+
+function test_range()
+  assert(lpeg.match(lexer.range('"'), '"foo\\"bar\n"baz') == 12)
+  assert(lpeg.match(lexer.range('"', true), '"foo\\"bar\n"baz') == 10)
+  assert(lpeg.match(lexer.range('"', false, false), '"foo\\"bar\n"baz') == 7)
+
+  assert(lpeg.match(lexer.range('(', ')'), '(foo\\)bar)baz') == 7)
+
+  assert(lpeg.match(lexer.range('/*', '*/'), '/*/*foo*/bar*/baz') == 10)
+  assert(lpeg.match(lexer.range('/*', '*/', false, false, true),
+    '/*/*foo*/bar*/baz') == 15)
+end
+
+function test_starts_line()
+  assert(lpeg.match(lexer.starts_line('#'), '#foo') == 2)
+  assert(lpeg.match(lexer.starts_line('#'), '\n#foo', 2) == 3)
+  assert(not lpeg.match(lexer.starts_line('#'), ' #foo', 2))
+end
+
+function test_last_char_includes()
+  assert(lpeg.match(lexer.last_char_includes('=,'), '/foo/'))
+  assert(lpeg.match(lexer.last_char_includes('=,'), 'foo=/bar/', 5) == 5)
+  assert(lpeg.match(lexer.last_char_includes('=,'), 'foo, /bar/', 6) == 6)
+  assert(not lpeg.match(lexer.last_char_includes('=,'), 'foo/bar', 4))
+end
+
+function test_word_match()
+  assert(lpeg.match(lexer.word_match[[foo bar baz]], 'foo') == 4)
+  assert(not lpeg.match(lexer.word_match[[foo bar baz]], 'foo_bar'))
+  assert(lpeg.match(lexer.word_match([[foo! bar? baz.]], true), 'FOO!') == 5)
+end
+
 -- Tests a basic lexer with a few simple rules and no custom styles.
 function test_basics()
   local lex = lexer.new('test')
   assert_default_styles(lex)
   lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
   lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[foo bar baz]]))
-  lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"')))
+  lex:add_rule('string', token(lexer.STRING, lexer.range('"')))
   lex:add_rule('number', token(lexer.NUMBER, lexer.integer))
   local code = [[foo bar baz "foo bar baz" 123]]
   local tokens = {
@@ -930,6 +967,8 @@ function test_php()
     {'element', '>'}
   }
   local initial_style = php._TOKENSTYLES['html_whitespace']
+  assert_lex(php, code, tokens, initial_style)
+  initial_style = php._TOKENSTYLES['default'] -- also test non-ws init style
   assert_lex(php, code, tokens, initial_style)
   initial_style = php._TOKENSTYLES['default'] -- also test non-ws init style
   assert_lex(php, code, tokens, initial_style)

@@ -73,19 +73,17 @@ lex:add_style('self', lexer.STYLE_TYPE)
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline_esc^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#', true)))
 
 -- Strings.
-local sq_str = P('u')^-1 * lexer.delimited_range("'", true)
-local dq_str = P('U')^-1 * lexer.delimited_range('"', true)
-local triple_sq_str = "'''" * (lexer.any - "'''")^0 * P("'''")^-1
-local triple_dq_str = '"""' * (lexer.any - '"""')^0 * P('"""')^-1
+local sq_str = P('u')^-1 * lexer.range("'", true)
+local dq_str = P('U')^-1 * lexer.range('"', true)
+local tq_str = lexer.range("'''") + lexer.range('"""')
 -- TODO: raw_strs cannot end in single \.
-local raw_sq_str = P('u')^-1 * 'r' * lexer.delimited_range("'", false, true)
-local raw_dq_str = P('U')^-1 * 'R' * lexer.delimited_range('"', false, true)
-lex:add_rule('string', token(lexer.STRING, triple_sq_str + triple_dq_str +
-                                           sq_str + dq_str + raw_sq_str +
-                                           raw_dq_str))
+local raw_sq_str = P('u')^-1 * 'r' * lexer.range("'", false, false)
+local raw_dq_str = P('U')^-1 * 'R' * lexer.range('"', false, false)
+lex:add_rule('string', token(lexer.STRING, tq_str + sq_str + dq_str +
+  raw_sq_str + raw_dq_str))
 
 -- Numbers.
 local dec = lexer.digit^1 * S('Ll')^-1
@@ -95,7 +93,7 @@ local integer = S('+-')^-1 * (bin + lexer.hex_num + oct + dec)
 lex:add_rule('number', token(lexer.NUMBER, lexer.float + integer))
 
 -- Decorators.
-lex:add_rule('decorator', token('decorator', '@' * lexer.nonnewline^0))
+lex:add_rule('decorator', token('decorator', lexer.to_eol('@')))
 lex:add_style('decorator', lexer.STYLE_PREPROCESSOR)
 
 -- Operators.

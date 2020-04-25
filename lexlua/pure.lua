@@ -11,8 +11,8 @@ local lex = lexer.new('pure')
 lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//')
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Pragmas.
@@ -45,6 +45,6 @@ lex:add_rule('operator', token(lexer.OPERATOR, dots + punct))
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"', true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"', true)))
 
 return lex

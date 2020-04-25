@@ -314,7 +314,7 @@ local constants = word_match[[
   __float80e__ __float80m__ __Infinity__ __NaN__ __QNaN__ __SNaN__
 ]]
 lex:add_rule('constant', token(lexer.CONSTANT, constants +
-                                               '$' * P('$')^-1 * -word))
+  '$' * P('$')^-1 * -word))
 
 -- Labels.
 lex:add_rule('label', token(lexer.LABEL, word * ':'))
@@ -323,18 +323,18 @@ lex:add_rule('label', token(lexer.LABEL, word * ':'))
 lex:add_rule('identifier', token(lexer.IDENTIFIER, word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'", true) +
-                                           lexer.delimited_range('"', true)))
+local sq_str = lexer.range("'", true)
+local dq_str = lexer.range('"', true)
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, ';' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol(';')))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float +
-                                           lexer.integer * S('hqb')^-1))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number * S('hqb')^-1))
 
 -- Preprocessor.
-local preproc_word = word_match[[
+local pp_word = word_match[[
   arg assign clear define defstr deftok depend elif elifctx elifdef elifempty
   elifenv elifid elifidn elifidni elifmacro elifn elifnctx elifndef elifnempty
   elifnenv elifnid elifnidn elifnidni elifnmacro elifnnum elifnstr elifntoken
@@ -345,9 +345,8 @@ local preproc_word = word_match[[
   ixdefine line local macro pathsearch pop push rep repl rmacro rotate stacksize
   strcat strlen substr undef unmacro use warning while xdefine
 ]]
-local preproc_symbol = '??' + S('!$+?') + '%' * -lexer.space + R('09')^1
-lex:add_rule('preproc', token(lexer.PREPROCESSOR, '%' * (preproc_word +
-                                                         preproc_symbol)))
+local pp_symbol = '??' + S('!$+?') + '%' * -lexer.space + R('09')^1
+lex:add_rule('preproc', token(lexer.PREPROCESSOR, '%' * (pp_word + pp_symbol)))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('+-/*%<>!=^&|~:,()[]')))

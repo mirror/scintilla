@@ -124,8 +124,8 @@ lex:add_rule('color', token('color', word_match[[
 lex:add_style('color', lexer.STYLE_NUMBER)
 
 -- Identifiers.
-lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.alpha *
-                                                   (lexer.alnum + S('_-'))^0))
+local word = lexer.alpha * (lexer.alnum + S('_-'))^0
+lex:add_rule('identifier', token(lexer.IDENTIFIER, word))
 
 -- Pseudo classes and pseudo elements.
 lex:add_rule('pseudoclass', ':' * token('pseudoclass', word_match[[
@@ -141,12 +141,12 @@ lex:add_rule('pseudoelement', '::' * token('pseudoelement', word_match[[
 lex:add_style('pseudoelement', lexer.STYLE_CONSTANT)
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           lexer.delimited_range('"')))
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '/*' * (lexer.any - '*/')^0 *
-                                             P('*/')^-1))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.range('/*', '*/')))
 
 -- Numbers.
 local unit = token('unit', word_match[[

@@ -25,7 +25,7 @@ lex:add_rule('macro', token(lexer.FUNCTION, lexer.word * S("!")))
 
 -- Library types
 lex:add_rule('library', token(lexer.LABEL, lexer.upper *
-                                           (lexer.lower + lexer.dec_num)^1))
+  (lexer.lower + lexer.dec_num)^1))
 
 -- Numbers.
 local identifier = P('r#')^-1 * lexer.word
@@ -37,22 +37,21 @@ end
 local function opt_cap(patt)
   return C(patt^-1)
 end
-local float = decimal_literal *
-              (Cmt(opt_cap('.' * decimal_literal) *
-                   opt_cap(S('eE') * S('+-')^-1 * integer_suffix(digit)) *
-                   opt_cap(P('f32') + 'f64'),
-                   function (input, index, decimals, exponent, type)
-                     return decimals ~= "" or exponent ~= "" or type ~= ""
-                   end) +
-               '.' * -(S('._') + identifier))
+local float = decimal_literal * (Cmt(
+  opt_cap('.' * decimal_literal) * opt_cap(S('eE') * S('+-')^-1 *
+  integer_suffix(digit)) * opt_cap(P('f32') + 'f64'),
+  function (input, index, decimals, exponent, type)
+    return decimals ~= "" or exponent ~= "" or type ~= ""
+  end) + '.' * -(S('._') + identifier))
 local function prefixed_integer(prefix, digit)
   return P(prefix) * integer_suffix(digit)
 end
-local integer = (prefixed_integer('0b', S('01')) +
-                 prefixed_integer('0o', R('07')) +
-                 prefixed_integer('0x', lexer.xdigit) +
-                 decimal_literal) *
-                (S('iu') * (P('8') + '16' + '32' + '64' + '128' + 'size'))^-1
+local integer = (
+  prefixed_integer('0b', S('01')) +
+  prefixed_integer('0o', R('07')) +
+  prefixed_integer('0x', lexer.xdigit) +
+  decimal_literal
+) * (S('iu') * (P('8') + '16' + '32' + '64' + '128' + 'size'))^-1
 lex:add_rule('number', token(lexer.NUMBER, float + integer))
 
 -- Types.
@@ -61,31 +60,30 @@ lex:add_rule('type', token(lexer.TYPE, word_match[[
 ]]))
 
 -- Strings.
-local sq_str = P('b')^-1 * lexer.delimited_range("'", true)
-local dq_str = P('b')^-1 * lexer.delimited_range('"')
+local sq_str = P('b')^-1 * lexer.range("'", true)
+local dq_str = P('b')^-1 * lexer.range('"')
 local raw_str = Cmt(P('b')^-1 * P('r') * C(P('#')^0) * '"',
-                    function(input, index, hashes)
-                      local _, e = input:find('"'..hashes, index, true)
-                      return (e or #input) + 1
-                    end)
+  function(input, index, hashes)
+    local _, e = input:find('"' .. hashes, index, true)
+    return (e or #input) + 1
+  end)
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str + raw_str))
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, identifier))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = lexer.nested_pair('/*', '*/')
+local line_comment = lexer.to_eol('//', true)
+local block_comment = lexer.range('/*', '*/', false, false, true)
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
+
+-- Attributes.
+lex:add_rule('preprocessor', token(lexer.PREPROCESSOR, '#' *
+  lexer.range('[', ']', true)))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR,
-                               S('+-/*%<>!=`^~@&|?#~:;,.()[]{}')))
-
--- Attributes.
-lex:add_rule('preprocessor', token(lexer.PREPROCESSOR,
-                                   "#[" * (lexer.nonnewline - ']')^0 *
-                                   P("]")^-1))
+  S('+-/*%<>!=`^~@&|?#~:;,.()[]{}')))
 
 -- Fold points.
 lex:add_fold_point(lexer.COMMENT, '/*', '*/')

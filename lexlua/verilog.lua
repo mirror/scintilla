@@ -46,11 +46,11 @@ lex:add_rule('type', token(lexer.TYPE, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"')))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"')))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//')
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
@@ -58,9 +58,8 @@ local bin_suffix = S('bB') * S('01_xXzZ')^1
 local oct_suffix = S('oO') * S('01234567_xXzZ')^1
 local dec_suffix = S('dD') * S('0123456789_xXzZ')^1
 local hex_suffix = S('hH') * S('0123456789abcdefABCDEF_xXzZ')^1
-lex:add_rule('number', token(lexer.NUMBER, (lexer.digit + '_')^1 +
-                                           "'" * (bin_suffix + oct_suffix +
-                                                  dec_suffix + hex_suffix)))
+lex:add_rule('number', token(lexer.NUMBER, (lexer.digit + '_')^1 + "'" *
+  (bin_suffix + oct_suffix + dec_suffix + hex_suffix)))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('=~+-/*<>%&|^~,:;()[]{}')))

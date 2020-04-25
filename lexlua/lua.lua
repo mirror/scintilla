@@ -32,7 +32,7 @@ local deprecated_func = token('deprecated_function', word_match[[
   getfenv loadstring module setfenv unpack
 ]])
 lex:add_rule('function', func + deprecated_func)
-lex:add_style('deprecated_function', lexer.STYLE_FUNCTION..',italics')
+lex:add_style('deprecated_function', lexer.STYLE_FUNCTION .. ',italics')
 
 -- Constants.
 lex:add_rule('constant', token(lexer.CONSTANT, word_match[[
@@ -103,26 +103,28 @@ local deprecated_library = token('deprecated_library', word_match[[
 ]])
 lex:add_rule('library', library + deprecated_library)
 lex:add_style('library', lexer.STYLE_TYPE)
-lex:add_style('deprecated_library', lexer.STYLE_TYPE..',italics')
+lex:add_style('deprecated_library', lexer.STYLE_TYPE .. ',italics')
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 local longstring = lpeg.Cmt('[' * lpeg.C(P('=')^0) * '[',
-                            function(input, index, eq)
-                              local _, e = input:find(']'..eq..']', index, true)
-                              return (e or #input) + 1
-                            end)
+  function(input, index, eq)
+    local _, e = input:find(']' .. eq .. ']', index, true)
+    return (e or #input) + 1
+  end)
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           lexer.delimited_range('"')) +
-                       token('longstring', longstring))
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str) +
+  token('longstring', longstring))
 lex:add_style('longstring', lexer.STYLE_STRING)
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '--' * (longstring +
-                                                     lexer.nonnewline^0)))
+local line_comment = lexer.to_eol('--')
+local block_comment = '--' * longstring
+lex:add_rule('comment', token(lexer.COMMENT, block_comment + line_comment))
 
 -- Numbers.
 local lua_integer = P('-')^-1 * (lexer.hex_num + lexer.dec_num)
@@ -133,7 +135,7 @@ lex:add_rule('label', token(lexer.LABEL, '::' * lexer.word * '::'))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, '..' +
-                                               S('+-*/%^#=<>&|~;:,.{}[]()')))
+  S('+-*/%^#=<>&|~;:,.{}[]()')))
 
 -- Fold points.
 local function fold_longcomment(text, pos, line, s, symbol)

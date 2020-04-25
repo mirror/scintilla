@@ -32,16 +32,16 @@ lex:add_style('special_keyword', lexer.STYLE_TYPE)
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           lexer.delimited_range('"')))
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline_esc^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#', true)))
 
 -- Numbers.
 local radix_literal = P('-')^-1 * lexer.dec_num * S('rR') * lexer.alnum^1
-lex:add_rule('number', token(lexer.NUMBER, radix_literal + lexer.float +
-                                           lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, radix_literal + lexer.number))
 
 -- Preprocessor.
 local preproc_word = word_match[[

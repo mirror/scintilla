@@ -12,15 +12,16 @@ local lex = lexer.new('json')
 lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'", true) +
-                                           lexer.delimited_range('"', true)))
+local sq_str = lexer.range("'", true)
+local dq_str = lexer.range('"', true)
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Keywords.
 lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[true false null]]))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//', true)
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.

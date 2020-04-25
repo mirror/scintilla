@@ -24,15 +24,15 @@ lex:add_rule('type', token(lexer.TYPE, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           '$' * lexer.word))
+local sq_str = lexer.range("'")
+local word_str = '$' * lexer.word
+lex:add_rule('string', token(lexer.STRING, sq_str + word_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT,
-                              lexer.delimited_range('"', false, true)))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.range('"', false, false)))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S(':=_<>+-/*!()[]')))

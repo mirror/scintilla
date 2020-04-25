@@ -22,10 +22,9 @@ lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 lex:add_rule('variable', token(lexer.VARIABLE, S('%$@') * lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"', true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"', true)))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * S(': .~') *
-                                             lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#' * S(': .~'))))
 
 return lex

@@ -10,14 +10,14 @@ local lex = lexer.new('diff', {lex_by_line = true})
 -- Text, separators, and file headers.
 lex:add_rule('index', token(lexer.COMMENT, 'Index: ' * lexer.any^0 * -1))
 lex:add_rule('separator', token(lexer.COMMENT, ('---' + P('*')^4 + P('=')^1) *
-                                               lexer.space^0 * -1))
+  lexer.space^0 * -1))
 lex:add_rule('header', token('header', (P('*** ') + '--- ' + '+++ ') *
-                                       lexer.any^1))
+  lexer.any^1))
 lex:add_style('header', lexer.STYLE_COMMENT)
 
 -- Location.
 lex:add_rule('location', token(lexer.NUMBER, ('@@' + lexer.digit^1 + '****') *
-                                             lexer.any^1))
+  lexer.any^1))
 
 -- Additions, deletions, and changes.
 lex:add_rule('addition', token('addition', S('>+') * lexer.any^0))

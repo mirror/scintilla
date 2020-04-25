@@ -13,7 +13,7 @@ lex:add_rule('whitespace', ws)
 
 -- Classes.
 lex:add_rule('class', token(lexer.KEYWORD, P('class')) * ws^1 *
-                      token(lexer.CLASS, lexer.word))
+  token(lexer.CLASS, lexer.word))
 
 -- Keywords.
 lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
@@ -41,17 +41,17 @@ lex:add_rule('function', token(lexer.FUNCTION, lexer.word) * #P('('))
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Templates.
-lex:add_rule('template', token('template', "'''" * (lexer.any - P("'''"))^0 *
-                                           P("'''")^-1))
+lex:add_rule('template', token('template', lexer.range("'''")))
 lex:add_style('template', lexer.STYLE_EMBEDDED)
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'", true) +
-                                           lexer.delimited_range('"', true)))
+local sq_str = lexer.range("'", true)
+local dq_str = lexer.range('"', true)
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//', true)
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.

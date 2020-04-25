@@ -25,7 +25,7 @@ local vbs_start_rule = #(P('<') * script_element * (P(function(input, index)
   end
 end) + '>')) * html.embed_start_tag -- <script language="vbscript">
 local vbs_end_rule = #('</' * script_element * lexer.space^0 * '>') *
-                     html.embed_end_tag -- </script>
+  html.embed_end_tag -- </script>
 lex:embed(vbs, vbs_start_rule, vbs_end_rule)
 
 -- Fold points.

@@ -46,21 +46,19 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING,
-                             lexer.delimited_range("'", true, true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range("'", true, false)))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Functions.
-lex:add_rule('function', token(lexer.FUNCTION,
-                               lexer.delimited_range('%', true, true)))
+lex:add_rule('function', token(lexer.FUNCTION, lexer.range('%', true, false)))
 
 -- Labels.
 lex:add_rule('label', token(lexer.LABEL, lexer.starts_line(':') * lexer.word))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '!' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('!')))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('+-*/$=,;()')))

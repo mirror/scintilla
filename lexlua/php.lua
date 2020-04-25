@@ -22,7 +22,7 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 ]]))
 
 local word = (lexer.alpha + '_' + R('\127\255')) *
-             (lexer.alnum + '_' + R('\127\255'))^0
+  (lexer.alnum + '_' + R('\127\255'))^0
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, word))
@@ -31,26 +31,26 @@ lex:add_rule('identifier', token(lexer.IDENTIFIER, word))
 lex:add_rule('variable', token(lexer.VARIABLE, '$' * word))
 
 -- Strings.
-local sq_str = lexer.delimited_range("'")
-local dq_str = lexer.delimited_range('"')
-local bt_str = lexer.delimited_range('`')
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+local bq_str = lexer.range('`')
 local heredoc = '<<<' * P(function(input, index)
   local _, e, delimiter = input:find('([%a_][%w_]*)[\n\r\f]+', index)
   if delimiter then
-    local _, e = input:find('[\n\r\f]+'..delimiter, e)
+    local _, e = input:find('[\n\r\f]+' .. delimiter, e)
     return e and e + 1
   end
 end)
-lex:add_rule('string', token(lexer.STRING, sq_str + dq_str + bt_str + heredoc))
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str + bq_str + heredoc))
 -- TODO: interpolated code.
 
 -- Comments.
-local line_comment = (P('//') + '#') * lexer.nonnewline^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol(P('//') + '#')
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, block_comment + line_comment))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('!@%^*&()-+=|/?.,;:<>[]{}')))

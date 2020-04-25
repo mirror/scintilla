@@ -23,28 +23,27 @@ lex:add_rule('value', token('value', word_match[[true false]]))
 lex:add_style('value', lexer.STYLE_CONSTANT)
 
 -- Identifiers.
-lex:add_rule('identifier', lexer.token(lexer.IDENTIFIER,
-                                       lexer.alpha * (lexer.alnum + S('_-'))^0))
+local word = lexer.alpha * (lexer.alnum + S('_-'))^0
+lex:add_rule('identifier', lexer.token(lexer.IDENTIFIER, word))
+
+local bracketed = lexer.range('[', ']')
 
 -- Group headers.
-lex:add_rule('header',
-             lexer.starts_line(token('header',
-                                     lexer.delimited_range('[]', false, true))))
+lex:add_rule('header', lexer.starts_line(token('header', bracketed)))
 lex:add_style('header', lexer.STYLE_LABEL)
 
 -- Locales.
-lex:add_rule('locale', token('locale',
-                             lexer.delimited_range('[]', false, true)))
+lex:add_rule('locale', token('locale', bracketed))
 lex:add_style('locale', lexer.STYLE_CLASS)
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"')))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"')))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, (lexer.float + lexer.integer)))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Field codes.
 lex:add_rule('code', lexer.token('code', P('%') * S('fFuUdDnNickvm')))

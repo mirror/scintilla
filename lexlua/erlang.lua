@@ -42,11 +42,11 @@ lex:add_rule('function', token(lexer.FUNCTION, word_match[[
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.lower *
-                                                   ('_' + lexer.alnum)^0))
+  ('_' + lexer.alnum)^0))
 
 -- Variables.
 lex:add_rule('variable', token(lexer.VARIABLE, P('_')^0 * lexer.upper *
-                                               ('_' + lexer.alnum)^0))
+  ('_' + lexer.alnum)^0))
 
 -- Directives.
 lex:add_rule('directive', token('directive', '-' * word_match[[
@@ -56,15 +56,16 @@ lex:add_rule('directive', token('directive', '-' * word_match[[
 lex:add_style('directive', lexer.STYLE_PREPROCESSOR)
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'", true) +
-                                           lexer.delimited_range('"') +
-                                           '$' * lexer.any * lexer.alnum^0))
+local sq_str = lexer.range("'", true)
+local dq_str = lexer.range('"')
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str +
+  '$' * lexer.any * lexer.alnum^0))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '%' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('%')))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('-<>.;=/|+*:,!()[]{}')))

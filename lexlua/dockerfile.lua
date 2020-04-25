@@ -20,20 +20,19 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Variable.
-lex:add_rule('variable', token(lexer.VARIABLE,
-                               S('$')^1 * (S('{')^1 * lexer.word * S('}')^1 +
-                                           lexer.word)))
+lex:add_rule('variable', token(lexer.VARIABLE, S('$')^1 *
+  (S('{')^1 * lexer.word * S('}')^1 + lexer.word)))
 
 -- Strings.
-local sq_str = lexer.delimited_range("'", false, true)
-local dq_str = lexer.delimited_range('"')
+local sq_str = lexer.range("'", false, false)
+local dq_str = lexer.range('"')
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('\\[],=:{}')))

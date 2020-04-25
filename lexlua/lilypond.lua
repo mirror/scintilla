@@ -18,12 +18,11 @@ lex:add_rule('keyword', token(lexer.KEYWORD, '\\' * lexer.word))
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING,
-                             lexer.delimited_range('"', false, true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"', false, false)))
 
 -- Comments.
 -- TODO: block comment.
-lex:add_rule('comment', token(lexer.COMMENT, '%' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('%')))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S("{}'~<>|")))

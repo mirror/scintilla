@@ -79,7 +79,7 @@ local directives_base = word_match([[
   bye
 ]], true)
 lex:add_rule('directive', token('directives', ('@end' * lexer.space^1 + '@') *
-                                              directives_base))
+  directives_base))
 lex:add_style('directives', lexer.STYLE_FUNCTION)
 
 -- Chapters.
@@ -103,7 +103,7 @@ local chapters_base = word_match([[
   chapheading majorheading heading subheading subsubheading
 ]], true)
 lex:add_rule('chapter', token('chapters', ('@end' * lexer.space^1 + '@') *
-                                          chapters_base))
+  chapters_base))
 lex:add_style('chapters', lexer.STYLE_CLASS)
 
 -- Common keywords.
@@ -175,35 +175,32 @@ local keyword_base = word_match([[
   -- not implemented
 ]], true)
 lex:add_rule('keyword', token(lexer.KEYWORD, ('@end' * lexer.space^1 + '@') *
-                                             keyword_base))
+  keyword_base))
+
+local nested_braces = lexer.range('{', '}', false, false, true)
 
 -- Italics
-lex:add_rule('emph', token('emph',
-                           '@emph' *
-                           lexer.delimited_range('{}', false, true, true)))
-lex:add_style('emph', lexer.STYLE_STRING..',italics')
+lex:add_rule('emph', token('emph', '@emph' * nested_braces))
+
+lex:add_style('emph', lexer.STYLE_STRING .. ',italics')
 
 -- Bold
-lex:add_rule('strong', token('strong',
-                             '@strong' *
-                             lexer.delimited_range('{}', false, true, true)))
-lex:add_style('strong', lexer.STYLE_STRING..',bold')
+lex:add_rule('strong', token('strong', '@strong' * nested_braces))
+lex:add_style('strong', lexer.STYLE_STRING .. ',bold')
 
 -- Identifiers
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING,
-                             lexer.delimited_range('{}', false, true, true)))
+lex:add_rule('string', token(lexer.STRING, nested_braces))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Comments.
-local line_comment = '@c' * lexer.nonnewline_esc^0
---local line_comment_long = '@comment' * lexer.nonnewline_esc^0
-local block_comment = '@ignore' * (lexer.any - '@end ignore')^0 *
-                      P('@end ignore')^-1
+local line_comment = lexer.to_eol('@c', true)
+--local line_comment_long = lexer.to_eol('@comment', true)
+local block_comment = lexer.range('@ignore', '@end ignore')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Fold points.

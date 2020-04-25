@@ -139,10 +139,10 @@ local M = {}
 -- [`lexer.punct`](), [`lexer.space`](), [`lexer.newline`](),
 -- [`lexer.nonnewline`](), [`lexer.nonnewline_esc`](), [`lexer.dec_num`](),
 -- [`lexer.hex_num`](), [`lexer.oct_num`](), [`lexer.integer`](),
--- [`lexer.float`](), and [`lexer.word`](). You may use your own token names if
--- none of the above fit your language, but an advantage to using predefined
--- token names is that your lexer's tokens will inherit the universal syntax
--- highlighting color theme used by your text editor.
+-- [`lexer.float`](), [`lexer.number`](), and [`lexer.word`](). You may use your
+-- own token names if none of the above fit your language, but an advantage to
+-- using predefined token names is that your lexer's tokens will inherit the
+-- universal syntax highlighting color theme used by your text editor.
 --
 -- ##### Example Tokens
 --
@@ -185,9 +185,8 @@ local M = {}
 --
 -- Line-style comments with a prefix character(s) are easy to express with LPeg:
 --
---     local shell_comment = token(lexer.COMMENT, '#' * lexer.nonnewline^0)
---     local c_line_comment = token(lexer.COMMENT,
---       '//' * lexer.nonnewline_esc^0)
+--     local shell_comment = token(lexer.COMMENT, lexer.to_eol('#'))
+--     local c_line_comment = token(lexer.COMMENT, lexer.to_eol('//', true))
 --
 -- The comments above start with a '#' or "//" and go to the end of the line.
 -- The second comment recognizes the next line also as a comment if the current
@@ -196,8 +195,7 @@ local M = {}
 -- C-style "block" comments with a start and end delimiter are also easy to
 -- express:
 --
---     local c_comment = token(lexer.COMMENT, '/*' * (lexer.any - '*/')^0 *
---       P('*/')^-1)
+--     local c_comment = token(lexer.COMMENT, lexer.range('/*', '*/'))
 --
 -- This comment starts with a "/\*" sequence and contains anything up to and
 -- including an ending "\*/" sequence. The ending "\*/" is optional so the lexer
@@ -205,21 +203,13 @@ local M = {}
 --
 -- **Strings**
 --
--- It is tempting to think that a string is not much different from the block
--- comment shown above in that both have start and end delimiters:
+-- Most programming languages allow escape sequences in strings such that a
+-- sequence like "\\&quot;" in a double-quoted string indicates that the
+-- '&quot;' is not the end of the string. [`lexer.range()`]() handles escapes
+-- inherently.
 --
---     local dq_str = '"' * (lexer.any - '"')^0 * P('"')^-1
---     local sq_str = "'" * (lexer.any - "'")^0 * P("'")^-1
---     local simple_string = token(lexer.STRING, dq_str + sq_str)
---
--- However, most programming languages allow escape sequences in strings such
--- that a sequence like "\\&quot;" in a double-quoted string indicates that the
--- '&quot;' is not the end of the string. The above token incorrectly matches
--- such a string. Instead, use the [`lexer.delimited_range()`]() convenience
--- function.
---
---     local dq_str = lexer.delimited_range('"')
---     local sq_str = lexer.delimited_range("'")
+--     local dq_str = lexer.range('"')
+--     local sq_str = lexer.range("'")
 --     local string = token(lexer.STRING, dq_str + sq_str)
 --
 -- In this case, the lexer treats '\' as an escape character in a string
@@ -228,9 +218,9 @@ local M = {}
 -- **Numbers**
 --
 -- Most programming languages have the same format for integer and float tokens,
--- so it might be as simple as using a couple of predefined LPeg patterns:
+-- so it might be as simple as using a predefined LPeg pattern:
 --
---     local number = token(lexer.NUMBER, lexer.float + lexer.integer)
+--     local number = token(lexer.NUMBER, lexer.number)
 --
 -- However, some languages allow postfix characters on integers.
 --
@@ -714,9 +704,9 @@ local M = {}
 --     lex:add_rule('custom', token('custom', P('quux')))
 --     lex:add_style('custom', lexer.STYLE_KEYWORD .. ',bold')
 --     lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
---     lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"')))
---     lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
---     lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+--     lex:add_rule('string', token(lexer.STRING, lexer.range('"')))
+--     lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
+--     lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 --     lex:add_rule('operator', token(lexer.OPERATOR, S('+-*/%^=<>,.()[]{}')))
 --
 --     lex:add_fold_point(lexer.OPERATOR, '{', '}')
@@ -769,7 +759,7 @@ local M = {}
 -- #### Acknowledgements
 --
 -- Thanks to Peter Odding for his [lexer post][] on the Lua mailing list
--- that inspired me, and thanks to Roberto Ierusalimschy for LPeg.
+-- that provided inspiration, and thanks to Roberto Ierusalimschy for LPeg.
 --
 -- [lexer post]: http://lua-users.org/lists/lua-l/2007-04/msg00116.html
 -- @field DEFAULT (string)
@@ -906,6 +896,9 @@ local M = {}
 --   A pattern that matches either a decimal, hexadecimal, or octal number.
 -- @field float (pattern)
 --   A pattern that matches a floating point number.
+-- @field number (pattern)
+--   A pattern that matches a typical number, either a floating point, decimal,
+--   hexadecimal, or octal number.
 -- @field word (pattern)
 --   A pattern that matches a typical word. Words begin with a letter or
 --   underscore and consist of alphanumeric and underscore characters.
@@ -965,7 +958,8 @@ local function searchpath(name, path)
   local tried = {}
   for part in path:gmatch('[^;]+') do
     local filename = part:gsub('%?', name)
-    if loadfile(filename) then return filename end
+    local ok, errmsg = loadfile(filename)
+    if ok or not errmsg:find('cannot open') then return filename end
     tried[#tried + 1] = string.format("no file '%s'", filename)
   end
   return nil, table.concat(tried, '\n')
@@ -1605,6 +1599,7 @@ M.float = lpeg_S('+-')^-1 * (
   (M.digit^0 * '.' * M.digit^1 + M.digit^1 * '.' * M.digit^0 * -lpeg_P('.')) *
   (lpeg_S('eE') * lpeg_S('+-')^-1 * M.digit^1)^-1 +
   (M.digit^1 * lpeg_S('eE') * lpeg_S('+-')^-1 * M.digit^1))
+M.number = M.float + M.integer
 
 M.word = (M.alpha + '_') * (M.alnum + '_')^0
 
@@ -1625,6 +1620,69 @@ function M.token(name, patt)
 end
 
 ---
+-- Creates and returns a pattern that matches from string or pattern *prefix*
+-- until the end of the line.
+-- *escape* indicates whether the end of the line can be escaped with a '\'
+-- character.
+-- @param prefix String or pattern prefix to start matching at.
+-- @param escape Optional flag indicating whether or not newlines can be escaped
+--  by a '\' character. The default value is `false`.
+-- @return pattern
+-- @usage local line_comment = lexer.to_eol('//')
+-- @usage local line_comment = lexer.to_eol(P('#') + ';')
+-- @name to_eol
+function M.to_eol(prefix, escape)
+  return prefix * (not escape and M.nonnewline or M.nonnewline_esc)^0
+end
+
+---
+-- Creates and returns a pattern that matches a range of text bounded by strings
+-- or patterns *s* and *e*.
+-- This is a convenience function for matching more complicated ranges like
+-- strings with escape characters, balanced parentheses, and block comments
+-- (nested or not). *e* is optional and defaults to *s*. *single_line* indicates
+-- whether or not the range must be on a single line; *escapes* indicates
+-- whether or not to allow '\' as an escape character; and *balanced* indicates
+-- whether or not to handle balanced ranges like parentheses, and requires *s*
+-- and *e* to be different.
+-- @param s String or pattern start of a range.
+-- @param e Optional string or pattern end of a range. The default value is *s*.
+-- @param single_line Optional flag indicating whether or not the range must be
+--   on a single line.
+-- @param escapes Optional flag indicating whether or not the range end may
+--   be escaped by a '\' character.
+--   The default value is `false` unless *s* and *e* are identical,
+--   single-character strings. In that case, the default value is `true`.
+-- @param balanced Optional flag indicating whether or not to match a balanced
+--   range, like the "%b" Lua pattern. This flag only applies if *s* and *e* are
+--   different.
+-- @return pattern
+-- @usage local dq_str_escapes = lexer.range('"')
+-- @usage local dq_str_noescapes = lexer.range('"', false, false)
+-- @usage local unbalanced_parens = lexer.range('(', ')')
+-- @usage local balanced_parens = lexer.range('(', ')', false, false, true)
+-- @name range
+function M.range(s, e, single_line, escapes, balanced)
+  if type(e) ~= 'string' and type(e) ~= 'userdata' then
+    e, single_line, escapes, balanced = s, e, single_line, escapes
+  end
+  local any = M.any - e
+  if single_line then any = any - '\n' end
+  if balanced then any = any - s end
+  if escapes == nil then
+    -- Only allow escapes by default for ranges with identical, single-character
+    -- string delimiters.
+    escapes = type(s) == 'string' and #s == 1 and s == e
+  end
+  if escapes then any = any - '\\' + '\\' * M.any end
+  if balanced and s ~= e then
+    return lpeg_P{s * (any + lpeg_V(1))^0 * lpeg_P(e)^-1}
+  else
+    return s * any^0 * lpeg_P(e)^-1
+  end
+end
+
+-- Deprecated function. Use `lexer.range()` instead.
 -- Creates and returns a pattern that matches a range of text bounded by
 -- *chars* characters.
 -- This is a convenience function for matching more complicated delimited ranges
@@ -1647,9 +1705,10 @@ end
 -- @usage local unbalanced_parens = lexer.delimited_range('()')
 -- @usage local balanced_parens = lexer.delimited_range('()', false, false,
 --   true)
--- @see nested_pair
+-- @see range
 -- @name delimited_range
 function M.delimited_range(chars, single_line, no_escape, balanced)
+  print("lexer.delimited_range() is deprecated, use lexer.range()")
   local s = chars:sub(1, 1)
   local e = #chars == 2 and chars:sub(2, 2) or s
   local range
@@ -1692,7 +1751,7 @@ end
 -- @param s String character set like one passed to `lpeg.S()`.
 -- @return pattern
 -- @usage local regex = lexer.last_char_includes('+-*!%^&|=,([{') *
---   lexer.delimited_range('/')
+--   lexer.range('/')
 -- @name last_char_includes
 function M.last_char_includes(s)
   s = string.format('[%s]', s:gsub('[-%%%[]', '%%%1'))
@@ -1704,7 +1763,7 @@ function M.last_char_includes(s)
   end)
 end
 
----
+-- Deprecated function. Use `lexer.range()` instead.
 -- Returns a pattern that matches a balanced range of text that starts with
 -- string *start_chars* and ends with string *end_chars*.
 -- With single-character delimiters, this function is identical to
@@ -1713,9 +1772,10 @@ end
 -- @param end_chars The string ending a nested sequence.
 -- @return pattern
 -- @usage local nested_comment = lexer.nested_pair('/*', '*/')
--- @see delimited_range
+-- @see range
 -- @name nested_pair
 function M.nested_pair(start_chars, end_chars)
+  print("lexer.nested_pair() is deprecated, use lexer.range()")
   local s, e = start_chars, lpeg_P(end_chars)^-1
   return lpeg_P{s * (M.any - s - end_chars + lpeg_V(1))^0 * e}
 end

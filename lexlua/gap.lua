@@ -20,11 +20,12 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'", true) +
-                                           lexer.delimited_range('"', true)))
+local sq_str = lexer.range("'", true)
+local dq_str = lexer.range('"', true)
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
 
 -- Numbers.
 lex:add_rule('number', token(lexer.NUMBER, lexer.digit^1 * -lexer.alpha))

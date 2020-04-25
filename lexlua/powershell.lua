@@ -12,7 +12,7 @@ local lex = lexer.new('powershell')
 lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
 
 -- Keywords.
 lex:add_rule('keyword', token(lexer.KEYWORD, word_match([[
@@ -44,15 +44,14 @@ lex:add_rule('type', token(lexer.KEYWORD, '[' * word_match([[
 ]], true) * ']'))
 
 -- Variables.
-lex:add_rule('variable', token(lexer.VARIABLE,
-                               '$' * (lexer.digit^1 + lexer.word +
-                                      lexer.delimited_range('{}', true, true))))
+lex:add_rule('variable', token(lexer.VARIABLE, '$' *
+  (lexer.digit^1 + lexer.word + lexer.range('{', '}', true))))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"', true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"', true)))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('=!<>+-/*^&|~.,:;?()[]{}%`')))

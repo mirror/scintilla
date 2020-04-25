@@ -28,20 +28,20 @@ lex:add_rule('type', token(lexer.TYPE, word_match[[
 ]]))
 
 -- Strings.
-local sq_str = P('L')^-1 * lexer.delimited_range("'", true)
-local dq_str = P('L')^-1 * lexer.delimited_range('"', true)
+local sq_str = P('L')^-1 * lexer.range("'", true)
+local dq_str = P('L')^-1 * lexer.range('"', true)
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//', true)
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Preprocessor.
 local preproc_word = word_match[[
@@ -49,7 +49,7 @@ local preproc_word = word_match[[
   undef using warning
 ]]
 lex:add_rule('preproc', token(lexer.PREPROCESSOR, lexer.starts_line('#') *
-                                                  S('\t ')^0 * preproc_word))
+  S('\t ')^0 * preproc_word))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('+-/*%<>!=^&|?~:;.()[]{}')))

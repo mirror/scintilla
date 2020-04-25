@@ -8,7 +8,8 @@ local P, R, S = lpeg.P, lpeg.R, lpeg.S
 local lex = lexer.new('ansi_c')
 
 -- Whitespace.
-lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
+local ws = token(lexer.WHITESPACE, lexer.space^1)
+lex:add_rule('whitespace', ws)
 
 -- Keywords.
 lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
@@ -48,30 +49,26 @@ lex:add_rule('constants', token(lexer.CONSTANT, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-local sq_str = P('L')^-1 * lexer.delimited_range("'", true)
-local dq_str = P('L')^-1 * lexer.delimited_range('"', true)
+local sq_str = P('L')^-1 * lexer.range("'", true)
+local dq_str = P('L')^-1 * lexer.range('"', true)
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1 +
-                      '#if' * S(' \t')^0 * '0' * lexer.space *
-                      (lexer.any - '#endif')^0 * P('#endif')^-1
+local line_comment = lexer.to_eol('//', true)
+local block_comment = lexer.range('/*', '*/') +
+  lexer.range('#if' * S(' \t')^0 * '0' * lexer.space, '#endif')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Preprocessor.
-local preproc_word = word_match[[
+local include = token(lexer.PREPROCESSOR, '#' * S('\t ')^0 * 'include') *
+  (ws * token(lexer.STRING, lexer.range('<', '>', true)))^-1
+local preproc = token(lexer.PREPROCESSOR, '#' * S('\t ')^0 * word_match[[
   define elif else endif if ifdef ifndef line pragma undef
-]]
-lex:add_rule('preprocessor',
-             (token(lexer.PREPROCESSOR, '#' * S('\t ')^0 * preproc_word) +
-              token(lexer.PREPROCESSOR, '#' * S('\t ')^0 * 'include') *
-              (token(lexer.WHITESPACE, S('\t ')^1) *
-               token(lexer.STRING,
-                     lexer.delimited_range('<>', true, true)))^-1))
+]])
+lex:add_rule('preprocessor', include + preproc)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('+-/*%<>~!=^&|?~:;,.()[]{}')))

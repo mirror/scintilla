@@ -22,9 +22,9 @@ lex:add_style('field', lexer.STYLE_CONSTANT)
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING,
-                             lexer.delimited_range('"') +
-                             lexer.delimited_range('{}', false, true, true)))
+local dq_str = lexer.range('"')
+local br_str = lexer.range('{', '}', false, false, true)
+lex:add_rule('string', token(lexer.STRING, dq_str + br_str))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S(',=')))

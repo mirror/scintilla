@@ -40,9 +40,9 @@ local literal_delimitted = P(function(input, index)
     if delimiter_matches[delimiter] then
       -- Handle nested delimiter/matches in strings.
       local s, e = delimiter, delimiter_matches[delimiter]
-      patt = lexer.delimited_range(s..e, false, false, true)
+      patt = lexer.range(s, e, false, true, true)
     else
-      patt = lexer.delimited_range(delimiter)
+      patt = lexer.range(delimiter)
     end
     match_pos = lpeg.match(patt, input, index)
     return match_pos or #input + 1
@@ -50,27 +50,27 @@ local literal_delimitted = P(function(input, index)
 end)
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline_esc^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#', true)))
 
 -- Strings.
-local cmd_str = lexer.delimited_range('`')
-local sq_str = lexer.delimited_range("'")
-local dq_str = lexer.delimited_range('"')
+local cmd_str = lexer.range('`')
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
 local heredoc = '<<' * P(function(input, index)
-  local s, e, indented, _, delimiter =
-    input:find('(%-?)(["`]?)([%a_][%w_]*)%2[\n\r\f;]+', index)
-  if s == index and delimiter then
-    local end_heredoc = (#indented > 0 and '[\n\r\f]+ *' or '[\n\r\f]+')
-    local _, e = input:find(end_heredoc..delimiter, e)
-    return e and e + 1 or #input + 1
-  end
+  local _, e, indented, _, delimiter = input:find(
+    '^(%-?)(["`]?)([%a_][%w_]*)%2[\n\r\f;]+', index)
+  if not delimiter then return end
+  local end_heredoc = (#indented > 0 and '[\n\r\f]+ *' or '[\n\r\f]+')
+  _, e = input:find(end_heredoc .. delimiter, e)
+  return e and e + 1 or #input + 1
 end)
+local string = token(lexer.STRING, (sq_str + dq_str + heredoc + cmd_str) *
+  S('f')^-1)
 -- TODO: regex_str fails with `obj.method /patt/` syntax.
 local regex_str = #P('/') * lexer.last_char_includes('!%^&*([{-=+|:;,?<>~') *
-                  lexer.delimited_range('/', true, false) * S('iomx')^0
-lex:add_rule('string', token(lexer.STRING, (sq_str + dq_str + heredoc +
-                                            cmd_str) * S('f')^-1) +
-                       token(lexer.REGEX, regex_str))
+  lexer.range('/', true) * S('iomx')^0
+local regex = token(lexer.REGEX, regex_str)
+lex:add_rule('string', string + regex)
 
 -- Numbers.
 local dec = lexer.digit^1 * ('_' * lexer.digit^1)^0 * S('ri')^-1
@@ -79,15 +79,18 @@ local integer = S('+-')^-1 * (bin + lexer.hex_num + lexer.oct_num + dec)
 -- TODO: meta, control, etc. for numeric_literal.
 local numeric_literal = '?' * (lexer.any - lexer.space) * -word_char
 lex:add_rule('number', token(lexer.NUMBER, lexer.float * S('ri')^-1 + integer +
-                                           numeric_literal))
+  numeric_literal))
 
 -- Variables.
-local global_var = '$' * (word + S('!@L+`\'=~/\\,.;<>_*"$?:') + lexer.digit +
-                          '-' * S('0FadiIKlpvw'))
+local global_var = '$' * (
+  word + S('!@L+`\'=~/\\,.;<>_*"$?:') +
+  lexer.digit +
+  '-' * S('0FadiIKlpvw')
+)
 local class_var = '@@' * word
 local inst_var = '@' * word
 lex:add_rule('variable', token(lexer.VARIABLE, global_var + class_var +
-                                               inst_var))
+  inst_var))
 
 -- Symbols.
 lex:add_rule('symbol', token('symbol', ':' * P(function(input, index)
@@ -101,7 +104,7 @@ lex:add_rule('operator', token(lexer.OPERATOR, S('!%^&*()[]{}-=+/|:;.,?<>~')))
 -- Fold points.
 local function disambiguate(text, pos, line, s)
   return line:sub(1, s - 1):match('^%s*$') and
-         not text:sub(1, pos - 1):match('\\[ \t]*\r?\n$') and 1 or 0
+    not text:sub(1, pos - 1):match('\\[ \t]*\r?\n$') and 1 or 0
 end
 lex:add_fold_point(lexer.KEYWORD, 'begin', 'end')
 lex:add_fold_point(lexer.KEYWORD, 'case', 'end')

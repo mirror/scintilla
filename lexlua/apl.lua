@@ -12,11 +12,11 @@ lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Comments.
 lex:add_rule('comment', token(lexer.COMMENT, (P('⍝') + '#') *
-                                             lexer.nonnewline^0))
+  lexer.nonnewline^0))
 
 -- Strings.
-local sq_str = lexer.delimited_range("'", false, true)
-local dq_str = lexer.delimited_range('"')
+local sq_str = lexer.range("'", false, false)
+local dq_str = lexer.range('"')
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Numbers.
@@ -26,12 +26,12 @@ local exp = S('eE')
 local img = S('jJ')
 local sgn = P('¯')^-1
 local float = sgn * (dig^0 * rad * dig^1 + dig^1 * rad * dig^0 + dig^1) *
-              (exp * sgn *dig^1)^-1
+  (exp * sgn *dig^1)^-1
 lex:add_rule('number', token(lexer.NUMBER, float * img * float + float))
 
 -- Keywords.
 lex:add_rule('keyword', token(lexer.KEYWORD, P('⍞') + 'χ' + '⍺' + '⍶' + '⍵' +
-                                             '⍹' + '⎕' * R('AZ', 'az')^0))
+  '⍹' + '⎕' * R('AZ', 'az')^0))
 
 -- Names.
 local n1l = R('AZ', 'az')

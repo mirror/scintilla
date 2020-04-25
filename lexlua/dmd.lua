@@ -12,25 +12,25 @@ local M = {_NAME = 'dmd'}
 local ws = token(lexer.WHITESPACE, lexer.space^1)
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
-local nested_comment = lexer.nested_pair('/+', '+/')
+local line_comment = lexer.to_eol('//', true)
+local block_comment = lexer.range('/*', '*/')
+local nested_comment = lexer.range('/+', '+/', false, false, true)
 local comment = token(lexer.COMMENT, line_comment + block_comment +
-                                     nested_comment)
+  nested_comment)
 
 -- Strings.
-local sq_str = lexer.delimited_range("'", true) * S('cwd')^-1
-local dq_str = lexer.delimited_range('"') * S('cwd')^-1
-local lit_str = 'r' * lexer.delimited_range('"', false, true) * S('cwd')^-1
-local bt_str = lexer.delimited_range('`', false, true) * S('cwd')^-1
-local hex_str = 'x' * lexer.delimited_range('"') * S('cwd')^-1
+local sq_str = lexer.range("'", true) * S('cwd')^-1
+local dq_str = lexer.range('"') * S('cwd')^-1
+local lit_str = 'r' * lexer.range('"', false, false) * S('cwd')^-1
+local bt_str = lexer.range('`', false, false) * S('cwd')^-1
+local hex_str = 'x' * lexer.range('"') * S('cwd')^-1
 local other_hex_str = '\\x' * (lexer.xdigit * lexer.xdigit)^1
-local del_str = lexer.nested_pair('q"[', ']"') * S('cwd')^-1 +
-                lexer.nested_pair('q"(', ')"') * S('cwd')^-1 +
-                lexer.nested_pair('q"{', '}"') * S('cwd')^-1 +
-                lexer.nested_pair('q"<', '>"') * S('cwd')^-1
-local string = token(lexer.STRING, del_str + sq_str + dq_str + lit_str +
-                                   bt_str + hex_str + other_hex_str)
+local str = sq_str + dq_str + lit_str + bt_str + hex_str + other_hex_str
+for left, right in pairs{['['] = ']', ['('] = ')', ['{'] = '}', ['<'] = '>'} do
+  str = str + lexer.range('q"' .. left, right .. '"', false, false, true) *
+    S('cwd')^-1
+end
+local string = token(lexer.STRING, str)
 
 -- Numbers.
 local dec = lexer.digit^1 * ('_' * lexer.digit^1)^0
@@ -72,7 +72,7 @@ local constant = token(lexer.CONSTANT, word_match{
 })
 
 local class_sequence = token(lexer.TYPE, P('class') + P('struct')) * ws^1 *
-                                         token(lexer.CLASS, lexer.word)
+  token(lexer.CLASS, lexer.word)
 
 -- Identifiers.
 local identifier = token(lexer.IDENTIFIER, lexer.word)
@@ -126,17 +126,17 @@ local versions_list = token('versions', word_match{
 })
 
 local versions = token(lexer.KEYWORD, 'version') * lexer.space^0 *
-                 token(lexer.OPERATOR, '(') * lexer.space^0 * versions_list
+  token(lexer.OPERATOR, '(') * lexer.space^0 * versions_list
 
 local scopes = token(lexer.KEYWORD, 'scope') * lexer.space^0 *
-               token(lexer.OPERATOR, '(') * lexer.space^0 * scopes_list
+  token(lexer.OPERATOR, '(') * lexer.space^0 * scopes_list
 
 local traits = token(lexer.KEYWORD, '__traits') * lexer.space^0 *
-               token(lexer.OPERATOR, '(') * lexer.space^0 * traits_list
+  token(lexer.OPERATOR, '(') * lexer.space^0 * traits_list
 
-local func = token(lexer.FUNCTION, lexer.word) *
-             #(lexer.space^0 * (P('!') * lexer.word^-1 * lexer.space^-1)^-1 *
-               P('('))
+local func = token(lexer.FUNCTION, lexer.word) * #(
+  lexer.space^0 * (P('!') * lexer.word^-1 * lexer.space^-1)^-1 * P('(')
+)
 
 M._rules = {
   {'whitespace', ws},

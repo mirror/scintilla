@@ -45,13 +45,13 @@ lex:add_rule('variable', token(lexer.VARIABLE, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           lexer.delimited_range('"') +
-                                           lexer.delimited_range('[]', true) +
-                                           lexer.delimited_range('{}', true)))
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+local br_str = lexer.range('[', ']', true) + lexer.range('{', '}', true)
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str + br_str))
 
 -- Comments.
-lex:add_rule('comment', token(lexer.COMMENT, '#' * lexer.nonnewline^0))
+lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('-+~!$*%=<>&|^?:()')))

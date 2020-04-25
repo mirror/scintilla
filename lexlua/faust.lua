@@ -21,11 +21,11 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range('"', true)))
+lex:add_rule('string', token(lexer.STRING, lexer.range('"', true)))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//')
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
@@ -37,11 +37,10 @@ lex:add_rule('number', token(lexer.NUMBER, flt + int))
 
 -- Pragmas.
 lex:add_rule('pragma', token(lexer.PREPROCESSOR, P('<mdoc>') *
-                                                 (lexer.any - P('</mdoc>'))^0 *
-                                                 P('</mdoc>')^-1))
+  (lexer.any - P('</mdoc>'))^0 * P('</mdoc>')^-1))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR,
-                               S('+-/*%<>~!=^&|?~:;,.()[]{}@#$`\\\'')))
+  S('+-/*%<>~!=^&|?~:;,.()[]{}@#$`\\\'')))
 
 return lex

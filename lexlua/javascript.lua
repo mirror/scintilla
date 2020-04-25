@@ -24,20 +24,22 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Comments.
-local line_comment = '//' * lexer.nonnewline_esc^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * P('*/')^-1
+local line_comment = lexer.to_eol('//', true)
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Strings.
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+local bq_str = lexer.range('`')
+local string = token(lexer.STRING, sq_str + dq_str + bq_str)
 local regex_str = #P('/') * lexer.last_char_includes('+-*%^!=&|?:;,([{<>') *
-                  lexer.delimited_range('/', true) * S('igm')^0
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           lexer.delimited_range('"') +
-                                           lexer.delimited_range('`')) +
-                       token(lexer.REGEX, regex_str))
+  lexer.range('/', true) * S('igm')^0
+local regex = token(lexer.REGEX, regex_str)
+lex:add_rule('string', string + regex)
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.float + lexer.integer))
+lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('+-/*%^!=&|?:;,.()[]{}<>')))

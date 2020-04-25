@@ -12,14 +12,15 @@ local lex = lexer.new('nsis')
 lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 
 -- Comments (4.1).
-local line_comment = (P(';') + '#') * lexer.nonnewline^0
-local block_comment = '/*' * (lexer.any - '*/')^0 * '*/'
+local line_comment = lexer.to_eol(P(';') + '#')
+local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Strings.
-lex:add_rule('string', token(lexer.STRING, lexer.delimited_range("'") +
-                                           lexer.delimited_range('"') +
-                                           lexer.delimited_range('`')))
+local sq_str = lexer.range("'")
+local dq_str = lexer.range('"')
+local bq_str = lexer.range('`')
+lex:add_rule('string', token(lexer.STRING, sq_str + dq_str + bq_str))
 
 -- Constants (4.2.3).
 lex:add_rule('constant', token(lexer.CONSTANT, word_match[[
