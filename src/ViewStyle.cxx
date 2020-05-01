@@ -309,10 +309,10 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	}
 
 	indicatorsDynamic = std::any_of(indicators.cbegin(), indicators.cend(),
-		[](const Indicator &indicator) { return indicator.IsDynamic(); });
+		[](const Indicator &indicator) noexcept { return indicator.IsDynamic(); });
 
 	indicatorsSetFore = std::any_of(indicators.cbegin(), indicators.cend(),
-		[](const Indicator &indicator) { return indicator.OverridesTextFore(); });
+		[](const Indicator &indicator) noexcept { return indicator.OverridesTextFore(); });
 
 	maxAscent = 1;
 	maxDescent = 1;
@@ -327,10 +327,10 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 		lineOverlap = lineHeight;
 
 	someStylesProtected = std::any_of(styles.cbegin(), styles.cend(),
-		[](const Style &style) { return style.IsProtected(); });
+		[](const Style &style) noexcept { return style.IsProtected(); });
 
 	someStylesForceCase = std::any_of(styles.cbegin(), styles.cend(),
-		[](const Style &style) { return style.caseForce != Style::caseMixed; });
+		[](const Style &style) noexcept { return style.caseForce != Style::caseMixed; });
 
 	aveCharWidth = styles[STYLE_DEFAULT].aveCharWidth;
 	spaceWidth = styles[STYLE_DEFAULT].spaceWidth;
