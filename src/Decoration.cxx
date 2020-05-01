@@ -39,22 +39,22 @@ public:
 	~Decoration() override {
 	}
 
-	bool Empty() const override {
+	bool Empty() const noexcept override {
 		return (rs.Runs() == 1) && (rs.AllSameAs(0));
 	}
-	int Indicator() const override {
+	int Indicator() const noexcept override {
 		return indicator;
 	}
-	Sci::Position Length() const override {
+	Sci::Position Length() const noexcept override {
 		return rs.Length();
 	}
-	int ValueAt(Sci::Position position) const override {
+	int ValueAt(Sci::Position position) const noexcept override {
 		return rs.ValueAt(static_cast<POS>(position));
 	}
-	Sci::Position StartRun(Sci::Position position) const override {
+	Sci::Position StartRun(Sci::Position position) const noexcept override {
 		return rs.StartRun(static_cast<POS>(position));
 	}
-	Sci::Position EndRun(Sci::Position position) const override {
+	Sci::Position EndRun(Sci::Position position) const noexcept override {
 		return rs.EndRun(static_cast<POS>(position));
 	}
 	void SetValueAt(Sci::Position position, int value) override {
@@ -63,7 +63,7 @@ public:
 	void InsertSpace(Sci::Position position, Sci::Position insertLength) override {
 		rs.InsertSpace(static_cast<POS>(position), static_cast<POS>(insertLength));
 	}
-	Sci::Position Runs() const override {
+	Sci::Position Runs() const noexcept override {
 		return rs.Runs();
 	}
 };
@@ -79,7 +79,7 @@ class DecorationList : public IDecorationList {
 	std::vector<const IDecoration*> decorationView;	// Read-only view of decorationList
 	bool clickNotified;
 
-	Decoration<POS> *DecorationFromIndicator(int indicator);
+	Decoration<POS> *DecorationFromIndicator(int indicator) noexcept;
 	Decoration<POS> *Create(int indicator, Sci::Position length);
 	void Delete(int indicator);
 	void DeleteAnyEmpty();
@@ -89,15 +89,15 @@ public:
 	DecorationList();
 	~DecorationList() override;
 
-	const std::vector<const IDecoration*> &View() const override {
+	const std::vector<const IDecoration*> &View() const noexcept override {
 		return decorationView;
 	}
 
 	void SetCurrentIndicator(int indicator) override;
-	int GetCurrentIndicator() const override { return currentIndicator; }
+	int GetCurrentIndicator() const noexcept override { return currentIndicator; }
 
 	void SetCurrentValue(int value) override;
-	int GetCurrentValue() const override { return currentValue; }
+	int GetCurrentValue() const noexcept override { return currentValue; }
 
 	// Returns changed=true if some values may have changed
 	FillResult<Sci::Position> FillRange(Sci::Position position, int value, Sci::Position fillLength) override;
@@ -107,10 +107,10 @@ public:
 
 	void DeleteLexerDecorations() override;
 
-	int AllOnFor(Sci::Position position) const override;
-	int ValueAt(int indicator, Sci::Position position) override;
-	Sci::Position Start(int indicator, Sci::Position position) override;
-	Sci::Position End(int indicator, Sci::Position position) override;
+	int AllOnFor(Sci::Position position) const noexcept override;
+	int ValueAt(int indicator, Sci::Position position) noexcept override;
+	Sci::Position Start(int indicator, Sci::Position position) noexcept override;
+	Sci::Position End(int indicator, Sci::Position position) noexcept override;
 
 	bool ClickNotified() const override {
 		return clickNotified;
@@ -131,7 +131,7 @@ DecorationList<POS>::~DecorationList() {
 }
 
 template <typename POS>
-Decoration<POS> *DecorationList<POS>::DecorationFromIndicator(int indicator) {
+Decoration<POS> *DecorationList<POS>::DecorationFromIndicator(int indicator) noexcept {
 	for (const std::unique_ptr<Decoration<POS>> &deco : decorationList) {
 		if (deco->Indicator() == indicator) {
 			return deco.get();
@@ -255,7 +255,7 @@ void DecorationList<POS>::SetView() {
 }
 
 template <typename POS>
-int DecorationList<POS>::AllOnFor(Sci::Position position) const {
+int DecorationList<POS>::AllOnFor(Sci::Position position) const noexcept {
 	int mask = 0;
 	for (const std::unique_ptr<Decoration<POS>> &deco : decorationList) {
 		if (deco->rs.ValueAt(static_cast<POS>(position))) {
@@ -268,7 +268,7 @@ int DecorationList<POS>::AllOnFor(Sci::Position position) const {
 }
 
 template <typename POS>
-int DecorationList<POS>::ValueAt(int indicator, Sci::Position position) {
+int DecorationList<POS>::ValueAt(int indicator, Sci::Position position) noexcept {
 	const Decoration<POS> *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.ValueAt(static_cast<POS>(position));
@@ -277,7 +277,7 @@ int DecorationList<POS>::ValueAt(int indicator, Sci::Position position) {
 }
 
 template <typename POS>
-Sci::Position DecorationList<POS>::Start(int indicator, Sci::Position position) {
+Sci::Position DecorationList<POS>::Start(int indicator, Sci::Position position) noexcept {
 	const Decoration<POS> *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.StartRun(static_cast<POS>(position));
@@ -286,7 +286,7 @@ Sci::Position DecorationList<POS>::Start(int indicator, Sci::Position position) 
 }
 
 template <typename POS>
-Sci::Position DecorationList<POS>::End(int indicator, Sci::Position position) {
+Sci::Position DecorationList<POS>::End(int indicator, Sci::Position position) noexcept {
 	const Decoration<POS> *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.EndRun(static_cast<POS>(position));
