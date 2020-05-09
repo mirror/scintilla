@@ -37,8 +37,8 @@ def UpdateVersionNumbers(sci, root):
     UpdateLineInFile(root + "doc/ScintillaDownload.html", "       Release",
         "       Release " + sci.versionDotted)
     ReplaceREInFile(root + "doc/ScintillaDownload.html",
-        r"/www.scintilla.org/([a-zA-Z]+)\d\d\d\d?",
-        r"/www.scintilla.org/\g<1>" +  sci.version)
+        r"(/sourceforge.net/projects/scintilla/files/scintilla/)[\d\.]+(/[a-zA-Z]+)\d+",
+        r"\g<1>" +  sci.versionDotted + "\g<2>" + sci.version)
     UpdateLineInFile(root + "doc/index.html",
         '          <font color="#FFCC99" size="3"> Release version',
         '          <font color="#FFCC99" size="3"> Release version ' +\
@@ -46,6 +46,12 @@ def UpdateVersionNumbers(sci, root):
     UpdateLineInFile(root + "doc/index.html",
         '           Site last modified',
         '           Site last modified ' + sci.mdyModified + '</font>')
+    ReplaceREInFile(root + "doc/ScintillaHistory.html",
+        r"(/sourceforge.net/projects/scintilla/files/scintilla/)[\d\.]+(/[a-zA-Z]+)\d+",
+        r"\g<1>" +  sci.versionDotted + "\g<2>" + sci.version,
+        count=1)
+    ReplaceREInFile(root + "doc/ScintillaHistory.html",
+        r">Release [\d\.]+<", ">Release " + sci.versionDotted + "<", count=1)
     UpdateLineInFile(root + "doc/ScintillaHistory.html",
         '	Released ',
         '	Released ' + sci.dmyModified + '.')
@@ -53,6 +59,11 @@ def UpdateVersionNumbers(sci, root):
         "CFBundleVersion", sci.versionDotted)
     UpdateLineInPlistFile(root + "cocoa/ScintillaFramework/Info.plist",
         "CFBundleShortVersionString", sci.versionDotted)
+    UpdateLineInFile(root + "LongTermDownload.html", "       Release",
+        "       Release " + sci.versionDotted)
+    ReplaceREInFile(root + "LongTermDownload.html",
+        r"(/sourceforge.net/projects/scintilla/files/scintilla/)[\d\.]+(/[a-zA-Z]+)\d+",
+        r"\g<1>" +  sci.versionDotted + "\g<2>" + sci.version)
 
 # Last 24 digits of UUID, used for item IDs in Xcode
 def uid24():

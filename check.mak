@@ -211,7 +211,14 @@ test: | /tmp/scintilla
 	make -C $|/test/unit CXX=$(LINUX_CXX) clean test
 	cd $|/test && lua5.1 test_lexlua.lua
 
-releasedir = /tmp/scintilla$(shell grep -o '[0-9]\+' version.txt)
+version = $(shell grep -o '[0-9]\+' version.txt)
+date = $(shell date +'%Y%m%d')
+gen:
+	@echo "Using version $(version) with date $(date)"
+	sed -i -e 's/content="[0-9]\+"/content="$(date)"/;' doc/index.html
+	cd scripts && python LexGen.py
+
+releasedir = /tmp/scintilla$(version)
 $(releasedir): ; hg archive $@
 zip: $(releasedir)
 	cd /tmp && tar czf $<.tgz $(notdir $<)
