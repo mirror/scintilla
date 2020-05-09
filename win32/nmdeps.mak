@@ -10,11 +10,13 @@ $(DIR_O)/PlatWin.obj: \
 	../src/UniConversion.h \
 	../src/DBCS.h \
 	../src/FontQuality.h \
-	PlatWin.h
+	PlatWin.h \
+	../include/Compat.h
 $(DIR_O)/ScintillaDLL.obj: \
 	ScintillaDLL.cxx \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	ScintillaWin.h
 $(DIR_O)/ScintillaWin.obj: \
 	ScintillaWin.cxx \
@@ -23,6 +25,7 @@ $(DIR_O)/ScintillaWin.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
 	../src/UniqueString.h \
@@ -60,6 +63,7 @@ $(DIR_O)/AutoComplete.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../lexlib/CharacterSet.h \
 	../src/Position.h \
 	../src/AutoComplete.h
@@ -68,13 +72,16 @@ $(DIR_O)/CallTip.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Position.h \
 	../src/IntegerRectangle.h \
 	../src/CallTip.h
 $(DIR_O)/CaseConvert.obj: \
 	../src/CaseConvert.cxx \
+	../lexlib/StringCopy.h \
 	../src/CaseConvert.h \
-	../src/UniConversion.h
+	../src/UniConversion.h \
+	../include/Compat.h
 $(DIR_O)/CaseFolder.obj: \
 	../src/CaseFolder.cxx \
 	../src/CaseFolder.h \
@@ -84,6 +91,7 @@ $(DIR_O)/Catalogue.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/LexerModule.h \
 	../lexlib/CatalogueModules.h \
@@ -93,6 +101,7 @@ $(DIR_O)/CellBuffer.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Position.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -107,6 +116,7 @@ $(DIR_O)/ContractionState.obj: \
 	../include/Platform.h \
 	../src/Position.h \
 	../src/UniqueString.h \
+	../include/Compat.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
 	../src/RunStyles.h \
@@ -120,6 +130,7 @@ $(DIR_O)/Decoration.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Position.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -132,6 +143,7 @@ $(DIR_O)/Document.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
@@ -154,6 +166,7 @@ $(DIR_O)/EditModel.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
 	../src/UniqueString.h \
@@ -182,6 +195,7 @@ $(DIR_O)/Editor.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
@@ -216,6 +230,7 @@ $(DIR_O)/EditView.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
@@ -249,6 +264,7 @@ $(DIR_O)/ExternalLexer.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/LexerModule.h \
 	../src/Catalogue.h \
@@ -258,6 +274,7 @@ $(DIR_O)/Indicator.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/IntegerRectangle.h \
 	../src/Indicator.h \
 	../src/XPM.h
@@ -266,12 +283,14 @@ $(DIR_O)/KeyMap.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/KeyMap.h
 $(DIR_O)/LineMarker.obj: \
 	../src/LineMarker.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/IntegerRectangle.h \
 	../src/XPM.h \
 	../src/LineMarker.h
@@ -282,6 +301,7 @@ $(DIR_O)/MarginView.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
 	../src/IntegerRectangle.h \
@@ -311,6 +331,7 @@ $(DIR_O)/PerLine.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Position.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -323,6 +344,7 @@ $(DIR_O)/PositionCache.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../lexlib/CharacterCategory.h \
 	../src/Position.h \
 	../src/UniqueString.h \
@@ -353,6 +375,7 @@ $(DIR_O)/RunStyles.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Position.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -364,6 +387,7 @@ $(DIR_O)/ScintillaBase.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/CharacterCategory.h \
@@ -402,6 +426,7 @@ $(DIR_O)/ScintillaBaseL.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/CharacterCategory.h \
@@ -438,6 +463,7 @@ $(DIR_O)/Selection.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Position.h \
 	../src/Selection.h
 $(DIR_O)/Style.obj: \
@@ -445,18 +471,21 @@ $(DIR_O)/Style.obj: \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Style.h
 $(DIR_O)/UniConversion.obj: \
 	../src/UniConversion.cxx \
 	../src/UniConversion.h
 $(DIR_O)/UniqueString.obj: \
 	../src/UniqueString.cxx \
-	../src/UniqueString.h
+	../src/UniqueString.h \
+	../include/Compat.h
 $(DIR_O)/ViewStyle.obj: \
 	../src/ViewStyle.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
+	../include/Compat.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/Indicator.h \
@@ -473,6 +502,7 @@ $(DIR_O)/Accessor.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -480,7 +510,8 @@ $(DIR_O)/Accessor.obj: \
 	../lexlib/Accessor.h
 $(DIR_O)/CharacterCategory.obj: \
 	../lexlib/CharacterCategory.cxx \
-	../lexlib/CharacterCategory.h
+	../lexlib/CharacterCategory.h \
+	../include/Compat.h
 $(DIR_O)/CharacterSet.obj: \
 	../lexlib/CharacterSet.cxx \
 	../lexlib/CharacterSet.h
@@ -489,6 +520,7 @@ $(DIR_O)/DefaultLexer.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -501,6 +533,7 @@ $(DIR_O)/LexerBase.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -513,6 +546,7 @@ $(DIR_O)/LexerModule.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -526,6 +560,7 @@ $(DIR_O)/LexerNoExceptions.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -539,6 +574,7 @@ $(DIR_O)/LexerSimple.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -566,6 +602,7 @@ $(DIR_O)/LexA68k.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -578,6 +615,7 @@ $(DIR_O)/LexAbaqus.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -590,6 +628,7 @@ $(DIR_O)/LexAda.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -602,6 +641,7 @@ $(DIR_O)/LexAPDL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -614,6 +654,7 @@ $(DIR_O)/LexAsm.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -627,6 +668,7 @@ $(DIR_O)/LexAsn1.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -639,6 +681,7 @@ $(DIR_O)/LexASY.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -651,6 +694,7 @@ $(DIR_O)/LexAU3.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -663,6 +707,7 @@ $(DIR_O)/LexAVE.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -675,6 +720,7 @@ $(DIR_O)/LexAVS.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -687,6 +733,7 @@ $(DIR_O)/LexBaan.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -700,6 +747,7 @@ $(DIR_O)/LexBash.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
@@ -715,6 +763,7 @@ $(DIR_O)/LexBasic.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -728,6 +777,7 @@ $(DIR_O)/LexBatch.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -740,6 +790,7 @@ $(DIR_O)/LexBibTeX.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -753,6 +804,7 @@ $(DIR_O)/LexBullant.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -765,6 +817,7 @@ $(DIR_O)/LexCaml.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -779,6 +832,7 @@ $(DIR_O)/LexCIL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
@@ -794,6 +848,7 @@ $(DIR_O)/LexCLW.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -806,6 +861,7 @@ $(DIR_O)/LexCmake.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -818,6 +874,7 @@ $(DIR_O)/LexCOBOL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -830,6 +887,7 @@ $(DIR_O)/LexCoffeeScript.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -842,6 +900,7 @@ $(DIR_O)/LexConf.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -854,6 +913,7 @@ $(DIR_O)/LexCPP.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
@@ -870,6 +930,7 @@ $(DIR_O)/LexCrontab.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -882,6 +943,7 @@ $(DIR_O)/LexCsound.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -894,6 +956,7 @@ $(DIR_O)/LexCSS.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -906,6 +969,7 @@ $(DIR_O)/LexD.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -919,6 +983,7 @@ $(DIR_O)/LexDataflex.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -931,6 +996,7 @@ $(DIR_O)/LexDiff.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -943,6 +1009,7 @@ $(DIR_O)/LexDMAP.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -955,6 +1022,7 @@ $(DIR_O)/LexDMIS.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -967,6 +1035,7 @@ $(DIR_O)/LexECL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -981,6 +1050,7 @@ $(DIR_O)/LexEDIFACT.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/LexerModule.h \
@@ -990,6 +1060,7 @@ $(DIR_O)/LexEiffel.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1002,6 +1073,7 @@ $(DIR_O)/LexErlang.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1014,6 +1086,7 @@ $(DIR_O)/LexErrorList.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1026,6 +1099,7 @@ $(DIR_O)/LexEScript.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1038,6 +1112,7 @@ $(DIR_O)/LexFlagship.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1050,6 +1125,7 @@ $(DIR_O)/LexForth.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1062,6 +1138,7 @@ $(DIR_O)/LexFortran.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1074,6 +1151,7 @@ $(DIR_O)/LexGAP.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1086,6 +1164,7 @@ $(DIR_O)/LexGui4Cli.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1098,6 +1177,7 @@ $(DIR_O)/LexHaskell.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -1114,6 +1194,7 @@ $(DIR_O)/LexHex.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1126,6 +1207,7 @@ $(DIR_O)/LexHollywood.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1139,7 +1221,9 @@ $(DIR_O)/LexHTML.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
+	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/Accessor.h \
@@ -1153,6 +1237,7 @@ $(DIR_O)/LexIndent.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1165,6 +1250,7 @@ $(DIR_O)/LexInno.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1177,6 +1263,7 @@ $(DIR_O)/LexJSON.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1190,6 +1277,7 @@ $(DIR_O)/LexKix.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1202,6 +1290,7 @@ $(DIR_O)/LexKVIrc.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1214,6 +1303,7 @@ $(DIR_O)/LexLaTeX.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -1229,6 +1319,7 @@ $(DIR_O)/LexLisp.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1241,6 +1332,7 @@ $(DIR_O)/LexLout.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1248,11 +1340,25 @@ $(DIR_O)/LexLout.obj: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
+$(DIR_O)/LexLPeg.obj: \
+	../lexers/LexLPeg.cxx \
+	../include/ILexer.h \
+	../include/Sci_Position.h \
+	../include/Scintilla.h \
+	../include/Compat.h \
+	../include/SciLexer.h \
+	../lexlib/PropSetSimple.h \
+	../lexlib/LexAccessor.h \
+	../lexlib/LexerModule.h \
+	../lexlib/DefaultLexer.h \
+	../lexlib/WordList.h \
+	../lexlib/Accessor.h
 $(DIR_O)/LexLua.obj: \
 	../lexers/LexLua.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
@@ -1266,6 +1372,7 @@ $(DIR_O)/LexMagik.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1278,6 +1385,7 @@ $(DIR_O)/LexMake.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1290,6 +1398,7 @@ $(DIR_O)/LexMarkdown.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1302,6 +1411,7 @@ $(DIR_O)/LexMatlab.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1314,6 +1424,7 @@ $(DIR_O)/LexMaxima.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1326,6 +1437,7 @@ $(DIR_O)/LexMetapost.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1338,6 +1450,7 @@ $(DIR_O)/LexMMIXAL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1350,6 +1463,7 @@ $(DIR_O)/LexModula.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -1363,6 +1477,7 @@ $(DIR_O)/LexMPT.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1375,6 +1490,7 @@ $(DIR_O)/LexMSSQL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1387,6 +1503,7 @@ $(DIR_O)/LexMySQL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1399,6 +1516,7 @@ $(DIR_O)/LexNim.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
@@ -1414,6 +1532,7 @@ $(DIR_O)/LexNimrod.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1426,6 +1545,7 @@ $(DIR_O)/LexNsis.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1438,6 +1558,7 @@ $(DIR_O)/LexNull.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1450,6 +1571,7 @@ $(DIR_O)/LexOpal.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1462,6 +1584,7 @@ $(DIR_O)/LexOScript.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1474,6 +1597,7 @@ $(DIR_O)/LexPascal.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1486,6 +1610,7 @@ $(DIR_O)/LexPB.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1498,6 +1623,7 @@ $(DIR_O)/LexPerl.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1511,6 +1637,7 @@ $(DIR_O)/LexPLM.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1523,6 +1650,7 @@ $(DIR_O)/LexPO.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1535,6 +1663,7 @@ $(DIR_O)/LexPOV.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1547,6 +1676,7 @@ $(DIR_O)/LexPowerPro.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1559,6 +1689,7 @@ $(DIR_O)/LexPowerShell.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1571,6 +1702,7 @@ $(DIR_O)/LexProgress.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1585,6 +1717,7 @@ $(DIR_O)/LexProps.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1597,6 +1730,7 @@ $(DIR_O)/LexPS.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1609,6 +1743,7 @@ $(DIR_O)/LexPython.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/StringCopy.h \
 	../lexlib/WordList.h \
@@ -1626,6 +1761,7 @@ $(DIR_O)/LexR.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1638,6 +1774,7 @@ $(DIR_O)/LexRaku.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1652,6 +1789,7 @@ $(DIR_O)/LexRebol.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1664,6 +1802,7 @@ $(DIR_O)/LexRegistry.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1677,6 +1816,7 @@ $(DIR_O)/LexRuby.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1689,6 +1829,7 @@ $(DIR_O)/LexRust.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/PropSetSimple.h \
 	../lexlib/WordList.h \
@@ -1704,6 +1845,7 @@ $(DIR_O)/LexSAS.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1716,6 +1858,7 @@ $(DIR_O)/LexScriptol.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1728,6 +1871,7 @@ $(DIR_O)/LexSmalltalk.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1740,6 +1884,7 @@ $(DIR_O)/LexSML.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1752,6 +1897,7 @@ $(DIR_O)/LexSorcus.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1764,6 +1910,7 @@ $(DIR_O)/LexSpecman.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1776,6 +1923,7 @@ $(DIR_O)/LexSpice.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1788,6 +1936,7 @@ $(DIR_O)/LexSQL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1803,6 +1952,7 @@ $(DIR_O)/LexStata.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1815,6 +1965,7 @@ $(DIR_O)/LexSTTXT.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1827,6 +1978,7 @@ $(DIR_O)/LexTACL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1839,6 +1991,7 @@ $(DIR_O)/LexTADS3.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1851,6 +2004,7 @@ $(DIR_O)/LexTAL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1863,6 +2017,7 @@ $(DIR_O)/LexTCL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1875,6 +2030,7 @@ $(DIR_O)/LexTCMD.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1887,6 +2043,7 @@ $(DIR_O)/LexTeX.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1899,6 +2056,7 @@ $(DIR_O)/LexTxt2tags.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1911,6 +2069,7 @@ $(DIR_O)/LexVB.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1923,6 +2082,7 @@ $(DIR_O)/LexVerilog.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1938,6 +2098,7 @@ $(DIR_O)/LexVHDL.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1950,6 +2111,7 @@ $(DIR_O)/LexVisualProlog.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
@@ -1965,6 +2127,7 @@ $(DIR_O)/LexX12.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/LexerModule.h \
 	../lexlib/DefaultLexer.h
@@ -1973,6 +2136,7 @@ $(DIR_O)/LexYAML.obj: \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
+	../include/Compat.h \
 	../include/SciLexer.h \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
