@@ -564,19 +564,36 @@
 	Released 07 December 2019.
 	</li>
 	<li>
-	ILexerWithIdentity interface defined provisionally to support use of Lexilla.
+	ILexerWithIdentity interface defined provisionally to support potential use of Lexilla.
 	The details of this interface may change before being stabilised in Scintilla 5.0.
 	</li>
 	<li>
 	SCI_LOADLEXERLIBRARY implemented on Cocoa.
 	</li>
 	<li>
-	Build Scintilla with SCI_EMPTYCATALOGUE to avoid making lexers available.
+	Can build Scintilla with SCI_EMPTYCATALOGUE to avoid making lexers available.
 	</li>
 	<li>
 	Add methods for iterating through the marker handles and marker numbers on a line:
 	SCI_MARKERHANDLEFROMLINE and SCI_MARKERNUMBERFROMLINE.
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1344/">Feature #1344</a>.
+	</li>
+	<li>
+	Lua LPeg lexer supports multiple lexer paths via ';' in <code>lexer.lpeg.home</code> property,
+	or via multiple calls to new <code>SCI_PRIVATELEXERCALL(SCI_LOADLEXERLIBRARY, path)</code>.
+	</li>
+	<li>
+	Lua LPeg lexer no longer includes the <code>io</code> and <code>package</code> libraries,
+	improving sandbox safety.
+	</li>
+	<li>
+	Lua LPeg lexer Lua API switches to 1-based indices for style numbers, line numbers and positions.
+	The C++ <code>SCI_PRIVATELEXERCALL</code> interface is unaffected.
+	</li>
+	<li>
+	Lua LPeg lexer API deprecates <code>lexer.delimited_range()</code> and <code>lexer.nested_pair()</code>
+	in favor of new <code>lexer.range()</code>, and adds <code>lexer.to_eol()</code> and
+	<code>lexer.number</code>.
 	</li>
 	<li>
 	Assembler lexers asm and as can change comment character with lexer.as.comment.character property.
@@ -598,6 +615,12 @@
 	<li>
 	Lexer and folder added for Raku language.
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1328/">Feature #1328</a>.
+	</li>
+	<li>
+	Added txt2tags Lua LPeg lexer.
+	</li>
+	<li>
+	Fixed incorrect grammar building for Lua LPeg lexers that embed themselves (e.g. PHP).
 	</li>
 	<li>
 	Add default argument for StyleContext::GetRelative.
