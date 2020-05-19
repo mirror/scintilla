@@ -250,6 +250,14 @@ void SetWindowPointer(HWND hWnd, void *ptr) noexcept {
 
 namespace {
 
+using GetDpiForWindowSig = UINT(WINAPI *)(HWND hwnd);
+GetDpiForWindowSig fnGetDpiForWindow = nullptr;
+
+void LoadDpiForWindow() noexcept {
+	HMODULE user32 = ::GetModuleHandleW(L"user32.dll");
+	fnGetDpiForWindow = DLLFunction<GetDpiForWindowSig>(user32, "GetDpiForWindow");
+}
+
 HINSTANCE hinstPlatformRes {};
 
 HCURSOR reverseArrowCursor {};
@@ -421,6 +429,16 @@ public:
 };
 typedef VarBuffer<XYPOSITION, stackBufferLength> TextPositions;
 
+UINT DpiForWindow(WindowID wid) noexcept {
+	if (fnGetDpiForWindow) {
+		return fnGetDpiForWindow(HwndFromWindowID(wid));
+	}
+	HDC hdcMeasure = ::CreateCompatibleDC({});
+	const UINT scale = ::GetDeviceCaps(hdcMeasure, LOGPIXELSY);
+	::DeleteDC(hdcMeasure);
+	return scale;
+}
+
 class SurfaceGDI : public Surface {
 	bool unicodeMode=false;
 	HDC hdc{};
@@ -432,6 +450,9 @@ class SurfaceGDI : public Surface {
 	HFONT fontOld{};
 	HBITMAP bitmap{};
 	HBITMAP bitmapOld{};
+
+	int logPixelsY = 72;
+
 	int maxWidthMeasure = INT_MAX;
 	// There appears to be a 16 bit string length limit in GDI on NT.
 	int maxLenText = 65535;
@@ -540,20 +561,22 @@ bool SurfaceGDI::Initialised() {
 	return hdc != 0;
 }
 
-void SurfaceGDI::Init(WindowID) {
+void SurfaceGDI::Init(WindowID wid) {
 	Release();
 	hdc = ::CreateCompatibleDC({});
 	hdcOwned = true;
 	::SetTextAlign(hdc, TA_BASELINE);
+	logPixelsY = DpiForWindow(wid);
 }
 
-void SurfaceGDI::Init(SurfaceID sid, WindowID) {
+void SurfaceGDI::Init(SurfaceID sid, WindowID wid) {
 	Release();
 	hdc = static_cast<HDC>(sid);
 	::SetTextAlign(hdc, TA_BASELINE);
+	logPixelsY = DpiForWindow(wid);
 }
 
-void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID) {
+void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID wid) {
 	Release();
 	SurfaceGDI *psurfOther = dynamic_cast<SurfaceGDI *>(surface_);
 	// Should only ever be called with a SurfaceGDI, not a SurfaceD2D
@@ -565,6 +588,7 @@ void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID) 
 	::SetTextAlign(hdc, TA_BASELINE);
 	SetUnicodeMode(psurfOther->unicodeMode);
 	SetDBCSMode(psurfOther->codePage);
+	logPixelsY = DpiForWindow(wid);
 }
 
 void SurfaceGDI::PenColour(ColourDesired fore) {
@@ -602,7 +626,7 @@ void SurfaceGDI::SetFont(const Font &font_) noexcept {
 }
 
 int SurfaceGDI::LogPixelsY() {
-	return ::GetDeviceCaps(hdc, LOGPIXELSY);
+	return logPixelsY;
 }
 
 int SurfaceGDI::DeviceHeightFont(int points) {
@@ -986,8 +1010,6 @@ class SurfaceD2D : public Surface {
 	ID2D1SolidColorBrush *pBrush;
 
 	int logPixelsY;
-	float dpiScaleX;
-	float dpiScaleY;
 
 	void Clear() noexcept;
 	void SetFont(const Font &font_);
@@ -1001,7 +1023,7 @@ public:
 	SurfaceD2D &operator=(SurfaceD2D &&) = delete;
 	~SurfaceD2D() override;
 
-	void SetScale();
+	void SetScale(WindowID wid);
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
@@ -1069,8 +1091,6 @@ SurfaceD2D::SurfaceD2D() noexcept :
 	pBrush = nullptr;
 
 	logPixelsY = 72;
-	dpiScaleX = 1.0;
-	dpiScaleY = 1.0;
 }
 
 SurfaceD2D::~SurfaceD2D() {
@@ -1101,12 +1121,8 @@ void SurfaceD2D::Release() {
 	Clear();
 }
 
-void SurfaceD2D::SetScale() {
-	HDC hdcMeasure = ::CreateCompatibleDC({});
-	logPixelsY = ::GetDeviceCaps(hdcMeasure, LOGPIXELSY);
-	dpiScaleX = ::GetDeviceCaps(hdcMeasure, LOGPIXELSX) / 96.0f;
-	dpiScaleY = logPixelsY / 96.0f;
-	::DeleteDC(hdcMeasure);
+void SurfaceD2D::SetScale(WindowID wid) {
+	logPixelsY = DpiForWindow(wid);
 }
 
 bool SurfaceD2D::Initialised() {
@@ -1117,20 +1133,20 @@ HRESULT SurfaceD2D::FlushDrawing() {
 	return pRenderTarget->Flush();
 }
 
-void SurfaceD2D::Init(WindowID /* wid */) {
+void SurfaceD2D::Init(WindowID wid) {
 	Release();
-	SetScale();
+	SetScale(wid);
 }
 
-void SurfaceD2D::Init(SurfaceID sid, WindowID) {
+void SurfaceD2D::Init(SurfaceID sid, WindowID wid) {
 	Release();
-	SetScale();
+	SetScale(wid);
 	pRenderTarget = static_cast<ID2D1RenderTarget *>(sid);
 }
 
-void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID) {
+void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID wid) {
 	Release();
-	SetScale();
+	SetScale(wid);
 	SurfaceD2D *psurfOther = dynamic_cast<SurfaceD2D *>(surface_);
 	// Should only ever be called with a SurfaceD2D, not a SurfaceGDI
 	PLATFORM_ASSERT(psurfOther);
@@ -2908,6 +2924,7 @@ void Platform::Assert(const char *c, const char *file, int line) {
 
 void Platform_Initialise(void *hInstance) {
 	hinstPlatformRes = static_cast<HINSTANCE>(hInstance);
+	LoadDpiForWindow();
 	LoadReverseArrowCursor();
 	ListBoxX_Register();
 }
