@@ -354,7 +354,7 @@ class ScintillaWin :
 	sptr_t HandleCompositionInline(uptr_t wParam, sptr_t lParam);
 	static bool KoreanIME() noexcept;
 	void MoveImeCarets(Sci::Position offset);
-	void DrawImeIndicator(int indicator, int len);
+	void DrawImeIndicator(int indicator, Sci::Position len);
 	void SetCandidateWindowPos();
 	void SelectionToHangul();
 	void EscapeHanja();
@@ -962,7 +962,7 @@ void ScintillaWin::MoveImeCarets(Sci::Position offset) {
 	}
 }
 
-void ScintillaWin::DrawImeIndicator(int indicator, int len) {
+void ScintillaWin::DrawImeIndicator(int indicator, Sci::Position len) {
 	// Emulate the visual style of IME characters with indicators.
 	// Draw an indicator on the character before caret by the character bytes of len
 	// so it should be called after InsertCharacter().
@@ -1160,7 +1160,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 			InsertCharacter(docChar.c_str(), static_cast<unsigned int>(docChar.size()), CharacterSource::tentativeInput);
 
-			DrawImeIndicator(imeIndicator[i], static_cast<unsigned int>(docChar.size()));
+			DrawImeIndicator(imeIndicator[i], docChar.size());
 			i += ucWidth;
 		}
 
@@ -1536,7 +1536,7 @@ sptr_t ScintillaWin::KeyMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 			return 1;
 		} else {
 			wchar_t wcs[3] = { 0 };
-			const unsigned int wclen = UTF16FromUTF32Character(static_cast<unsigned int>(wParam), wcs);
+			const size_t wclen = UTF16FromUTF32Character(static_cast<unsigned int>(wParam), wcs);
 			AddCharUTF16(wcs, wclen, CharacterSource::directInput);
 			return FALSE;
 		}
@@ -1639,7 +1639,7 @@ sptr_t ScintillaWin::EditMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 		if (static_cast<Sci::Position>(wParam) < 0) {
 			wParam = SelectionStart().Position();
 		}
-		return pdoc->LineFromPosition(static_cast<Sci::Position>(wParam));
+		return pdoc->LineFromPosition(wParam);
 
 	case EM_EXLINEFROMCHAR:
 		return pdoc->LineFromPosition(lParam);
@@ -1664,7 +1664,7 @@ sptr_t ScintillaWin::EditMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 		break;
 
 	case EM_SETSEL: {
-			Sci::Position nStart = static_cast<Sci::Position>(wParam);
+			Sci::Position nStart = wParam;
 			Sci::Position nEnd = lParam;
 			if (nStart == 0 && nEnd == -1) {
 				nEnd = pdoc->Length();
@@ -2841,7 +2841,7 @@ void ScintillaWin::ImeStartComposition() {
 			// The negative is to allow for leading
 			lf.lfHeight = -(std::abs(deviceHeight / SC_FONT_SIZE_MULTIPLIER));
 			lf.lfWeight = vs.styles[styleHere].weight;
-			lf.lfItalic = static_cast<BYTE>(vs.styles[styleHere].italic ? 1 : 0);
+			lf.lfItalic = vs.styles[styleHere].italic ? 1 : 0;
 			lf.lfCharSet = DEFAULT_CHARSET;
 			lf.lfFaceName[0] = L'\0';
 			if (vs.styles[styleHere].fontName) {
