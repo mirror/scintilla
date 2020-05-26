@@ -289,7 +289,8 @@
     <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_PRIVATELEXERCALL(SCI_LOADLEXERLIBRARY, const char *path)</a><br/>
     <a class="message" href="#SCI_PROPERTYNAMES">SCI_PRIVATELEXERCALL(SCI_PROPERTYNAMES, char *names) &rarr; int</a><br/>
     <a class="message" href="#SCI_SETDOCPOINTER">SCI_PRIVATELEXERCALL(SCI_SETDOCPOINTER, int sci)</a><br/>
-    <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_PRIVATELEXERCALL(SCI_SETLEXERLANGUAGE, languageName)</a><br/>
+    <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_PRIVATELEXERCALL(SCI_SETLEXERLANGUAGE, char *languageName)</a><br/>
+    <a class="message" href="#SCI_GETNAMEDSTYLES">SCI_PRIVATELEXERCALL(SCI_GETNAMEDSTYLES, char *styleName) &rarr; int</a><br/>
     <a class="message" href="#SCI_NAMEOFSTYLE">SCI_NAMEOFSTYLE(int style, char *name) &rarr; int</a><br/>
     </code>
 
@@ -450,6 +451,16 @@
     <p>See also:
     <a class="message" href="#SCI_SETDOCPOINTER"><code>SCI_SETDOCPOINTER</code></a>,
     <a class="message" href="#SCI_PROPERTYNAMES"><code>SCI_PROPERTYNAMES</code></a></p>
+
+    <p><b id="SCI_GETNAMEDSTYLES">SCI_PRIVATELEXERCALL(SCI_GETNAMEDSTYLES, const char *styleName)</b><br/>
+    Returns the style number associated with <code>styleName</code>.</p>
+
+    <p>Usage:</p>
+
+    <pre><code>
+    style = SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_GETNAMEDSTYLES, "error")
+    SendScintilla(sci, SCI_ANNOTATIONSETSTYLE, line, style) // match error style
+    </code></pre>
 
     <p><b id="SCI_NAMEOFSTYLE">SCI_NAMEOFSTYLE(int style, char *name) &rarr; int</b><br/>
     Retrieves the name of a style. Note this is <em>not</em> a

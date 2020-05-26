@@ -806,14 +806,14 @@ public:
     auto lParam = reinterpret_cast<sptr_t>(arg);
     switch(code) {
     case SCI_GETDIRECTFUNCTION:
-      SS = reinterpret_cast<SciFnDirect>(lParam);
+      SS = reinterpret_cast<SciFnDirect>(arg);
       return nullptr;
     case SCI_SETDOCPOINTER:
       sci = lParam;
       return nullptr;
     case SCI_CHANGELEXERSTATE:
       if (ownLua) lua_close(L);
-      L = reinterpret_cast<lua_State *>(lParam), ownLua = false;
+      L = reinterpret_cast<lua_State *>(arg), ownLua = false;
       return nullptr;
     case SCI_LOADLEXERLIBRARY: {
       const char *path = reinterpret_cast<const char*>(arg);
@@ -858,7 +858,13 @@ public:
       }
       val.append(val, 0, val.length() - 1); // "lexer/lexer" fallback
       return StringResult(lParam, val.c_str());
-    } case SCI_GETSTATUS:
+    } case SCI_GETNAMEDSTYLES:
+      if (!L) return reinterpret_cast<void *>(STYLE_DEFAULT);
+      for (int i = 0; i < STYLE_MAX; i++)
+        if (strcmp(NameOfStyle(i), reinterpret_cast<const char *>(arg)) == 0)
+          return reinterpret_cast<void *>(i);
+      return reinterpret_cast<void *>(STYLE_DEFAULT);
+    case SCI_GETSTATUS:
       return StringResult(lParam, props.Get(LexerErrorKey));
     }
     return nullptr;
