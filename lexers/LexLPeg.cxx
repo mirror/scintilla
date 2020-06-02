@@ -806,7 +806,7 @@ public:
     auto lParam = reinterpret_cast<sptr_t>(arg);
     switch(code) {
     case SCI_GETDIRECTFUNCTION:
-      SS = reinterpret_cast<SciFnDirect>(arg);
+      SS = reinterpret_cast<SciFnDirect>(lParam);
       return nullptr;
     case SCI_SETDOCPOINTER:
       sci = lParam;
