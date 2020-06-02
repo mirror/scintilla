@@ -6857,7 +6857,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char
     *language)</a><br />
      <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language) &rarr; int</a><br />
-     <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char
+     <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(bool iLexer5, const char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(position start, position end)</a><br />
      <a class="message" href="#SCI_CHANGELEXERSTATE">SCI_CHANGELEXERSTATE(position start, position end) &rarr; int</a><br />
@@ -6913,9 +6913,13 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><code>SCI_GETLEXERLANGUAGE</code> retrieves the name of the lexer.</p>
 
-    <p><b id="SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char *path)</b><br />
+    <p><b id="SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(bool iLexer5, const char *path)</b><br />
      Load a lexer implemented in a shared library. This is a .so file on GTK/Linux, a .dylib file on macOS, or a .DLL file on Windows.
-     </p>
+    <code>iLexer5</code> indicates whether or not the library contains Scintilla lexers that implement
+    the ILexer5 interface defined in Scintilla 4.3+ (e.g. Lexilla). The default is to assume lexers
+    implement the ILexer interface defined in Scintilla 3.x. This flag must be set explicitly and
+    cannot be inferred.
+    </p>
 
     <p><b id="SCI_COLOURISE">SCI_COLOURISE(position start, position end)</b><br />
      This requests the current lexer or the container (if the lexer is set to

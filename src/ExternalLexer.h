@@ -10,7 +10,7 @@
 
 namespace Scintilla {
 
-void ExternalLexerLoad(const char *path);
+void ExternalLexerLoad(const char *path, bool iLexer5=false);
 
 }
 

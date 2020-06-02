@@ -12,7 +12,7 @@
 
 namespace Scintilla {
 
-enum { dvOriginal=0, dvLineEnd=1 };
+enum { dvOriginal=0, dvLineEnd=1, dvRelease4=2 };
 
 class IDocument {
 public:
@@ -90,6 +90,82 @@ public:
 	virtual const char * SCI_METHOD GetName() = 0;
 	virtual int SCI_METHOD  GetIdentifier() = 0;
 	virtual const char * SCI_METHOD PropertyGet(const char *key) = 0;
+};
+
+// For upstream lexer/lexilla support.
+
+enum { lvRelease4=2, lvRelease5=3 };
+
+class ILexer4 {
+public:
+	virtual int SCI_METHOD Version() const = 0;
+	virtual void SCI_METHOD Release() = 0;
+	virtual const char * SCI_METHOD PropertyNames() = 0;
+	virtual int SCI_METHOD PropertyType(const char *name) = 0;
+	virtual const char * SCI_METHOD DescribeProperty(const char *name) = 0;
+	virtual Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) = 0;
+	virtual const char * SCI_METHOD DescribeWordListSets() = 0;
+	virtual Sci_Position SCI_METHOD WordListSet(int n, const char *wl) = 0;
+	virtual void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) = 0;
+	virtual void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) = 0;
+	virtual void * SCI_METHOD PrivateCall(int operation, void *pointer) = 0;
+	virtual int SCI_METHOD LineEndTypesSupported() = 0;
+	virtual int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) = 0;
+	virtual int SCI_METHOD SubStylesStart(int styleBase) = 0;
+	virtual int SCI_METHOD SubStylesLength(int styleBase) = 0;
+	virtual int SCI_METHOD StyleFromSubStyle(int subStyle) = 0;
+	virtual int SCI_METHOD PrimaryStyleFromStyle(int style) = 0;
+	virtual void SCI_METHOD FreeSubStyles() = 0;
+	virtual void SCI_METHOD SetIdentifiers(int style, const char *identifiers) = 0;
+	virtual int SCI_METHOD DistanceToSecondaryStyles() = 0;
+	virtual const char * SCI_METHOD GetSubStyleBases() = 0;
+	virtual int SCI_METHOD NamedStyles() = 0;
+	virtual const char * SCI_METHOD NameOfStyle(int style) = 0;
+	virtual const char * SCI_METHOD TagsOfStyle(int style) = 0;
+	virtual const char * SCI_METHOD DescriptionOfStyle(int style) = 0;
+};
+
+class ILexer5 : public ILexer4 {
+public:
+	virtual const char * SCI_METHOD GetName() = 0;
+	virtual int SCI_METHOD  GetIdentifier() = 0;
+	virtual const char * SCI_METHOD PropertyGet(const char *key) = 0;
+};
+
+class LexillaLexer : public ILexerWithIdentity {
+ILexer5 *lex;
+public:
+	LexillaLexer(ILexer5 *lex_) : lex(lex_) {}
+	virtual ~LexillaLexer() {}
+	void SCI_METHOD Release() override { lex->Release(); };
+	int SCI_METHOD Version() const override { return lex->Version(); }
+	const char * SCI_METHOD PropertyNames() override { return lex->PropertyNames(); }
+	int SCI_METHOD PropertyType(const char *name) override { return lex->PropertyType(name); }
+	const char * SCI_METHOD DescribeProperty(const char *name) override { return lex->DescribeProperty(name); }
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override { return lex->PropertySet(key, val); }
+	const char * SCI_METHOD DescribeWordListSets() override { return lex->DescribeWordListSets(); }
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override { return lex->WordListSet(n, wl); }
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) override { lex->Lex(startPos, lengthDoc, initStyle, pAccess); }
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) override { lex->Fold(startPos, lengthDoc, initStyle, pAccess); }
+	void * SCI_METHOD PrivateCall(int operation, void *pointer) override { return lex->PrivateCall(operation, pointer); }
+	int SCI_METHOD LineEndTypesSupported() override { return lex->LineEndTypesSupported(); }
+	int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) override { return lex->AllocateSubStyles(styleBase, numberStyles); }
+	int SCI_METHOD SubStylesStart(int styleBase) override { return lex->SubStylesStart(styleBase); }
+	int SCI_METHOD SubStylesLength(int styleBase) override { return lex->SubStylesLength(styleBase); }
+	int SCI_METHOD StyleFromSubStyle(int subStyle) override { return lex->StyleFromSubStyle(subStyle); }
+	int SCI_METHOD PrimaryStyleFromStyle(int style) override { return lex->PrimaryStyleFromStyle(style); }
+	void SCI_METHOD FreeSubStyles() override { lex->FreeSubStyles(); }
+	void SCI_METHOD SetIdentifiers(int style, const char *identifiers) override { lex->SetIdentifiers(style, identifiers); }
+	int SCI_METHOD DistanceToSecondaryStyles() override { return lex->DistanceToSecondaryStyles(); }
+	const char * SCI_METHOD GetSubStyleBases() override { return lex->GetSubStyleBases(); }
+	int SCI_METHOD NamedStyles() override { return lex->NamedStyles(); }
+	const char * SCI_METHOD NameOfStyle(int style) override { return lex->NameOfStyle(style); }
+	const char * SCI_METHOD TagsOfStyle(int style) override { return lex->TagsOfStyle(style); }
+	const char * SCI_METHOD DescriptionOfStyle(int style) override { return lex->DescriptionOfStyle(style); }
+	// ILexerWithIdentity methods
+	const char * SCI_METHOD GetName() override { return lex->GetName(); }
+	int SCI_METHOD GetIdentifier() override { return lex->GetIdentifier(); }
+	const char * SCI_METHOD PropertyGet(const char *key) override { return lex->PropertyGet(key); }
 };
 
 }
