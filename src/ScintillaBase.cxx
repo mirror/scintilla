@@ -28,10 +28,8 @@
 #include "PropSetSimple.h"
 #include "CharacterCategory.h"
 
-#ifdef SCI_LEXER
 #include "LexerModule.h"
 #include "Catalogue.h"
-#endif
 
 #include "Position.h"
 #include "UniqueString.h"
