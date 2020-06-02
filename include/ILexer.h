@@ -137,7 +137,7 @@ ILexer5 *lex;
 public:
 	LexillaLexer(ILexer5 *lex_) : lex(lex_) {}
 	virtual ~LexillaLexer() {}
-	void SCI_METHOD Release() override { lex->Release(); };
+	void SCI_METHOD Release() override { lex->Release(); delete this; };
 	int SCI_METHOD Version() const override { return lex->Version(); }
 	const char * SCI_METHOD PropertyNames() override { return lex->PropertyNames(); }
 	int SCI_METHOD PropertyType(const char *name) override { return lex->PropertyType(name); }

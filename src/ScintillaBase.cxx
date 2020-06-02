@@ -604,10 +604,6 @@ LexState::LexState(Document *pdoc_) : LexInterface(pdoc_) {
 LexState::~LexState() {
 	if (instance) {
 		instance->Release();
-		LexillaLexer *iLexer5 = dynamic_cast<LexillaLexer *>(instance);
-		if (iLexer5) {
-			delete iLexer5;
-		}
 		instance = nullptr;
 	}
 }
@@ -615,10 +611,6 @@ LexState::~LexState() {
 void LexState::SetInstance(ILexer *instance_) {
 	if (instance) {
 		instance->Release();
-		LexillaLexer *iLexer5 = dynamic_cast<LexillaLexer *>(instance);
-		if (iLexer5) {
-			delete iLexer5;
-		}
 		instance = nullptr;
 	}
 	instance = instance_;
@@ -636,10 +628,6 @@ void LexState::SetLexerModule(const LexerModule *lex) {
 	if (lex != lexCurrent) {
 		if (instance) {
 			instance->Release();
-			LexillaLexer *iLexer5 = dynamic_cast<LexillaLexer *>(instance);
-			if (iLexer5) {
-				delete iLexer5;
-			}
 			instance = nullptr;
 		}
 		interfaceVersion = lvOriginal;
