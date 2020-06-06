@@ -256,6 +256,10 @@ UINT uSystemDPI = USER_DEFAULT_SCREEN_DPI;
 using GetDpiForWindowSig = UINT(WINAPI *)(HWND hwnd);
 GetDpiForWindowSig fnGetDpiForWindow = nullptr;
 
+HMODULE hDLLShcore {};
+using GetDpiForMonitorSig = HRESULT (WINAPI *)(HMONITOR hmonitor, /*MONITOR_DPI_TYPE*/int dpiType, UINT *dpiX, UINT *dpiY);
+GetDpiForMonitorSig fnGetDpiForMonitor = nullptr;
+
 using GetSystemMetricsForDpiSig = int(WINAPI *)(int nIndex, UINT dpi);
 GetSystemMetricsForDpiSig fnGetSystemMetricsForDpi = nullptr;
 
@@ -276,6 +280,13 @@ void LoadDpiForWindow() noexcept {
 		HDC hdcMeasure = ::CreateCompatibleDC({});
 		uSystemDPI = ::GetDeviceCaps(hdcMeasure, LOGPIXELSY);
 		::DeleteDC(hdcMeasure);
+	}
+
+	if (!fnGetDpiForWindow) {
+		hDLLShcore = ::LoadLibraryExW(L"shcore.dll", {}, LOAD_LIBRARY_SEARCH_SYSTEM32);
+		if (hDLLShcore) {
+			fnGetDpiForMonitor = DLLFunction<GetDpiForMonitorSig>(hDLLShcore, "GetDpiForMonitor");
+		}
 	}
 }
 
@@ -451,6 +462,14 @@ typedef VarBuffer<XYPOSITION, stackBufferLength> TextPositions;
 UINT DpiForWindow(WindowID wid) noexcept {
 	if (fnGetDpiForWindow) {
 		return fnGetDpiForWindow(HwndFromWindowID(wid));
+	}
+	if (fnGetDpiForMonitor) {
+		HMONITOR hMonitor = ::MonitorFromWindow(HwndFromWindowID(wid), MONITOR_DEFAULTTONEAREST);
+		UINT dpiX = 0;
+		UINT dpiY = 0;
+		if (fnGetDpiForMonitor(hMonitor, 0 /*MDT_EFFECTIVE_DPI*/, &dpiX, &dpiY) == S_OK) {
+			return dpiY;
+		}
 	}
 	return uSystemDPI;
 }
@@ -3005,6 +3024,10 @@ void Platform_Finalise(bool fromDllMain) {
 		}
 	}
 #endif
+	if (!fromDllMain && hDLLShcore) {
+		FreeLibrary(hDLLShcore);
+		hDLLShcore = {};
+	}
 	ListBoxX_Unregister();
 }
 
