@@ -199,9 +199,7 @@ struct FormatAndMetrics {
 		if (hfont)
 			::DeleteObject(hfont);
 #if defined(USE_D2D)
-		if (pTextFormat)
-			pTextFormat->Release();
-		pTextFormat = nullptr;
+		ReleaseUnknown(pTextFormat);
 #endif
 		extraFontFlag = 0;
 		characterSet = 0;
@@ -1143,10 +1141,7 @@ SurfaceD2D::~SurfaceD2D() {
 }
 
 void SurfaceD2D::Clear() noexcept {
-	if (pBrush) {
-		pBrush->Release();
-		pBrush = nullptr;
-	}
+	ReleaseUnknown(pBrush);
 	if (pRenderTarget) {
 		while (clipsActive) {
 			pRenderTarget->PopAxisAlignedClip();
@@ -1154,7 +1149,7 @@ void SurfaceD2D::Clear() noexcept {
 		}
 		if (ownRenderTarget) {
 			pRenderTarget->EndDraw();
-			pRenderTarget->Release();
+			ReleaseUnknown(pRenderTarget);
 			ownRenderTarget = false;
 		}
 		pRenderTarget = nullptr;
