@@ -12,15 +12,15 @@
 
 typedef void Scintilla;
 
-void scnotification(Scintilla *view, int msg, void *lParam, void *wParam) {
-  //struct SCNotification *scn = (struct SCNotification *)lParam;
-  //printw("SCNotification received: %i", scn->nmhdr.code);
+void scnotification(Scintilla *view, int msg, SCNotification *n, void *userdata)
+{
+  //printw("SCNotification received: %i", n->nmhdr.code);
 }
 
 int main(int argc, char **argv) {
   setlocale(LC_CTYPE, ""); // for displaying UTF-8 characters properly
   initscr(), raw(), cbreak(), noecho(), start_color();
-  Scintilla *sci = scintilla_new(scnotification);
+  Scintilla *sci = scintilla_new(scnotification, NULL);
   curs_set(0); // Scintilla draws its own cursor
 
   SSM(SCI_STYLESETFORE, STYLE_DEFAULT, 0xFFFFFF);
