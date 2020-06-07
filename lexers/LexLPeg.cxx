@@ -479,6 +479,8 @@ class LexerLPeg : public DefaultLexer {
         if (status == LUA_OK && lua_pcall(L, 0, 1, -2) == LUA_OK) break;
         return (LogError(L), false);
       }
+      if (lua_isnil(L, -1))
+        return (LogError(L, "'lexer.lua' module not found"), false);
       lua_remove(L, -2); // lua_error_handler
       lua_replace(L, -2); // nil
       lua_pushinteger(L, SC_FOLDLEVELBASE);
