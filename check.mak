@@ -3,7 +3,17 @@
 # backporting fixes and features from the main branch of Scintilla. It likely
 # will not produce compiled targets that can be used by a Scintilla-based
 # application.
-# Usage: make -f check.mak
+# Usage: 
+#   make -f check.mak            # check that everything compiles
+#   make -f check.mak test       # run all tests
+#   make -f check.mak bait       # run test GTK program
+#   make -f check.mak dmapp      # run test Win32 program using WINE
+#   make -f check.mak lexilla    # run test Win32 program with Lexilla
+#   make -f check.mak jinx       # run test curses program with Lua LPeg lexers
+#   make -f check.mak gen        # update all version info and dates based on
+#                                  version.txt and the current date
+#   make -f check.mak zip        # make release archives
+#   make -f check.mak upload     # upload HTML docs to sourceforge
 
 .SUFFIXES: .cxx .c .o .h .a
 
@@ -210,6 +220,125 @@ clean:
 test: | /tmp/scintilla
 	make -C $|/test/unit CXX=$(LINUX_CXX) clean test
 	cd $|/test && lua5.1 test_lexlua.lua
+
+# Bait test program for GTK.
+# Rebuild scintilla.a to ensure only GTK platform objects are inside.
+bait: | /tmp/scintilla/gtk/bait
+	rm -f $|/../../bin/scintilla.a
+	make -C $(dir $|) -j4
+	make -C $|
+	$|/$@
+/tmp/scintilla/gtk/bait: /tmp/scintilla/bait.zip | /tmp/scintilla
+	mkdir $@
+	unzip -d $@ $< && mv $@/bait/* $@ && rmdir $@/bait
+	sed -i -e 's|scintilla|..|;' $@/Makefile
+/tmp/scintilla/bait.zip: | /tmp/scintilla
+	wget -O $@ https://www.scintilla.org/bait.zip
+
+# dmapp test program for Win32.
+# There are two configurations: one that uses the standard SciLexer.dll, and one
+# that uses the standard Scintilla.dll (no lexers) with a Lexilla.dll from 
+# SciTE 4.x+. Since the test program is mean to be build on Windows, create a
+# makefile for cross-compiling from Linux and also patch the test program to
+# support the Lexilla configuration.
+dmapp_dlls = $(addprefix /tmp/scintilla/win32/dmapp/,Scintilla.dll SciLexer.dll Lexilla.dll)
+define _dmapp_makefile
+ALL: DMApp.exe
+DMApp.o: DMApp.cxx ; i686-w64-mingw32-g++ -std=c++11 -I ../../include -c $< -o $@
+DMApp_rc.o: DMApp.rc ; i686-w64-mingw32-windres $< $@
+DMApp.exe: DMApp.o DMApp_rc.o ; i686-w64-mingw32-g++ $^ -o $@ -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwinmm -lcomctl32 -ladvapi32 -limm32 -lshell32 -lole32 -lstdc++
+clean: ; rm -f *.exe *.o *.res
+endef
+export dmapp_makefile = $(value _dmapp_makefile)
+define _dmapp_patch
+--- a/DMApp.cxx	2000-03-08 01:37:03.000000000 -0500
++++ b/DMApp.cxx	2020-06-07 10:13:31.328183977 -0400
+@@ -4,6 +4,7 @@
+ #include <windows.h>
+ #include <richedit.h>
+ 
++#include "ILexer.h"
+ #include "Scintilla.h"
+ #include "SciLexer.h"
+ #include "resource.h"
+@@ -20,6 +21,7 @@
+ 	HWND currentDialog;
+ 	HWND wMain;
+ 	HWND wEditor;
++	bool lexilla;
+ 	bool isDirty;
+ 	char fullPath[MAX_PATH];
+ 
+@@ -56,6 +58,7 @@
+ 	currentDialog = 0;
+ 	wMain = 0;
+ 	wEditor = 0;
++	lexilla = false;
+ 	isDirty = false;
+ 	fullPath[0] = '\\0';
+ }
+@@ -335,7 +338,13 @@
+ 
+ void DMApp::InitialiseEditor() {
+ 	SendEditor(SCI_SETLEXER, SCLEX_HTML);
+-	SendEditor(SCI_SETSTYLEBITS, 7);
++	if (lexilla) {
++		typedef Scintilla::ILexer5 *(__stdcall *CreateLexerFn)(const char *name);
++		auto fp = ::GetProcAddress(::LoadLibrary("Lexilla.dll"), "CreateLexer");
++		CreateLexerFn f;
++		memcpy(&f, &fp, sizeof(CreateLexerFn));
++		SendEditor(SCI_SETILEXER, 1, reinterpret_cast<LPARAM>(f("hypertext")));
++	}
+ 
+ 	SendEditor(SCI_SETKEYWORDS, 0, 
+ 		reinterpret_cast<LPARAM>(htmlKeyWords));
+@@ -539,11 +548,12 @@
+ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow) {
+ 
+ 	app.hInstance = hInstance;
++	app.lexilla = lpszCmdLine[0] == 'X';
+ 
+ 	HACCEL hAccTable = LoadAccelerators(hInstance, "DMApp");
+ 
+ 	//::LoadLibrary("Scintilla.DLL");
+-	::LoadLibrary("SciLexer.DLL");
++	::LoadLibrary(!app.lexilla ? "SciLexer.DLL" : "Scintilla.DLL");
+ 
+ 	RegisterWindowClass();
+ 
+endef
+export dmapp_patch = $(value _dmapp_patch)
+dmapp: /tmp/scintilla/win32/dmapp/DMApp.exe
+	WINEPREFIX=$(dir $<)/wine WINEARCH=win32 wine $<
+lexilla: /tmp/scintilla/win32/dmapp/DMApp.exe
+	WINEPREFIX=$(dir $<)/wine WINEARCH=win32 wine $< X
+/tmp/scintilla/win32/dmapp/DMApp.exe: $(dmapp_dlls) | /tmp/scintilla/win32/dmapp
+	make -C $|
+$(dmapp_dlls): /tmp/scintilla/scite.zip | /tmp/scintilla/win32/dmapp
+	make -C $(dir $|) CXX=/opt/mingw-w64/bin/i686-w64-mingw32-g++ \
+		AR=/opt/mingw-w64/bin/i686-w64-mingw32-ar \
+		RANLIB=/opt/mingw-w64/bin/i686-w64-mingw32-ranlib \
+		WINDRES=/opt/mingw-w64/bin/i686-w64-mingw32-windres -j4
+	cd $| && ln -sf ../../bin/*.dll .
+	unzip -d $| $< wscite/Lexilla.dll && mv $|/wscite/* $|
+/tmp/scintilla/win32/dmapp: /tmp/scintilla/dmapp.zip | /tmp/scintilla
+	mkdir $@
+	unzip -d $@ $<
+	perl -pi -e 's/\r\n/\n/g' $@/DMApp.cxx
+	echo "$$dmapp_makefile" > $@/makefile
+	echo "$$dmapp_patch" > $@/patch
+	cd $@ && patch -p1 < patch
+/tmp/scintilla/dmapp.zip: | /tmp/scintilla
+	wget -O $@ https://www.scintilla.org/dmapp.zip
+/tmp/scintilla/scite.zip: | /tmp/scintilla
+	wget -O $@ https://www.scintilla.org/wscite32_443.zip
+
+# jinx test program for curses.
+jinx: | /tmp/scintilla/curses/jinx
+	rm -f $|/../../bin/scintilla.a
+	make -C $(dir $|) -j4 LPEG_LEXER=1 DEBUG=1
+	make -C $| LPEG_LEXER=1 DEBUG=1
+	cd $| && ./$@
 
 version = $(shell grep -o '[0-9]\+' version.txt)
 date = $(shell date +'%Y%m%d')
