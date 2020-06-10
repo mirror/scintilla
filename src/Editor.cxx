@@ -1819,11 +1819,11 @@ Sci::Position Editor::FormatRange(bool draw, const Sci_RangeToFormat *pfr) {
 	return view.FormatRange(draw, pfr, surface, surfaceMeasure, *this, vs);
 }
 
-int Editor::TextWidth(int style, const char *text) {
+long Editor::TextWidth(uptr_t style, const char *text) {
 	RefreshStyleData();
 	AutoSurface surface(this);
 	if (surface) {
-		return static_cast<int>(surface->WidthText(vs.styles[style].font, text, static_cast<int>(strlen(text))));
+		return Sci::lround(surface->WidthText(vs.styles[style].font, text, static_cast<int>(strlen(text))));
 	} else {
 		return 1;
 	}
