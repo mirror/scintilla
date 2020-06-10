@@ -335,7 +335,7 @@ local M = {}
 -- [not]eolfilled | Does the background color extend to the end of the line?
 -- case:_char_    | The case of the font ('u': upper, 'l': lower, 'm': normal).
 -- [not]visible   | Whether or not the text is visible.
--- [not]changeable| Whether the text is changeable or read-only.
+-- [not]changable | Whether the text is changable or read-only.
 --
 -- Specify font colors in either "#RRGGBB" format, "0xBBGGRR" format, or the
 -- decimal equivalent of the latter. As with token names, LPeg patterns, and
@@ -844,7 +844,7 @@ local M = {}
 -- @field STYLE_INDENTGUIDE (string)
 --   The style used for indentation guides.
 -- @field STYLE_CALLTIP (string)
---   The style used by call tips if [`buffer.call_tip_use_style`]() is set.
+--   The style used by call tips if [`view.call_tip_use_style`]() is set.
 --   Only the font name, size, and color attributes are used.
 -- @field STYLE_FOLDDISPLAYTEXT (string)
 --   The style used for fold display text.
@@ -1051,7 +1051,7 @@ end
 --   * `case:char`: Font case ('u' for uppercase, 'l' for lowercase, and 'm' for
 --     mixed case).
 --   * `visible` or `notvisible`: Whether or not the text is visible.
---   * `changeable` or `notchangeable`: Whether or not the text is changeable or
+--   * `changable` or `notchangable`: Whether or not the text is changable or
 --     read-only.
 --
 -- Property settings may also contain "$(property.name)" expansions for
