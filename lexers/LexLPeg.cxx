@@ -368,9 +368,7 @@ class LexerLPeg : public DefaultLexer {
           SS(sci, SCI_STYLESETCASE, num, SC_CASE_LOWER);
       } else if (strcmp(key, "visible") == 0 || strcmp(key, "notvisible") == 0)
         SS(sci, SCI_STYLESETVISIBLE, num, *key == 'v');
-      else if (strcmp(key, "changable") == 0 ||
-               strcmp(key, "notchangable") == 0 ||
-               strcmp(key, "changeable") == 0 ||
+      else if (strcmp(key, "changeable") == 0 ||
                strcmp(key, "notchangeable") == 0)
         SS(sci, SCI_STYLESETCHANGEABLE, num, *key == 'c');
       else if (strcmp(key, "hotspot") == 0 || strcmp(key, "nothotspot") == 0)
