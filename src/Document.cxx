@@ -140,6 +140,7 @@ Document::Document(int options) :
 	perLineData[ldState] = Sci::make_unique<LineState>();
 	perLineData[ldMargin] = Sci::make_unique<LineAnnotation>();
 	perLineData[ldAnnotation] = Sci::make_unique<LineAnnotation>();
+	perLineData[ldEOLAnnotation] = Sci::make_unique<LineAnnotation>();
 
 	decorations = DecorationListCreate(IsLarge());
 
@@ -213,6 +214,10 @@ LineAnnotation *Document::Margins() const noexcept {
 
 LineAnnotation *Document::Annotations() const noexcept {
 	return dynamic_cast<LineAnnotation *>(perLineData[ldAnnotation].get());
+}
+
+LineAnnotation *Document::EOLAnnotations() const noexcept {
+	return dynamic_cast<LineAnnotation *>(perLineData[ldEOLAnnotation].get());
 }
 
 int Document::LineEndTypesSupported() const {
@@ -2386,6 +2391,36 @@ void Document::AnnotationClearAll() {
 		AnnotationSetText(l, nullptr);
 	// Free remaining data
 	Annotations()->ClearAll();
+}
+
+StyledText Document::EOLAnnotationStyledText(Sci::Line line) const noexcept {
+	const LineAnnotation *pla = EOLAnnotations();
+	return StyledText(pla->Length(line), pla->Text(line),
+		pla->MultipleStyles(line), pla->Style(line), pla->Styles(line));
+}
+
+void Document::EOLAnnotationSetText(Sci::Line line, const char *text) {
+	if (line >= 0 && line < LinesTotal()) {
+		EOLAnnotations()->SetText(line, text);
+		DocModification mh(SC_MOD_CHANGEEOLANNOTATION, LineStart(line),
+			0, 0, 0, line);
+		NotifyModified(mh);
+	}
+}
+
+void Document::EOLAnnotationSetStyle(Sci::Line line, int style) {
+	EOLAnnotations()->SetStyle(line, style);
+	const DocModification mh(SC_MOD_CHANGEEOLANNOTATION, LineStart(line),
+		0, 0, 0, line);
+	NotifyModified(mh);
+}
+
+void Document::EOLAnnotationClearAll() {
+	const Sci::Line maxEditorLine = LinesTotal();
+	for (Sci::Line l=0; l<maxEditorLine; l++)
+		EOLAnnotationSetText(l, nullptr);
+	// Free remaining data
+	EOLAnnotations()->ClearAll();
 }
 
 void Document::IncrementStyleClock() noexcept {
