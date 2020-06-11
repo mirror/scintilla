@@ -590,6 +590,10 @@
 	<a href="https://sourceforge.net/p/scintilla/bugs/2185/">Bug #2185</a>.
 	</li>
 	<li>
+	Fix bug on Win32 where calling WM_GETTEXT for more text than in document could return
+	less text than in document.
+	</li>
+	<li>
 	Fixed bug in Batch lexer where a single character line with a single character line end continued
 	state onto the next line.
 	</li>
