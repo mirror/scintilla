@@ -15,7 +15,7 @@ namespace Scintilla {
 #endif
 
 extern void Platform_Initialise(void *hInstance);
-extern void Platform_Finalise(bool fromDllMain);
+extern void Platform_Finalise(bool fromDllMain) noexcept;
 
 RECT RectFromPRectangle(PRectangle prc) noexcept;
 
