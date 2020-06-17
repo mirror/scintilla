@@ -1224,7 +1224,7 @@ bool Document::DeleteChars(Sci::Position pos, Sci::Position len) {
 			bool startSequence = false;
 			const char *text = cb.DeleteChars(pos, len, startSequence);
 			if (startSavePoint && cb.IsCollectingUndo())
-				NotifySavePoint(!startSavePoint);
+				NotifySavePoint(false);
 			if ((pos < LengthNoExcept()) || (pos == 0))
 				ModifiedAt(pos);
 			else
@@ -1276,7 +1276,7 @@ Sci::Position Document::InsertString(Sci::Position position, const char *s, Sci:
 	bool startSequence = false;
 	const char *text = cb.InsertString(position, s, insertLength, startSequence);
 	if (startSavePoint && cb.IsCollectingUndo())
-		NotifySavePoint(!startSavePoint);
+		NotifySavePoint(false);
 	ModifiedAt(position);
 	NotifyModified(
 		DocModification(
