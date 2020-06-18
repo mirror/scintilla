@@ -315,6 +315,7 @@ lexilla: /tmp/scintilla/win32/dmapp/DMApp.exe
 /tmp/scintilla/win32/dmapp/DMApp.exe: $(dmapp_dlls) | /tmp/scintilla/win32/dmapp
 	make -C $|
 $(dmapp_dlls): /tmp/scintilla/scite.zip | /tmp/scintilla/win32/dmapp
+	rm -f $|/../Catalogue.o $|/../ScintillaBase.o
 	make -C $(dir $|) CXX=/opt/mingw-w64/bin/i686-w64-mingw32-g++ \
 		AR=/opt/mingw-w64/bin/i686-w64-mingw32-ar \
 		RANLIB=/opt/mingw-w64/bin/i686-w64-mingw32-ranlib \
@@ -335,7 +336,7 @@ $(dmapp_dlls): /tmp/scintilla/scite.zip | /tmp/scintilla/win32/dmapp
 
 # jinx test program for curses.
 jinx: | /tmp/scintilla/curses/jinx
-	rm -f $|/../../bin/scintilla.a
+	rm -f $|/../../bin/scintilla.a $|/../LexLPeg.o
 	make -C $(dir $|) -j4 LPEG_LEXER=1 DEBUG=1
 	make -C $| LPEG_LEXER=1 DEBUG=1
 	cd $| && ./$@
