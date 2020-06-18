@@ -122,6 +122,7 @@ enum {
 };
 
 GdkAtom ScintillaGTK::atomUTF8 = nullptr;
+GdkAtom ScintillaGTK::atomUTF8Mime = nullptr;
 GdkAtom ScintillaGTK::atomString = nullptr;
 GdkAtom ScintillaGTK::atomUriList = nullptr;
 GdkAtom ScintillaGTK::atomDROPFILES_DND = nullptr;
