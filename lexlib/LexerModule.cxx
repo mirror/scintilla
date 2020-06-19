@@ -35,7 +35,6 @@ LexerModule::LexerModule(int language_,
 	fnLexer(fnLexer_),
 	fnFolder(fnFolder_),
 	fnFactory(nullptr),
-	fnFactory5(nullptr),
 	wordListDescriptions(wordListDescriptions_),
 	lexClasses(lexClasses_),
 	nClasses(nClasses_),
@@ -97,8 +96,6 @@ size_t LexerModule::NamedStyles() const {
 ILexer *LexerModule::Create() const {
 	if (fnFactory)
 		return fnFactory();
-	else if (fnFactory5)
-		return new LexillaLexer(fnFactory5());
 	else
 		return new LexerSimple(this);
 }

@@ -39,7 +39,6 @@ int nextLanguage = SCLEX_AUTOMATIC + 1;
 typedef int (EXT_LEXER_DECL *GetLexerCountFn)();
 typedef void (EXT_LEXER_DECL *GetLexerNameFn)(unsigned int Index, char *name, int buflength);
 typedef LexerFactoryFunction(EXT_LEXER_DECL *GetLexerFactoryFunction)(unsigned int Index);
-typedef LexerFactoryFunction5(EXT_LEXER_DECL *GetLexerFactoryFunction5)(unsigned int Index);
 
 /// Generic function to convert from a void* to a function pointer.
 /// This avoids undefined and conditionally defined behaviour.
@@ -55,17 +54,15 @@ T FunctionPointer(void *function) noexcept {
 class ExternalLexerModule : public LexerModule {
 protected:
 	GetLexerFactoryFunction fneFactory;
-	GetLexerFactoryFunction5 fneFactory5;
 	std::string name;
 public:
 	ExternalLexerModule(int language_, LexerFunction fnLexer_,
 		const char *languageName_=nullptr, LexerFunction fnFolder_=nullptr) :
 		LexerModule(language_, fnLexer_, nullptr, fnFolder_),
-		fneFactory(nullptr), fneFactory5(nullptr), name(languageName_){
+		fneFactory(nullptr), name(languageName_){
 		languageName = name.c_str();
 	}
 	void SetExternal(GetLexerFactoryFunction fFactory, int index) noexcept;
-	void SetExternal(GetLexerFactoryFunction5 fFactory, int index) noexcept;
 };
 
 /// LexerLibrary exists for every External Lexer DLL, contains ExternalLexerModules.
@@ -73,7 +70,7 @@ class LexerLibrary {
 	std::unique_ptr<DynamicLibrary> lib;
 	std::vector<std::unique_ptr<ExternalLexerModule>> modules;
 public:
-	explicit LexerLibrary(const char *moduleName_, bool iLexer5=false);
+	explicit LexerLibrary(const char *moduleName_);
 	~LexerLibrary();
 
 	std::string moduleName;
@@ -87,7 +84,7 @@ public:
 	static LexerManager *GetInstance();
 	static void DeleteInstance() noexcept;
 
-	void Load(const char *path, bool iLexer5=false);
+	void Load(const char *path);
 	void Clear() noexcept;
 
 private:
@@ -114,18 +111,13 @@ void ExternalLexerModule::SetExternal(GetLexerFactoryFunction fFactory, int inde
 	fnFactory = fFactory(index);
 }
 
-void ExternalLexerModule::SetExternal(GetLexerFactoryFunction5 fFactory5, int index) noexcept {
-	fneFactory5 = fFactory5;
-	fnFactory5 = fFactory5(index);
-}
-
 //------------------------------------------
 //
 // LexerLibrary
 //
 //------------------------------------------
 
-LexerLibrary::LexerLibrary(const char *moduleName_, bool iLexer5) {
+LexerLibrary::LexerLibrary(const char *moduleName_) {
 	// Load the DLL
 	lib.reset(DynamicLibrary::Load(moduleName_));
 	if (lib->IsValid()) {
@@ -135,14 +127,9 @@ LexerLibrary::LexerLibrary(const char *moduleName_, bool iLexer5) {
 		if (GetLexerCount) {
 			// Find functions in the DLL
 			GetLexerNameFn GetLexerName = FunctionPointer<GetLexerNameFn>(lib->FindFunction("GetLexerName"));
-			GetLexerFactoryFunction fnFactory = nullptr;
-			GetLexerFactoryFunction5 fnFactory5 = nullptr;
-			if (!iLexer5)
-				fnFactory = FunctionPointer<GetLexerFactoryFunction>(lib->FindFunction("GetLexerFactory"));
-			else
-				fnFactory5 = FunctionPointer<GetLexerFactoryFunction5>(lib->FindFunction("GetLexerFactory"));
+			GetLexerFactoryFunction fnFactory = FunctionPointer<GetLexerFactoryFunction>(lib->FindFunction("GetLexerFactory"));
 
-			if (!GetLexerName || (!fnFactory && !fnFactory5)) {
+			if (!GetLexerName || !fnFactory) {
 				return;
 			}
 
@@ -164,10 +151,7 @@ LexerLibrary::LexerLibrary(const char *moduleName_, bool iLexer5) {
 
 				// The external lexer needs to know how to call into its DLL to
 				// do its lexing and folding, we tell it here.
-				if (!iLexer5)
-					lex->SetExternal(fnFactory, i);
-				else
-					lex->SetExternal(fnFactory5, i);
+        lex->SetExternal(fnFactory, i);
 			}
 		}
 	}
@@ -202,12 +186,12 @@ LexerManager::~LexerManager() {
 	Clear();
 }
 
-void LexerManager::Load(const char *path, bool iLexer5) {
+void LexerManager::Load(const char *path) {
 	for (const std::unique_ptr<LexerLibrary> &ll : libraries) {
 		if (ll->moduleName == path)
 			return;
 	}
-	libraries.push_back(Sci::make_unique<LexerLibrary>(path, iLexer5));
+	libraries.push_back(Sci::make_unique<LexerLibrary>(path));
 }
 
 void LexerManager::Clear() noexcept {
@@ -230,8 +214,8 @@ LMMinder minder;
 
 namespace Scintilla {
 
-void ExternalLexerLoad(const char *path, bool iLexer5) {
-	LexerManager::GetInstance()->Load(path, iLexer5);
+void ExternalLexerLoad(const char *path) {
+	LexerManager::GetInstance()->Load(path);
 }
 
 }

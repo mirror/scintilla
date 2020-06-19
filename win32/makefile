@@ -117,7 +117,6 @@ SRC_OBJS = \
 	MarginView.o \
 	PerLine.o \
 	PositionCache.o \
-	PropSetSimple.o \
 	RESearch.o \
 	RunStyles.o \
 	Selection.o \
@@ -130,12 +129,13 @@ SRC_OBJS = \
 # Required by lexers
 LEXLIB_OBJS = \
 	Accessor.o \
-	CatalogueL.o \
+	Catalogue.o \
 	DefaultLexer.o \
 	ExternalLexer.o \
 	LexerBase.o \
 	LexerModule.o \
 	LexerSimple.o \
+	PropSetSimple.o \
 	StyleContext.o \
 	WordList.o
 
@@ -152,18 +152,12 @@ SCILEX_OBJS=\
 
 COMPONENT_OBJS = \
 	$(SRC_OBJS) \
-	Accessor.o \
-	Catalogue.o \
 	HanjaDic.o \
-	LexerBase.o \
-	LexerModule.o \
-	LexerSimple.o \
 	PlatWin.o \
 	ScintillaBase.o \
 	ScintillaDLL.o \
 	ScintillaWin.o \
-	ScintRes.o \
-	WordList.o
+	ScintRes.o
 
 LEXCOMPONENT_OBJS = \
 	$(SCILEX_OBJS) \
@@ -184,12 +178,6 @@ $(LIBSCI): $(SCILEX_OBJS)
 include deps.mak
 
 ScintillaBaseL.o:
-	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
-
-Catalogue.o: Catalogue.cxx
-	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -D SCI_LEXER -D SCI_EMPTYCATALOGUE -c $< -o $@
-
-CatalogueL.o: Catalogue.cxx
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
 
 ScintRes.o:	ScintRes.rc

@@ -10,7 +10,10 @@
 
 namespace Scintilla {
 
+#ifdef SCI_LEXER
 class LexState;
+#endif
+
 /**
  */
 class ScintillaBase : public Editor, IListBoxDelegate {
@@ -41,10 +44,12 @@ protected:
 	int maxListWidth;		/// Maximum width of list, in average character widths
 	int multiAutoCMode; /// Mode for autocompleting when multiple selections are present
 
+#if SCI_LEXER
 	LexState *DocumentLexState();
 	void SetLexer(uptr_t wParam);
 	void SetLexerLanguage(const char *languageName);
 	void Colourise(int start, int end);
+#endif
 
 	ScintillaBase();
 	// Deleted so ScintillaBase objects can not be copied.
