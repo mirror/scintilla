@@ -787,8 +787,9 @@ public:
             // Assume a theme change, with the default style being set first.
             // Subsequent style settings will be based on the default.
             SS(sci, SCI_STYLECLEARALL, 0, 0);
+          lua_pop(L, 1); // style
         }
-        lua_pop(L, 3); // style, style number, _TOKENSTYLES
+        lua_pop(L, 2); // style number, _TOKENSTYLES
       }
       lua_pop(L, 1); // lexer object or nil
       ASSERT_STACK_TOP(L);
