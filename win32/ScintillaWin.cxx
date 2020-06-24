@@ -403,6 +403,9 @@ class ScintillaWin :
 
 	UINT CodePageOfDocument() const noexcept;
 	bool ValidCodePage(int codePage) const override;
+	std::string UTF8FromEncoded(std::string_view encoded) const override;
+	std::string EncodedFromUTF8(std::string_view utf8) const override;
+
 	std::string EncodeWString(std::wstring_view wsv);
 	sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 	void IdleWork() override;
@@ -2051,6 +2054,26 @@ bool ScintillaWin::ValidCodePage(int codePage) const {
 	return codePage == 0 || codePage == SC_CP_UTF8 ||
 	       codePage == 932 || codePage == 936 || codePage == 949 ||
 	       codePage == 950 || codePage == 1361;
+}
+
+std::string ScintillaWin::UTF8FromEncoded(std::string_view encoded) const {
+	if (IsUnicodeMode()) {
+		return std::string(encoded);
+	} else {
+		// Pivot through wide string
+		std::wstring ws = StringDecode(encoded, CodePageOfDocument());
+		return StringEncode(ws, SC_CP_UTF8);
+	}
+}
+
+std::string ScintillaWin::EncodedFromUTF8(std::string_view utf8) const {
+	if (IsUnicodeMode()) {
+		return std::string(utf8);
+	} else {
+		// Pivot through wide string
+		std::wstring ws = StringDecode(utf8, SC_CP_UTF8);
+		return StringEncode(ws, CodePageOfDocument());
+	}
 }
 
 sptr_t ScintillaWin::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {

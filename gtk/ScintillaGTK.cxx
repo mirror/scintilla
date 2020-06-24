@@ -816,6 +816,24 @@ bool ScintillaGTK::ValidCodePage(int codePage) const {
 	       || codePage == 1361;
 }
 
+std::string ScintillaGTK::UTF8FromEncoded(std::string_view encoded) const {
+	if (IsUnicodeMode()) {
+		return std::string(encoded);
+	} else {
+		const char *charSetBuffer = CharacterSetID();
+		return ConvertText(encoded.data(), encoded.length(), "UTF-8", charSetBuffer, true);
+	}
+}
+
+std::string ScintillaGTK::EncodedFromUTF8(std::string_view utf8) const {
+	if (IsUnicodeMode()) {
+		return std::string(utf8);
+	} else {
+		const char *charSetBuffer = CharacterSetID();
+		return ConvertText(utf8.data(), utf8.length(), charSetBuffer, "UTF-8", true);
+	}
+}
+
 sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	try {
 		switch (iMessage) {

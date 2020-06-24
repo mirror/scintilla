@@ -570,6 +570,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int CodePage() const noexcept;
 	virtual bool ValidCodePage(int /* codePage */) const { return true; }
+	virtual std::string UTF8FromEncoded(std::string_view encoded) const = 0;
+	virtual std::string EncodedFromUTF8(std::string_view utf8) const = 0;
+
 	Sci::Line WrapCount(Sci::Line line);
 	void AddStyledText(const char *buffer, Sci::Position appendLength);
 

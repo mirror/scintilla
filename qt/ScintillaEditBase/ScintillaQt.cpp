@@ -250,6 +250,28 @@ bool ScintillaQt::ValidCodePage(int codePage) const
 	|| codePage == 1361;
 }
 
+std::string ScintillaQt::UTF8FromEncoded(std::string_view encoded) const {
+	if (IsUnicodeMode()) {
+		return std::string(encoded);
+	} else {
+		QTextCodec *codec = QTextCodec::codecForName(
+				CharacterSetID(CharacterSetOfDocument()));
+		QString text = codec->toUnicode(encoded.data(), static_cast<int>(encoded.length()));
+		return text.toStdString();
+	}
+}
+
+std::string ScintillaQt::EncodedFromUTF8(std::string_view utf8) const {
+	if (IsUnicodeMode()) {
+		return std::string(utf8);
+	} else {
+		QString text = QString::fromUtf8(utf8.data(), static_cast<int>(utf8.length()));
+		QTextCodec *codec = QTextCodec::codecForName(
+				CharacterSetID(CharacterSetOfDocument()));
+		QByteArray ba = codec->fromUnicode(text);
+		return std::string(ba.data(), ba.length());
+	}
+}
 
 void ScintillaQt::ScrollText(Sci::Line linesToMove)
 {

@@ -1195,6 +1195,38 @@ NSPoint ScintillaCocoa::GetCaretPosition() {
 
 // -------------------------------------------------------------------------------------------------
 
+std::string ScintillaCocoa::UTF8FromEncoded(std::string_view encoded) const {
+	if (IsUnicodeMode()) {
+		return std::string(encoded);
+	} else {
+		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+					    vs.styles[STYLE_DEFAULT].characterSet);
+		CFStringRef cfsVal = CFStringFromString(encoded.data(), encoded.length(), encoding);
+		std::string utf = EncodedBytesString(cfsVal, kCFStringEncodingUTF8);
+		if (cfsVal)
+			CFRelease(cfsVal);
+		return utf;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------
+
+std::string ScintillaCocoa::EncodedFromUTF8(std::string_view utf8) const {
+	if (IsUnicodeMode()) {
+		return std::string(utf8);
+	} else {
+		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+					    vs.styles[STYLE_DEFAULT].characterSet);
+		CFStringRef cfsVal = CFStringFromString(utf8.data(), utf8.length(), kCFStringEncodingUTF8);
+		const std::string sEncoded = EncodedBytesString(cfsVal, encoding);
+		if (cfsVal)
+			CFRelease(cfsVal);
+		return sEncoded;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------
+
 #pragma mark Drag
 
 /**
