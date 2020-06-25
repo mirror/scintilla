@@ -29,10 +29,18 @@ lex:add_rule('list', token('list',
   lexer.starts_line(S(' \t')^0 * (S('*+-') + R('09')^1 * '.')) * S(' \t')))
 lex:add_style('list', lexer.STYLE_CONSTANT)
 
+local hspace = S('\t\v\f\r ')
+local blank_line = '\n' * hspace^0 * ('\n' + P(-1))
+
 local code_line = lexer.to_eol(lexer.starts_line(P(' ')^4 + '\t') * -P('<')) *
   lexer.newline^-1
-local code_block = lexer.range(lexer.starts_line('```'), '```')
-local code_inline = lexer.range('``') + lexer.range('`', false, false)
+local code_block = lexer.range(
+  lexer.starts_line('```'), '\n```' * hspace^0 * ('\n' + P(-1)))
+local code_inline = lpeg.Cmt(lpeg.C(P('`')^1), function(input, index, bt)
+  -- `foo`, ``foo``, ``foo`bar``, `foo``bar` are all allowed.
+  local _, e = input:find('[^`]' .. bt .. '%f[^`]', index)
+  return (e or #input) + 1
+end)
 lex:add_rule('block_code', token('code', code_line + code_block + code_inline))
 lex:add_style('code', lexer.STYLE_EMBEDDED .. ',eolfilled')
 
@@ -80,8 +88,8 @@ local function flanked_range(s, not_inword)
     s * #(fl_char - lexer.punct)
   local right_fl = lpeg.B(lexer.punct) * s * #(punct_space - s) +
     lpeg.B(fl_char) * s
-  return left_fl * (lexer.any - (not_inword and s * #punct_space or s))^0 *
-    right_fl
+  return left_fl * (lexer.any - blank_line -
+    (not_inword and s * #punct_space or s))^0 * right_fl
 end
 
 lex:add_rule('strong', token('strong', flanked_range('**') +
@@ -96,9 +104,9 @@ lex:add_style('em', 'italics')
 
 -- Embedded HTML.
 local html = lexer.load('html')
-local start_rule = lexer.starts_line(S(' \t')^0) * #P('<') *
-  html:get_rule('element')
-local end_rule = token(lexer.DEFAULT, P('\n')) -- TODO: lexer.WHITESPACE errors
+local start_rule = lexer.starts_line(P(' ')^-3) * #P('<') *
+  html:get_rule('element') -- P(' ')^4 starts code_line
+local end_rule = token(lexer.DEFAULT, blank_line) -- TODO: lexer.WHITESPACE errors
 lex:embed(html, start_rule, end_rule)
 
 return lex
