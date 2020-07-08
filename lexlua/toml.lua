@@ -12,7 +12,7 @@ lex:add_rule('indent', #lexer.starts_line(S(' \t')) *
   (token(lexer.WHITESPACE, ' ') + token('indent_error', '\t'))^1)
 lex:add_rule('whitespace', token(lexer.WHITESPACE, S(' \t')^1 +
   lexer.newline^1))
-lex:add_style('indent_error', 'back:%(color.red)')
+lex:add_style('indent_error', {back = lexer.colors.red})
 
 -- kewwords.
 lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[true false]]))

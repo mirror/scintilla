@@ -30,8 +30,8 @@ function assert_default_styles(lex)
     assert(lex._TOKENSTYLES[style] == i, 'default styles out of order')
   end
   local predefined_styles = {
-    'default', 'linenumber', 'bracelight', 'bracebad', 'controlchar',
-    'indentguide', 'calltip', 'folddisplaytext'
+    'default', 'line_number', 'brace_light', 'brace_bad', 'control_char',
+    'indent_guide', 'call_tip', 'fold_display_text'
   }
   for i = 1, #predefined_styles do
     local style = predefined_styles[i]
@@ -48,6 +48,7 @@ end
 function assert_style(lex, style_name, style)
   assert(lex._TOKENSTYLES[style_name],
          string.format("style '%s' does not exist", style_name))
+  style = tostring(style)
   assert(lex._EXTRASTYLES[style_name] == style,
          string.format("'%s' ~= '%s'", lex._EXTRASTYLES[style_name], style))
 end
@@ -274,6 +275,17 @@ function test_add_style()
     {'custom', 'baz'}
   }
   assert_lex(lex, code, tokens)
+end
+
+-- Tests adding different kinds of lexer styles.
+function test_add_styles()
+  local lex = lexer.new('test')
+  lex:add_style('foo', lexer.STYLE_KEYWORD)
+  assert_style(lex, 'foo', lexer.STYLE_KEYWORD)
+  lex:add_style('bar', lexer.STYLE_KEYWORD .. {italics = true})
+  assert_style(lex, 'bar', '$(style.keyword),italics')
+  lex:add_style('baz', 'fore:$(color.red)') -- legacy string
+  assert_style(lex, 'baz', 'fore:$(color.red)')
 end
 
 -- Tests a simple parent lexer embedding a simple child lexer.
@@ -606,8 +618,8 @@ function test_legacy()
     'function', 'class', 'type', 'label', 'regex', 'embedded'
   }
   local predefined = {
-    'default', 'linenumber', 'bracelight', 'bracebad', 'controlchar',
-    'indentguide', 'calltip', 'folddisplaytext'
+    'default', 'line_number', 'brace_light', 'brace_bad', 'control_char',
+    'indent_guide', 'call_tip', 'fold_display_text'
   }
   local token_styles = {}
   for i = 1, #default do token_styles[default[i]] = i end
@@ -1159,6 +1171,65 @@ function test_rhtml()
   }
   initial_style = rhtml._TOKENSTYLES['rails_whitespace']
   assert_lex(rhtml, code, rhtml_tokens, initial_style)
+end
+
+-- Tests that the `lexer.colors` table reads and writes properties with a
+-- 'color.' prefix and supports 0xBBGGRR and '#RRGGBB' color formats.
+function test_colors()
+  if not lexer.property then lexer.load('text') end -- creates lexer.property
+
+  assert(lexer.colors.red == '')
+  assert(lexer.property['color.red'] == '')
+  lexer.colors.red = 0x0000FF
+  assert(lexer.colors.red == tostring(0x0000FF))
+  assert(lexer.property['color.red'] == tostring(0x0000FF))
+  lexer.colors.blue = '#0000FF'
+  assert(lexer.colors.blue == '#0000FF')
+  assert(lexer.property['color.blue'] == '#0000FF')
+  -- Verify legacy themes can set color properties directly.
+  lexer.property['color.green'] = '#00FF00'
+  assert(lexer.colors.green == '#00FF00')
+  assert(lexer.property['color.green'] == '#00FF00')
+end
+
+-- Tests that the `lexer.styles` table reads and writes properties with a
+-- 'style.' prefix and supports creating styles from existing styles and
+-- property tables.
+function test_styles()
+  if not lexer.property then lexer.load('text') end -- creates lexer.property
+
+  assert(tostring(lexer.styles.default) == '$(style.default)')
+  assert(tostring(lexer.STYLE_DEFAULT) == '$(style.default)') -- legacy constant
+  assert(lexer.property['style.default'] == '')
+
+  assert(tostring(lexer.styles.keyword) == '$(style.keyword)')
+  assert(lexer.property['style.keyword'] == '')
+  lexer.styles.keyword = {}
+  assert(tostring(lexer.styles.keyword) == '$(style.keyword)')
+  assert(lexer.property['style.keyword'] == '')
+  lexer.styles.keyword = lexer.styles.default
+  assert(tostring(lexer.styles.keyword) == '$(style.keyword)')
+  assert(lexer.property['style.keyword'] == '$(style.default)')
+  lexer.styles.keyword = {bold = true}
+  assert(tostring(lexer.styles.keyword) == '$(style.keyword)')
+  assert(lexer.property['style.keyword'] == 'bold')
+  lexer.colors.yellow = '#FFFF00'
+  lexer.styles.keyword = {fore = lexer.colors.yellow}
+  assert(lexer.property['style.keyword'] == 'fore:#FFFF00')
+
+  lexer.styles.embedded = lexer.styles.keyword .. {italics = true}
+  assert(lexer.property['style.embedded'] == '$(style.keyword),italics')
+  assert(lexer.property['style.keyword'] == 'fore:#FFFF00') -- not modified
+
+  -- Verify legacy styles work.
+  lexer.property['style.macro'] = lexer.STYLE_PREPROCESSOR
+  assert(lexer.property['style.macro'] == '$(style.preprocessor)')
+  lexer.property['style.addition'] = 'fore:$(color.green)'
+  assert(lexer.property['style.addition'] == 'fore:$(color.green)')
+  lexer.property['style.unknown'] = lexer.STYLE_IDENTIFIER .. ',italics'
+  assert(lexer.property['style.unknown'] == '$(style.identifier),,italics')
+  lexer.styles.unknown = lexer.STYLE_IDENTIFIER .. ',italics'
+  assert(lexer.property['style.unknown'] == '$(style.identifier),,italics')
 end
 
 -- Run tests.

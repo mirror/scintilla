@@ -28,7 +28,7 @@ lex:add_style('tag_end', lexer.STYLE_KEYWORD)
 lex:add_rule('link', token(lexer.STRING, S('[]')))
 lex:add_rule('internal_link', B('[[') *
   token('link_article', (lexer.any - '|' - ']]')^1))
-lex:add_style('link_article', lexer.STYLE_STRING .. ',underlined')
+lex:add_style('link_article', lexer.STYLE_STRING .. {underlined = true})
 
 -- Templates and parser functions.
 lex:add_rule('template', token(lexer.OPERATOR, S('{}')))
@@ -37,7 +37,7 @@ lex:add_rule('parser_func', B('{{') *
 lex:add_rule('template_name', B('{{') *
   token('template_name', (lexer.any - S('{}|'))^1))
 lex:add_style('parser_func', lexer.STYLE_FUNCTION)
-lex:add_style('template_name', lexer.STYLE_OPERATOR .. ',underlined')
+lex:add_style('template_name', lexer.STYLE_OPERATOR .. {underlined = true})
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('-=|#~!')))

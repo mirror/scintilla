@@ -182,11 +182,11 @@ local nested_braces = lexer.range('{', '}', false, false, true)
 -- Italics
 lex:add_rule('emph', token('emph', '@emph' * nested_braces))
 
-lex:add_style('emph', lexer.STYLE_STRING .. ',italics')
+lex:add_style('emph', lexer.STYLE_STRING .. {italics = true})
 
 -- Bold
 lex:add_rule('strong', token('strong', '@strong' * nested_braces))
-lex:add_style('strong', lexer.STYLE_STRING .. ',bold')
+lex:add_style('strong', lexer.STYLE_STRING .. {bold = true})
 
 -- Identifiers
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))

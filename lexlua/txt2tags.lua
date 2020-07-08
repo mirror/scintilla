@@ -120,36 +120,32 @@ lex:add_rule('verbatim_area', verbatim_area)
 lex:add_rule('raw_area', raw_area)
 lex:add_rule('tagged_area', tagged_area)
 
-local font_size = lexer.property_int['fontsize'] > 0 and
-  lexer.property_int['fontsize'] or 10
-local hstyle = 'fore:$(color.red)'
-
-lex:add_style('line', 'bold')
-lex:add_style('h5', hstyle .. ',size:' .. (font_size + 1))
-lex:add_style('h4', hstyle .. ',size:' .. (font_size + 2))
-lex:add_style('h3', hstyle .. ',size:' .. (font_size + 3))
-lex:add_style('h2', hstyle .. ',size:' .. (font_size + 4))
-lex:add_style('h1', hstyle .. ',size:' .. (font_size + 5))
+lex:add_style('line', {bold = true})
+local font_size =
+  tonumber(lexer.property_expanded['style.default']:match('size:(%d+)')) or 10
+for n = 5, 1, -1 do
+  lex:add_style('h' .. n, {fore = lexer.colors.red, size = font_size + (6 - n)})
+end
 lex:add_style('header_label', lexer.STYLE_LABEL)
-lex:add_style('email', 'underlined')
-lex:add_style('host', 'underlined')
-lex:add_style('url', 'underlined')
+lex:add_style('email', {underlined = true})
+lex:add_style('host', {underlined = true})
+lex:add_style('url', {underlined = true})
 lex:add_style('address_label', lexer.STYLE_LABEL)
-lex:add_style('address', 'underlined')
-lex:add_style('image', 'fore:$(color.green)')
-lex:add_style('image_link', 'underlined')
+lex:add_style('address', {underlined = true})
+lex:add_style('image', {fore = lexer.colors.green})
+lex:add_style('image_link', {underlined = true})
 lex:add_style('macro', lexer.STYLE_PREPROCESSOR)
-lex:add_style('bold', 'bold')
-lex:add_style('italic', 'italics')
-lex:add_style('underline', 'underlined')
-lex:add_style('strike', 'italics') -- a strike style is not available
-lex:add_style('mono', 'font:mono')
-lex:add_style('raw', 'back:$(color.grey)')
+lex:add_style('bold', {bold = true})
+lex:add_style('italic', {italics = true})
+lex:add_style('underline', {underlined = true})
+lex:add_style('strike', {italics = true}) -- a strike style is not available
+lex:add_style('mono', {font = 'mono'})
+lex:add_style('raw', {back = lexer.colors.grey})
 lex:add_style('tagged', lexer.STYLE_EMBEDDED)
-lex:add_style('verbatim_area', 'font:mono') -- in consistency with mono
-lex:add_style('raw_area', 'back:$(color.grey)') -- in consistency with raw
+lex:add_style('verbatim_area', {font = 'mono'}) -- in consistency with mono
+lex:add_style('raw_area', {back = lexer.colors.grey}) -- in consistency with raw
 lex:add_style('tagged_area', lexer.STYLE_EMBEDDED) -- in consistency with tagged
-lex:add_style('table_sep', 'fore:$(color.green)')
-lex:add_style('header_cell_content', 'fore:$(color.green)')
+lex:add_style('table_sep', {fore = lexer.colors.green})
+lex:add_style('header_cell_content', {fore = lexer.colors.green})
 
 return lex

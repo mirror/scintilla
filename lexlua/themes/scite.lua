@@ -1,53 +1,51 @@
 -- Copyright 2006-2020 Mitchell mitchell.att.foicica.com. See License.txt.
 -- SciTE theme for Lua lexers.
 
-local property = require('lexer').property
+local lexer = require('lexer')
+local colors, styles = lexer.colors, lexer.styles
 
-property['color.red'] = '#7F0000'
-property['color.yellow'] = '#7F7F00'
-property['color.green'] = '#007F00'
-property['color.teal'] = '#007F7F'
-property['color.purple'] = '#7F007F'
-property['color.orange'] = '#B07F00'
-property['color.blue'] = '#00007F'
-property['color.black'] = '#000000'
-property['color.grey'] = '#808080'
-property['color.white'] = '#FFFFFF'
+colors.red = '#7F0000'
+colors.yellow = '#7F7F00'
+colors.green = '#007F00'
+colors.teal = '#007F7F'
+colors.purple = '#7F007F'
+colors.orange = '#B07F00'
+colors.blue = '#00007F'
+colors.black = '#000000'
+colors.grey = '#808080'
+colors.white = '#FFFFFF'
 
--- Default style.
-property['font'], property['fontsize'] = 'Monospace', '11'
-if WIN32 then
-  property['font'] = 'Courier New'
-elseif OSX then
-  property['font'], property['fontsize'] = 'Monaco', '12'
-end
+-- Default font.
+local font = WIN32 and 'Courier New' or OSX and 'Monaco' or 'Monospace'
+local size = not OSX and 11 or 12
 
 -- Predefined styles.
-property['style.default'] = 'font:$(font),size:$(fontsize),'..
-                            'fore:$(color.black),back:$(color.white)'
-property['style.linenumber'] = 'back:#C0C0C0'
-property['style.bracelight'] = 'fore:#0000FF,bold'
-property['style.bracebad'] = 'fore:#FF0000,bold'
-property['style.controlchar'] = ''
-property['style.indentguide'] = 'fore:#C0C0C0,back:$(color.white)'
-property['style.calltip'] = 'fore:$(color.white),back:#444444'
-property['style.folddisplaytext'] = ''
+styles.default = {
+  font = font, size = size, fore = colors.black, back = colors.white
+}
+styles.line_number = {back = '#C0C0C0'}
+styles.brace_light = {fore = '#0000FF', bold = true}
+styles.brace_bad = {fore = '#FF0000', bold = true}
+styles.control_char = {}
+styles.indent_guide = {fore = '#C0C0C0', back = colors.white}
+styles.call_tip = {fore = colors.white, back = '#444444'}
+styles.fold_display_text = {}
 
 -- Token styles.
-property['style.class'] = 'fore:$(color.black),bold'
-property['style.comment'] = 'fore:$(color.green)'
-property['style.constant'] = 'fore:$(color.teal),bold'
-property['style.embedded'] = 'fore:$(color.blue)'
-property['style.error'] = 'fore:$(color.red)'
-property['style.function'] = 'fore:$(color.black),bold'
-property['style.identifier'] = ''
-property['style.keyword'] = 'fore:$(color.blue),bold'
-property['style.label'] = 'fore:$(color.teal),bold'
-property['style.number'] = 'fore:$(color.teal)'
-property['style.operator'] = 'fore:$(color.black),bold'
-property['style.preprocessor'] = 'fore:$(color.yellow)'
-property['style.regex'] = '$(style.string)'
-property['style.string'] = 'fore:$(color.purple)'
-property['style.type'] = 'fore:$(color.blue)'
-property['style.variable'] = 'fore:$(color.black)'
-property['style.whitespace'] = ''
+styles.class = {fore = colors.black, bold = true}
+styles.comment = {fore = colors.green}
+styles.constant = {fore = colors.teal, bold = true}
+styles.embedded = {fore = colors.blue}
+styles.error = {fore = colors.red}
+styles['function'] = {fore = colors.black, bold = true}
+styles.identifier = {}
+styles.keyword = {fore = colors.blue, bold = true}
+styles.label = {fore = colors.teal, bold = true}
+styles.number = {fore = colors.teal}
+styles.operator = {fore = colors.black, bold = true}
+styles.preprocessor = {fore = colors.yellow}
+styles.regex = lexer.STYLE_STRING
+styles.string = {fore = colors.purple}
+styles.type = {fore = colors.blue}
+styles.variable = {fore = colors.black}
+styles.whitespace = {}

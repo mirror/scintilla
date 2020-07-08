@@ -249,18 +249,18 @@ lex:add_style('field', lexer.STYLE_LABEL)
 -- sequences like '\S', '\s' have special meanings with Gawk. Tokens that
 -- contain them are displayed differently.
 lex:add_rule('gawkRegex', token('gawkRegex', SLASH * P(scanGawkRegex)))
-lex:add_style('gawkRegex', lexer.STYLE_PREPROCESSOR .. ',underlined')
+lex:add_style('gawkRegex', lexer.STYLE_PREPROCESSOR .. {underlined = true})
 lex:add_rule('regex', token(lexer.REGEX, SLASH * P(scanRegex)))
 
 -- Operators.
 lex:add_rule('gawkOperator', token('gawkOperator', P("|&") + "@" + "**=" +
   "**"))
-lex:add_style('gawkOperator', lexer.STYLE_OPERATOR .. ',underlined')
+lex:add_style('gawkOperator', lexer.STYLE_OPERATOR .. {underlined = true})
 lex:add_rule('operator', token(lexer.OPERATOR, S('!%&()*+,-/:;<=>?[\\]^{|}~')))
 
 -- Numbers.
 lex:add_rule('gawkNumber', token('gawkNumber', lexer.hex_num + lexer.oct_num))
-lex:add_style('gawkNumber', lexer.STYLE_NUMBER .. ',underlined')
+lex:add_style('gawkNumber', lexer.STYLE_NUMBER .. {underlined = true})
 lex:add_rule('number', token(lexer.NUMBER, float))
 
 -- Keywords.
@@ -281,7 +281,8 @@ lex:add_rule('gawkBuiltInVariable', token('gawkBuiltInVariable', word_match[[
   ARGIND BINMODE ERRNO FIELDWIDTHS FPAT FUNCTAB IGNORECASE LINT PREC PROCINFO
   ROUNDMODE RT SYMTAB TEXTDOMAIN
 ]]))
-lex:add_style('gawkBuiltInVariable', lexer.STYLE_CONSTANT .. ',underlined')
+lex:add_style(
+  'gawkBuiltInVariable', lexer.STYLE_CONSTANT .. {underlined = true})
 
 -- Functions.
 lex:add_rule('function', token(lexer.FUNCTION, lexer.word * #P('(')))

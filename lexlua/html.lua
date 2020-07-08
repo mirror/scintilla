@@ -41,7 +41,7 @@ local element = known_element + unknown_element
 lex:add_rule('element', element)
 lex:add_style('single_element', lexer.STYLE_KEYWORD)
 lex:add_style('element', lexer.STYLE_KEYWORD)
-lex:add_style('unknown_element', lexer.STYLE_KEYWORD .. ',italics')
+lex:add_style('unknown_element', lexer.STYLE_KEYWORD .. {italics = true})
 
 -- Closing tags.
 local tag_close = token('element', P('/')^-1 * '>')
@@ -65,7 +65,7 @@ local unknown_attribute = token('unknown_attribute', (lexer.alnum + '-')^1)
 local attribute = (known_attribute + unknown_attribute) * #(lexer.space^0 * '=')
 lex:add_rule('attribute', attribute)
 lex:add_style('attribute', lexer.STYLE_TYPE)
-lex:add_style('unknown_attribute', lexer.STYLE_TYPE .. ',italics')
+lex:add_style('unknown_attribute', lexer.STYLE_TYPE .. {italics = true})
 
 -- TODO: performance is terrible on large files.
 local in_tag = P(function(input, index)

@@ -48,7 +48,7 @@ lex:add_style('time', lexer.STYLE_NUMBER)
 
 -- Special special value.
 lex:add_rule('now', token('now', P('now')))
-lex:add_style('now', lexer.STYLE_CONSTANT .. ',bold')
+lex:add_style('now', lexer.STYLE_CONSTANT .. {bold = true})
 
 -- Strings.
 local sq_str = P('L')^-1 * lexer.range("'", true)
