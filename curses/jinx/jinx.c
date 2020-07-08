@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
       "    // Start up the gnome\n"
       "    gnome_init(\"stest\", \"1.0\", argc, argv);\n}");
   SSM(SCI_SETPROPERTY, (uptr_t)"fold", (sptr_t)"1");
+  SSM(SCI_SETMARGINWIDTHN, 0, 2);
   SSM(SCI_SETMARGINWIDTHN, 2, 1);
   SSM(SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS);
   SSM(SCI_SETMARGINSENSITIVEN, 2, 1);
