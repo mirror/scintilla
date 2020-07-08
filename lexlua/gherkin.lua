@@ -28,15 +28,15 @@ local number = token(lexer.NUMBER, lexer.number)
 
 -- Tags.
 lex:add_rule('tag', token('tag', '@' * lexer.word^0))
-lex:add_style('tag', lexer.STYLE_LABEL)
+lex:add_style('tag', lexer.styles.label)
 
 -- Placeholders.
 lex:add_rule('placeholder', token('placeholder',
   lexer.range('<', '>', false, false, true)))
-lex:add_style('placeholder', lexer.STYLE_VARIABLE)
+lex:add_style('placeholder', lexer.styles.variable)
 
 -- Examples.
 lex:add_rule('example', token('example', lexer.to_eol('|')))
-lex:add_style('example', lexer.STYLE_NUMBER)
+lex:add_style('example', lexer.styles.number)
 
 return lex

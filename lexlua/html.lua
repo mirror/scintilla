@@ -17,7 +17,7 @@ lex:add_rule('comment', token(lexer.COMMENT, lexer.range('<!--', '-->')))
 -- Doctype.
 lex:add_rule('doctype', token('doctype',
   lexer.range('<!' * word_match([[doctype]], true), '>')))
-lex:add_style('doctype', lexer.STYLE_COMMENT)
+lex:add_style('doctype', lexer.styles.comment)
 
 -- Elements.
 local single_element = token('single_element', '<' * P('/')^-1 * word_match([[
@@ -39,9 +39,9 @@ local unknown_element = token('unknown_element', '<' * P('/')^-1 *
   (lexer.alnum + '-')^1)
 local element = known_element + unknown_element
 lex:add_rule('element', element)
-lex:add_style('single_element', lexer.STYLE_KEYWORD)
-lex:add_style('element', lexer.STYLE_KEYWORD)
-lex:add_style('unknown_element', lexer.STYLE_KEYWORD .. {italics = true})
+lex:add_style('single_element', lexer.styles.keyword)
+lex:add_style('element', lexer.styles.keyword)
+lex:add_style('unknown_element', lexer.styles.keyword .. {italics = true})
 
 -- Closing tags.
 local tag_close = token('element', P('/')^-1 * '>')
@@ -64,8 +64,8 @@ local known_attribute = token('attribute', word_match([[
 local unknown_attribute = token('unknown_attribute', (lexer.alnum + '-')^1)
 local attribute = (known_attribute + unknown_attribute) * #(lexer.space^0 * '=')
 lex:add_rule('attribute', attribute)
-lex:add_style('attribute', lexer.STYLE_TYPE)
-lex:add_style('unknown_attribute', lexer.STYLE_TYPE .. {italics = true})
+lex:add_style('attribute', lexer.styles.type)
+lex:add_style('unknown_attribute', lexer.styles.type .. {italics = true})
 
 -- TODO: performance is terrible on large files.
 local in_tag = P(function(input, index)
@@ -92,7 +92,7 @@ lex:add_rule('number', #lexer.digit * lexer.last_char_includes('=') *
 -- Entities.
 lex:add_rule('entity', token('entity', '&' * (lexer.any - lexer.space - ';')^1 *
   ';'))
-lex:add_style('entity', lexer.STYLE_COMMENT)
+lex:add_style('entity', lexer.styles.comment)
 
 -- Fold points.
 local function disambiguate_lt(text, pos, line, s)

@@ -42,7 +42,7 @@ lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
 
 -- Templates.
 lex:add_rule('template', token('template', lexer.range("'''")))
-lex:add_style('template', lexer.STYLE_EMBEDDED)
+lex:add_style('template', lexer.styles.embedded)
 
 -- Strings.
 local sq_str = lexer.range("'", true)
@@ -73,7 +73,7 @@ lex:add_rule('number', token(lexer.NUMBER, float + hex + dec))
 
 -- Annotations.
 lex:add_rule('annotation', token('annotation', '@' * lexer.word))
-lex:add_style('annotation', lexer.STYLE_PREPROCESSOR)
+lex:add_style('annotation', lexer.styles.preprocessor)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('+-/*%<>!=^&|?~:;.()[]{}#')))

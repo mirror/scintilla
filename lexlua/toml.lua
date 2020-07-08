@@ -44,7 +44,7 @@ local time = hours * ':' * minutes * ':' * seconds * fraction^-1
 local T = S(' \t')^1 + S('tT')
 local zone = 'Z' + S(' \t')^0 * S('-+') * hours * (':' * minutes)^-1
 lex:add_rule('datetime', token('timestamp', date * (T * time * zone^-1)))
-lex:add_style('timestamp', lexer.STYLE_NUMBER)
+lex:add_style('timestamp', lexer.styles.number)
 
 -- Numbers.
 lex:add_rule('number', token(lexer.NUMBER, lexer.number))

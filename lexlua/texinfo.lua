@@ -80,7 +80,7 @@ local directives_base = word_match([[
 ]], true)
 lex:add_rule('directive', token('directives', ('@end' * lexer.space^1 + '@') *
   directives_base))
-lex:add_style('directives', lexer.STYLE_FUNCTION)
+lex:add_style('directives', lexer.styles['function'])
 
 -- Chapters.
 local chapters_base = word_match([[
@@ -104,7 +104,7 @@ local chapters_base = word_match([[
 ]], true)
 lex:add_rule('chapter', token('chapters', ('@end' * lexer.space^1 + '@') *
   chapters_base))
-lex:add_style('chapters', lexer.STYLE_CLASS)
+lex:add_style('chapters', lexer.styles.class)
 
 -- Common keywords.
 local keyword_base = word_match([[
@@ -182,11 +182,11 @@ local nested_braces = lexer.range('{', '}', false, false, true)
 -- Italics
 lex:add_rule('emph', token('emph', '@emph' * nested_braces))
 
-lex:add_style('emph', lexer.STYLE_STRING .. {italics = true})
+lex:add_style('emph', lexer.styles.string .. {italics = true})
 
 -- Bold
 lex:add_rule('strong', token('strong', '@strong' * nested_braces))
-lex:add_style('strong', lexer.STYLE_STRING .. {bold = true})
+lex:add_style('strong', lexer.styles.string .. {bold = true})
 
 -- Identifiers
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))

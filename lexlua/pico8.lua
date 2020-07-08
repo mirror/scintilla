@@ -34,6 +34,6 @@ local lua = lexer.load('lua')
 local lua_start_rule = token('pico8_tag', '__lua__')
 local lua_end_rule = token('pico8_tag', '__gfx__' )
 lex:embed(lua, lua_start_rule, lua_end_rule)
-lex:add_style('pico8_tag', lexer.STYLE_EMBEDDED)
+lex:add_style('pico8_tag', lexer.styles.embedded)
 
 return lex

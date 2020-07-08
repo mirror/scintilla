@@ -53,7 +53,7 @@ lex:add_rule('directive', token('directive', '-' * word_match[[
   author behaviour behavior compile copyright define doc else endif export file
   ifdef ifndef import include include_lib module record spec type undef
 ]]))
-lex:add_style('directive', lexer.STYLE_PREPROCESSOR)
+lex:add_style('directive', lexer.styles.preprocessor)
 
 -- Strings.
 local sq_str = lexer.range("'", true)

@@ -16,7 +16,7 @@ lex:add_rule('field', token('field', word_match[[
   series address edition howpublished booktitle organization chapter school
   institution type isbn issn affiliation issue keyword url
 ]]))
-lex:add_style('field', lexer.STYLE_CONSTANT)
+lex:add_style('field', lexer.styles.constant)
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
@@ -37,7 +37,7 @@ local entry = token('entry', P('@') * word_match([[
   book article booklet conference inbook incollection inproceedings manual
   mastersthesis lambda misc phdthesis proceedings techreport unpublished
 ]], true))
-lex:add_style('entry', lexer.STYLE_PREPROCESSOR)
+lex:add_style('entry', lexer.styles.preprocessor)
 local bibtex_start_rule = entry * ws^0 * token(lexer.OPERATOR, P('{'))
 local bibtex_end_rule = token(lexer.OPERATOR, P('}'))
 latex:embed(lex, bibtex_start_rule, bibtex_end_rule)

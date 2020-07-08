@@ -280,7 +280,7 @@ lex:add_rule('instruction', token('instruction', word_match[[
   hint_nop56 hint_nop57 hint_nop58 hint_nop59 hint_nop60 hint_nop61 hint_nop62
   hint_nop63
 ]]))
-lex:add_style('instruction', lexer.STYLE_FUNCTION)
+lex:add_style('instruction', lexer.styles['function'])
 
 -- Registers.
 lex:add_rule('register', token('register', word_match[[
@@ -294,7 +294,7 @@ lex:add_rule('register', token('register', word_match[[
   xmm9 xmm10 xmm11 xmm12 xmm13 xmm14 xmm15 ymm8 ymm9 ymm10 ymm11 ymm12 ymm13
   ymm14 ymm15
 ]]))
-lex:add_style('register', lexer.STYLE_CONSTANT)
+lex:add_style('register', lexer.styles.constant)
 
 -- Types.
 local sizes = word_match[[

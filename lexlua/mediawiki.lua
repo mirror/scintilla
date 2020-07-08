@@ -20,15 +20,15 @@ local tag_attr = token('tag_attr', lexer.alpha^1 * lexer.space^0 *
       (lexer.any - lexer.space - '>')^0)^-1)^0 * lexer.space^0)
 local tag_end = token('tag_end', P('/')^-1 * '>')
 lex:add_rule('tag', tag_start * tag_attr^0 * tag_end)
-lex:add_style('tag_start', lexer.STYLE_KEYWORD)
-lex:add_style('tag_attr', lexer.STYLE_TYPE)
-lex:add_style('tag_end', lexer.STYLE_KEYWORD)
+lex:add_style('tag_start', lexer.styles.keyword)
+lex:add_style('tag_attr', lexer.styles.type)
+lex:add_style('tag_end', lexer.styles.keyword)
 
 -- Link
 lex:add_rule('link', token(lexer.STRING, S('[]')))
 lex:add_rule('internal_link', B('[[') *
   token('link_article', (lexer.any - '|' - ']]')^1))
-lex:add_style('link_article', lexer.STYLE_STRING .. {underlined = true})
+lex:add_style('link_article', lexer.styles.string .. {underlined = true})
 
 -- Templates and parser functions.
 lex:add_rule('template', token(lexer.OPERATOR, S('{}')))
@@ -36,8 +36,8 @@ lex:add_rule('parser_func', B('{{') *
   token('parser_func', P('#') * lexer.alpha^1 + lexer.upper^1 * ':'))
 lex:add_rule('template_name', B('{{') *
   token('template_name', (lexer.any - S('{}|'))^1))
-lex:add_style('parser_func', lexer.STYLE_FUNCTION)
-lex:add_style('template_name', lexer.STYLE_OPERATOR .. {underlined = true})
+lex:add_style('parser_func', lexer.styles['function'])
+lex:add_style('template_name', lexer.styles.operator .. {underlined = true})
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('-=|#~!')))
@@ -48,6 +48,6 @@ lex:add_rule('behavior_switch', (B(lexer.space) + start_pat) *
   token('behavior_switch', '__' *
     (P('TOC') + 'FORCETOC' + 'NOTOC' + 'NOEDITSECTION' + 'NOCC' + 'NOINDEX') *
     '__') * #lexer.space)
-lex:add_style('behavior_switch', lexer.STYLE_KEYWORD)
+lex:add_style('behavior_switch', lexer.styles.keyword)
 
 return lex

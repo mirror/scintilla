@@ -32,7 +32,8 @@ local deprecated_func = token('deprecated_function', word_match[[
   getfenv loadstring module setfenv unpack
 ]])
 lex:add_rule('function', func + deprecated_func)
-lex:add_style('deprecated_function', lexer.STYLE_FUNCTION .. {italics = true})
+lex:add_style(
+  'deprecated_function', lexer.styles['function'] .. {italics = true})
 
 -- Constants.
 lex:add_rule('constant', token(lexer.CONSTANT, word_match[[
@@ -102,8 +103,8 @@ local deprecated_library = token('deprecated_library', word_match[[
   debug.getfenv debug.setfenv
 ]])
 lex:add_rule('library', library + deprecated_library)
-lex:add_style('library', lexer.STYLE_TYPE)
-lex:add_style('deprecated_library', lexer.STYLE_TYPE .. {italics = true})
+lex:add_style('library', lexer.styles.type)
+lex:add_style('deprecated_library', lexer.styles.type .. {italics = true})
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
@@ -119,7 +120,7 @@ local sq_str = lexer.range("'")
 local dq_str = lexer.range('"')
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str) +
   token('longstring', longstring))
-lex:add_style('longstring', lexer.STYLE_STRING)
+lex:add_style('longstring', lexer.styles.string)
 
 -- Comments.
 local line_comment = lexer.to_eol('--')

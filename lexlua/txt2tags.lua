@@ -126,25 +126,25 @@ local font_size =
 for n = 5, 1, -1 do
   lex:add_style('h' .. n, {fore = lexer.colors.red, size = font_size + (6 - n)})
 end
-lex:add_style('header_label', lexer.STYLE_LABEL)
+lex:add_style('header_label', lexer.styles.label)
 lex:add_style('email', {underlined = true})
 lex:add_style('host', {underlined = true})
 lex:add_style('url', {underlined = true})
-lex:add_style('address_label', lexer.STYLE_LABEL)
+lex:add_style('address_label', lexer.styles.label)
 lex:add_style('address', {underlined = true})
 lex:add_style('image', {fore = lexer.colors.green})
 lex:add_style('image_link', {underlined = true})
-lex:add_style('macro', lexer.STYLE_PREPROCESSOR)
+lex:add_style('macro', lexer.styles.preprocessor)
 lex:add_style('bold', {bold = true})
 lex:add_style('italic', {italics = true})
 lex:add_style('underline', {underlined = true})
 lex:add_style('strike', {italics = true}) -- a strike style is not available
 lex:add_style('mono', {font = 'mono'})
 lex:add_style('raw', {back = lexer.colors.grey})
-lex:add_style('tagged', lexer.STYLE_EMBEDDED)
+lex:add_style('tagged', lexer.styles.embedded)
 lex:add_style('verbatim_area', {font = 'mono'}) -- in consistency with mono
 lex:add_style('raw_area', {back = lexer.colors.grey}) -- in consistency with raw
-lex:add_style('tagged_area', lexer.STYLE_EMBEDDED) -- in consistency with tagged
+lex:add_style('tagged_area', lexer.styles.embedded) -- in consistency with tagged
 lex:add_style('table_sep', {fore = lexer.colors.green})
 lex:add_style('header_cell_content', {fore = lexer.colors.green})
 

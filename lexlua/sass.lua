@@ -16,7 +16,7 @@ lex:add_rule('variable', token(lexer.VARIABLE, '$' * (lexer.alnum + S('_-'))^1))
 
 -- Mixins.
 lex:add_rule('mixin', token('mixin', P('@') * lexer.word))
-lex:add_style('mixin', lexer.STYLE_FUNCTION)
+lex:add_style('mixin', lexer.styles['function'])
 
 -- Fold points.
 lex:add_fold_point(lexer.COMMENT, '//', lexer.fold_line_comments('//'))

@@ -22,7 +22,7 @@ local identifier = (alpha + S('_-:.?')) * word_char^0
 -- Elements.
 local element = token('element', '<' * P('/')^-1 * identifier)
 lex:add_rule('element', element)
-lex:add_style('element', lexer.STYLE_KEYWORD)
+lex:add_style('element', lexer.styles.keyword)
 
 -- Closing tags.
 local tag_close = token('element', P('/')^-1 * '>')
@@ -31,7 +31,7 @@ lex:add_rule('tag_close', tag_close)
 -- Attributes.
 local attribute = token('attribute', identifier) * #(lexer.space^0 * '=')
 lex:add_rule('attribute', attribute)
-lex:add_style('attribute', lexer.STYLE_TYPE)
+lex:add_style('attribute', lexer.styles.type)
 
 local in_tag = P(function(input, index)
   local before = input:sub(1, index - 1)
@@ -60,7 +60,7 @@ lex:add_rule('number', #lexer.digit * lexer.last_char_includes('=') *
 lex:add_rule('entity', token('entity', '&' * word_match[[
   lt gt amp apos quot
 ]] * ';'))
-lex:add_style('entity', lexer.STYLE_OPERATOR)
+lex:add_style('entity', lexer.styles.operator)
 
 -- Fold points.
 local function disambiguate_lt(text, pos, line, s)

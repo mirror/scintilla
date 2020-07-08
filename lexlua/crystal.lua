@@ -96,7 +96,7 @@ lex:add_rule('variable', token(lexer.VARIABLE, global_var + class_var +
 lex:add_rule('symbol', token('symbol', ':' * P(function(input, index)
   if input:sub(index - 2, index - 2) ~= ':' then return index end
 end) * (word_char^1 + sq_str + dq_str)))
-lex:add_style('symbol', lexer.STYLE_CONSTANT)
+lex:add_style('symbol', lexer.styles.constant)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('!%^&*()[]{}-=+/|:;.,?<>~')))

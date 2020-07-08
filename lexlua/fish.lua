@@ -35,7 +35,7 @@ lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Shebang.
 lex:add_rule('shebang', token('shebang', lexer.to_eol('#!/')))
-lex:add_style('shebang', lexer.STYLE_LABEL)
+lex:add_style('shebang', lexer.styles.label)
 
 -- Comments.
 lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))

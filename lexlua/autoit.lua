@@ -116,7 +116,7 @@ lex:add_rule('string', token(lexer.STRING, dq_str + sq_str + inc))
 
 -- Macros.
 lex:add_rule('macro', token('macro', '@' * (lexer.alnum + '_')^1))
-lex:add_style('macro', lexer.STYLE_PREPROCESSOR)
+lex:add_style('macro', lexer.styles.preprocessor)
 
 -- Variables.
 lex:add_rule('variable', token(lexer.VARIABLE, '$' * (lexer.alnum + '_')^1))

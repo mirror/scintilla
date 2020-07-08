@@ -45,7 +45,7 @@ html:modify_rule('comment', token(lexer.COMMENT, html_comment + django_comment))
 local django_start_rule = token('django_tag', '{' * S('{%'))
 local django_end_rule = token('django_tag', S('%}') * '}')
 html:embed(lex, django_start_rule, django_end_rule)
-lex:add_style('django_tag', lexer.STYLE_EMBEDDED)
+lex:add_style('django_tag', lexer.styles.embedded)
 
 -- Fold points.
 lex:add_fold_point('django_tag', '{{', '}}')

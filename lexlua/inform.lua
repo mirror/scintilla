@@ -48,7 +48,7 @@ lex:add_rule('action', token('action', word_match[[
   ThrowAt ThrownAt Tie Touch Transfer Turn Unlock VagueGo Verify Version Wait
   Wake WakeOther Wave WaveHands Wear Yes
 ]]))
-lex:add_style('action', lexer.STYLE_VARIABLE)
+lex:add_style('action', lexer.styles.variable)
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))

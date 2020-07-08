@@ -28,7 +28,7 @@ lex:add_rule('blockquote', token(lexer.STRING,
 
 lex:add_rule('list', token('list',
   lexer.starts_line(S(' \t')^0 * (S('*+-') + R('09')^1 * '.')) * S(' \t')))
-lex:add_style('list', lexer.STYLE_CONSTANT)
+lex:add_style('list', lexer.styles.constant)
 
 local hspace = S('\t\v\f\r ')
 local blank_line = '\n' * hspace^0 * ('\n' + P(-1))
@@ -43,7 +43,7 @@ local code_inline = lpeg.Cmt(lpeg.C(P('`')^1), function(input, index, bt)
   return (e or #input) + 1
 end)
 lex:add_rule('block_code', token('code', code_line + code_block + code_inline))
-lex:add_style('code', lexer.STYLE_EMBEDDED .. {eolfilled = true})
+lex:add_style('code', lexer.styles.embedded .. {eolfilled = true})
 
 lex:add_rule('hr', token('hr', lpeg.Cmt(
   lexer.starts_line(S(' \t')^0 * lpeg.C(S('*-_'))), function(input, index, c)
@@ -66,7 +66,7 @@ local ref_link_title = token(lexer.STRING, lexer.range('"', true, false) +
   lexer.range("'", true, false) + lexer.range('(', ')', true))
 lex:add_rule('link_label', ref_link_label * ws * ref_link_url *
   (ws * ref_link_title)^-1)
-lex:add_style('link_label', lexer.STYLE_LABEL)
+lex:add_style('link_label', lexer.styles.label)
 lex:add_style('link_url', {underlined = true})
 
 local link_label = P('!')^-1 * lexer.range('[', ']', true)

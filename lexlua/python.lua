@@ -67,7 +67,7 @@ lex:add_rule('constant', token(lexer.CONSTANT, word_match[[
 
 -- Self.
 lex:add_rule('self', token('self', P('self')))
-lex:add_style('self', lexer.STYLE_TYPE)
+lex:add_style('self', lexer.styles.type)
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))
@@ -94,7 +94,7 @@ lex:add_rule('number', token(lexer.NUMBER, lexer.float + integer))
 
 -- Decorators.
 lex:add_rule('decorator', token('decorator', lexer.to_eol('@')))
-lex:add_style('decorator', lexer.STYLE_PREPROCESSOR)
+lex:add_style('decorator', lexer.styles.preprocessor)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('!%^&*()[]{}-=+/|:;.,?<>~`')))

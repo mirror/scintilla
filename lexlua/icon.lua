@@ -26,7 +26,7 @@ lex:add_rule('special_keyword', token('special_keyword', P('&') * word_match[[
   lcase letters level line main null output phi pi pos progname random regions
   source storage subject time trace ucase version
 ]]))
-lex:add_style('special_keyword', lexer.STYLE_TYPE)
+lex:add_style('special_keyword', lexer.styles.type)
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, lexer.word))

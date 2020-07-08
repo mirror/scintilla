@@ -62,7 +62,7 @@ local html = lexer.load('html')
 local php_start_rule = token('php_tag', '<?' * ('php' * lexer.space)^-1)
 local php_end_rule = token('php_tag', '?>')
 html:embed(lex, php_start_rule, php_end_rule)
-lex:add_style('php_tag', lexer.STYLE_EMBEDDED)
+lex:add_style('php_tag', lexer.styles.embedded)
 
 -- Fold points.
 lex:add_fold_point('php_tag', '<?', '?>')

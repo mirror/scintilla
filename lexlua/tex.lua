@@ -17,7 +17,7 @@ lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('%')))
 -- TeX environments.
 lex:add_rule('environment', token('environment', '\\' * (P('begin') + 'end') *
   lexer.word))
-lex:add_style('environment', lexer.STYLE_KEYWORD)
+lex:add_style('environment', lexer.styles.keyword)
 
 -- Commands.
 lex:add_rule('command', token(lexer.KEYWORD, '\\' * (lexer.alpha^1 +

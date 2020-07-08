@@ -26,7 +26,7 @@ lex:add_rule('variable', token(lexer.VARIABLE, word_match[[
 lex:add_rule('state', token('state', word_match[[
   ACTIVE SELECTED NORMAL PRELIGHT INSENSITIVE TRUE FALSE
 ]]))
-lex:add_style('state', lexer.STYLE_CONSTANT)
+lex:add_style('state', lexer.styles.constant)
 
 -- Functions.
 lex:add_rule('function', token(lexer.FUNCTION, word_match[[

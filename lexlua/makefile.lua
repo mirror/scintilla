@@ -30,7 +30,7 @@ local special_target = token(lexer.CONSTANT, word_match[[
 local normal_target = token('target', (lexer.any - lexer.space - S(':#='))^1)
 lex:add_rule('target', lexer.starts_line((special_target + normal_target) *
   ws^0 * #(':' * -P('='))))
-lex:add_style('target', lexer.STYLE_LABEL)
+lex:add_style('target', lexer.styles.label)
 
 -- Variables.
 local word_char = lexer.any - lexer.space - S(':#=(){}')

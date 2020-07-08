@@ -13,7 +13,7 @@ lex:add_rule('whitespace', token(lexer.WHITESPACE, lexer.space^1))
 -- Colors.
 lex:add_rule('color', token('color', '#' * lexer.xdigit * lexer.xdigit *
   lexer.xdigit * lexer.xdigit * lexer.xdigit * lexer.xdigit))
-lex:add_style('color', lexer.STYLE_NUMBER)
+lex:add_style('color', lexer.styles.number)
 
 -- Comments.
 lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))

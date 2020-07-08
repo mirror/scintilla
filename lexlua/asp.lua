@@ -13,7 +13,7 @@ local vb = lexer.load('vb')
 local vb_start_rule = token('asp_tag', '<%' * P('=')^-1)
 local vb_end_rule = token('asp_tag', '%>')
 lex:embed(vb, vb_start_rule, vb_end_rule)
-lex:add_style('asp_tag', lexer.STYLE_EMBEDDED)
+lex:add_style('asp_tag', lexer.styles.embedded)
 
 -- Embedded VBScript.
 local vbs = lexer.load('vbscript')

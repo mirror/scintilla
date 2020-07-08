@@ -38,17 +38,17 @@ lex:add_rule('class', token(lexer.CLASS, word_match[[
 
 -- Global ugens.
 lex:add_rule('ugen', token('ugen', word_match[[dac adc blackhole]]))
-lex:add_style('ugen', lexer.STYLE_CONSTANT)
+lex:add_style('ugen', lexer.styles.constant)
 
 -- Times.
 lex:add_rule('time', token('time', word_match[[
   samp ms second minute hour day week
 ]]))
-lex:add_style('time', lexer.STYLE_NUMBER)
+lex:add_style('time', lexer.styles.number)
 
 -- Special special value.
 lex:add_rule('now', token('now', P('now')))
-lex:add_style('now', lexer.STYLE_CONSTANT .. {bold = true})
+lex:add_style('now', lexer.styles.constant .. {bold = true})
 
 -- Strings.
 local sq_str = P('L')^-1 * lexer.range("'", true)

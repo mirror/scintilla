@@ -46,7 +46,7 @@ lex:add_rule('operator', token(lexer.OPERATOR, S('#?=!<>+-*$/%&|^~.,;()[]{}')))
 
 -- Annotations.
 lex:add_rule('annotation', token('annotation', '@' * lexer.word^1))
-lex:add_style('annotation', lexer.STYLE_PREPROCESSOR)
+lex:add_style('annotation', lexer.styles.preprocessor)
 
 -- Fold points.
 lex:add_fold_point(lexer.OPERATOR, '{', '}')

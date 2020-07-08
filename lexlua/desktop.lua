@@ -16,11 +16,11 @@ lex:add_rule('key', token('key', word_match[[
   NotShowIn TryExec Exec Exec Path Terminal MimeType Categories StartupNotify
   StartupWMClass URL
 ]]))
-lex:add_style('key', lexer.STYLE_KEYWORD)
+lex:add_style('key', lexer.styles.keyword)
 
 -- Values.
 lex:add_rule('value', token('value', word_match[[true false]]))
-lex:add_style('value', lexer.STYLE_CONSTANT)
+lex:add_style('value', lexer.styles.constant)
 
 -- Identifiers.
 local word = lexer.alpha * (lexer.alnum + S('_-'))^0
@@ -30,11 +30,11 @@ local bracketed = lexer.range('[', ']')
 
 -- Group headers.
 lex:add_rule('header', lexer.starts_line(token('header', bracketed)))
-lex:add_style('header', lexer.STYLE_LABEL)
+lex:add_style('header', lexer.styles.label)
 
 -- Locales.
 lex:add_rule('locale', token('locale', bracketed))
-lex:add_style('locale', lexer.STYLE_CLASS)
+lex:add_style('locale', lexer.styles.class)
 
 -- Strings.
 lex:add_rule('string', token(lexer.STRING, lexer.range('"')))
@@ -47,7 +47,7 @@ lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Field codes.
 lex:add_rule('code', lexer.token('code', P('%') * S('fFuUdDnNickvm')))
-lex:add_style('code', lexer.STYLE_VARIABLE)
+lex:add_style('code', lexer.styles.variable)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('=')))

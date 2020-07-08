@@ -24,7 +24,7 @@ lex:add_rule('error', token(lexer.ERROR, word_match[[function end]]))
 
 -- Self reference.
 lex:add_rule('self_ref', token('self_ref', '@' * lexer.word + 'self'))
-lex:add_style('self_ref', lexer.STYLE_LABEL)
+lex:add_style('self_ref', lexer.styles.label)
 
 -- Functions.
 lex:add_rule('function', token(lexer.FUNCTION, word_match[[
@@ -99,15 +99,15 @@ lex:add_rule('library', token('library', word_match[[
   -- Debug functions.
   debug.upvalue
 ]]))
-lex:add_style('library', lexer.STYLE_TYPE)
+lex:add_style('library', lexer.styles.type)
 
 -- Identifiers.
 local identifier = token(lexer.IDENTIFIER, lexer.word)
 local proper_ident = token('proper_ident', R('AZ') * lexer.word)
 local tbl_key = token('tbl_key', lexer.word * ':' + ':' * lexer.word )
 lex:add_rule('identifier', tbl_key + proper_ident + identifier)
-lex:add_style('proper_ident', lexer.STYLE_CLASS)
-lex:add_style('tbl_key', lexer.STYLE_REGEX)
+lex:add_style('proper_ident', lexer.styles.class)
+lex:add_style('tbl_key', lexer.styles.regex)
 
 local longstring = lpeg.Cmt('[' * lpeg.C(P('=')^0) * '[',
   function(input, index, eq)
@@ -120,7 +120,7 @@ local sq_str = lexer.range("'", false, false)
 local dq_str = lexer.range('"', false, false)
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str) +
   token('longstring', longstring))
-lex:add_style('longstring', lexer.STYLE_STRING)
+lex:add_style('longstring', lexer.styles.string)
 
 -- Comments.
 local line_comment = lexer.to_eol('--')
@@ -132,11 +132,11 @@ lex:add_rule('number', token(lexer.NUMBER, lexer.number))
 
 -- Function definition.
 lex:add_rule('fndef', token('fndef', P('->') + '=>'))
-lex:add_style('fndef', lexer.STYLE_PREPROCESSOR)
+lex:add_style('fndef', lexer.styles.preprocessor)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('+-*!\\/%^#=<>;:,.')))
 lex:add_rule('symbol', token('symbol', S('(){}[]')))
-lex:add_style('symbol', lexer.STYLE_EMBEDDED)
+lex:add_style('symbol', lexer.styles.embedded)
 
 return lex

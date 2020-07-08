@@ -49,7 +49,7 @@ lex:add_rule('number', token(lexer.NUMBER, P('-')^-1 * lexer.digit^1 *
 
 -- Entities.
 lex:add_rule('entity', token('entity', '&' * word))
-lex:add_style('entity', lexer.STYLE_VARIABLE)
+lex:add_style('entity', lexer.styles.variable)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('<>=*/+-`@%()')))
