@@ -886,7 +886,10 @@ end
 -- @name colors
 -- @class table
 M.colors = setmetatable({}, {
-  __index = function(_, name) return M.property['color.' .. name] end,
+  __index = function(_, name)
+    local color = M.property['color.' .. name]
+    return tonumber(color) or color
+  end,
   __newindex = function(_, name, color) M.property['color.' .. name] = color end
 })
 

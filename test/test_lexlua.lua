@@ -1181,7 +1181,7 @@ function test_colors()
   assert(lexer.colors.red == '')
   assert(lexer.property['color.red'] == '')
   lexer.colors.red = 0x0000FF
-  assert(lexer.colors.red == tostring(0x0000FF))
+  assert(lexer.colors.red == 0x0000FF)
   assert(lexer.property['color.red'] == tostring(0x0000FF))
   lexer.colors.blue = '#0000FF'
   assert(lexer.colors.blue == '#0000FF')
