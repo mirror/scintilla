@@ -134,7 +134,7 @@ local js_start_rule = #('<' * script_element * ('>' + P(function(input, index)
   end
 end))) * lex.embed_start_tag
 local js_end_rule = #('</' * script_element * ws^-1 * '>') * lex.embed_end_tag
-local js_line_comment = '//' * (lexer.nonnewline_esc - js_end_rule)^0
+local js_line_comment = '//' * (lexer.nonnewline - js_end_rule)^0
 local js_block_comment = '/*' * (lexer.any - '*/' - js_end_rule)^0 * P('*/')^-1
 js:modify_rule('comment', token(lexer.COMMENT, js_line_comment +
   js_block_comment))

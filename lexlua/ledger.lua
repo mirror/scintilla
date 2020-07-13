@@ -11,7 +11,7 @@ local delim = P('\t') + P('  ')
 
 -- Account.
 lex:add_rule('account', token(lexer.VARIABLE, lexer.starts_line(S(' \t')^1 *
-  (lexer.print - delim)^1)))
+  lexer.graph^1)))
 
 -- Amount.
 lex:add_rule('amount', token(lexer.NUMBER, delim * (1 - S(';\r\n'))^1))

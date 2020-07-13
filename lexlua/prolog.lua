@@ -308,7 +308,7 @@ lex:add_rule('bif', token(lexer.FUNCTION, word_match(bifs[dialect]) * #(P'(')))
 -- Numbers.
 local decimal_group = S('+-')^-1 * (lexer.digit + '_')^1
 local binary_number = '0b' * (S('01') + '_')^1
-local character_code = '0\'' * S('\\')^-1 * (lexer.print - lexer.space)
+local character_code = '0\'' * S('\\')^-1 * lexer.graph
 local decimal_number = decimal_group * ('.' * decimal_group)^-1 *
   ('e' * decimal_group)^-1
 local hexadecimal_number = '0x' * (lexer.xdigit + '_')^1

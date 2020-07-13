@@ -133,16 +133,15 @@ local M = {}
 -- [`lexer.PREPROCESSOR`](), [`lexer.CONSTANT`](), [`lexer.VARIABLE`](),
 -- [`lexer.FUNCTION`](), [`lexer.CLASS`](), [`lexer.TYPE`](), [`lexer.LABEL`](),
 -- [`lexer.REGEX`](), and [`lexer.EMBEDDED`](). Patterns include
--- [`lexer.any`](), [`lexer.ascii`](), [`lexer.extend`](), [`lexer.alpha`](),
--- [`lexer.digit`](), [`lexer.alnum`](), [`lexer.lower`](), [`lexer.upper`](),
--- [`lexer.xdigit`](), [`lexer.cntrl`](), [`lexer.graph`](), [`lexer.print`](),
--- [`lexer.punct`](), [`lexer.space`](), [`lexer.newline`](),
--- [`lexer.nonnewline`](), [`lexer.nonnewline_esc`](), [`lexer.dec_num`](),
--- [`lexer.hex_num`](), [`lexer.oct_num`](), [`lexer.integer`](),
--- [`lexer.float`](), [`lexer.number`](), and [`lexer.word`](). You may use your
--- own token names if none of the above fit your language, but an advantage to
--- using predefined token names is that your lexer's tokens will inherit the
--- universal syntax highlighting color theme used by your text editor.
+-- [`lexer.any`](), [`lexer.alpha`](), [`lexer.digit`](), [`lexer.alnum`](),
+-- [`lexer.lower`](), [`lexer.upper`](), [`lexer.xdigit`](), [`lexer.graph`](),
+-- [`lexer.print`](), [`lexer.punct`](), [`lexer.space`](), [`lexer.newline`](),
+-- [`lexer.nonnewline`](), [`lexer.dec_num`](), [`lexer.hex_num`](),
+-- [`lexer.oct_num`](), [`lexer.integer`](), [`lexer.float`](),
+-- [`lexer.number`](), and [`lexer.word`](). You may use your own token names if
+-- none of the above fit your language, but an advantage to using predefined
+-- token names is that your lexer's tokens will inherit the universal syntax
+-- highlighting color theme used by your text editor.
 --
 -- ##### Example Tokens
 --
@@ -798,9 +797,6 @@ local M = {}
 --   A pattern that matches a sequence of end of line characters.
 -- @field nonnewline (pattern)
 --   A pattern that matches any single, non-newline character.
--- @field nonnewline_esc (pattern)
---   A pattern that matches any single, non-newline character or any set of end
---   of line characters escaped with '\'.
 -- @field dec_num (pattern)
 --   A pattern that matches a decimal number.
 -- @field hex_num (pattern)
@@ -1590,23 +1586,18 @@ end
 
 -- Common patterns.
 M.any = lpeg_P(1)
-M.ascii = lpeg_R('\000\127')
-M.extend = lpeg_R('\000\255')
 M.alpha = lpeg_R('AZ', 'az')
 M.digit = lpeg_R('09')
 M.alnum = lpeg_R('AZ', 'az', '09')
 M.lower = lpeg_R('az')
 M.upper = lpeg_R('AZ')
 M.xdigit = lpeg_R('09', 'AF', 'af')
-M.cntrl = lpeg_R('\000\031')
 M.graph = lpeg_R('!~')
-M.print = lpeg_R(' ~')
 M.punct = lpeg_R('!/', ':@', '[\'', '{~')
 M.space = lpeg_S('\t\v\f\n\r ')
 
 M.newline = lpeg_P('\r')^-1 * '\n'
 M.nonnewline = 1 - M.newline
-M.nonnewline_esc = 1 - (M.newline + '\\') + '\\' * M.any
 
 M.dec_num = M.digit^1
 M.hex_num = '0' * lpeg_S('xX') * M.xdigit^1
@@ -1619,6 +1610,13 @@ M.float = lpeg_S('+-')^-1 * (
 M.number = M.float + M.integer
 
 M.word = (M.alpha + '_') * (M.alnum + '_')^0
+
+-- Deprecated.
+M.nonnewline_esc = 1 - (M.newline + '\\') + '\\' * M.any
+M.ascii = lpeg_R('\000\127')
+M.extend = lpeg_R('\000\255')
+M.cntrl = lpeg_R('\000\031')
+M.print = lpeg_R(' ~')
 
 ---
 -- Creates and returns a token pattern with token name *name* and pattern
