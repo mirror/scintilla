@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('nim', {fold_by_indentation = true})
 
@@ -85,7 +85,7 @@ lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#', true)))
 local dec = lexer.digit^1 * ('_' * lexer.digit^1)^0
 local hex = '0' * S('xX') * lexer.xdigit^1 * ('_' * lexer.xdigit^1)^0
 local bin = '0' * S('bB') * S('01')^1 * ('_' * S('01')^1)^0
-local oct = '0o' * R('07')^1
+local oct = '0o' * lpeg.R('07')^1
 local integer = S('+-')^-1 * (bin + hex + oct + dec) *
   ("'" * S('iIuUfF') * (P('8') + '16' + '32' + '64'))^-1
 local float = lexer.digit^1 * ('_' * lexer.digit^1)^0 *

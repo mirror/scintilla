@@ -4,7 +4,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local B, P, R, S = lpeg.B, lpeg.P, lpeg.R, lpeg.S
+local B, P, S, R = lpeg.B, lpeg.P, lpeg.S, lpeg.R
 
 local lex = lexer.new('elixir', {fold_by_indentation = true})
 

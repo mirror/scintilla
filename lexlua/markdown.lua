@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('markdown')
 
@@ -27,7 +27,7 @@ lex:add_rule('blockquote', token(lexer.STRING,
   end)))
 
 lex:add_rule('list', token('list',
-  lexer.starts_line(S(' \t')^0 * (S('*+-') + R('09')^1 * '.')) * S(' \t')))
+  lexer.starts_line(S(' \t')^0 * (S('*+-') + lexer.digit^1 * '.')) * S(' \t')))
 lex:add_style('list', lexer.styles.constant)
 
 local hspace = S('\t\v\f\r ')

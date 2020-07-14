@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S, V = lpeg.P, lpeg.R, lpeg.S, lpeg.V
+local P, S, V = lpeg.P, lpeg.S, lpeg.V
 
 local lex = lexer.new('css')
 
@@ -154,7 +154,7 @@ local unit = token('unit', word_match[[
   vh vmax vmin vw
 ]])
 lex:add_style('unit', lexer.styles.number)
-lex:add_rule('number', token(lexer.NUMBER, lexer.digit^1) * unit^-1)
+lex:add_rule('number', token(lexer.NUMBER, lexer.dec_num) * unit^-1)
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('~!#*>+=|.,:;()[]{}')))

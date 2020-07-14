@@ -4,7 +4,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local M = {_NAME = 'yaml'}
 
@@ -22,7 +22,7 @@ local dq_str = lexer.range('"')
 local string = token(lexer.STRING, sq_str + dq_str)
 
 -- Numbers.
-local integer = lexer.dec_num + lexer.hex_num + '0' * S('oO') * R('07')^1
+local integer = lexer.dec_num + lexer.hex_num + '0' * S('oO') * lpeg.R('07')^1
 local special_num = '.' * word_match({'inf', 'nan'}, nil, true)
 local number = token(lexer.NUMBER, special_num + lexer.float + integer)
 

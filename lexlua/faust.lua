@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('faust')
 
@@ -29,7 +29,7 @@ local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
-local int = R('09')^1
+local int = lexer.digit^1
 local rad = P('.')
 local exp = (P('e') * S('+-')^-1 * int)^-1
 local flt = int * (rad * int)^-1 * exp + int^-1 * rad * int * exp

@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('gap')
 
@@ -28,7 +28,7 @@ lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 lex:add_rule('comment', token(lexer.COMMENT, lexer.to_eol('#')))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.digit^1 * -lexer.alpha))
+lex:add_rule('number', token(lexer.NUMBER, lexer.dec_num * -lexer.alpha))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('*+-,./:;<=>~^#()[]{}')))

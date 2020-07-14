@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S, R = lpeg.P, lpeg.S, lpeg.R
 
 local lex = lexer.new('glsl', {inherit = lexer.load('cpp')})
 

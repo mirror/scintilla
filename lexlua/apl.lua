@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('apl')
 
@@ -20,7 +20,7 @@ local dq_str = lexer.range('"')
 lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Numbers.
-local dig = R('09')
+local dig = lexer.digit
 local rad = P('.')
 local exp = S('eE')
 local img = S('jJ')
@@ -31,12 +31,12 @@ lex:add_rule('number', token(lexer.NUMBER, float * img * float + float))
 
 -- Keywords.
 lex:add_rule('keyword', token(lexer.KEYWORD, P('⍞') + 'χ' + '⍺' + '⍶' + '⍵' +
-  '⍹' + '⎕' * R('AZ', 'az')^0))
+  '⍹' + '⎕' * lexer.alpha^0))
 
 -- Names.
-local n1l = R('AZ', 'az')
+local n1l = lexer.alpha
 local n1b = P('_') + '∆' + '⍙'
-local n2l = n1l + R('09')
+local n2l = n1l + lexer.digit
 local n2b = n1b + '¯'
 local n1 = n1l + n1b
 local n2 = n2l + n2b

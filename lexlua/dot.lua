@@ -4,7 +4,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('dot')
 
@@ -42,7 +42,7 @@ local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
-lex:add_rule('number', token(lexer.NUMBER, lexer.digit^1 + lexer.float))
+lex:add_rule('number', token(lexer.NUMBER, lexer.dec_num + lexer.float))
 
 -- Operators.
 lex:add_rule('operator', token(lexer.OPERATOR, S('->()[]{};')))

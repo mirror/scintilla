@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('pkgbuild')
 
@@ -64,7 +64,7 @@ local parens = lexer.range('(', ')', true)
 local brackets = lexer.range('[', ']', true)
 local braces = lexer.range('{', '}', true)
 local backticks = lexer.range('`', true, false)
-local number = lexer.digit^1
+local number = lexer.dec_num
 lex:add_rule('variable', token(lexer.VARIABLE, '$' *
   (symbol + parens + brackets + braces + backticks + number + lexer.word)))
 

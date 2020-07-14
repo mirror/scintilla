@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S, V = lpeg.P, lpeg.R, lpeg.S, lpeg.V
+local P, S, V = lpeg.P, lpeg.S, lpeg.V
 
 local lex = lexer.new('php')
 
@@ -21,8 +21,8 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
   __class__ __file__ __function__ __line__ __sleep __wakeup
 ]]))
 
-local word = (lexer.alpha + '_' + R('\127\255')) *
-  (lexer.alnum + '_' + R('\127\255'))^0
+local word = (lexer.alpha + '_' + lpeg.R('\127\255')) *
+  (lexer.alnum + '_' + lpeg.R('\127\255'))^0
 
 -- Identifiers.
 lex:add_rule('identifier', token(lexer.IDENTIFIER, word))

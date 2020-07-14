@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S, V = lpeg.P, lpeg.R, lpeg.S, lpeg.V
+local P, S, V = lpeg.P, lpeg.S, lpeg.V
 
 local lex = lexer.new('myrddin')
 
@@ -37,9 +37,9 @@ lex:add_rule('string', token(lexer.STRING, sq_str + dq_str))
 
 -- Numbers.
 local digit = lexer.digit + '_'
-local bdigit = R'01' + '_'
+local bdigit = S'01' + '_'
 local xdigit = lexer.xdigit + '_'
-local odigit = R'07' + '_'
+local odigit = lpeg.R'07' + '_'
 local integer = '0x' * xdigit^1 + '0o' * odigit^1 + '0b' * bdigit^1 + digit^1
 local float = digit^1 * (
   ('.' * digit^1) * (S'eE' * S'+-'^-1 * digit^1)^-1 +

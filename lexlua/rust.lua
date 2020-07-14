@@ -3,7 +3,7 @@
 
 local lexer = require("lexer")
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S, V = lpeg.P, lpeg.R, lpeg.S, lpeg.V
+local P, S, V = lpeg.P, lpeg.S, lpeg.V
 local C, Cmt = lpeg.C, lpeg.Cmt
 
 local lex = lexer.new('rust')
@@ -48,7 +48,7 @@ local function prefixed_integer(prefix, digit)
 end
 local integer = (
   prefixed_integer('0b', S('01')) +
-  prefixed_integer('0o', R('07')) +
+  prefixed_integer('0o', lpeg.R('07')) +
   prefixed_integer('0x', lexer.xdigit) +
   decimal_literal
 ) * (S('iu') * (P('8') + '16' + '32' + '64' + '128' + 'size'))^-1

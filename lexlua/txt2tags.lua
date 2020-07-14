@@ -5,7 +5,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 local nonspace = lexer.any - lexer.space
 
 local lex = lexer.new('txt2tags')
@@ -14,7 +14,7 @@ local lex = lexer.new('txt2tags')
 local ws = token(lexer.WHITESPACE, (lexer.space - lexer.newline)^1)
 
 -- Titles
-local alphanumeric = R('AZ') + R('az') + R('09') + P('_') + P('-')
+local alphanumeric = lexer.alnum + S('_-')
 local header_label = token('header_label_start', '[') *
   token('header_label', alphanumeric^1) * token('header_label_end', ']')
 local function h(level)

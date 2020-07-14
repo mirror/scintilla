@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('pure')
 
@@ -28,8 +28,8 @@ lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
 
 -- Numbers.
 local bin = '0' * S('Bb') * S('01')^1
-local hex = '0' * S('Xx') * (R('09') + R('af') + R('AF'))^1
-local dec = R('09')^1
+local hex = lexer.hex_num
+local dec = lexer.dec_num
 local int = (bin + hex + dec) * P('L')^-1
 local rad = P('.') - '..'
 local exp = (S('Ee') * S('+-')^-1 * int)^-1

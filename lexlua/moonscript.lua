@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, S, R = lpeg.P, lpeg.S, lpeg.R
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('moonscript', {fold_by_indentation = true})
 
@@ -103,7 +103,7 @@ lex:add_style('library', lexer.styles.type)
 
 -- Identifiers.
 local identifier = token(lexer.IDENTIFIER, lexer.word)
-local proper_ident = token('proper_ident', R('AZ') * lexer.word)
+local proper_ident = token('proper_ident', lexer.upper * lexer.word)
 local tbl_key = token('tbl_key', lexer.word * ':' + ':' * lexer.word )
 lex:add_rule('identifier', tbl_key + proper_ident + identifier)
 lex:add_style('proper_ident', lexer.styles.class)

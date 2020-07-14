@@ -4,7 +4,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('json')
 
@@ -25,7 +25,7 @@ local block_comment = lexer.range('/*', '*/')
 lex:add_rule('comment', token(lexer.COMMENT, line_comment + block_comment))
 
 -- Numbers.
-local integer = S('+-')^-1 * lexer.digit^1 * S('Ll')^-1
+local integer = S('+-')^-1 * lexer.dec_num * S('Ll')^-1
 lex:add_rule('number', token(lexer.NUMBER, lexer.float + integer))
 
 -- Operators.

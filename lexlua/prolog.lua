@@ -26,7 +26,7 @@
 local lexer = require('lexer')
 
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S, B, V, C = lpeg.P, lpeg.R, lpeg.S, lpeg.B, lpeg.V, lpeg.C
+local P, S, B, V, C = lpeg.P, lpeg.S, lpeg.B, lpeg.V, lpeg.C
 
 local lex = lexer.new('prolog')
 

@@ -3,7 +3,7 @@
 
 local l = require('lexer')
 local token, word_match, starts_line = l.token, l.word_match, l.starts_line
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local M = {_NAME = 'rest'}
 

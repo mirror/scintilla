@@ -4,7 +4,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S, B = lpeg.P, lpeg.R, lpeg.S, lpeg.B
+local P, S, B = lpeg.P, lpeg.S, lpeg.B
 
 local lex = lexer.new('mediawiki')
 

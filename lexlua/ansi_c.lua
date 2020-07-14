@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('ansi_c')
 
@@ -25,7 +25,7 @@ lex:add_rule('type', token(lexer.TYPE, word_match[[
   _Bool _Complex _Imaginary
   -- Stdlib types.
   ptrdiff_t size_t max_align_t wchar_t intptr_t uintptr_t intmax_t uintmax_t
-]] + P('u')^-1 * 'int' * (P('_least') + '_fast')^-1 * R('09')^1 * '_t'))
+]] + P('u')^-1 * 'int' * (P('_least') + '_fast')^-1 * lexer.digit^1 * '_t'))
 
 -- Constants.
 lex:add_rule('constants', token(lexer.CONSTANT, word_match[[

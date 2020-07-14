@@ -4,7 +4,7 @@
 
 local lexer = require 'lexer'
 local token, word_match = lexer.token, lexer.word_match
-local B, P, R, S, V = lpeg.B, lpeg.P, lpeg.R, lpeg.S, lpeg.V
+local B, P, S, V = lpeg.B, lpeg.P, lpeg.S, lpeg.V
 
 local M = { _NAME = 'snobol4' }
 

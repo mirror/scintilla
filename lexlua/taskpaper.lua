@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token = lexer.token
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local M = {_NAME = 'taskpaper'}
 
@@ -20,7 +20,7 @@ local overdue_tag = token('overdue_tag', P('@overdue'))
 local plain_tag = token('plain_tag', P('@') * lexer.word)
 
 local extended_tag = token('extended_tag', P('@') * lexer.word * P('(') *
-  (lexer.word + R('09') + P('-'))^1 * P(')'))
+  (lexer.word + lexer.digit + P('-'))^1 * P(')'))
 
 -- Projects
 local project = token('project', lexer.range(lexer.starts_line(lexer.alnum),

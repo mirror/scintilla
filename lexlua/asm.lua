@@ -3,7 +3,7 @@
 
 local lexer = require('lexer')
 local token, word_match = lexer.token, lexer.word_match
-local P, R, S = lpeg.P, lpeg.R, lpeg.S
+local P, S = lpeg.P, lpeg.S
 
 local lex = lexer.new('asm')
 
@@ -345,7 +345,7 @@ local pp_word = word_match[[
   ixdefine line local macro pathsearch pop push rep repl rmacro rotate stacksize
   strcat strlen substr undef unmacro use warning while xdefine
 ]]
-local pp_symbol = '??' + S('!$+?') + '%' * -lexer.space + R('09')^1
+local pp_symbol = '??' + S('!$+?') + '%' * -lexer.space + lexer.digit^1
 lex:add_rule('preproc', token(lexer.PREPROCESSOR, '%' * (pp_word + pp_symbol)))
 
 -- Operators.
