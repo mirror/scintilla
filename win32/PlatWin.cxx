@@ -1139,6 +1139,14 @@ void SurfaceGDI::SetDBCSMode(int codePage_) {
 
 #if defined(USE_D2D)
 
+namespace {
+
+constexpr D2D1_RECT_F RectangleFromPRectangle(PRectangle rc) noexcept {
+	return { rc.left, rc.top, rc.right, rc.bottom };
+}
+
+}
+
 class SurfaceD2D : public Surface {
 	bool unicodeMode;
 	int x, y;
@@ -1600,7 +1608,7 @@ void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 		const HRESULT hr = pRenderTarget->CreateBitmap(size, image.data(),
                   width * 4, &props, &bitmap);
 		if (SUCCEEDED(hr)) {
-			D2D1_RECT_F rcDestination = {rc.left, rc.top, rc.right, rc.bottom};
+			const D2D1_RECT_F rcDestination = RectangleFromPRectangle(rc);
 			pRenderTarget->DrawBitmap(bitmap, rcDestination);
 			ReleaseUnknown(bitmap);
 		}
@@ -1630,7 +1638,7 @@ void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	ID2D1Bitmap *pBitmap = nullptr;
 	HRESULT hr = pCompatibleRenderTarget->GetBitmap(&pBitmap);
 	if (SUCCEEDED(hr)) {
-		D2D1_RECT_F rcDestination = {rc.left, rc.top, rc.right, rc.bottom};
+		const D2D1_RECT_F rcDestination = RectangleFromPRectangle(rc);
 		D2D1_RECT_F rcSource = {from.x, from.y, from.x + rc.Width(), from.y + rc.Height()};
 		pRenderTarget->DrawBitmap(pBitmap, rcDestination, 1.0f,
 			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, rcSource);
@@ -1649,7 +1657,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION yba
 	const TextWide tbuf(s, len, unicodeMode, codePageText);
 	if (pRenderTarget && pTextFormat && pBrush) {
 		if (fuOptions & ETO_CLIPPED) {
-			D2D1_RECT_F rcClip = {rc.left, rc.top, rc.right, rc.bottom};
+			const D2D1_RECT_F rcClip = RectangleFromPRectangle(rc);
 			pRenderTarget->PushAxisAlignedClip(rcClip, D2D1_ANTIALIAS_MODE_ALIASED);
 		}
 
@@ -1841,7 +1849,7 @@ XYPOSITION SurfaceD2D::AverageCharWidth(Font &font_) {
 
 void SurfaceD2D::SetClip(PRectangle rc) {
 	if (pRenderTarget) {
-		D2D1_RECT_F rcClip = {rc.left, rc.top, rc.right, rc.bottom};
+		const D2D1_RECT_F rcClip = RectangleFromPRectangle(rc);
 		pRenderTarget->PushAxisAlignedClip(rcClip, D2D1_ANTIALIAS_MODE_ALIASED);
 		clipsActive++;
 	}
