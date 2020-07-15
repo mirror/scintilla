@@ -775,7 +775,7 @@ void Editor::MultipleSelectAdd(AddNumber addNumber) {
 					ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 					ScrollRange(sel.RangeMain());
 					Redraw();
-					if (addNumber == addOne)
+					if (addNumber == AddNumber::one)
 						return;
 					searchStart = pos + lengthFound;
 				} else {
@@ -8329,11 +8329,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_MULTIPLESELECTADDNEXT:
-		MultipleSelectAdd(addOne);
+		MultipleSelectAdd(AddNumber::one);
 		break;
 
 	case SCI_MULTIPLESELECTADDEACH:
-		MultipleSelectAdd(addEach);
+		MultipleSelectAdd(AddNumber::each);
 		break;
 
 	case SCI_CHANGELEXERSTATE:
