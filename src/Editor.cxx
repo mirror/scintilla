@@ -273,7 +273,7 @@ void Editor::InvalidateStyleData() {
 	vs.technology = technology;
 	DropGraphics(false);
 	AllocateGraphics();
-	view.llc.Invalidate(LineLayout::llInvalid);
+	view.llc.Invalidate(LineLayout::ValidLevel::invalid);
 	view.posCache.Clear();
 }
 
@@ -1473,7 +1473,7 @@ bool Editor::Wrapping() const noexcept {
 void Editor::NeedWrapping(Sci::Line docLineStart, Sci::Line docLineEnd) {
 //Platform::DebugPrintf("\nNeedWrapping: %0d..%0d\n", docLineStart, docLineEnd);
 	if (wrapPending.AddRange(docLineStart, docLineEnd)) {
-		view.llc.Invalidate(LineLayout::llPositions);
+		view.llc.Invalidate(LineLayout::ValidLevel::positions);
 	}
 	// Wrap lines during idle.
 	if (Wrapping() && wrapPending.NeedsWrap()) {
@@ -2524,7 +2524,7 @@ void Editor::NotifySavePoint(Document *, void *, bool atSavePoint) {
 
 void Editor::CheckModificationForWrap(DocModification mh) {
 	if (mh.modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT)) {
-		view.llc.Invalidate(LineLayout::llCheckTextAndStyle);
+		view.llc.Invalidate(LineLayout::ValidLevel::checkTextAndStyle);
 		const Sci::Line lineDoc = pdoc->SciLineFromPosition(mh.position);
 		const Sci::Line lines = std::max(static_cast<Sci::Line>(0), mh.linesAdded);
 		if (Wrapping()) {
@@ -2603,7 +2603,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			}
 		}
 		if (mh.modificationType & SC_MOD_CHANGESTYLE) {
-			view.llc.Invalidate(LineLayout::llCheckTextAndStyle);
+			view.llc.Invalidate(LineLayout::ValidLevel::checkTextAndStyle);
 		}
 	} else {
 		// Move selection and brace highlights
