@@ -77,7 +77,7 @@ public:
 		}
 		return buf[position - startPos];
 	}
-	IDocumentWithLineEnd *MultiByteAccess() const {
+	IDocumentWithLineEnd *MultiByteAccess() const noexcept {
 		if (documentVersion >= dvLineEnd) {
 			return static_cast<IDocumentWithLineEnd *>(pAccess);
 		}
