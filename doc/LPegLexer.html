@@ -1570,6 +1570,24 @@ operator    30
 
     <p>A pattern that matches a floating point number.</p>
 
+    <p><a id="lexer.fold_by_indentation"></a></p>
+
+    <h3><code>lexer.fold_by_indentation</code> (boolean)</h3>
+
+    <p>Whether or not to fold based on indentation level if a lexer does not have
+      a folder.
+      Some lexers automatically enable this option. It is disabled by default.
+      This is an alias for <code>lexer.property['fold.by.indentation'] = '1|0'</code>.</p>
+
+    <p><a id="lexer.fold_compact"></a></p>
+
+    <h3><code>lexer.fold_compact</code> (boolean)</h3>
+
+    <p>Whether or not blank lines after an ending fold point are included in that
+      fold.
+      This option is disabled by default.
+      This is an alias for <code>lexer.property['fold.compact'] = '1|0'</code>.</p>
+
     <p><a id="lexer.fold_level"></a></p>
 
     <h3><code>lexer.fold_level</code> (table, Read-only)</h3>
@@ -1587,6 +1605,33 @@ operator    30
     The line is a header, or fold point.</li>
     </ul>
 
+
+    <p><a id="lexer.fold_line_comments"></a></p>
+
+    <h3><code>lexer.fold_line_comments</code> (boolean)</h3>
+
+    <p>Whether or not to fold multiple, consecutive line comments and only show
+      the top-level comment.
+      This option is disabled by default.
+      This is an alias for <code>lexer.property['fold.line.comments'] = '1|0'</code>.</p>
+
+    <p><a id="lexer.fold_on_zero_sum_lines"></a></p>
+
+    <h3><code>lexer.fold_on_zero_sum_lines</code> (boolean)</h3>
+
+    <p>Whether or not to mark as a fold point lines that contain both an ending
+      and starting fold point. For example, <code>} else {</code> would be marked as a fold
+      point.
+      This option is disabled by default.
+      This is an alias for <code>lexer.property['fold.on.zero.sum.lines'] = '1|0'</code>.</p>
+
+    <p><a id="lexer.folding"></a></p>
+
+    <h3><code>lexer.folding</code> (boolean)</h3>
+
+    <p>Whether or not folding is enabled.
+      This option is disabled by default.
+      This is an alias for <code>lexer.property['fold'] = '1|0'</code>.</p>
 
     <p><a id="lexer.graph"></a></p>
 

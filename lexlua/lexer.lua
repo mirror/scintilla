@@ -846,6 +846,31 @@ local M = {}
 --   found.
 -- @field style_at (table, Read-only)
 --   Table of style names at positions in the buffer starting from 1.
+-- @field folding (boolean)
+--   Whether or not folding is enabled.
+--   This option is disabled by default.
+--   This is an alias for `lexer.property['fold'] = '1|0'`.
+-- @field fold_on_zero_sum_lines (boolean)
+--   Whether or not to mark as a fold point lines that contain both an ending
+--   and starting fold point. For example, `} else {` would be marked as a fold
+--   point.
+--   This option is disabled by default.
+--   This is an alias for `lexer.property['fold.on.zero.sum.lines'] = '1|0'`.
+-- @field fold_compact (boolean)
+--   Whether or not blank lines after an ending fold point are included in that
+--   fold.
+--   This option is disabled by default.
+--   This is an alias for `lexer.property['fold.compact'] = '1|0'`.
+-- @field fold_by_indentation (boolean)
+--   Whether or not to fold based on indentation level if a lexer does not have
+--   a folder.
+--   Some lexers automatically enable this option. It is disabled by default.
+--   This is an alias for `lexer.property['fold.by.indentation'] = '1|0'`.
+-- @field fold_line_comments (boolean)
+--   Whether or not to fold multiple, consecutive line comments and only show
+--   the top-level comment.
+--   This option is disabled by default.
+--   This is an alias for `lexer.property['fold.line.comments'] = '1|0'`.
 module('lexer')]=]
 
 if not require then

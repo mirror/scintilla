@@ -327,6 +327,13 @@ static int lexer_index(lua_State *L) {
     luaL_argcheck(
       L, lua_getfield(L, -1, "_BUFFER"), 2, "must be lexing or folding");
     lua_pushcclosure(L, line_from_position, 1);
+  } else if (strncmp(key, "fold", 4) == 0) {
+    // Alias lexer.fold* to lexer.property['fold*'].
+    if (strcmp(key, "folding") == 0) key = "fold"; // lexer.fold() exists
+    lua_getfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
+    LexerLPeg *lexer = reinterpret_cast<LexerLPeg *>(lua_touserdata(L, -1));
+    const char *value = lexer->PropertyGet(luaL_gsub(L, key, "_", "."));
+    lua_pushboolean(L, strcmp(value, "1") == 0);
   } else lua_rawget(L, 1);
   return 1;
 }
@@ -339,7 +346,19 @@ static int lexer_newindex(lua_State *L) {
     strcmp(key, "property") != 0 && strcmp(key, "property_int") != 0 &&
     strcmp(key, "style_at") != 0 && strcmp(key, "line_state") != 0 &&
     strcmp(key, "line_from_position") != 0, 3, "read-only property");
-  return (lua_rawset(L, 1), 0);
+  if (strncmp(key, "fold", 4) == 0 && strcmp(key, "fold_level") != 0) {
+    // Alias lexer.fold* to lexer.property['fold*'].
+    if (strcmp(key, "folding") == 0) key = "fold"; // lexer.fold() exists
+    key = luaL_gsub(L, key, "_", ".");
+    lua_getfield(L, LUA_REGISTRYINDEX, "sci_lexer_lpeg");
+    LexerLPeg *lexer = reinterpret_cast<LexerLPeg *>(lua_touserdata(L, -1));
+    if (lua_toboolean(L, 3))
+      lexer->PropertySet(
+        key, (!lua_isnumber(L, 3) || lua_tonumber(L, 3) == 1) ? "1" : "0");
+    else
+      lexer->PropertySet(key, "0");
+  } else lua_rawset(L, 1);
+  return 0;
 }
 
 /**
