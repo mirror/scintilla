@@ -51,7 +51,7 @@ The file "check.mak" is designed to run on a Linux machine that has
 cross-compilers for Win32 and Mac OSX. It does not necessarily produce any
 binary builds of Scintilla that can be used -- it just ensures Scintilla can be
 built without compile errors. How to obtain a set of cross-compilers is beyond
-the scope of this document. At the time of writing, GCC 5.4 is used exclusively.
+the scope of this document. At the time of writing, GCC 4.8 and 5.4 are used.
 
 Not only does "check.mak" perform platform compile checks, but it also has rules
 for manually running Scintilla's unit tests (which take too long to run
@@ -708,3 +708,21 @@ branch), or have information worth noting.
 8304:c010c1851c8a Fixed path mentioned in comment.
 8311:f0910912700f Change log for SciTE.
   Not backported, as Lexilla is not supported.
+
+8389:e0f48fde525f SciTE change log.
+  Not backported, as this is LongTerm3.
+
+8404:a1ec539e1585 Stronger argument validation in BlobInline methods.
+  Not backported, as this applies to changes that have not been backported.
+
+8402:efa2991d428f Make simple methods on simple classes constexpr.
+8416:06a43e06a8e0 Add constexpr, const, noexcept and make other small improvements to lexlib.
+  Backported, but without constexpr for complicated methods.
+
+8417:e46854ef9662 Fix truncation of locale due to not counting NUL. Add return code check.
+8418:c2b2e876bf7e Tidied up code using wstring, which will often avoid allocating, and fixing variable names.
+  Not backported, as this applies to changes that have not been backported.
+
+8419:ea29809cb3f5 Updates for 4.4.4.
+8421:f422793aa52f Update download size.
+  Not backported, as this is LongTerm3.
