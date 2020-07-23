@@ -1416,19 +1416,21 @@ public:
     }
   }
   /**
-   * Copies the text of the internal clipboard, not the primary and/or secondary
-   * X selections, into the given buffer and returns the size of the clipboard
-   * text.
-   * @param text The buffer to copy clipboard text to.
-   * @return size of the clipboard text
+   * Returns a NUL-terminated copy of the text on the internal clipboard, not
+   * the primary and/or secondary X selections.
+   * The caller is responsible for `free`ing the returned text.
+   * @param len An optional pointer to store the length of the returned text in.
+   * @return clipboard text
    */
-  int GetClipboard(char *buffer) {
-    if (buffer) memcpy(buffer, clipboard.Data(), clipboard.Length() + 1);
-    return clipboard.Length() + 1;
+  char *GetClipboard(int *len) {
+    if (len) *len = clipboard.Length();
+    char *text = new char[clipboard.Length() + 1];
+    memcpy(text, clipboard.Data(), clipboard.Length() + 1);
+    return text;
   }
 };
 
-// Link with C. Documentation in Scintilla.h.
+// Link with C. Documentation in ScintillaCurses.h.
 extern "C" {
 void *scintilla_new(
   void (*callback)(void *, int, SCNotification *, void *), void *userdata)
@@ -1468,8 +1470,8 @@ bool scintilla_send_mouse(
     return (scicurses->MouseRelease(time, y, x, ctrl), true);
   return false;
 }
-int scintilla_get_clipboard(void *sci, char *buffer) {
-  return reinterpret_cast<ScintillaCurses *>(sci)->GetClipboard(buffer);
+char *scintilla_get_clipboard(void *sci, int *len) {
+  return reinterpret_cast<ScintillaCurses *>(sci)->GetClipboard(len);
 }
 void scintilla_noutrefresh(void *sci) {
   reinterpret_cast<ScintillaCurses *>(sci)->NoutRefresh();

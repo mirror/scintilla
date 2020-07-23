@@ -69,18 +69,16 @@ bool scintilla_send_mouse(
   void *sci, int event, unsigned int time, int button, int y, int x, bool shift,
   bool ctrl, bool alt);
 /**
- * Copies the text of Scintilla's internal clipboard, not the primary and/or
- * secondary X selections, into the given buffer and returns the size of the
- * clipboard text.
- * Call with a `null` buffer first to get the size of the buffer needed to store
- * clipboard text.
- * Keep in mind clipboard text may contain null bytes.
+ * Returns a NUL-terminated copy of the text on Scintilla's internal clipboard,
+ * not the primary and/or secondary X selections.
+ * The caller is responsible for `free`ing the returned text.
+ * Keep in mind clipboard text may contain NUL bytes.
  * Curses does not have to be initialized before calling this function.
  * @param sci The Scintilla window returned by `scintilla_new()`.
- * @param buffer The buffer to copy clipboard text to.
- * @return size of the clipboard text.
+ * @param len An optional pointer to store the length of the returned text in.
+ * @return the clipboard text.
  */
-int scintilla_get_clipboard(void *sci, char *buffer);
+char *scintilla_get_clipboard(void *sci, int *len);
 /**
  * Refreshes the Scintilla window on the virtual screen.
  * This should be done along with the normal curses `noutrefresh()`, as the
