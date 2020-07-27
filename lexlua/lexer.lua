@@ -24,14 +24,14 @@ local M = {}
 -- Operator             | Description
 -- ---------------------|------------
 -- `lpeg.P(string)`     | Matches `string` literally.
--- `lpeg.P(`_`n`_`)`    | Matches exactly _`n`_ characters.
+-- `lpeg.P(`_`n`_`)`    | Matches exactly _`n`_ number of characters.
 -- `lpeg.S(string)`     | Matches any character in set `string`.
 -- `lpeg.R("`_`xy`_`")` | Matches any character between range `x` and `y`.
 -- `patt^`_`n`_         | Matches at least _`n`_ repetitions of `patt`.
 -- `patt^-`_`n`_        | Matches at most _`n`_ repetitions of `patt`.
 -- `patt1 * patt2`      | Matches `patt1` followed by `patt2`.
 -- `patt1 + patt2`      | Matches `patt1` or `patt2` (ordered choice).
--- `patt1 - patt2`      | Matches `patt1` if `patt2` does not match.
+-- `patt1 - patt2`      | Matches `patt1` if `patt2` does not also match.
 -- `-patt`              | Equivalent to `("" - patt)`.
 -- `#patt`              | Matches `patt` but consumes no input.
 --
@@ -1786,8 +1786,8 @@ function M.starts_line(patt)
 end
 
 ---
--- Creates and returns a pattern that verifies that string set *s* contains the
--- first non-whitespace character behind the current match position.
+-- Creates and returns a pattern that verifies the first non-whitespace
+-- character behind the current match position is in string set *s*.
 -- @param s String character set like one passed to `lpeg.S()`.
 -- @return pattern
 -- @usage local regex = lexer.last_char_includes('+-*!%^&|=,([{') *
