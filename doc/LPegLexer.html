@@ -536,7 +536,7 @@ operator    30
     </tr>
     <tr>
     <td><code>lpeg.P(</code><em><code>n</code></em><code>)</code>    </td>
-    <td> Matches exactly <em><code>n</code></em> characters.</td>
+    <td> Matches exactly <em><code>n</code></em> number of characters.</td>
     </tr>
     <tr>
     <td><code>lpeg.S(string)</code>     </td>
@@ -564,7 +564,7 @@ operator    30
     </tr>
     <tr>
     <td><code>patt1 - patt2</code>      </td>
-    <td> Matches <code>patt1</code> if <code>patt2</code> does not match.</td>
+    <td> Matches <code>patt1</code> if <code>patt2</code> does not also match.</td>
     </tr>
     <tr>
     <td><code>-patt</code>              </td>
@@ -1977,8 +1977,8 @@ operator    30
 
     <h3><code>lexer.last_char_includes</code> (s)</h3>
 
-    <p>Creates and returns a pattern that verifies that string set <em>s</em> contains the
-    first non-whitespace character behind the current match position.</p>
+    <p>Creates and returns a pattern that verifies the first non-whitespace character
+    behind the current match position is in string set <em>s</em>.</p>
 
     <p>Parameters:</p>
 
