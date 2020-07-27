@@ -15,13 +15,15 @@ lex:add_rule('whitespace', ws)
 lex:add_rule('keyword', token(lexer.KEYWORD, word_match[[
   auto break case const continue default do else extern for goto if inline
   register restrict return sizeof static switch typedef volatile while
+  -- C99.
+  false true
   -- C11.
   _Alignas _Alignof _Atomic _Generic _Noreturn _Static_assert _Thread_local
 ]]))
 
 -- Types.
 lex:add_rule('type', token(lexer.TYPE, word_match[[
-  char double enum float int long short signed struct union unsigned void
+  bool char double enum float int long short signed struct union unsigned void
   _Bool _Complex _Imaginary
   -- Stdlib types.
   ptrdiff_t size_t max_align_t wchar_t intptr_t uintptr_t intmax_t uintmax_t
