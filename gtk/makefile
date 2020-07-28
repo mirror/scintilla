@@ -39,6 +39,7 @@ BASE_FLAGS += -fsanitize=$(SANITIZE)
 endif
 ARFLAGS = rc
 RANLIB ?= ranlib
+PKG_CONFIG ?= pkg-config
 
 GTK_VERSION = $(if $(GTK3),gtk+-3.0,gtk+-2.0)
 
@@ -89,7 +90,7 @@ LUA_OBJS:=lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o linit.o \
 endif
 
 
-CONFIG_FLAGS:=$(shell pkg-config --cflags $(GTK_VERSION))
+CONFIG_FLAGS:=$(shell $(PKG_CONFIG) --cflags $(GTK_VERSION))
 MARSHALLER=scintilla-marshal.o
 
 all: $(COMPLIB)
