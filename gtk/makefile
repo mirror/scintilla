@@ -99,9 +99,9 @@ clean:
 	$(DEL) *.o $(call normalize,$(COMPLIB)) *.plist
 
 %.o: %.cxx
-	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
+	$(CXX) $(CPPFLAGS) $(CXX_ALL_FLAGS) $(CXXFLAGS) -c $<
 %.o: %.c
-	$(CC) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(BASE_FLAGS) $(CFLAGS) -w -c $<
+	$(CC) $(CPPFLAGS) $(DEFINES) $(INCLUDES) $(CONFIG_FLAGS) $(BASE_FLAGS) $(CFLAGS) -w -c $<
 $(LUA_OBJS): %.o: ../lua/src/%.c
 	$(CC) $(LUA_CFLAGS) $(CFLAGS) -c $<
 
