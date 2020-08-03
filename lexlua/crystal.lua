@@ -120,6 +120,6 @@ lex:add_fold_point(lexer.KEYWORD, 'until', disambiguate)
 lex:add_fold_point(lexer.OPERATOR, '(', ')')
 lex:add_fold_point(lexer.OPERATOR, '[', ']')
 lex:add_fold_point(lexer.OPERATOR, '{', '}')
-lex:add_fold_point(lexer.OPERATOR, '#', lexer.fold_line_comments('#'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('#'))
 
 return lex

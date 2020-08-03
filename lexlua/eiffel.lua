@@ -56,6 +56,6 @@ lex:add_fold_point(lexer.KEYWORD, 'once', 'end')
 lex:add_fold_point(lexer.KEYWORD, 'class', function(text, pos, line, s)
   return line:find('deferred%s+class') and 0 or 1
 end)
-lex:add_fold_point(lexer.COMMENT, '--', lexer.fold_line_comments('--'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('--'))
 
 return lex

@@ -866,11 +866,11 @@ local M = {}
 --   a folder.
 --   Some lexers automatically enable this option. It is disabled by default.
 --   This is an alias for `lexer.property['fold.by.indentation'] = '1|0'`.
--- @field fold_line_comments (boolean)
---   Whether or not to fold multiple, consecutive line comments and only show
---   the top-level comment.
+-- @field fold_line_groups (boolean)
+--   Whether or not to fold multiple, consecutive line groups (such as line
+--   comments and import statements) and only show the top line.
 --   This option is disabled by default.
---   This is an alias for `lexer.property['fold.line.comments'] = '1|0'`.
+--   This is an alias for `lexer.property['fold.line.groups'] = '1|0'`.
 module('lexer')]=]
 
 if not require then
@@ -1133,7 +1133,7 @@ end
 --   point (1), an ending fold point (-1), or not a fold point at all (0).
 -- @usage lex:add_fold_point(lexer.OPERATOR, '{', '}')
 -- @usage lex:add_fold_point(lexer.KEYWORD, 'if', 'end')
--- @usage lex:add_fold_point(lexer.COMMENT, '#', lexer.fold_line_comments('#'))
+-- @usage lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('#'))
 -- @usage lex:add_fold_point('custom', function(text, pos, line, s, symbol)
 --   ... end)
 -- @name add_fold_point
@@ -1921,6 +1921,28 @@ local function next_line_is_comment(prefix, text, pos, line, s)
 end
 
 ---
+-- Returns for `lexer.add_fold_point()` the parameters needed to fold
+-- consecutive lines that start with string *prefix*.
+-- @param prefix The prefix string (e.g. a line comment).
+-- @usage lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('--'))
+-- @usage lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('//'))
+-- @usage lex:add_fold_point(
+--   lexer.KEYWORD, lexer.fold_consecutive_lines('import'))
+-- @name fold_consecutive_lines
+function M.fold_consecutive_lines(prefix)
+  local property_int = M.property_int
+  return prefix, function(text, pos, line, s)
+    if property_int['fold.line.groups'] == 0 then return 0 end
+    if s > 1 and line:match('^%s*()') < s then return 0 end
+    local prev_line_comment = prev_line_is_comment(prefix, text, pos, line, s)
+    local next_line_comment = next_line_is_comment(prefix, text, pos, line, s)
+    if not prev_line_comment and next_line_comment then return 1 end
+    if prev_line_comment and not next_line_comment then return -1 end
+    return 0
+  end
+end
+
+-- Deprecated legacy function. Use `lexer.fold_consecutive_lines()` instead.
 -- Returns a fold function (to be passed to `lexer.add_fold_point()`) that folds
 -- consecutive line comments that start with string *prefix*.
 -- @param prefix The prefix string defining a line comment.
@@ -1930,16 +1952,10 @@ end
 --   lexer.fold_line_comments('//'))
 -- @name fold_line_comments
 function M.fold_line_comments(prefix)
-  local property_int = M.property_int
-  return function(text, pos, line, s)
-    if property_int['fold.line.comments'] == 0 then return 0 end
-    if s > 1 and line:match('^%s*()') < s then return 0 end
-    local prev_line_comment = prev_line_is_comment(prefix, text, pos, line, s)
-    local next_line_comment = next_line_is_comment(prefix, text, pos, line, s)
-    if not prev_line_comment and next_line_comment then return 1 end
-    if prev_line_comment and not next_line_comment then return -1 end
-    return 0
-  end
+  print(
+    "lexer.fold_line_comments() is deprecated, " ..
+    "use lexer.fold_consecutive_lines()")
+  return select(2, M.fold_consecutive_lines(prefix))
 end
 
 M.property_expanded = setmetatable({}, {

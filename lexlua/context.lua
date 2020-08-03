@@ -47,7 +47,7 @@ lex:add_rule('operator', operator)
 lex:add_fold_point('environment', '\\start', '\\stop')
 lex:add_fold_point('environment', '\\begin', '\\end')
 lex:add_fold_point(lexer.OPERATOR, '{', '}')
-lex:add_fold_point(lexer.COMMENT, '%', lexer.fold_line_comments('%'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('%'))
 
 -- Embedded Lua.
 local luatex = lexer.load('lua')

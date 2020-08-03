@@ -603,6 +603,10 @@
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1361/">Feature #1361</a>.
 	</li>
 	<li>
+	The curses platform's <code>scintilla_get_clipboard()</code> now returns a
+	copy of clipboard text directly.
+	</li>
+	<li>
 	Fix translucent rectangle drawing on Qt. When drawing a translucent selection, there were edge
 	artifacts as the calls used were drawing outlines over fill areas. Make bottom and right borders on
 	INDIC_ROUNDBOX be same intensity as top and left.
@@ -648,6 +652,10 @@
 	</li>
 	<li>
 	The Lua LPeg lexer for C now highlights C99 <code>bool</code>, <code>true</code>, and <code>false</code>.
+	</li>
+	<li>
+	Fixed crashes in Lua LPeg lexer when "lexer.lua" cannot be found, and when
+	attempting to set styles for non-existant tokens.
 	</li>
 	<li>
 	Fixed bug with GTK on recent Linux distributions where underscores were invisible.

@@ -1606,14 +1606,14 @@ operator    30
     </ul>
 
 
-    <p><a id="lexer.fold_line_comments"></a></p>
+    <p><a id="lexer.fold_line_groups"></a></p>
 
-    <h3><code>lexer.fold_line_comments</code> (boolean)</h3>
+    <h3><code>lexer.fold_line_groups</code> (boolean)</h3>
 
-    <p>Whether or not to fold multiple, consecutive line comments and only show
-      the top-level comment.
+    <p>Whether or not to fold multiple, consecutive line groups (such as line
+      comments or import statements) and only show the top line.
       This option is disabled by default.
-      This is an alias for <code>lexer.property['fold.line.comments'] = '1|0'</code>.</p>
+      This is an alias for <code>lexer.property['fold.line.groups'] = '1|0'</code>.</p>
 
     <p><a id="lexer.fold_on_zero_sum_lines"></a></p>
 
@@ -1928,27 +1928,26 @@ operator    30
     </ul>
 
 
-    <p><a id="lexer.fold_line_comments"></a></p>
+    <p><a id="lexer.fold_consecutive_lines"></a></p>
 
-    <h3><code>lexer.fold_line_comments</code> (prefix)</h3>
+    <h3><code>lexer.fold_consecutive_lines</code> (prefix)</h3>
 
-    <p>Returns a fold function (to be passed to <code>lexer.add_fold_point()</code>) that folds
-    consecutive line comments that start with string <em>prefix</em>.</p>
+    <p>Returns for <code>lexer.add_fold_point()</code> the parameters needed to fold
+    consecutive lines that start with string <em>prefix</em>.</p>
 
     <p>Parameters:</p>
 
     <ul>
-    <li><code>prefix</code>: The prefix string defining a line comment.</li>
+    <li><code>prefix</code>: The prefix string (e.g. a line comment).</li>
     </ul>
 
 
     <p>Usage:</p>
 
     <ul>
-    <li><code>lex:add_fold_point(lexer.COMMENT, '--',
-    lexer.fold_line_comments('--'))</code></li>
-    <li><code>lex:add_fold_point(lexer.COMMENT, '//',
-    lexer.fold_line_comments('//'))</code></li>
+    <li><code>lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('--'))</code></li>
+    <li><code>lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('//'))</code></li>
+    <li><code>lex:add_fold_point(lexer.KEYWORD, lexer.fold_consecutive_lines('import'))</code></li>
     </ul>
 
 

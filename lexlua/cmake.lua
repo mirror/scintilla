@@ -135,6 +135,6 @@ lex:add_fold_point(lexer.KEYWORD, 'WHILE', 'ENDWHILE')
 lex:add_fold_point(lexer.FUNCTION, 'MACRO', 'ENDMACRO')
 lex:add_fold_point(lexer.OPERATOR, '(', ')')
 lex:add_fold_point(lexer.OPERATOR, '{', '}')
-lex:add_fold_point(lexer.COMMENT, '#', lexer.fold_line_comments('#'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('#'))
 
 return lex

@@ -67,8 +67,8 @@ lex:add_style('php_tag', lexer.styles.embedded)
 -- Fold points.
 lex:add_fold_point('php_tag', '<?', '?>')
 lex:add_fold_point(lexer.COMMENT, '/*', '*/')
-lex:add_fold_point(lexer.COMMENT, '//', lexer.fold_line_comments('//'))
-lex:add_fold_point(lexer.COMMENT, '#', lexer.fold_line_comments('#'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('//'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('#'))
 lex:add_fold_point(lexer.OPERATOR, '{', '}')
 lex:add_fold_point(lexer.OPERATOR, '(', ')')
 

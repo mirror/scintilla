@@ -16,6 +16,6 @@ lex:add_rule('variable', token(lexer.VARIABLE, '@' *
   (lexer.alnum + S('_-{}'))^1))
 
 -- Fold points.
-lex:add_fold_point(lexer.COMMENT, '//', lexer.fold_line_comments('//'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('//'))
 
 return lex

@@ -19,6 +19,6 @@ lex:add_rule('mixin', token('mixin', P('@') * lexer.word))
 lex:add_style('mixin', lexer.styles['function'])
 
 -- Fold points.
-lex:add_fold_point(lexer.COMMENT, '//', lexer.fold_line_comments('//'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('//'))
 
 return lex

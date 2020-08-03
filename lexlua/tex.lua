@@ -27,7 +27,7 @@ lex:add_rule('command', token(lexer.KEYWORD, '\\' * (lexer.alpha^1 +
 lex:add_rule('operator', token(lexer.OPERATOR, S('$&#{}[]')))
 
 -- Fold points.
-lex:add_fold_point(lexer.COMMENT, '%', lexer.fold_line_comments('%'))
+lex:add_fold_point(lexer.COMMENT, lexer.fold_consecutive_lines('%'))
 lex:add_fold_point('environment', '\\begin', '\\end')
 lex:add_fold_point(lexer.OPERATOR, '{', '}')
 
