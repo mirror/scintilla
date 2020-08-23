@@ -264,11 +264,8 @@ static int lexer_property_index(lua_State *L) {
     luaL_argcheck(L, buffer, 1, "must be lexing or folding");
     int style = buffer->StyleAt(luaL_checkinteger(L, 2) - 1);
     lua_getfield(L, 4, "_TOKENSTYLES");
-    lua_pushnil(L);
-    while (lua_next(L, -2)) {
+    for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1))
       if (luaL_checkinteger(L, -1) - 1 == style) break;
-      lua_pop(L, 1); // value
-    }
     lua_pop(L, 1); // style_num, leaving name on top
   } else if (strcmp(property, "line_state") == 0) {
     luaL_argcheck(L, buffer, 1, "must be lexing or folding");
@@ -497,16 +494,13 @@ void LexerLPeg::SetStyles() {
   // the user has not already defined them).
   lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
   lua_getfield(L, -1, "_EXTRASTYLES");
-  lua_pushnil(L);
-  while (lua_next(L, -2)) {
+  for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1))
     if (lua_isstring(L, -2) && lua_isstring(L, -1)) {
       lua_pushstring(L, "style."), lua_pushvalue(L, -3), lua_concat(L, 2);
       if (!*props.Get(lua_tostring(L, -1)))
         PropertySet(lua_tostring(L, -1), lua_tostring(L, -2));
       lua_pop(L, 1); // style name
     }
-    lua_pop(L, 1); // value
-  }
   lua_pop(L, 1); // _EXTRASTYLES
 
   if (!SS || !sci) {
@@ -522,8 +516,7 @@ void LexerLPeg::SetStyles() {
   lua_pop(L, 1); // style
   SS(sci, SCI_STYLECLEARALL, 0, 0); // set default styles
   lua_getfield(L, -1, "_TOKENSTYLES");
-  lua_pushnil(L);
-  while (lua_next(L, -2)) {
+  for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1))
     if (lua_isstring(L, -2) && lua_isnumber(L, -1) &&
         lua_tointeger(L, -1) - 1 != STYLE_DEFAULT) {
       lua_pushstring(L, "style."), lua_pushvalue(L, -3), lua_concat(L, 2);
@@ -531,8 +524,6 @@ void LexerLPeg::SetStyles() {
       SetStyle(lua_tointeger(L, -2) - 1, lua_tostring(L, -1));
       lua_pop(L, 1); // style
     }
-    lua_pop(L, 1); // value
-  }
   lua_pop(L, 2); // _TOKENSTYLES, lexer object
   ASSERT_STACK_TOP(L);
 }
@@ -818,11 +809,8 @@ void SCI_METHOD LexerLPeg::Fold(
   if (!lua_istable(L, -1))
     return LogError(L, "Table of folds expected from 'lexer.fold'");
   // Fold the text from the fold table returned.
-  lua_pushnil(L);
-  while (lua_next(L, -2)) { // line = level
+  for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) // line = level
     styler.SetLevel(lua_tointeger(L, -2) - 1, lua_tointeger(L, -1));
-    lua_pop(L, 1); // level
-  }
   lua_pop(L, 3); // fold table returned, lua_error_handler, lexer object
   ASSERT_STACK_TOP(L);
 }
@@ -936,13 +924,12 @@ const char * SCI_METHOD LexerLPeg::NameOfStyle(int style) {
   styleName = "Not Available";
   lua_rawgetp(L, LUA_REGISTRYINDEX, reinterpret_cast<void *>(this));
   lua_getfield(L, -1, "_TOKENSTYLES");
-  lua_pushnil(L);
-  while (lua_next(L, -2))
+  for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1))
     if (lua_tointeger(L, -1) - 1 == style) {
       styleName = lua_tostring(L, -2);
       lua_pop(L, 2); // value and key
       break;
-    } else lua_pop(L, 1); // value
+    }
   lua_pop(L, 2); // _TOKENSTYLES, lexer object
   ASSERT_STACK_TOP(L);
   return styleName.c_str();
