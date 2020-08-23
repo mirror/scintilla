@@ -170,7 +170,7 @@ M._foldsymbols = {
   [lexer.OPERATOR] = {['{'] = 1, ['}'] = -1},
   [lexer.COMMENT] = {
     ['/*'] = 1, ['*/'] = -1, ['/+'] = 1, ['+/'] = -1,
-    ['//'] = lexer.fold_line_comments('//')
+    ['//'] = select(2, lexer.fold_consecutive_lines('//'))
   }
 }
 
