@@ -902,8 +902,20 @@ local function searchpath(name, path)
 end
 
 ---
--- Map of color names strings to color values in `0xBBGGRR` or `"#RRGGBB"`
+-- Map of color name strings to color values in `0xBBGGRR` or `"#RRGGBB"`
 -- format.
+-- Note: for applications running within a terminal emulator, only 16 color
+-- values are recognized, regardless of how many colors a user's terminal
+-- actually supports. (A terminal emulator's settings determines how to actually
+-- display these recognized color values, which may end up being mapped to a
+-- completely different color set.) In order to use the light variant of a
+-- color, some terminals require a style's `bold` attribute must be set along
+-- with that normal color. Recognized color values are black (0x000000), red
+-- (0x000080), green (0x008000), yellow (0x008080), blue (0x800000), magenta
+-- (0x800080), cyan (0x808000), white (0xC0C0C0), light black (0x404040), light
+-- red (0x0000FF), light green (0x00FF00), light yellow (0x00FFFF), light blue
+-- (0xFF0000), light magenta (0xFF00FF), light cyan (0xFFFF00), and light white
+-- (0xFFFFFF).
 -- @name colors
 -- @class table
 M.colors = setmetatable({}, {
