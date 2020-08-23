@@ -725,4 +725,16 @@ branch), or have information worth noting.
 
 8419:ea29809cb3f5 Updates for 4.4.4.
 8421:f422793aa52f Update download size.
+8459:5fbdb19e6cee Added tag rel-4-4-4 for changeset f422793aa52f
+8465:8820f7f9ad26 SciTE change log.
   Not backported, as this is LongTerm3.
+
+8475:2a7cbb364d79 Use [[fallthrough]] to reduce warnings from Visual Studio static analysis.
+  Not backported, since only C++11 is supported.
+
+8476:0fff04a16faf SciTE change log.
+  Not backported, as this is LongTerm3.
+
+8479:6877fb805dba Use groups without folders as groups with folders caused trouble for new clones.
+8480:dcab8335677e Updating version number.
+  Not backported, as Lexilla is not supported.
