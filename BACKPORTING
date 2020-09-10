@@ -738,3 +738,10 @@ branch), or have information worth noting.
 8479:6877fb805dba Use groups without folders as groups with folders caused trouble for new clones.
 8480:dcab8335677e Updating version number.
   Not backported, as Lexilla is not supported.
+
+8506:b932d5546df6 SciTE change log.
+8511:3ef2f5e5629d Update version number to 4.4.5.
+8512:22b6bbb36280 Add blurb for new version.
+8513:49cf08088ac0 Added information on lexer library functions SetLibraryProperty and GetLibraryPropertyNames.
+8514:eae8ad09180c Change release date.
+  Not backported, as this is LongTerm3 and Lexilla is not supported.
