@@ -9,10 +9,8 @@
 DIR_BIN=$(SUB_DIR_BIN)
 DIR_O=$(SUB_DIR_O)
 
-COMPONENT = $(DIR_BIN)/Scintilla.dll
-LEXCOMPONENT = $(DIR_BIN)/SciLexer.dll
+COMPONENT = $(DIR_BIN)/scintilla.dll
 LIBSCI = $(DIR_BIN)/libscintilla.a
-SCILIB = $(DIR_BIN)/libscintilla.dll.a
 
 ifdef CLANG
 CXX = clang++
@@ -22,8 +20,9 @@ CXX = clang++
 CLANG_OPTS = -Wno-missing-braces -Wno-language-extension-token -Xclang -flto-visibility-public-std
 else
 # MinGW GCC
+CXX = g++
 LDMINGW = -Wl,--enable-runtime-pseudo-reloc-v2 -Wl,--add-stdcall-alias -Wl,--export-all-symbols
-LIBSMINGW = -static-libgcc -static-libstdc++
+LIBSMINGW = -static-libgcc -static-libstdc++ -static -pthread
 STRIPOPTION = -s
 endif
 
@@ -40,18 +39,22 @@ WINDRES ?= windres
 vpath %.h ../src ../include ../lexlib
 vpath %.cxx ../src ../lexlib ../lexers
 
-LDFLAGS=-shared -mwindows $(LDMINGW)
+LDFLAGS=-shared -mconsole $(LDMINGW)
 LIBS=-lgdi32 -luser32 -limm32 -lole32 -luuid -loleaut32 -lmsimg32 $(LIBSMINGW)
 # Add -MMD to get dependencies
-INCLUDEDIRS=-I ../include -I ../src -I../lexlib
+INCLUDEDIRS=-I ../include -I ../src -I ../lexlib
 
-CXXBASEFLAGS=--std=$(CXXSTD) -Wall -pedantic $(INCLUDEDIRS) -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS)
+CXXBASEFLAGS=-std=$(CXXSTD) -Wall -pedantic -fpermissive -fno-strict-aliasing -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS) #-DMINGW_HAS_SECURE_API=1
 
 ifdef NO_CXX11_REGEX
 REFLAGS=-DNO_CXX11_REGEX
 endif
 
-ifdef DEBUG
+ifeq ($(QUIET), 1)
+CXXBASEFLAGS=$(CXXBASEFLAGS) -w
+endif
+
+ifeq ($(DEBUG), 1)
 CXXFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
 else
 CXXFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS) $(INCLUDEDIRS)
@@ -68,8 +71,11 @@ clean:
 $(DIR_O)/%.o: %.cxx
 	$(CXX) $(CXXFLAGS) $(REFLAGS) -c $< -o $@
 
+$(DIR_O)%.o: ../lexlib/%.cxx
+	$(CXX) $(CXXFLAGS) $(REFLAGS) -c $< -o $@
+
 analyze:
-	$(CXX) --analyze $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx
+	$(CXX) --analyze $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx
 
 depend deps.mak:
 	python DepGen.py
@@ -129,31 +135,12 @@ LEXLIBOBJS=\
 	$(DIR_O)/StyleContext.o \
 	$(DIR_O)/WordList.o \
 
-# Required by libraries and DLLs that include lexing
-SCILEXOBJS=\
-	$(BASEOBJS) \
-	$(LEXLIBOBJS) \
-	$(LEXOBJS) \
-	$(DIR_O)/ScintillaBaseL.o
-
 $(COMPONENT): $(SOBJS)
-	$(CXX) $(LDFLAGS) $(STRIPFLAG) -o $@ -Wl,--out-implib,$(SCILIB) $(SOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STRIPFLAG) -o $@ -Wl,--out-implib,$(LIBSCI) $(SOBJS) $(LIBS)
 
-$(LEXCOMPONENT): $(DIR_O)/ScintillaDLL.o $(DIR_O)/ScintillaWinL.o $(SCILEXOBJS) Scintilla.def
-	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) $(DIR_O)/ScintillaDLL.o $(DIR_O)/ScintillaWinL.o $(SCILEXOBJS) $(LIBS)
-
-$(LIBSCI): $(DIR_O)/ScintillaWin.o $(SCILEXOBJS)
-	$(AR) rc $@ $^
-	$(RANLIB) $@
 
 # Automatically generate dependencies for most files with "make deps"
 include deps.mak
-
-$(DIR_O)/ScintillaBaseL.o:
-	$(CXX) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
-
-$(DIR_O)/ScintillaWinL.o:
-	$(CXX) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
 
 $(DIR_O)/ScintRes.o:	ScintRes.rc
 	$(WINDRES) ScintRes.rc $@
