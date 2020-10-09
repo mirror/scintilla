@@ -21,8 +21,8 @@ CLANG_OPTS = -Wno-missing-braces -Wno-language-extension-token -Xclang -flto-vis
 else
 # MinGW GCC
 CXX = g++
-LDMINGW = -Wl,--enable-runtime-pseudo-reloc-v2 -Wl,--add-stdcall-alias -Wl,--export-all-symbols
-LIBSMINGW = -static-libgcc -static-libstdc++ -static -pthread
+LDMINGW = -static-libgcc -static-libstdc++ -Wl,--enable-runtime-pseudo-reloc-v2 -Wl,--add-stdcall-alias
+LIBSMINGW = -static -lwinpthread
 STRIPOPTION = -s
 endif
 
@@ -44,7 +44,7 @@ LIBS=-lgdi32 -luser32 -limm32 -lole32 -luuid -loleaut32 -lmsimg32 $(LIBSMINGW)
 # Add -MMD to get dependencies
 INCLUDEDIRS=-I ../include -I ../src -I ../lexlib
 
-CXXBASEFLAGS=-std=$(CXXSTD) -Wall -pedantic -fpermissive -fno-strict-aliasing -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS) #-DMINGW_HAS_SECURE_API=1
+CXXBASEFLAGS=-std=$(CXXSTD) -Wall -pedantic -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS)
 
 ifdef NO_CXX11_REGEX
 REFLAGS=-DNO_CXX11_REGEX
@@ -66,7 +66,8 @@ endif
 all:	$(COMPONENT) | silent
 
 clean:
-	$(DEL) *.exe *.o *.a *.obj *.dll *.res *.map *.plist
+	$(DEL) $(DIR_BIN)/*.exe $(DIR_BIN)/*.dll
+	$(DEL) $(DIR_O)/*.o $(DIR_O)/*.a $(DIR_O)/*.obj $(DIR_O)/*.res $(DIR_O)/*.map $(DIR_O)/*.plist
 
 $(DIR_O)/%.o: %.cxx
 	$(CXX) $(CXXFLAGS) $(REFLAGS) -c $< -o $@
@@ -136,7 +137,7 @@ LEXLIBOBJS=\
 	$(DIR_O)/WordList.o \
 
 $(COMPONENT): $(SOBJS)
-	$(CXX) $(LDFLAGS) $(STRIPFLAG) -o $@ -Wl,--out-implib,$(LIBSCI) $(SOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STRIPFLAG) -o $@ $(SOBJS) $(LIBS)
 
 
 # Automatically generate dependencies for most files with "make deps"
