@@ -20,7 +20,6 @@ extern "C" {
 int Scintilla_RegisterClasses(void *hInstance);
 int Scintilla_ReleaseResources(void);
 #endif
-int Scintilla_LinkLexers(void);
 
 #ifdef __cplusplus
 }
