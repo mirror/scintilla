@@ -63,10 +63,8 @@ SHAREDEXTENSION = $(if $(windir),dll,so)
 ifdef windir
 CC = gcc
 DEL = del /q
-LEXILLA = lexilla.dll
 else
 DEL = rm -f
-LEXILLA = liblexilla.so
 endif
 COMPLIB=$(basedir)/bin/scintilla.a
 COMPONENT=$(basedir)/bin/libscintilla.$(SHAREDEXTENSION)
@@ -93,14 +91,11 @@ CONFIG_FLAGS:=$(shell $(PKG_CONFIG) --cflags $(GTK_VERSION))
 CONFIGLIB:=$(shell $(PKG_CONFIG) --libs $(GTK_VERSION) gmodule-no-export-2.0)
 MARSHALLER=scintilla-marshal.o
 
-all: $(COMPLIB) $(COMPONENT) $(LEXILLA)
+all: $(COMPLIB) $(COMPONENT)
 
 static: $(COMPLIB)
 
 shared: $(COMPONENT)
-
-$(LEXILLA):
-	$(MAKE) --directory=../lexilla/src
 
 clean:
 	$(DEL) *.o $(call normalize,$(COMPLIB)) $(call normalize,$(COMPONENT)) *.plist
@@ -158,33 +153,17 @@ SRC_OBJS = \
 	ViewStyle.o \
 	XPM.o
 
-# Required by lexers
-LEXLIB_OBJS = \
-	Accessor.o \
-	Catalogue.o \
-	DefaultLexer.o \
-	ExternalLexer.o \
-	LexerBase.o \
-	LexerModule.o \
-	LexerSimple.o \
-	PropSetSimple.o \
-	StyleContext.o \
-	WordList.o
-
-LEXLIBL_OBJS = $(LEXLIB_OBJS) CatalogueL.o
-LEXLIBS_OBJS = $(LEXLIB_OBJS) Catalogue.o
-
 GTK_OBJS = \
 	ScintillaBase.o \
 	PlatGTK.o \
 	ScintillaGTK.o \
 	ScintillaGTKAccessible.o
 
-$(COMPLIB): $(SRC_OBJS) $(LEXLIBL_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEX_OBJS)
+$(COMPLIB): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEX_OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
 
-$(COMPONENT): $(SRC_OBJS) $(LEXLIBS_OBJS) $(GTK_OBJS) $(MARSHALLER)
+$(COMPONENT): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER)
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) $(LDFLAGS) $^ -o $@ $(CONFIGLIB)
 
 Catalogue.o: Catalogue.cxx
