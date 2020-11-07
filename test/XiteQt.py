@@ -18,6 +18,10 @@ scintillaScriptsDirectory = os.path.join(scintillaDirectory, "scripts")
 sys.path.append(scintillaScriptsDirectory)
 import Face
 
+scintillaIncludesLexers = False
+# Lexilla may optionally be tested it is built and can be loaded
+lexillaAvailable = False
+
 class Form(QDialog):
 
 	def __init__(self, parent=None):

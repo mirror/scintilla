@@ -12,6 +12,10 @@ if sys.platform == "win32":
 else:
 	import XiteQt as Xite
 
+# Unicode line ends are only available for lexers that support the feature so requires lexers
+lexersAvailable = Xite.lexillaAvailable or Xite.scintillaIncludesLexers
+unicodeLineEndsAvailable = lexersAvailable
+
 class TestSimple(unittest.TestCase):
 
 	def setUp(self):
@@ -298,10 +302,11 @@ class TestSimple(unittest.TestCase):
 
 	# Several tests for unicode line ends U+2028 and U+2029
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testUnicodeLineEnds(self):
 		# Add two lines separated with U+2028 and ensure it is seen as two lines
 		# Then remove U+2028 and should be just 1 lines
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		self.ed.AddText(5, b"x\xe2\x80\xa8y")
@@ -326,13 +331,14 @@ class TestSimple(unittest.TestCase):
 		self.ed.AddText(4, b"x\xc2\x85y")
 		self.assertEquals(self.ed.LineCount, 1)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testUnicodeLineEndsSwitchToUnicodeAndBack(self):
 		# Add the Unicode line ends when not in Unicode mode
 		self.ed.SetCodePage(0)
 		self.ed.AddText(5, b"x\xe2\x80\xa8y")
 		self.assertEquals(self.ed.LineCount, 1)
 		# Into UTF-8 mode - should now be interpreting as two lines
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		self.assertEquals(self.ed.LineCount, 2)
@@ -340,6 +346,7 @@ class TestSimple(unittest.TestCase):
 		self.ed.SetCodePage(0)
 		self.assertEquals(self.ed.LineCount, 1)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testUFragmentedEOLCompletion(self):
 		# Add 2 starting bytes of UTF-8 line end then complete it
 		self.ed.ClearAll()
@@ -361,9 +368,10 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), b"x\xe2\x80\xa8y")
 		self.assertEquals(self.ed.LineCount, 2)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testUFragmentedEOLStart(self):
 		# Add end of UTF-8 line end then insert start
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		self.assertEquals(self.ed.LineCount, 1)
@@ -373,10 +381,11 @@ class TestSimple(unittest.TestCase):
 		self.ed.AddText(1, b"\xe2")
 		self.assertEquals(self.ed.LineCount, 2)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testUBreakApartEOL(self):
 		# Add two lines separated by U+2029 then remove and add back each byte ensuring
 		# only one line after each removal of any byte in line end and 2 lines after reinsertion
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		text = b"x\xe2\x80\xa9y";
@@ -398,9 +407,10 @@ class TestSimple(unittest.TestCase):
 			self.ed.ReplaceTarget(1, text[i:i+1])
 			self.assertEquals(self.ed.LineCount, 2)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testURemoveEOLFragment(self):
 		# Add UTF-8 line end then delete each byte causing line end to disappear
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		for i in range(3):
@@ -414,10 +424,11 @@ class TestSimple(unittest.TestCase):
 
 	# Several tests for unicode NEL line ends U+0085
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testNELLineEnds(self):
 		# Add two lines separated with U+0085 and ensure it is seen as two lines
 		# Then remove U+0085 and should be just 1 lines
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		self.ed.AddText(4, b"x\xc2\x85y")
@@ -433,6 +444,7 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.LineLength(0), 2)
 		self.assertEquals(self.ed.GetLineEndPosition(0), 2)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testNELFragmentedEOLCompletion(self):
 		# Add starting byte of UTF-8 NEL then complete it
 		self.ed.AddText(3, b"x\xc2y")
@@ -443,9 +455,10 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), b"x\xc2\x85y")
 		self.assertEquals(self.ed.LineCount, 2)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testNELFragmentedEOLStart(self):
 		# Add end of UTF-8 NEL then insert start
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		self.assertEquals(self.ed.LineCount, 1)
@@ -455,10 +468,11 @@ class TestSimple(unittest.TestCase):
 		self.ed.AddText(1, b"\xc2")
 		self.assertEquals(self.ed.LineCount, 2)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testNELBreakApartEOL(self):
 		# Add two lines separated by U+0085 then remove and add back each byte ensuring
 		# only one line after each removal of any byte in line end and 2 lines after reinsertion
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.ed.SetCodePage(65001)
 		self.ed.SetLineEndTypesAllowed(1)
 		text = b"x\xc2\x85y";
@@ -480,6 +494,7 @@ class TestSimple(unittest.TestCase):
 			self.ed.ReplaceTarget(1, text[i:i+1])
 			self.assertEquals(self.ed.LineCount, 2)
 
+	@unittest.skipUnless(unicodeLineEndsAvailable, "can not test Unicode line ends")
 	def testNELRemoveEOLFragment(self):
 		# Add UTF-8 NEL then delete each byte causing line end to disappear
 		self.ed.SetCodePage(65001)
@@ -1294,6 +1309,7 @@ class TestRepresentations(unittest.TestCase):
 		result = self.ed.GetRepresentation(ohmSign)
 		self.assertEquals(result, ohmExplained)
 
+@unittest.skipUnless(lexersAvailable, "no lexers included")
 class TestProperties(unittest.TestCase):
 
 	def setUp(self):
@@ -1303,13 +1319,20 @@ class TestProperties(unittest.TestCase):
 		self.ed.EmptyUndoBuffer()
 
 	def testSet(self):
-		self.ed.SetProperty(b"test", b"12")
-		self.assertEquals(self.ed.GetPropertyInt(b"test"), 12)
-		result = self.ed.GetProperty(b"test")
-		self.assertEquals(result, b"12")
-		self.ed.SetProperty(b"test.plus", b"[$(test)]")
-		result = self.ed.GetPropertyExpanded(b"test.plus")
-		self.assertEquals(result, b"[12]")
+		self.xite.ChooseLexer(b"cpp")
+		# For Lexilla, only known property names may work
+		propName = b"lexer.cpp.allow.dollars"
+		self.ed.SetProperty(propName, b"1")
+		self.assertEquals(self.ed.GetPropertyInt(propName), 1)
+		result = self.ed.GetProperty(propName)
+		self.assertEquals(result, b"1")
+		self.ed.SetProperty(propName, b"0")
+		self.assertEquals(self.ed.GetPropertyInt(propName), 0)
+		result = self.ed.GetProperty(propName)
+		self.assertEquals(result, b"0")
+		# No longer expands but should at least return the value
+		result = self.ed.GetPropertyExpanded(propName)
+		self.assertEquals(result, b"0")
 
 class TestTextMargin(unittest.TestCase):
 
@@ -2216,6 +2239,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 		self.assertEquals(firstPosition, pos)
 		self.assertEquals(firstPosition+1, self.ed.TargetEnd)
 
+@unittest.skipUnless(lexersAvailable, "no lexers included")
 class TestLexer(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame
@@ -2224,11 +2248,11 @@ class TestLexer(unittest.TestCase):
 		self.ed.EmptyUndoBuffer()
 
 	def testLexerNumber(self):
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.assertEquals(self.ed.GetLexer(), self.ed.SCLEX_CPP)
 
 	def testLexerName(self):
-		self.ed.LexerLanguage = b"cpp"
+		self.xite.ChooseLexer(b"cpp")
 		self.assertEquals(self.ed.GetLexer(), self.ed.SCLEX_CPP)
 		name = self.ed.GetLexerLanguage(0)
 		self.assertEquals(name, b"cpp")
@@ -2247,6 +2271,7 @@ class TestLexer(unittest.TestCase):
 		wordSet = self.ed.DescribeKeyWordSets()
 		self.assertNotEquals(wordSet, b"")
 
+@unittest.skipUnless(lexersAvailable, "no lexers included")
 class TestSubStyles(unittest.TestCase):
 	''' These tests include knowledge of the current implementation in the cpp lexer
 	and may have to change when that implementation changes.

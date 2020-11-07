@@ -19,6 +19,10 @@ from MessageNumbers import msgs, sgsm
 import ScintillaCallable
 import XiteMenu
 
+scintillaIncludesLexers = False
+# Lexilla may optionally be tested it is built and can be loaded
+lexillaAvailable = False
+
 scintillaDirectory = ".."
 scintillaIncludeDirectory = os.path.join(scintillaDirectory, "include")
 scintillaScriptsDirectory = os.path.join(scintillaDirectory, "scripts")
@@ -26,6 +30,19 @@ sys.path.append(scintillaScriptsDirectory)
 import Face
 
 scintillaBinDirectory = os.path.join(scintillaDirectory, "bin")
+
+lexillaBinDirectory = os.path.join(scintillaDirectory, "..", "lexilla", "bin")
+lexName = "Lexilla.DLL"
+try:
+	lexillaDLLPath = os.path.join(lexillaBinDirectory, lexName)
+	lexillaLibrary = ctypes.cdll.LoadLibrary(lexillaDLLPath)
+	createLexer = lexillaLibrary.CreateLexer
+	createLexer.restype = ctypes.c_void_p
+	lexillaAvailable = True
+	print("Found Lexilla")
+except OSError:
+	print("Can't find " + lexName)
+	print("Python is built for " + " ".join(platform.architecture()))
 
 WFUNC = ctypes.WINFUNCTYPE(c_int, HWND, c_uint, WPARAM, LPARAM)
 
@@ -182,11 +199,15 @@ class XiteWin():
 
 	def OnCreate(self, hwnd):
 		self.win = hwnd
+		if scintillaIncludesLexers:
+			sciName = "SciLexer.DLL"
+		else:
+			sciName = "Scintilla.DLL"
 		try:
-			scintillaDLLPath = os.path.join(scintillaBinDirectory, "SciLexer.DLL")
+			scintillaDLLPath = os.path.join(scintillaBinDirectory, sciName)
 			ctypes.cdll.LoadLibrary(scintillaDLLPath)
 		except OSError:
-			print("Can't find SciLexer.DLL")
+			print("Can't find " + sciName)
 			print("Python is built for " + " ".join(platform.architecture()))
 			sys.exit()
 		self.sciHwnd = user32.CreateWindowExW(0,
@@ -206,6 +227,14 @@ class XiteWin():
 
 		self.FocusOnEditor()
 
+	def ChooseLexer(self, lexer):
+		if scintillaIncludesLexers:
+			self.ed.LexerLanguage = lexer
+		elif lexillaAvailable:
+			pLexilla = createLexer(lexer)
+			self.ed.SetILexer(0, pLexilla)
+		else:	# No lexers available
+			pass
 
 	def Invalidate(self):
 		user32.InvalidateRect(self.win, 0, 0)
