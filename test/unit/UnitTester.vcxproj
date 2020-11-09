@@ -150,7 +150,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\lexlib\WordList.cxx" />
     <ClCompile Include="..\..\src\CellBuffer.cxx" />
     <ClCompile Include="..\..\src\CharClassify.cxx" />
     <ClCompile Include="..\..\src\ContractionState.cxx" />

@@ -29,7 +29,6 @@
         OptionSet
         PropSetSimple
         StyleContext
-        WordList
 */
 
 #include <cstdio>
