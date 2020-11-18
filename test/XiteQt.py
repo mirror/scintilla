@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Requires Python 2.7 or later
 
-import ctypes, os, sys, unittest
+import ctypes, os, platform, sys, unittest
 
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -21,6 +21,19 @@ import Face
 scintillaIncludesLexers = False
 # Lexilla may optionally be tested it is built and can be loaded
 lexillaAvailable = False
+
+lexillaBinDirectory = os.path.join(scintillaDirectory, "..", "lexilla", "bin")
+lexName = "liblexilla.so"
+try:
+	lexillaSOPath = os.path.join(lexillaBinDirectory, lexName)
+	lexillaLibrary = ctypes.cdll.LoadLibrary(lexillaSOPath)
+	createLexer = lexillaLibrary.CreateLexer
+	createLexer.restype = ctypes.c_void_p
+	lexillaAvailable = True
+	print("Found Lexilla")
+except OSError:
+	print("Can't find " + lexName)
+	print("Python is built for " + " ".join(platform.architecture()))
 
 class Form(QDialog):
 
@@ -59,6 +72,15 @@ class XiteWin():
 		results = runner.run(tests)
 		print(results)
 		sys.exit(0)
+
+	def ChooseLexer(self, lexer):
+		if scintillaIncludesLexers:
+			self.ed.LexerLanguage = lexer
+		elif lexillaAvailable:
+			pLexilla = createLexer(lexer)
+			self.ed.SetILexer(0, pLexilla)
+		else:	# No lexers available
+			pass
 
 xiteFrame = None
 
