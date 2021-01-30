@@ -12,13 +12,9 @@ useStlAlgorithm
 
 // Written with variable for consistency
 knownArgument:scintilla/src/SparseVector.h
-knownArgument:scintilla/src/RESearch.cxx
 
 // The two sections are for different purposes: C1 control set and UTF-8 invalid bytes
 duplicateCondition:scintilla/src/Editor.cxx
-
-// Appears to not understand lambda
-knownConditionTrueFalse:scintilla/src/PerLine.cxx
 
 // Some non-explicit constructors are used for conversions or are private to lexers
 noExplicitConstructor
