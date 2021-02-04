@@ -1021,7 +1021,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return DocumentLexState()->GetIdentifier();
 
 	case SCI_SETILEXER:
-		DocumentLexState()->SetInstance(reinterpret_cast<ILexer5 *>(lParam));
+		DocumentLexState()->SetInstance(static_cast<ILexer5 *>(PtrFromSPtr(lParam)));
 		return 0;
 
 	case SCI_COLOURISE:
@@ -1058,7 +1058,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_PRIVATELEXERCALL:
 		return reinterpret_cast<sptr_t>(
-			DocumentLexState()->PrivateCall(static_cast<int>(wParam), reinterpret_cast<void *>(lParam)));
+			DocumentLexState()->PrivateCall(static_cast<int>(wParam), PtrFromSPtr(lParam)));
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_GETSTYLEBITSNEEDED:
