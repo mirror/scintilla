@@ -588,6 +588,10 @@
 	Fix Alt+End (move to wrapped line end) for Japanese UTF-8 text..
 	<a href="https://sourceforge.net/p/scintilla/bugs/2231/">Bug #2231</a>.
 	</li>
+	<li>
+	SciTE uses the "null" lexer when it doesn't have a lexer assigned to a file.
+	This avoids activating a Lua script lexer if one is assigned.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scite446.zip">Release 4.4.6</a>
