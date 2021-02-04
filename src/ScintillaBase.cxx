@@ -536,7 +536,7 @@ namespace Scintilla {
 
 class LexState : public LexInterface {
 public:
-	explicit LexState(Document *pdoc_);
+	explicit LexState(Document *pdoc_) noexcept;
 	void SetInstance(ILexer5 *instance_);
 	// Deleted so LexState objects can not be copied.
 	LexState(const LexState &) = delete;
@@ -576,7 +576,7 @@ public:
 
 }
 
-LexState::LexState(Document *pdoc_) : LexInterface(pdoc_) {
+LexState::LexState(Document *pdoc_) noexcept : LexInterface(pdoc_) {
 }
 
 LexState::~LexState() {
