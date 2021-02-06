@@ -27,8 +27,7 @@ def printHFile(f):
 				featureDefineName = "SCN_" + name.upper()
 				out.append("#define " + featureDefineName + " " + v["Value"])
 			elif v["FeatureType"] in ["val"]:
-				if not ("SCE_" in name or "SCLEX_" in name):
-					out.append("#define " + name + " " + v["Value"])
+				out.append("#define " + name + " " + v["Value"])
 	if anyProvisional:
 		out.append("#endif")
 	return out
