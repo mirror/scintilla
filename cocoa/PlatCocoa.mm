@@ -1785,7 +1785,7 @@ PRectangle ListBoxImpl::GetDesiredRect() {
 	if (@available(macOS 11, *)) {
 		// macOS 11 requires some extra space possibly due to the rounded highlight.
 		// There may be a better way to discover how much space is required
-		// but an 22 pixels fixes it for almost all tested cases.
+		// but an extra 22 pixels fixes it for almost all tested cases.
 		rcDesired.right += 22;
 	}
 
