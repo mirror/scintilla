@@ -22,7 +22,10 @@ scintillaIncludesLexers = False
 # Lexilla may optionally be tested it is built and can be loaded
 lexillaAvailable = False
 
-lexillaBinDirectory = os.path.join(scintillaDirectory, "..", "lexilla", "bin")
+lexillaDirectory = os.path.join(scintillaDirectory, "..", "lexilla")
+lexillaBinDirectory = os.path.join(lexillaDirectory, "bin")
+lexillaIncludeDirectory = os.path.join(lexillaDirectory, "include")
+
 lexName = "liblexilla.so"
 try:
 	lexillaSOPath = os.path.join(lexillaBinDirectory, lexName)
@@ -47,6 +50,12 @@ class XiteWin():
 	def __init__(self, test=""):
 		self.face = Face.Face()
 		self.face.ReadFromFile(os.path.join(scintillaIncludeDirectory, "Scintilla.iface"))
+		try:
+			faceLex = Face.Face()
+			faceLex.ReadFromFile(os.path.join(lexillaIncludeDirectory, "LexicalStyles.iface"))
+			self.face.features = {**self.face.features, **faceLex.features}
+		except FileNotFoundError:
+			print("Can't find " + "LexicalStyles.iface")
 
 		self.test = test
 
