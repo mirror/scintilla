@@ -165,7 +165,7 @@ class XiteWin():
 		try:
 			faceLex = Face.Face()
 			faceLex.ReadFromFile(os.path.join(lexillaIncludeDirectory, "LexicalStyles.iface"))
-			self.face.features = {**self.face.features, **faceLex.features}
+			self.face.features.update(faceLex.features)
 		except FileNotFoundError:
 			print("Can't find " + "LexicalStyles.iface")
 
