@@ -106,9 +106,16 @@ const char user_keywords[] = // Definition of own keywords, not used by MySQL.
 - (void) setupEditor
 {  
   // Lexer type is MySQL.
-  [mEditor setGeneralProperty: SCI_SETLEXER parameter: SCLEX_MYSQL value: 0];
-  // alternatively: [mEditor setEditorProperty: SCI_SETLEXERLANGUAGE parameter: nil value: (sptr_t) "mysql"];
-  
+  void *lexillaDL = dlopen(LEXILLA_LIB LEXILLA_EXTENSION, RTLD_LAZY);
+  if (lexillaDL) {
+    Lexilla::CreateLexerFn createLexer =
+	  reinterpret_cast<Lexilla::CreateLexerFn>(dlsym(lexillaDL, LEXILLA_CREATELEXER));
+    if (createLexer) {
+      Scintilla::ILexer5 *pLexer = createLexer("mysql");
+      [mEditor setReferenceProperty: SCI_SETILEXER parameter: nil value: pLexer];
+    }
+  }
+
   // Keywords to highlight. Indices are:
   // 0 - Major keywords (reserved keywords)
   // 1 - Normal keywords (everything not reserved but integral part of the language)
