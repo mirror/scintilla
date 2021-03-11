@@ -284,8 +284,7 @@
     <code>nmake -f lexilla.mak</code><br />
     </p>
 
-    <p>Lexilla follows the <a class="seealso" href="#SCI_LOADLEXERLIBRARY">external lexer protocol</a>
-    so can be loaded by applications that support this.
+    <p>Lexilla follows the external lexer protocol so can be loaded by applications that support this.
     As the protocol only supports object lexers, an additional function <code>CreateLexer(const char *name)</code>
     is exposed which will create a lexer object (ILexer5 *) for any object lexer or function lexer.
     </p>
@@ -2723,8 +2722,8 @@ struct Sci_TextToFind {
     <p>The styling messages allow you to assign styles to text. If your styling needs can be met by
     one of the standard lexers, or if you can write your own, then a lexer is probably the easiest
     way to style your document. If you choose to use the container to do the styling you can use
-    the <a class="message" href="#SCI_SETLEXER"><code>SCI_SETLEXER</code></a> command to select
-    <code>SCLEX_CONTAINER</code>, in which case the container is sent a <a class="message"
+    the <a class="message" href="#SCI_SETILEXER"><code>SCI_SETILEXER</code></a> command to select
+    <code>NULL</code>, in which case the container is sent a <a class="message"
     href="#SCN_STYLENEEDED"><code>SCN_STYLENEEDED</code></a> <a class="jump"
     href="#Notifications">notification</a> each time text needs styling for display. As another
     alternative, you might use idle time to style the document. Even if you use a lexer, you might
@@ -6104,7 +6103,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p>With <code>SC_DOCUMENTOPTION_STYLES_NONE</code>, lexers are still active and may display
     indicators. Some may produce folding information althoough most require lexical styles to correctly determine folding.
-    Its often more efficient to set the null lexer <code>SCLEX_NULL</code> so no lexer is run.
+    Its often more efficient to set the null lexer <code>NULL</code> so no lexer is run.
     </p>
 
     <p class="provisional">The <code>SC_DOCUMENTOPTION_TEXT_LARGE</code> option is experimental and has not been
@@ -6112,7 +6111,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     Applications using this option should be tested to ensure the option works in their circumstances and each lexer
     included should also be tested with documents larger than 4GB.
     For many applications lexing documents larger than 4GB will be too sluggish so <code>SC_DOCUMENTOPTION_STYLES_NONE</code>
-    and the null lexer <code>SCLEX_NULL</code> can be used. Another approach is to turn on idle styling with
+    and the null lexer <code>NULL</code> can be used. Another approach is to turn on idle styling with
     <a class="seealso" href="#SCI_SETIDLESTYLING"><code>SCI_SETIDLESTYLING</code></a>.
     </p>
 
@@ -7055,14 +7054,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     or .so modules (on GTK/Linux) that export three
     functions: <code>GetLexerCount</code>, <code>GetLexerName</code>, and
     <code>GetLexerFactory</code>. See <code>ExternalLexer.cxx</code> for more information.</p>
-     <a class="message" href="#SCI_SETLEXER">SCI_SETLEXER(int lexer)</a><br />
      <a class="message" href="#SCI_GETLEXER">SCI_GETLEXER &rarr; int</a><br />
-     <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char
-    *language)</a><br />
      <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language) &rarr; int</a><br />
      <a class="message" href="#SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer ilexer)</a><br />
-     <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char
-    *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(position start, position end)</a><br />
      <a class="message" href="#SCI_CHANGELEXERSTATE">SCI_CHANGELEXERSTATE(position start, position end) &rarr; int</a><br />
      <a class="message" href="#SCI_PROPERTYNAMES">SCI_PROPERTYNAMES(&lt;unused&gt;, char *names) &rarr; int</a><br />
@@ -7091,24 +7085,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_TAGSOFSTYLE">SCI_TAGSOFSTYLE(int style, char *tags) &rarr; int</a><br />
      <a class="message" href="#SCI_DESCRIPTIONOFSTYLE">SCI_DESCRIPTIONOFSTYLE(int style, char *description) &rarr; int</a><br />
 
-    <p><b id="SCI_SETLEXER">SCI_SETLEXER(int lexer)</b><br />
-     <b id="SCI_GETLEXER">SCI_GETLEXER &rarr; int</b><br />
-     You can select the lexer to use with an integer code from the <code>SCLEX_*</code> enumeration
-    in <code>Scintilla.h</code>. There are two codes in this sequence that do not use lexers:
-    <code>SCLEX_NULL</code> to select no lexing action and <code>SCLEX_CONTAINER</code> which sends
-    the <code><a class="message" href="#SCN_STYLENEEDED">SCN_STYLENEEDED</a></code> notification to
-    the container whenever a range of text needs to be styled. You cannot use the
-    <code>SCLEX_AUTOMATIC</code> value; this identifies additional external lexers that Scintilla
-    assigns unused lexer numbers to.</p>
+    <p><b id="SCI_GETLEXER">SCI_GETLEXER &rarr; int</b><br />
+     You can retrieve an integer lexer ID for the current lexer from the <code>SCLEX_*</code> enumeration
+    in <code>SciLexer.h</code>. Some lexers may not have a lexer ID, just a lexer name in which case 0 is returned.</p>
 
-    <p><b id="SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char *language)</b><br />
-    <b id="SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language NUL-terminated) &rarr; int</b><br />
-     <code>SCI_SETLEXERLANGUAGE</code> lets you select a lexer by name, and is the only method if you are using an
-    external lexer or if you have written a lexer module for a language of your own and do not wish
-    to assign it an explicit lexer number. To select an existing lexer, set <code class="parameter">language</code> to
-    match the (case sensitive) name given to the module, for example "ada" or "python", not "Ada"
-    or "Python". To locate the name for the built-in lexers, open the relevant
-    <code>Lex*.cxx</code> file and search for <code>LexerModule</code>. The third argument in the
+    <p><b id="SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language NUL-terminated) &rarr; int</b><br />
+     <code>SCI_GETLEXERLANGUAGE</code>returns the name of the current lexer which must be set with <code>SCI_SETILEXER</code>.
+    To locate the name for a lexer, open the relevant
+    <code>lexilla/lexers/Lex*.cxx</code> file and search for <code>LexerModule</code>. The third argument in the
     <code>LexerModule</code> constructor is the name to use.</p>
 
      <p class="provisional"><b id="SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer ilexer)</b><br />
@@ -7121,13 +7105,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><code>SCI_GETLEXERLANGUAGE</code> retrieves the name of the lexer.</p>
 
-    <p><b id="SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char *path)</b><br />
-     Load a lexer implemented in a shared library. This is a .so file on GTK/Linux, a .dylib file on macOS, or a .DLL file on Windows.
-     </p>
-
     <p><b id="SCI_COLOURISE">SCI_COLOURISE(position start, position end)</b><br />
      This requests the current lexer or the container (if the lexer is set to
-    <code>SCLEX_CONTAINER</code>) to style the document between <code class="parameter">start</code> and
+    <code>NULL</code>) to style the document between <code class="parameter">start</code> and
     <code class="parameter">end</code>. If <code class="parameter">end</code> is -1, the document is styled from
     <code class="parameter">start</code> to the end. If the <code>"fold"</code> property is set to
     <code>"1"</code> and your lexer or container supports folding, fold levels are also set. This
@@ -7608,7 +7588,7 @@ struct SCNotification {
 
     <p><b id="SCN_STYLENEEDED">SCN_STYLENEEDED</b><br />
      If you used <code><a class="message"
-    href="#SCI_SETLEXER">SCI_SETLEXER</a>(SCLEX_CONTAINER)</code> to make the container act as the
+    href="#SCI_SETILEXER">SCI_SETILEXER</a>(NULL)</code> to make the container act as the
     lexer, you will receive this notification when Scintilla is about to display or print text that
     requires styling. You are required to style the text from the line that contains the position
     returned by <a class="seealso" href="#SCI_GETENDSTYLED"><code>SCI_GETENDSTYLED</code></a> up to

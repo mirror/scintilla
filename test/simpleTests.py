@@ -2283,14 +2283,14 @@ class TestSubStyles(unittest.TestCase):
 		self.ed.EmptyUndoBuffer()
 
 	def testInfo(self):
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		bases = self.ed.GetSubStyleBases()
 		self.assertEquals(bases, b"\x0b\x11")	# 11, 17
 		self.assertEquals(self.ed.DistanceToSecondaryStyles(), 0x40)
 
 	def testAllocate(self):
 		firstSubStyle = 0x80	# Current implementation
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		self.assertEquals(self.ed.GetStyleFromSubStyle(firstSubStyle), firstSubStyle)
 		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), 0)
 		self.assertEquals(self.ed.GetSubStylesLength(self.ed.SCE_C_IDENTIFIER), 0)
@@ -2311,7 +2311,7 @@ class TestSubStyles(unittest.TestCase):
 	def testInactive(self):
 		firstSubStyle = 0x80	# Current implementation
 		inactiveDistance = self.ed.DistanceToSecondaryStyles()
-		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.xite.ChooseLexer(b"cpp")
 		numSubStyles = 5
 		subs = self.ed.AllocateSubStyles(self.ed.SCE_C_IDENTIFIER, numSubStyles)
 		self.assertEquals(subs, firstSubStyle)
