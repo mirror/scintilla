@@ -3410,42 +3410,6 @@ void Menu::Show(Point pt, Window &w) {
 	Destroy();
 }
 
-class DynamicLibraryImpl : public DynamicLibrary {
-protected:
-	HMODULE h;
-public:
-	explicit DynamicLibraryImpl(const char *modulePath) noexcept {
-		h = ::LoadLibraryA(modulePath);
-	}
-
-	~DynamicLibraryImpl() override {
-		if (h)
-			::FreeLibrary(h);
-	}
-
-	// Use GetProcAddress to get a pointer to the relevant function.
-	Function FindFunction(const char *name) noexcept override {
-		if (h) {
-			// Use memcpy as it doesn't invoke undefined or conditionally defined behaviour.
-			FARPROC fp = ::GetProcAddress(h, name);
-			Function f = nullptr;
-			static_assert(sizeof(f) == sizeof(fp));
-			memcpy(&f, &fp, sizeof(f));
-			return f;
-		} else {
-			return nullptr;
-		}
-	}
-
-	bool IsValid() noexcept override {
-		return h != NULL;
-	}
-};
-
-DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
-	return static_cast<DynamicLibrary *>(new DynamicLibraryImpl(modulePath));
-}
-
 ColourDesired Platform::Chrome() {
 	return ColourDesired(::GetSysColor(COLOR_3DFACE));
 }

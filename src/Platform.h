@@ -514,23 +514,6 @@ public:
 	void Show(Point pt, Window &w);
 };
 
-/**
- * Dynamic Library (DLL/SO/...) loading
- */
-class DynamicLibrary {
-public:
-	virtual ~DynamicLibrary() = default;
-
-	/// @return Pointer to function "name", or NULL on failure.
-	virtual Function FindFunction(const char *name) = 0;
-
-	/// @return true if the library was loaded successfully.
-	virtual bool IsValid() = 0;
-
-	/// @return An instance of a DynamicLibrary subclass with "modulePath" loaded.
-	static DynamicLibrary *Load(const char *modulePath);
-};
-
 #if defined(__clang__)
 # if __has_feature(attribute_analyzer_noreturn)
 #  define CLANG_ANALYZER_NORETURN __attribute__((analyzer_noreturn))

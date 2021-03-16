@@ -1955,46 +1955,6 @@ void Menu::Show(Point pt, Window &w) {
 #endif
 }
 
-class DynamicLibraryImpl : public DynamicLibrary {
-protected:
-	GModule *m;
-public:
-	explicit DynamicLibraryImpl(const char *modulePath) noexcept {
-		m = g_module_open(modulePath, G_MODULE_BIND_LAZY);
-	}
-	// Deleted so DynamicLibraryImpl objects can not be copied.
-	DynamicLibraryImpl(const DynamicLibraryImpl&) = delete;
-	DynamicLibraryImpl(DynamicLibraryImpl&&) = delete;
-	DynamicLibraryImpl&operator=(const DynamicLibraryImpl&) = delete;
-	DynamicLibraryImpl&operator=(DynamicLibraryImpl&&) = delete;
-	~DynamicLibraryImpl() override {
-		if (m != nullptr)
-			g_module_close(m);
-	}
-
-	// Use g_module_symbol to get a pointer to the relevant function.
-	Function FindFunction(const char *name) override {
-		if (m != nullptr) {
-			gpointer fn_address = nullptr;
-			const gboolean status = g_module_symbol(m, name, &fn_address);
-			if (status)
-				return static_cast<Function>(fn_address);
-			else
-				return nullptr;
-		} else {
-			return nullptr;
-		}
-	}
-
-	bool IsValid() override {
-		return m != nullptr;
-	}
-};
-
-DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
-	return static_cast<DynamicLibrary *>(new DynamicLibraryImpl(modulePath));
-}
-
 ColourDesired Platform::Chrome() {
 	return ColourDesired(0xe0, 0xe0, 0xe0);
 }

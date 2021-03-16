@@ -1134,50 +1134,6 @@ void Menu::Show(Point pt, Window & /*w*/)
 
 //----------------------------------------------------------------------
 
-class DynamicLibraryImpl : public DynamicLibrary {
-protected:
-	QLibrary *lib;
-public:
-	explicit DynamicLibraryImpl(const char *modulePath) {
-		QString path = QString::fromUtf8(modulePath);
-		lib = new QLibrary(path);
-	}
-	// Deleted so DynamicLibraryImpl objects can not be copied
-	DynamicLibraryImpl(const DynamicLibraryImpl &) = delete;
-	DynamicLibraryImpl(DynamicLibraryImpl &&) = delete;
-	DynamicLibraryImpl &operator=(const DynamicLibraryImpl &) = delete;
-	DynamicLibraryImpl &operator=(DynamicLibraryImpl &&) = delete;
-
-	virtual ~DynamicLibraryImpl() {
-		if (lib)
-			lib->unload();
-		lib = nullptr;
-	}
-	Function FindFunction(const char *name) override {
-		if (lib) {
-			// Use memcpy as it doesn't invoke undefined or conditionally defined behaviour.
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-			QFunctionPointer fp {};
-#else
-			void *fp = nullptr;
-#endif
-			fp = lib->resolve(name);
-			Function f = nullptr;
-			static_assert(sizeof(f) == sizeof(fp));
-			memcpy(&f, &fp, sizeof(f));
-			return f;
-		}
-		return nullptr;
-	}
-	bool IsValid() override {
-		return lib != nullptr;
-	}
-};
-DynamicLibrary *DynamicLibrary::Load(const char *modulePath)
-{
-	return static_cast<DynamicLibrary *>(new DynamicLibraryImpl(modulePath));
-}
-
 ColourDesired Platform::Chrome()
 {
 	QColor c(Qt::gray);
