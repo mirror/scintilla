@@ -268,7 +268,7 @@
       </tbody>
     </table>
 
-    <h2 class="provisional">Lexilla</h2>
+    <h2>Lexilla</h2>
 
     <p>For Scintilla 5.0, lexers will be split off into a separate Lexilla library.
     Scintilla will be responsible for the GUI and calling lexers with Lexilla providing the lexers.
@@ -7095,7 +7095,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>lexilla/lexers/Lex*.cxx</code> file and search for <code>LexerModule</code>. The third argument in the
     <code>LexerModule</code> constructor is the name to use.</p>
 
-     <p class="provisional"><b id="SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer ilexer)</b><br />
+     <p><b id="SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer ilexer)</b><br />
      <code>SCI_SETILEXER</code> allows setting a lexer as an <code>ILexer5*</code>.
      The lexer may be implemented by an application or a shared library such as Lexilla.</p>
 
@@ -7277,7 +7277,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     can be used during lexing. For example a C++ lexer may store a set of preprocessor definitions
     or variable declarations and style these depending on their role.</p>
 
-    <p class="provisional">ILexer4 is extended with the provisional ILexer5 interface to support use of Lexilla.</p>
+    <p>ILexer4 is extended with the ILexer5 interface to support use of Lexilla.</p>
 
     <p>A set of helper classes allows older lexers defined by functions to be used in Scintilla.</p>
 <h4>ILexer4</h4>
@@ -7313,7 +7313,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 <span class="S10">};</span><br />
 </div>
 
-<h4 class="provisional">ILexer5</h4>
+<h4>ILexer5</h4>
 
 <div class="highlighted">
 <span><span class="S5">class</span><span class="S0"> </span>ILexer5<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>ILexer4<span class="S0"> </span><span class="S10">{</span><br />
@@ -7372,12 +7372,12 @@ A set of common tags and conventions for combining them is <a  class="jump" href
 <code>DescriptionOfStyle</code> is an English description of the style like "<code>Function or method name definition</code>".
 </p>
 
-<p class="provisional"><code>GetName</code> and <code>GetIdentifier</code> may be called
+<p><code>GetName</code> and <code>GetIdentifier</code> may be called
 to discover the identity of a lexer and be used to implement
 <a class="seealso" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE</a> and
 <a class="seealso" href="#SCI_GETLEXER">SCI_GETLEXER</a>.</p>
 
-<p class="provisional"><code>PropertyGet</code> may be called
+<p><code>PropertyGet</code> may be called
 to discover the value of a property stored by a lexer and be used to implement
 <a class="seealso" href="#SCI_GETPROPERTY">SCI_GETPROPERTY</a>.</p>
 
