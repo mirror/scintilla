@@ -5,7 +5,7 @@ $(DIR_O)/HanjaDic.obj: \
 	HanjaDic.h
 $(DIR_O)/PlatWin.obj: \
 	PlatWin.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
 	../src/DBCS.h \
@@ -18,7 +18,7 @@ $(DIR_O)/ScintillaDLL.obj: \
 	ScintillaWin.h
 $(DIR_O)/ScintillaWin.obj: \
 	ScintillaWin.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -57,7 +57,7 @@ $(DIR_O)/ScintillaWin.obj: \
 	ScintillaWin.h
 $(DIR_O)/AutoComplete.obj: \
 	../src/AutoComplete.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/CharacterSet.h \
@@ -65,7 +65,7 @@ $(DIR_O)/AutoComplete.obj: \
 	../src/AutoComplete.h
 $(DIR_O)/CallTip.obj: \
 	../src/CallTip.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -81,7 +81,7 @@ $(DIR_O)/CaseFolder.obj: \
 	../src/CaseConvert.h
 $(DIR_O)/CellBuffer.obj: \
 	../src/CellBuffer.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -101,7 +101,7 @@ $(DIR_O)/CharClassify.obj: \
 	../src/CharClassify.h
 $(DIR_O)/ContractionState.obj: \
 	../src/ContractionState.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -114,7 +114,7 @@ $(DIR_O)/DBCS.obj: \
 	../src/DBCS.h
 $(DIR_O)/Decoration.obj: \
 	../src/Decoration.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -124,7 +124,7 @@ $(DIR_O)/Decoration.obj: \
 	../src/Decoration.h
 $(DIR_O)/Document.obj: \
 	../src/Document.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -146,7 +146,7 @@ $(DIR_O)/Document.obj: \
 	../src/ElapsedPeriod.h
 $(DIR_O)/EditModel.obj: \
 	../src/EditModel.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -174,7 +174,7 @@ $(DIR_O)/EditModel.obj: \
 	../src/EditModel.h
 $(DIR_O)/Editor.obj: \
 	../src/Editor.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -208,7 +208,7 @@ $(DIR_O)/Editor.obj: \
 	../src/ElapsedPeriod.h
 $(DIR_O)/EditView.obj: \
 	../src/EditView.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -242,7 +242,7 @@ $(DIR_O)/EditView.obj: \
 	../src/ElapsedPeriod.h
 $(DIR_O)/Indicator.obj: \
 	../src/Indicator.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/IntegerRectangle.h \
@@ -250,13 +250,13 @@ $(DIR_O)/Indicator.obj: \
 	../src/XPM.h
 $(DIR_O)/KeyMap.obj: \
 	../src/KeyMap.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/KeyMap.h
 $(DIR_O)/LineMarker.obj: \
 	../src/LineMarker.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/IntegerRectangle.h \
@@ -264,7 +264,7 @@ $(DIR_O)/LineMarker.obj: \
 	../src/LineMarker.h
 $(DIR_O)/MarginView.obj: \
 	../src/MarginView.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -295,7 +295,7 @@ $(DIR_O)/MarginView.obj: \
 	../src/EditView.h
 $(DIR_O)/PerLine.obj: \
 	../src/PerLine.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -305,7 +305,7 @@ $(DIR_O)/PerLine.obj: \
 	../src/PerLine.h
 $(DIR_O)/PositionCache.obj: \
 	../src/PositionCache.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -337,7 +337,7 @@ $(DIR_O)/RESearch.obj: \
 	../src/RESearch.h
 $(DIR_O)/RunStyles.obj: \
 	../src/RunStyles.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -346,7 +346,7 @@ $(DIR_O)/RunStyles.obj: \
 	../src/RunStyles.h
 $(DIR_O)/ScintillaBase.obj: \
 	../src/ScintillaBase.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -379,7 +379,7 @@ $(DIR_O)/ScintillaBase.obj: \
 	../src/ScintillaBase.h
 $(DIR_O)/ScintillaBaseL.obj: \
 	../src/ScintillaBase.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -412,14 +412,14 @@ $(DIR_O)/ScintillaBaseL.obj: \
 	../src/ScintillaBase.h
 $(DIR_O)/Selection.obj: \
 	../src/Selection.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
 	../src/Selection.h
 $(DIR_O)/Style.obj: \
 	../src/Style.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Style.h
@@ -431,7 +431,7 @@ $(DIR_O)/UniqueString.obj: \
 	../src/UniqueString.h
 $(DIR_O)/ViewStyle.obj: \
 	../src/ViewStyle.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -443,5 +443,5 @@ $(DIR_O)/ViewStyle.obj: \
 	../src/ViewStyle.h
 $(DIR_O)/XPM.obj: \
 	../src/XPM.cxx \
-	../include/Platform.h \
+	../src/Platform.h \
 	../src/XPM.h

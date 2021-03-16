@@ -63,6 +63,7 @@ HEADERS  += \
     ../../src/RunStyles.h \
     ../../src/RESearch.h \
     ../../src/PositionCache.h \
+    ../../src/Platform.h \
     ../../src/PerLine.h \
     ../../src/Partitioning.h \
     ../../src/LineMarker.h \
@@ -82,7 +83,6 @@ HEADERS  += \
     ../../src/CallTip.h \
     ../../src/AutoComplete.h \
     ../../include/Scintilla.h \
-    ../../include/Platform.h \
     ../../include/ILexer.h
 
 OTHER_FILES +=
