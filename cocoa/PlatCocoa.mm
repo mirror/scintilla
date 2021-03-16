@@ -2089,13 +2089,13 @@ unsigned int Platform::DoubleClickTime() {
 //#define TRACE
 #ifdef TRACE
 
-void Platform::DebugDisplay(const char *s) {
+void Platform::DebugDisplay(const char *s) noexcept {
 	fprintf(stderr, "%s", s);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void Platform::DebugPrintf(const char *format, ...) {
+void Platform::DebugPrintf(const char *format, ...) noexcept {
 	const int BUF_SIZE = 2000;
 	char buffer[BUF_SIZE];
 
@@ -2108,9 +2108,9 @@ void Platform::DebugPrintf(const char *format, ...) {
 
 #else
 
-void Platform::DebugDisplay(const char *) {}
+void Platform::DebugDisplay(const char *) noexcept {}
 
-void Platform::DebugPrintf(const char *, ...) {}
+void Platform::DebugPrintf(const char *, ...) noexcept {}
 
 #endif
 
@@ -2118,7 +2118,7 @@ void Platform::DebugPrintf(const char *, ...) {}
 
 static bool assertionPopUps = true;
 
-bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
+bool Platform::ShowAssertionPopUps(bool assertionPopUps_) noexcept {
 	bool ret = assertionPopUps;
 	assertionPopUps = assertionPopUps_;
 	return ret;
@@ -2126,7 +2126,7 @@ bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
 
 //--------------------------------------------------------------------------------------------------
 
-void Platform::Assert(const char *c, const char *file, int line) {
+void Platform::Assert(const char *c, const char *file, int line) noexcept {
 	char buffer[2000];
 	snprintf(buffer, sizeof(buffer), "Assertion [%s] failed at %s %d\r\n", c, file, line);
 	Platform::DebugDisplay(buffer);

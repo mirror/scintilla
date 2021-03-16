@@ -542,31 +542,26 @@ public:
 #endif
 
 /**
- * Platform class used to retrieve system wide parameters such as double click speed
- * and chrome colour. Not a creatable object, more of a module with several functions.
+ * Platform namespace used to retrieve system wide parameters such as double click speed
+ * and chrome colour.
  */
-class Platform {
-public:
-	Platform() = default;
-	Platform(const Platform &) = delete;
-	Platform(Platform &&) = delete;
-	Platform &operator=(const Platform &) = delete;
-	Platform &operator=(Platform &&) = delete;
-	~Platform() = default;
-	static ColourDesired Chrome();
-	static ColourDesired ChromeHighlight();
-	static const char *DefaultFont();
-	static int DefaultFontSize();
-	static unsigned int DoubleClickTime();
-	static void DebugDisplay(const char *s);
-	static constexpr long LongFromTwoShorts(short a,short b) noexcept {
-		return (a) | ((b) << 16);
-	}
+namespace Platform {
 
-	static void DebugPrintf(const char *format, ...);
-	static bool ShowAssertionPopUps(bool assertionPopUps_);
-	static void Assert(const char *c, const char *file, int line) CLANG_ANALYZER_NORETURN;
-};
+ColourDesired Chrome();
+ColourDesired ChromeHighlight();
+const char *DefaultFont();
+int DefaultFontSize();
+unsigned int DoubleClickTime();
+constexpr long LongFromTwoShorts(short a,short b) noexcept {
+	return (a) | ((b) << 16);
+}
+
+void DebugDisplay(const char *s) noexcept;
+void DebugPrintf(const char *format, ...) noexcept;
+bool ShowAssertionPopUps(bool assertionPopUps_) noexcept;
+void Assert(const char *c, const char *file, int line) noexcept CLANG_ANALYZER_NORETURN;
+
+}
 
 #ifdef  NDEBUG
 #define PLATFORM_ASSERT(c) ((void)0)

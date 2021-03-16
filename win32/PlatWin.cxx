@@ -3466,14 +3466,14 @@ unsigned int Platform::DoubleClickTime() {
 	return ::GetDoubleClickTime();
 }
 
-void Platform::DebugDisplay(const char *s) {
+void Platform::DebugDisplay(const char *s) noexcept {
 	::OutputDebugStringA(s);
 }
 
 //#define TRACE
 
 #ifdef TRACE
-void Platform::DebugPrintf(const char *format, ...) {
+void Platform::DebugPrintf(const char *format, ...) noexcept {
 	char buffer[2000];
 	va_list pArguments;
 	va_start(pArguments, format);
@@ -3482,19 +3482,19 @@ void Platform::DebugPrintf(const char *format, ...) {
 	Platform::DebugDisplay(buffer);
 }
 #else
-void Platform::DebugPrintf(const char *, ...) {
+void Platform::DebugPrintf(const char *, ...) noexcept {
 }
 #endif
 
 static bool assertionPopUps = true;
 
-bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
+bool Platform::ShowAssertionPopUps(bool assertionPopUps_) noexcept {
 	const bool ret = assertionPopUps;
 	assertionPopUps = assertionPopUps_;
 	return ret;
 }
 
-void Platform::Assert(const char *c, const char *file, int line) {
+void Platform::Assert(const char *c, const char *file, int line) noexcept {
 	char buffer[2000] {};
 	sprintf(buffer, "Assertion [%s] failed at %s %d%s", c, file, line, assertionPopUps ? "" : "\r\n");
 	if (assertionPopUps) {

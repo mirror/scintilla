@@ -1211,12 +1211,12 @@ unsigned int Platform::DoubleClickTime()
 	return QApplication::doubleClickInterval();
 }
 
-void Platform::DebugDisplay(const char *s)
+void Platform::DebugDisplay(const char *s) noexcept
 {
 	qWarning("Scintilla: %s", s);
 }
 
-void Platform::DebugPrintf(const char *format, ...)
+void Platform::DebugPrintf(const char *format, ...) noexcept
 {
 	char buffer[2000];
 	va_list pArguments;
@@ -1226,12 +1226,12 @@ void Platform::DebugPrintf(const char *format, ...)
 	Platform::DebugDisplay(buffer);
 }
 
-bool Platform::ShowAssertionPopUps(bool /*assertionPopUps*/)
+bool Platform::ShowAssertionPopUps(bool /*assertionPopUps*/) noexcept
 {
 	return false;
 }
 
-void Platform::Assert(const char *c, const char *file, int line)
+void Platform::Assert(const char *c, const char *file, int line) noexcept
 {
 	char buffer[2000];
 	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
