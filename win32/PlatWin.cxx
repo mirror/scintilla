@@ -44,6 +44,7 @@
 #include <dwrite.h>
 #endif
 
+#include "Geometry.h"
 #include "Platform.h"
 #include "XPM.h"
 #include "UniConversion.h"

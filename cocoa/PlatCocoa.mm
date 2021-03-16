@@ -32,6 +32,7 @@
 
 #import <Foundation/NSGeometry.h>
 
+#import "Geometry.h"
 #import "Platform.h"
 
 #include "XPM.h"

@@ -10,6 +10,7 @@
 
 #include "ScintillaDocument.h"
 
+#include "Geometry.h"
 #include "Platform.h"
 
 #include "ILoader.h"

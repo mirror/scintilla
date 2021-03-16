@@ -17,6 +17,7 @@
 
 #include <Cocoa/Cocoa.h>
 
+#include "Geometry.h"
 #include "Platform.h"
 #include "Scintilla.h"
 

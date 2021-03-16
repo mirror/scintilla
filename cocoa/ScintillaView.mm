@@ -15,6 +15,7 @@
 #include <string_view>
 #include <vector>
 
+#import "Geometry.h"
 #import "Platform.h"
 #import "ScintillaView.h"
 #import "ScintillaCocoa.h"

@@ -26,6 +26,7 @@
 #import <QuartzCore/CAAnimation.h>
 #import <QuartzCore/CATransaction.h>
 
+#import "Geometry.h"
 #import "Platform.h"
 #import "ScintillaView.h"
 #import "ScintillaCocoa.h"

@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
+#include "Geometry.h"
 #include "Platform.h"
 
 #include "Scintilla.h"

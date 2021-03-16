@@ -19,6 +19,7 @@
 #include <iterator>
 #include <memory>
 
+#include "Geometry.h"
 #include "Platform.h"
 
 #include "ILoader.h"

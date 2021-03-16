@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 
+#include "Geometry.h"
 #include "Platform.h"
 
 #include "Scintilla.h"

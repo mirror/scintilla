@@ -28,6 +28,7 @@
 #include <memory>
 
 #include "Scintilla.h"
+#include "Geometry.h"
 #include "Platform.h"
 #include "ILoader.h"
 #include "ILexer.h"

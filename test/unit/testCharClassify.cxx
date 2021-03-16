@@ -8,6 +8,7 @@
 #include <memory>
 #include <iostream>
 
+#include "Geometry.h"
 #include "Platform.h"
 
 #include "CharClassify.h"

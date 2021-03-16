@@ -87,6 +87,7 @@
 #endif
 
 // ScintillaGTK.h and stuff it needs
+#include "Geometry.h"
 #include "Platform.h"
 
 #include "ILoader.h"

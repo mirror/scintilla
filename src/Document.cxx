@@ -25,6 +25,7 @@
 #include <regex>
 #endif
 
+#include "Geometry.h"
 #include "Platform.h"
 
 #include "ILoader.h"

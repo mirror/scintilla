@@ -5,6 +5,7 @@ HanjaDic.o: \
 	HanjaDic.h
 PlatWin.o: \
 	PlatWin.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
@@ -18,6 +19,7 @@ ScintillaDLL.o: \
 	ScintillaWin.h
 ScintillaWin.o: \
 	ScintillaWin.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -57,6 +59,7 @@ ScintillaWin.o: \
 	ScintillaWin.h
 AutoComplete.o: \
 	../src/AutoComplete.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -65,6 +68,7 @@ AutoComplete.o: \
 	../src/AutoComplete.h
 CallTip.o: \
 	../src/CallTip.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -81,6 +85,7 @@ CaseFolder.o: \
 	../src/CaseConvert.h
 CellBuffer.o: \
 	../src/CellBuffer.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -101,6 +106,7 @@ CharClassify.o: \
 	../src/CharClassify.h
 ContractionState.o: \
 	../src/ContractionState.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../src/Position.h \
 	../src/UniqueString.h \
@@ -114,6 +120,7 @@ DBCS.o: \
 	../src/DBCS.h
 Decoration.o: \
 	../src/Decoration.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -124,6 +131,7 @@ Decoration.o: \
 	../src/Decoration.h
 Document.o: \
 	../src/Document.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -146,6 +154,7 @@ Document.o: \
 	../src/ElapsedPeriod.h
 EditModel.o: \
 	../src/EditModel.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -174,6 +183,7 @@ EditModel.o: \
 	../src/EditModel.h
 Editor.o: \
 	../src/Editor.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -208,6 +218,7 @@ Editor.o: \
 	../src/ElapsedPeriod.h
 EditView.o: \
 	../src/EditView.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -242,6 +253,7 @@ EditView.o: \
 	../src/ElapsedPeriod.h
 Indicator.o: \
 	../src/Indicator.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -250,12 +262,14 @@ Indicator.o: \
 	../src/XPM.h
 KeyMap.o: \
 	../src/KeyMap.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/KeyMap.h
 LineMarker.o: \
 	../src/LineMarker.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -264,6 +278,7 @@ LineMarker.o: \
 	../src/LineMarker.h
 MarginView.o: \
 	../src/MarginView.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -295,6 +310,7 @@ MarginView.o: \
 	../src/EditView.h
 PerLine.o: \
 	../src/PerLine.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -305,6 +321,7 @@ PerLine.o: \
 	../src/PerLine.h
 PositionCache.o: \
 	../src/PositionCache.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -337,6 +354,7 @@ RESearch.o: \
 	../src/RESearch.h
 RunStyles.o: \
 	../src/RunStyles.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -346,6 +364,7 @@ RunStyles.o: \
 	../src/RunStyles.h
 ScintillaBase.o: \
 	../src/ScintillaBase.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -379,6 +398,7 @@ ScintillaBase.o: \
 	../src/ScintillaBase.h
 ScintillaBaseL.o: \
 	../src/ScintillaBase.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
@@ -412,6 +432,7 @@ ScintillaBaseL.o: \
 	../src/ScintillaBase.h
 Selection.o: \
 	../src/Selection.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -419,6 +440,7 @@ Selection.o: \
 	../src/Selection.h
 Style.o: \
 	../src/Style.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -431,6 +453,7 @@ UniqueString.o: \
 	../src/UniqueString.h
 ViewStyle.o: \
 	../src/ViewStyle.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
@@ -443,5 +466,6 @@ ViewStyle.o: \
 	../src/ViewStyle.h
 XPM.o: \
 	../src/XPM.cxx \
+	../src/Geometry.h \
 	../src/Platform.h \
 	../src/XPM.h
