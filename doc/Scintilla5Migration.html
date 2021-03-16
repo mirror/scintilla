@@ -187,7 +187,7 @@
     <p>Load Lexilla using the appropriate operating system function: either LoadLibrary on Windows or
     dlopen on Unix.</p>
     <code class="windows">HMODULE lexillaLibrary = LoadLibrary(szLexillaPath);<br /></code>
-    <code class="unix">void *lexillaLibrary = szLexillaPath(libPath, RTLD_LAZY);<br /></code>
+    <code class="unix">void *lexillaLibrary = dlopen(szLexillaPath, RTLD_LAZY);<br /></code>
     <p>Find the CreateLexer function inside the shared library using either GetProcAddress on Windows or
     dlsym on Unix.</p>
     <code class="windows">FARPROC fun = GetProcAddress(lexillaLibrary, LEXILLA_CREATELEXER);<br /></code>
