@@ -273,7 +273,7 @@ class ListBox : public Window {
 public:
 	ListBox() noexcept;
 	~ListBox() override;
-	static ListBox *Allocate();
+	static std::unique_ptr<ListBox> Allocate();
 
 	virtual void SetFont(const Font *font)=0;
 	virtual void Create(Window &parent, int ctrlID, Point location, int lineHeight_, bool unicodeMode_, int technology_)=0;

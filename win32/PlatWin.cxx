@@ -2573,9 +2573,8 @@ public:
 	static LRESULT PASCAL StaticWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 };
 
-ListBox *ListBox::Allocate() {
-	ListBoxX *lb = new ListBoxX();
-	return lb;
+std::unique_ptr<ListBox> ListBox::Allocate() {
+	return std::make_unique<ListBoxX>();
 }
 
 void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, int technology_) {

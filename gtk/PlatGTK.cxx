@@ -1234,9 +1234,8 @@ public:
 	void SetList(const char *listText, char separator, char typesep) override;
 };
 
-ListBox *ListBox::Allocate() {
-	ListBoxX *lb = new ListBoxX();
-	return lb;
+std::unique_ptr<ListBox> ListBox::Allocate() {
+	return std::make_unique<ListBoxX>();
 }
 
 static int treeViewGetRowHeight(GtkTreeView *view) {

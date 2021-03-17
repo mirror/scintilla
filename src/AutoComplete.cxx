@@ -43,7 +43,7 @@ AutoComplete::AutoComplete() :
 	widthLBDefault(100),
 	heightLBDefault(100),
 	autoSort(SC_ORDER_PRESORTED) {
-	lb.reset(ListBox::Allocate());
+	lb = ListBox::Allocate();
 }
 
 AutoComplete::~AutoComplete() {

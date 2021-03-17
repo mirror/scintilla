@@ -1042,9 +1042,9 @@ ListWidget *ListBoxImpl::GetWidget() const noexcept
 ListBox::ListBox() noexcept {}
 ListBox::~ListBox() {}
 
-ListBox *ListBox::Allocate()
+std::unique_ptr<ListBox> ListBox::Allocate()
 {
-	return new ListBoxImpl();
+	return std::make_unique<ListBoxImpl>();
 }
 ListWidget::ListWidget(QWidget *parent)
 : QListWidget(parent), delegate(nullptr)

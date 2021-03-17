@@ -1960,9 +1960,8 @@ ListBox::ListBox() noexcept {
 ListBox::~ListBox() {
 }
 
-ListBox *ListBox::Allocate() {
-	ListBoxImpl *lb = new ListBoxImpl();
-	return lb;
+std::unique_ptr<ListBox> ListBox::Allocate() {
+	return std::make_unique<ListBoxImpl>();
 }
 
 //--------------------------------------------------------------------------------------------------
