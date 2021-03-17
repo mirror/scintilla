@@ -75,27 +75,33 @@ inline CGRect PRectangleToCGRect(PRectangle &rc) {
 	return CGRectMake(rc.left, rc.top, rc.Width(), rc.Height());
 }
 
-//----------------- Font ---------------------------------------------------------------------------
+//----------------- FontQuartz ---------------------------------------------------------------------
 
-Font::Font() noexcept : fid(0) {
-}
+class FontQuartz : public Font {
+public:
+	std::unique_ptr<QuartzTextStyle> style;
+	FontQuartz(const FontParameters &fp) {
+		style = std::make_unique<QuartzTextStyle>();
+		// Create the font with attributes
+		QuartzFont font(fp.faceName, strlen(fp.faceName), fp.size, fp.weight, fp.italic);
+		CTFontRef fontRef = font.getFontID();
+		style->setFontRef(fontRef, fp.characterSet);
+	}
+	FontQuartz(const QuartzTextStyle *style_) {
+		style = std::make_unique<QuartzTextStyle>(style_);
+	}
+};
 
 //--------------------------------------------------------------------------------------------------
 
-Font::~Font() {
-	Release();
-}
-
-//--------------------------------------------------------------------------------------------------
-
-static QuartzTextStyle *TextStyleFromFont(const Font &f) {
-	return static_cast<QuartzTextStyle *>(f.GetID());
-}
-
-//--------------------------------------------------------------------------------------------------
-
-static int FontCharacterSet(Font &f) {
-	return TextStyleFromFont(f)->getCharacterSet();
+static QuartzTextStyle *TextStyleFromFont(const Font *f) noexcept {
+	if (f) {
+		const FontQuartz *pfq = dynamic_cast<const FontQuartz *>(f);
+		if (pfq) {
+			return pfq->style.get();
+		}
+	}
+	return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -103,24 +109,8 @@ static int FontCharacterSet(Font &f) {
 /**
  * Creates a CTFontRef with the given properties.
  */
-void Font::Create(const FontParameters &fp) {
-	Release();
-
-	QuartzTextStyle *style = new QuartzTextStyle();
-	fid = style;
-
-	// Create the font with attributes
-	QuartzFont font(fp.faceName, strlen(fp.faceName), fp.size, fp.weight, fp.italic);
-	CTFontRef fontRef = font.getFontID();
-	style->setFontRef(fontRef, fp.characterSet);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void Font::Release() {
-	if (fid)
-		delete static_cast<QuartzTextStyle *>(fid);
-	fid = 0;
+std::shared_ptr<Font> Font::Allocate(const FontParameters &fp) {
+	return std::make_shared<FontQuartz>(fp);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -202,7 +192,7 @@ ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) : text(screenL
 								    byteCount,
 								    kCFStringEncodingUTF8,
 								    false);
-			QuartzTextStyle *qts = static_cast<QuartzTextStyle *>(screenLine->FontOfPosition(bp)->GetID());
+			const QuartzTextStyle *qts = TextStyleFromFont(screenLine->FontOfPosition(bp));
 			CFMutableDictionaryRef pieceAttributes = qts->getCTStyle();
 			as = CFAttributedStringCreate(NULL, piece, pieceAttributes);
 			CFRelease(piece);
@@ -1037,7 +1027,7 @@ std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *screen
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				 ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
 	DrawTextTransparent(rc, font_, ybase, text, fore);
@@ -1045,7 +1035,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, s
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				  ColourDesired fore, ColourDesired back) {
 	CGContextSaveGState(gc);
 	CGContextClipToRect(gc, PRectangleToCGRect(rc));
@@ -1110,27 +1100,34 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet) {
 	}
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				      ColourDesired fore) {
-	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
+	QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
+		return;
+	}
+	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, style->getCharacterSet());
 	ColourDesired colour(fore.AsInteger());
 	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
 
-	QuartzTextStyle *style = TextStyleFromFont(font_);
 	style->setCTStyleColour(color);
 
 	CGColorRelease(color);
 
-	textLayout->setText(text, encoding, *style);
+	textLayout->setText(text, encoding, style);
 	textLayout->draw(gc, rc.left, ybase);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) {
-	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
+void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
+	const QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
+		return;
+	}
+	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, style->getCharacterSet());
 	const CFStringEncoding encodingUsed =
-		textLayout->setText(text, encoding, *TextStyleFromFont(font_));
+		textLayout->setText(text, encoding, style);
 
 	CTLineRef mLine = textLayout->getCTLine();
 	assert(mLine);
@@ -1186,51 +1183,53 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font_, std::string_view text) {
-	if (font_.GetID()) {
-		CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-		textLayout->setText(text, encoding, *TextStyleFromFont(font_));
-
-		return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
+XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
+	const QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
+		return 1;
 	}
-	return 1;
+	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, style->getCharacterSet());
+	textLayout->setText(text, encoding, style);
+
+	return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
 }
 
 // This string contains a good range of characters to test for size.
 const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
 			  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-XYPOSITION SurfaceImpl::Ascent(Font &font_) {
-	if (!font_.GetID())
+XYPOSITION SurfaceImpl::Ascent(const Font *font_) {
+	const QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
 		return 1;
+	}
 
-	float ascent = TextStyleFromFont(font_)->getAscent();
+	float ascent = style->getAscent();
 	return ascent + 0.5f;
 
 }
 
-XYPOSITION SurfaceImpl::Descent(Font &font_) {
-	if (!font_.GetID())
+XYPOSITION SurfaceImpl::Descent(const Font *font_) {
+	const QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
 		return 1;
+	}
 
-	float descent = TextStyleFromFont(font_)->getDescent();
+	float descent = style->getDescent();
 	return descent + 0.5f;
 
 }
 
-XYPOSITION SurfaceImpl::InternalLeading(Font &) {
+XYPOSITION SurfaceImpl::InternalLeading(const Font *) {
 	return 0;
 }
 
-XYPOSITION SurfaceImpl::Height(Font &font_) {
+XYPOSITION SurfaceImpl::Height(const Font *font_) {
 
 	return Ascent(font_) + Descent(font_);
 }
 
-XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
-
-	if (!font_.GetID())
-		return 1;
+XYPOSITION SurfaceImpl::AverageCharWidth(const Font *font_) {
 
 	XYPOSITION width = WidthText(font_, sizeString);
 
@@ -1407,7 +1406,7 @@ void Window::InvalidateRectangle(PRectangle rc) {
 
 //--------------------------------------------------------------------------------------------------
 
-void Window::SetFont(Font &) {
+void Window::SetFont(const Font *) {
 	// Implemented on list subclass on Cocoa.
 }
 
@@ -1630,7 +1629,7 @@ private:
 	XYPOSITION maxItemWidth;
 	unsigned int aveCharWidth;
 	XYPOSITION maxIconWidth;
-	Font font;
+	std::unique_ptr<Font> font;
 	int maxWidth;
 
 	NSTableView *table;
@@ -1666,7 +1665,7 @@ public:
 	}
 
 	// ListBox methods
-	void SetFont(Font &font) override;
+	void SetFont(const Font *font_) override;
 	void Create(Window &parent, int ctrlID, Scintilla::Point pt, int lineHeight_, bool unicodeMode_, int technology_) override;
 	void SetAverageCharWidth(int width) override;
 	void SetVisibleRows(int rows) override;
@@ -1744,12 +1743,11 @@ void ListBoxImpl::Create(Window & /*parent*/, int /*ctrlID*/, Scintilla::Point p
 	wid = (__bridge_retained WindowID)winLB;
 }
 
-void ListBoxImpl::SetFont(Font &font_) {
+void ListBoxImpl::SetFont(const Font *font_) {
 	// NSCell setFont takes an NSFont* rather than a CTFontRef but they
 	// are the same thing toll-free bridged.
 	QuartzTextStyle *style = TextStyleFromFont(font_);
-	font.Release();
-	font.SetID(new QuartzTextStyle(*style));
+	font = std::make_unique<FontQuartz>(style);
 	NSFont *pfont = (__bridge NSFont *)style->getFontRef();
 	[colText.dataCell setFont: pfont];
 	CGFloat itemHeight = std::ceil(pfont.boundingRectForFont.size.height);
@@ -1831,7 +1829,7 @@ void ListBoxImpl::Append(char *s, int type) {
 	ld.Add(count, type, s);
 
 	Scintilla::SurfaceImpl surface;
-	XYPOSITION width = surface.WidthText(font, s);
+	XYPOSITION width = surface.WidthText(font.get(), s);
 	if (width > maxItemWidth) {
 		maxItemWidth = width;
 		colText.width = maxItemWidth;

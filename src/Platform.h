@@ -81,7 +81,6 @@ namespace Scintilla {
 // Underlying the implementation of the platform classes are platform specific types.
 // Sometimes these need to be passed around by client code so they are defined here
 
-typedef void *FontID;
 typedef void *SurfaceID;
 typedef void *WindowID;
 typedef void *MenuID;
@@ -124,25 +123,16 @@ struct FontParameters {
 };
 
 class Font {
-protected:
-	FontID fid;
 public:
-	Font() noexcept;
+	Font() noexcept=default;
 	// Deleted so Font objects can not be copied
 	Font(const Font &) = delete;
 	Font(Font &&) = delete;
 	Font &operator=(const Font &) = delete;
 	Font &operator=(Font &&) = delete;
-	virtual ~Font();
+	virtual ~Font()=default;
 
-	virtual void Create(const FontParameters &fp);
-	virtual void Release();
-
-	FontID GetID() const noexcept { return fid; }
-	// Alias another font - caller guarantees not to Release
-	void SetID(FontID fid_) noexcept { fid = fid_; }
-	friend class Surface;
-	friend class SurfaceImpl;
+	static std::shared_ptr<Font> Allocate(const FontParameters &fp);
 };
 
 class IScreenLine {
@@ -206,16 +196,16 @@ public:
 
 	virtual std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) = 0;
 
-	virtual void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;
-	virtual void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;
-	virtual void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) = 0;
-	virtual void MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) = 0;
-	virtual XYPOSITION WidthText(Font &font_, std::string_view text) = 0;
-	virtual XYPOSITION Ascent(Font &font_)=0;
-	virtual XYPOSITION Descent(Font &font_)=0;
-	virtual XYPOSITION InternalLeading(Font &font_)=0;
-	virtual XYPOSITION Height(Font &font_)=0;
-	virtual XYPOSITION AverageCharWidth(Font &font_)=0;
+	virtual void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;
+	virtual void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;
+	virtual void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) = 0;
+	virtual void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) = 0;
+	virtual XYPOSITION WidthText(const Font *font_, std::string_view text) = 0;
+	virtual XYPOSITION Ascent(const Font *font_)=0;
+	virtual XYPOSITION Descent(const Font *font_)=0;
+	virtual XYPOSITION InternalLeading(const Font *font_)=0;
+	virtual XYPOSITION Height(const Font *font_)=0;
+	virtual XYPOSITION AverageCharWidth(const Font *font_)=0;
 
 	virtual void SetClip(PRectangle rc)=0;
 	virtual void FlushCachedState()=0;
@@ -255,7 +245,7 @@ public:
 	void Show(bool show=true);
 	void InvalidateAll();
 	void InvalidateRectangle(PRectangle rc);
-	virtual void SetFont(Font &font);
+	virtual void SetFont(const Font *font);
 	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow, cursorHand };
 	void SetCursor(Cursor curs);
 	PRectangle GetMonitorRect(Point pt);
@@ -286,7 +276,7 @@ public:
 	~ListBox() override;
 	static ListBox *Allocate();
 
-	void SetFont(Font &font) override =0;
+	void SetFont(const Font *font) override =0;
 	virtual void Create(Window &parent, int ctrlID, Point location, int lineHeight_, bool unicodeMode_, int technology_)=0;
 	virtual void SetAverageCharWidth(int width)=0;
 	virtual void SetVisibleRows(int rows)=0;

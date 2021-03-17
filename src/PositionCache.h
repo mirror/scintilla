@@ -46,7 +46,7 @@ enum PointEnd {
 
 class BidiData {
 public:
-	std::vector<FontAlias> stylesFonts;
+	std::vector<std::shared_ptr<Font>> stylesFonts;
 	std::vector<XYPOSITION> widthReprs;
 	void Resize(size_t maxLineLength_);
 };

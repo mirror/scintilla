@@ -21,14 +21,14 @@ public:
 		characterSet = 0;
 	}
 
-	QuartzTextStyle(const QuartzTextStyle &other) {
+	QuartzTextStyle(const QuartzTextStyle *other) {
 		// Does not copy font colour attribute
-		fontRef = static_cast<CTFontRef>(CFRetain(other.fontRef));
+		fontRef = static_cast<CTFontRef>(CFRetain(other->fontRef));
 		styleDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2,
 						      &kCFTypeDictionaryKeyCallBacks,
 						      &kCFTypeDictionaryValueCallBacks);
 		CFDictionaryAddValue(styleDict, kCTFontAttributeName, fontRef);
-		characterSet = other.characterSet;
+		characterSet = other->characterSet;
 	}
 
 	~QuartzTextStyle() {
@@ -77,11 +77,11 @@ public:
 		CFDictionaryAddValue(styleDict, kCTFontAttributeName, fontRef);
 	}
 
-	CTFontRef getFontRef() {
+	CTFontRef getFontRef() const noexcept {
 		return fontRef;
 	}
 
-	int getCharacterSet() {
+	int getCharacterSet() const noexcept {
 		return characterSet;
 	}
 

@@ -188,7 +188,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 		rcSelMargin.bottom = rc.bottom;
 
 	const Point ptOrigin = model.GetVisibleOriginInMain();
-	FontAlias fontLineNumber = vs.styles[STYLE_LINENUMBER].font;
+	const Font *fontLineNumber = vs.styles[STYLE_LINENUMBER].font.get();
 	for (size_t margin = 0; margin < vs.ms.size(); margin++) {
 		if (vs.ms[margin].width > 0) {
 

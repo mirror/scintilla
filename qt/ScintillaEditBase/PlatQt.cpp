@@ -100,43 +100,6 @@ QString UnicodeFromText(QTextCodec *codec, std::string_view text) {
 	return codec->toUnicode(text.data(), static_cast<int>(text.length()));
 }
 
-class FontAndCharacterSet {
-public:
-	int characterSet;
-	QFont *pfont;
-	FontAndCharacterSet(int characterSet_, QFont *pfont):
-		characterSet(characterSet_), pfont(pfont) {
-	}
-	~FontAndCharacterSet() {
-		delete pfont;
-		pfont = nullptr;
-	}
-};
-
-namespace {
-
-FontAndCharacterSet *AsFontAndCharacterSet(const Font &f) {
-	return reinterpret_cast<FontAndCharacterSet *>(f.GetID());
-}
-
-int FontCharacterSet(const Font &f)
-{
-	return AsFontAndCharacterSet(f)->characterSet;
-}
-
-QFont *FontPointer(const Font &f)
-{
-	return AsFontAndCharacterSet(f)->pfont;
-}
-
-}
-
-Font::Font() noexcept : fid(nullptr) {}
-Font::~Font()
-{
-	delete reinterpret_cast<FontAndCharacterSet *>(fid);
-	fid = nullptr;
-}
 static QFont::StyleStrategy ChooseStrategy(int eff)
 {
 	switch (eff) {
@@ -148,26 +111,44 @@ static QFont::StyleStrategy ChooseStrategy(int eff)
 	}
 }
 
-void Font::Create(const FontParameters &fp)
-{
-	Release();
+class FontAndCharacterSet : public Font {
+public:
+	int characterSet = 0;
+	QFont *pfont = nullptr;
+	FontAndCharacterSet(const FontParameters &fp) {
+		pfont = new QFont;
+		pfont->setStyleStrategy(ChooseStrategy(fp.extraFontFlag));
+		pfont->setFamily(QString::fromUtf8(fp.faceName));
+		pfont->setPointSizeF(fp.size);
+		pfont->setBold(fp.weight > 500);
+		pfont->setItalic(fp.italic);
 
-	QFont *font = new QFont;
-	font->setStyleStrategy(ChooseStrategy(fp.extraFontFlag));
-	font->setFamily(QString::fromUtf8(fp.faceName));
-	font->setPointSizeF(fp.size);
-	font->setBold(fp.weight > 500);
-	font->setItalic(fp.italic);
+		characterSet = fp.characterSet;
+	}
+	~FontAndCharacterSet() {
+		delete pfont;
+		pfont = nullptr;
+	}
+};
 
-	fid = new FontAndCharacterSet(fp.characterSet, font);
+namespace {
+
+const FontAndCharacterSet *AsFontAndCharacterSet(const Font *f) {
+	return dynamic_cast<const FontAndCharacterSet *>(f);
 }
 
-void Font::Release()
+QFont *FontPointer(const Font *f)
 {
-	if (fid)
-		delete reinterpret_cast<FontAndCharacterSet *>(fid);
-	fid = nullptr;
+	return AsFontAndCharacterSet(f)->pfont;
 }
+
+}
+
+std::shared_ptr<Font> Font::Allocate(const FontParameters &fp)
+{
+	return std::make_shared<FontAndCharacterSet>(fp);
+}
+
 SurfaceImpl::SurfaceImpl()
 : device(nullptr), painter(nullptr), deviceOwned(false), painterOwned(false), x(0), y(0),
 	  unicodeMode(false), codePage(0), codecName(nullptr), codec(nullptr)
@@ -241,12 +222,13 @@ void SurfaceImpl::BrushColour(ColourDesired back)
 	GetPainter()->setBrush(QBrush(QColorFromCA(back)));
 }
 
-void SurfaceImpl::SetCodec(const Font &font)
+void SurfaceImpl::SetCodec(const Font *font)
 {
-	if (font.GetID()) {
+	const FontAndCharacterSet *pfacs = AsFontAndCharacterSet(font);
+	if (pfacs && pfacs->pfont) {
 		const char *csid = "UTF-8";
 		if (!unicodeMode)
-			csid = CharacterSetID(FontCharacterSet(font));
+			csid = CharacterSetID(pfacs->characterSet);
 		if (csid != codecName) {
 			codecName = csid;
 			codec = QTextCodec::codecForName(csid);
@@ -254,10 +236,11 @@ void SurfaceImpl::SetCodec(const Font &font)
 	}
 }
 
-void SurfaceImpl::SetFont(const Font &font)
+void SurfaceImpl::SetFont(const Font *font)
 {
-	if (font.GetID()) {
-		GetPainter()->setFont(*FontPointer(font));
+	const FontAndCharacterSet *pfacs = AsFontAndCharacterSet(font);
+	if (pfacs && pfacs->pfont) {
+		GetPainter()->setFont(*(pfacs->pfont));
 		SetCodec(font);
 	}
 }
@@ -444,7 +427,7 @@ std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *)
 }
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc,
-                                 Font &font,
+				 const Font *font,
                                  XYPOSITION ybase,
 				 std::string_view text,
                                  ColourDesired fore,
@@ -460,7 +443,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc,
 }
 
 void SurfaceImpl::DrawTextClipped(PRectangle rc,
-                                  Font &font,
+				  const Font *font,
                                   XYPOSITION ybase,
 				  std::string_view text,
                                   ColourDesired fore,
@@ -472,7 +455,7 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc,
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc,
-                                      Font &font,
+				      const Font *font,
                                       XYPOSITION ybase,
 				      std::string_view text,
         ColourDesired fore)
@@ -490,11 +473,11 @@ void SurfaceImpl::SetClip(PRectangle rc)
 	GetPainter()->setClipRect(QRectFFromPRect(rc));
 }
 
-void SurfaceImpl::MeasureWidths(Font &font,
+void SurfaceImpl::MeasureWidths(const Font *font,
 				std::string_view text,
                                 XYPOSITION *positions)
 {
-	if (!font.GetID())
+	if (!font)
 		return;
 	SetCodec(font);
 	QString su = UnicodeFromText(codec, text);
@@ -541,7 +524,7 @@ void SurfaceImpl::MeasureWidths(Font &font,
 	}
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font, std::string_view text)
+XYPOSITION SurfaceImpl::WidthText(const Font *font, std::string_view text)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);
 	SetCodec(font);
@@ -549,13 +532,13 @@ XYPOSITION SurfaceImpl::WidthText(Font &font, std::string_view text)
 	return metrics.width(su);
 }
 
-XYPOSITION SurfaceImpl::Ascent(Font &font)
+XYPOSITION SurfaceImpl::Ascent(const Font *font)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);
 	return metrics.ascent();
 }
 
-XYPOSITION SurfaceImpl::Descent(Font &font)
+XYPOSITION SurfaceImpl::Descent(const Font *font)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);
 	// Qt returns 1 less than true descent
@@ -565,18 +548,18 @@ XYPOSITION SurfaceImpl::Descent(Font &font)
 	return metrics.descent() + 1;
 }
 
-XYPOSITION SurfaceImpl::InternalLeading(Font & /* font */)
+XYPOSITION SurfaceImpl::InternalLeading(const Font * /* font */)
 {
 	return 0;
 }
 
-XYPOSITION SurfaceImpl::Height(Font &font)
+XYPOSITION SurfaceImpl::Height(const Font *font)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);
 	return metrics.height();
 }
 
-XYPOSITION SurfaceImpl::AverageCharWidth(Font &font)
+XYPOSITION SurfaceImpl::AverageCharWidth(const Font *font)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);
 	return metrics.averageCharWidth();
@@ -727,7 +710,7 @@ void Window::InvalidateRectangle(PRectangle rc)
 		window(wid)->update(QRectFromPRect(rc));
 }
 
-void Window::SetFont(Font &font)
+void Window::SetFont(const Font *font)
 {
 	if (wid)
 		window(wid)->setFont(*FontPointer(font));
@@ -793,7 +776,7 @@ public:
 	ListBoxImpl();
 	~ListBoxImpl();
 
-	void SetFont(Font &font) override;
+	void SetFont(const Font *font) override;
 	void Create(Window &parent, int ctrlID, Point location,
 						int lineHeight, bool unicodeMode_, int technology) override;
 	void SetAverageCharWidth(int width) override;
@@ -874,10 +857,13 @@ void ListBoxImpl::Create(Window &parent,
 
 	wid = list;
 }
-void ListBoxImpl::SetFont(Font &font)
+void ListBoxImpl::SetFont(const Font *font)
 {
 	ListWidget *list = GetWidget();
-	list->setFont(*FontPointer(font));
+	const FontAndCharacterSet *pfacs = AsFontAndCharacterSet(font);
+	if (pfacs && pfacs->pfont) {
+		list->setFont(*(pfacs->pfont));
+	}
 }
 void ListBoxImpl::SetAverageCharWidth(int /*width*/) {}
 

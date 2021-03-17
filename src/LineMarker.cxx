@@ -111,7 +111,7 @@ static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize, C
 	surface->FillRectangle(rcH, fore);
 }
 
-void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharacter, FoldPart part, int marginStyle) const {
+void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, const Font *fontForCharacter, FoldPart part, int marginStyle) const {
 	if (customDraw) {
 		customDraw(surface, rcWhole, fontForCharacter, static_cast<int>(part), marginStyle, this);
 		return;

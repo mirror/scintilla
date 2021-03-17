@@ -18,31 +18,6 @@
 
 using namespace Scintilla;
 
-FontAlias::FontAlias() noexcept {
-}
-
-FontAlias::FontAlias(const FontAlias &other) noexcept : Font() {
-	SetID(other.fid);
-}
-
-FontAlias::FontAlias(FontAlias &&other) noexcept : Font() {
-	SetID(other.fid);
-	other.ClearFont();
-}
-
-FontAlias::~FontAlias() {
-	SetID(FontID{});
-	// ~Font will not release the actual font resource since it is now 0
-}
-
-void FontAlias::MakeAlias(const Font &fontOrigin) noexcept {
-	SetID(fontOrigin.GetID());
-}
-
-void FontAlias::ClearFont() noexcept {
-	SetID(FontID{});
-}
-
 bool FontSpecification::operator==(const FontSpecification &other) const noexcept {
 	return fontName == other.fontName &&
 	       weight == other.weight &&
@@ -148,7 +123,7 @@ void Style::Clear(ColourDesired fore_, ColourDesired back_, int size_,
 	visible = visible_;
 	changeable = changeable_;
 	hotspot = hotspot_;
-	font.ClearFont();
+	font.reset();
 	FontMeasurements::ClearMeasurements();
 }
 
@@ -169,7 +144,7 @@ void Style::ClearTo(const Style &source) noexcept {
 	    source.hotspot);
 }
 
-void Style::Copy(const Font &font_, const FontMeasurements &fm_) noexcept {
-	font.MakeAlias(font_);
+void Style::Copy(std::shared_ptr<Font> font_, const FontMeasurements &fm_) noexcept {
+	font = std::move(font_);
 	(FontMeasurements &)(*this) = fm_;
 }

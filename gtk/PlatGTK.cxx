@@ -71,15 +71,26 @@ GtkWidget *PWidget(WindowID wid) noexcept {
 enum encodingType { singleByte, UTF8, dbcs };
 
 // Holds a PangoFontDescription*.
-class FontHandle {
+class FontHandle : public Font {
 public:
-	PangoFontDescription *pfd;
+	PangoFontDescription *pfd = nullptr;
 	int characterSet;
 	FontHandle() noexcept : pfd(nullptr), characterSet(-1) {
 	}
 	FontHandle(PangoFontDescription *pfd_, int characterSet_) noexcept {
 		pfd = pfd_;
 		characterSet = characterSet_;
+	}
+	FontHandle(const FontParameters &fp) {
+		pfd = pango_font_description_new();
+		if (pfd) {
+			pango_font_description_set_family(pfd,
+				(fp.faceName[0] == '!') ? fp.faceName + 1 : fp.faceName);
+			pango_font_description_set_size(pfd, pangoUnitsFromDouble(fp.size));
+			pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
+			pango_font_description_set_style(pfd, fp.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
+		}
+		characterSet = fp.characterSet;
 	}
 	// Deleted so FontHandle objects can not be copied.
 	FontHandle(const FontHandle &) = delete;
@@ -91,45 +102,19 @@ public:
 			pango_font_description_free(pfd);
 		pfd = nullptr;
 	}
-	static FontHandle *CreateNewFont(const FontParameters &fp);
 };
-
-FontHandle *FontHandle::CreateNewFont(const FontParameters &fp) {
-	PangoFontDescription *pfd = pango_font_description_new();
-	if (pfd) {
-		pango_font_description_set_family(pfd,
-						  (fp.faceName[0] == '!') ? fp.faceName+1 : fp.faceName);
-		pango_font_description_set_size(pfd, pangoUnitsFromDouble(fp.size));
-		pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
-		pango_font_description_set_style(pfd, fp.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-		return new FontHandle(pfd, fp.characterSet);
-	}
-
-	return nullptr;
-}
 
 // X has a 16 bit coordinate space, so stop drawing here to avoid wrapping
 constexpr int maxCoordinate = 32000;
 
-FontHandle *PFont(const Font &f) noexcept {
-	return static_cast<FontHandle *>(f.GetID());
+const FontHandle *PFont(const Font *f) noexcept {
+	return dynamic_cast<const FontHandle *>(f);
 }
 
 }
 
-Font::Font() noexcept : fid(nullptr) {}
-
-Font::~Font() {}
-
-void Font::Create(const FontParameters &fp) {
-	Release();
-	fid = FontHandle::CreateNewFont(fp);
-}
-
-void Font::Release() {
-	if (fid)
-		delete static_cast<FontHandle *>(fid);
-	fid = nullptr;
+std::shared_ptr<Font> Font::Allocate(const FontParameters &fp) {
+	return std::make_shared<FontHandle>(fp);
 }
 
 // Required on OS X
@@ -184,17 +169,17 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextBase(PRectangle rc, const Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore);
-	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
-	void MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) override;
-	XYPOSITION WidthText(Font &font_, std::string_view text) override;
-	XYPOSITION Ascent(Font &font_) override;
-	XYPOSITION Descent(Font &font_) override;
-	XYPOSITION InternalLeading(Font &font_) override;
-	XYPOSITION Height(Font &font_) override;
-	XYPOSITION AverageCharWidth(Font &font_) override;
+	void DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore);
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
+	XYPOSITION Ascent(const Font *font_) override;
+	XYPOSITION Descent(const Font *font_) override;
+	XYPOSITION InternalLeading(const Font *font_) override;
+	XYPOSITION Height(const Font *font_) override;
+	XYPOSITION AverageCharWidth(const Font *font_) override;
 
 	void SetClip(PRectangle rc) override;
 	void FlushCachedState() override;
@@ -684,7 +669,7 @@ size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t len) n
 
 }
 
-void SurfaceImpl::DrawTextBase(PRectangle rc, const Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 			       ColourDesired fore) {
 	PenColour(fore);
 	if (context) {
@@ -710,20 +695,20 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, const Font &font_, XYPOSITION ybas
 	}
 }
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				 ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				  ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				      ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
 	for (size_t i=0; i<text.length(); i++) {
@@ -774,102 +759,100 @@ public:
 	}
 };
 
-void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) {
-	if (font_.GetID()) {
-		if (PFont(font_)->pfd) {
-			pango_layout_set_font_description(layout, PFont(font_)->pfd);
-			if (et == UTF8) {
-				// Simple and direct as UTF-8 is native Pango encoding
-				int i = 0;
-				pango_layout_set_text(layout, text.data(), text.length());
-				ClusterIterator iti(layout, text.length());
-				while (!iti.finished) {
-					iti.Next();
-					const int places = iti.curIndex - i;
-					while (i < iti.curIndex) {
-						// Evenly distribute space among bytes of this cluster.
-						// Would be better to find number of characters and then
-						// divide evenly between characters with each byte of a character
-						// being at the same position.
-						positions[i] = iti.position - (iti.curIndex - 1 - i) * iti.distance / places;
-						i++;
-					}
+void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
+	if (PFont(font_)->pfd) {
+		pango_layout_set_font_description(layout, PFont(font_)->pfd);
+		if (et == UTF8) {
+			// Simple and direct as UTF-8 is native Pango encoding
+			int i = 0;
+			pango_layout_set_text(layout, text.data(), text.length());
+			ClusterIterator iti(layout, text.length());
+			while (!iti.finished) {
+				iti.Next();
+				const int places = iti.curIndex - i;
+				while (i < iti.curIndex) {
+					// Evenly distribute space among bytes of this cluster.
+					// Would be better to find number of characters and then
+					// divide evenly between characters with each byte of a character
+					// being at the same position.
+					positions[i] = iti.position - (iti.curIndex - 1 - i) * iti.distance / places;
+					i++;
 				}
-				PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
-			} else {
-				int positionsCalculated = 0;
-				if (et == dbcs) {
-					SetConverter(PFont(font_)->characterSet);
-					std::string utfForm = UTF8FromIconv(conv, text);
-					if (!utfForm.empty()) {
-						// Convert to UTF-8 so can ask Pango for widths, then
-						// Loop through UTF-8 and DBCS forms, taking account of different
-						// character byte lengths.
-						Converter convMeasure("UCS-2", CharacterSetID(characterSet), false);
-						pango_layout_set_text(layout, utfForm.c_str(), strlen(utfForm.c_str()));
-						int i = 0;
-						int clusterStart = 0;
-						ClusterIterator iti(layout, strlen(utfForm.c_str()));
-						while (!iti.finished) {
-							iti.Next();
-							const int clusterEnd = iti.curIndex;
-							const int places = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
-							int place = 1;
-							while (clusterStart < clusterEnd) {
-								size_t lenChar = MultiByteLenFromIconv(convMeasure, text.data()+i, text.length()-i);
-								while (lenChar--) {
-									positions[i++] = iti.position - (places - place) * iti.distance / places;
-									positionsCalculated++;
-								}
-								clusterStart += UTF8BytesOfLead[static_cast<unsigned char>(utfForm[clusterStart])];
-								place++;
-							}
-						}
-						PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
-					}
-				}
-				if (positionsCalculated < 1) {
-					const size_t lenPositions = text.length();
-					// Either 8-bit or DBCS conversion failed so treat as 8-bit.
-					SetConverter(PFont(font_)->characterSet);
-					const bool rtlCheck = PFont(font_)->characterSet == SC_CHARSET_HEBREW ||
-							      PFont(font_)->characterSet == SC_CHARSET_ARABIC;
-					std::string utfForm = UTF8FromIconv(conv, text);
-					if (utfForm.empty()) {
-						utfForm = UTF8FromLatin1(text);
-					}
-					pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
-					size_t i = 0;
+			}
+			PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
+		} else {
+			int positionsCalculated = 0;
+			if (et == dbcs) {
+				SetConverter(PFont(font_)->characterSet);
+				std::string utfForm = UTF8FromIconv(conv, text);
+				if (!utfForm.empty()) {
+					// Convert to UTF-8 so can ask Pango for widths, then
+					// Loop through UTF-8 and DBCS forms, taking account of different
+					// character byte lengths.
+					Converter convMeasure("UCS-2", CharacterSetID(characterSet), false);
+					pango_layout_set_text(layout, utfForm.c_str(), strlen(utfForm.c_str()));
+					int i = 0;
 					int clusterStart = 0;
-					// Each 8-bit input character may take 1 or 2 bytes in UTF-8
-					// and groups of up to 3 may be represented as ligatures.
-					ClusterIterator iti(layout, utfForm.length());
+					ClusterIterator iti(layout, strlen(utfForm.c_str()));
 					while (!iti.finished) {
 						iti.Next();
 						const int clusterEnd = iti.curIndex;
-						const int ligatureLength = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
-						if (rtlCheck && ((clusterEnd <= clusterStart) || (ligatureLength == 0) || (ligatureLength > 3))) {
-							// Something has gone wrong: exit quickly but pretend all the characters are equally spaced:
-							int widthLayout = 0;
-							pango_layout_get_size(layout, &widthLayout, nullptr);
-							const XYPOSITION widthTotal = floatFromPangoUnits(widthLayout);
-							for (size_t bytePos=0; bytePos<lenPositions; bytePos++) {
-								positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
+						const int places = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
+						int place = 1;
+						while (clusterStart < clusterEnd) {
+							size_t lenChar = MultiByteLenFromIconv(convMeasure, text.data()+i, text.length()-i);
+							while (lenChar--) {
+								positions[i++] = iti.position - (places - place) * iti.distance / places;
+								positionsCalculated++;
 							}
-							return;
+							clusterStart += UTF8BytesOfLead[static_cast<unsigned char>(utfForm[clusterStart])];
+							place++;
 						}
-						PLATFORM_ASSERT(ligatureLength > 0 && ligatureLength <= 3);
-						for (int charInLig=0; charInLig<ligatureLength; charInLig++) {
-							positions[i++] = iti.position - (ligatureLength - 1 - charInLig) * iti.distance / ligatureLength;
-						}
-						clusterStart = clusterEnd;
 					}
-					while (i < lenPositions) {
-						// If something failed, fill in rest of the positions
-						positions[i++] = clusterStart;
-					}
-					PLATFORM_ASSERT(i == text.length());
+					PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
 				}
+			}
+			if (positionsCalculated < 1) {
+				const size_t lenPositions = text.length();
+				// Either 8-bit or DBCS conversion failed so treat as 8-bit.
+				SetConverter(PFont(font_)->characterSet);
+				const bool rtlCheck = PFont(font_)->characterSet == SC_CHARSET_HEBREW ||
+							    PFont(font_)->characterSet == SC_CHARSET_ARABIC;
+				std::string utfForm = UTF8FromIconv(conv, text);
+				if (utfForm.empty()) {
+					utfForm = UTF8FromLatin1(text);
+				}
+				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
+				size_t i = 0;
+				int clusterStart = 0;
+				// Each 8-bit input character may take 1 or 2 bytes in UTF-8
+				// and groups of up to 3 may be represented as ligatures.
+				ClusterIterator iti(layout, utfForm.length());
+				while (!iti.finished) {
+					iti.Next();
+					const int clusterEnd = iti.curIndex;
+					const int ligatureLength = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
+					if (rtlCheck && ((clusterEnd <= clusterStart) || (ligatureLength == 0) || (ligatureLength > 3))) {
+						// Something has gone wrong: exit quickly but pretend all the characters are equally spaced:
+						int widthLayout = 0;
+						pango_layout_get_size(layout, &widthLayout, nullptr);
+						const XYPOSITION widthTotal = floatFromPangoUnits(widthLayout);
+						for (size_t bytePos=0; bytePos<lenPositions; bytePos++) {
+							positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
+						}
+						return;
+					}
+					PLATFORM_ASSERT(ligatureLength > 0 && ligatureLength <= 3);
+					for (int charInLig=0; charInLig<ligatureLength; charInLig++) {
+						positions[i++] = iti.position - (ligatureLength - 1 - charInLig) * iti.distance / ligatureLength;
+					}
+					clusterStart = clusterEnd;
+				}
+				while (i < lenPositions) {
+					// If something failed, fill in rest of the positions
+					positions[i++] = clusterStart;
+				}
+				PLATFORM_ASSERT(i == text.length());
 			}
 		}
 	} else {
@@ -880,37 +863,31 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 	}
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font_, std::string_view text) {
-	if (font_.GetID()) {
-		if (PFont(font_)->pfd) {
-			std::string utfForm;
-			pango_layout_set_font_description(layout, PFont(font_)->pfd);
-			if (et == UTF8) {
-				pango_layout_set_text(layout, text.data(), text.length());
-			} else {
-				SetConverter(PFont(font_)->characterSet);
-				utfForm = UTF8FromIconv(conv, text);
-				if (utfForm.empty()) {	// iconv failed so treat as Latin1
-					utfForm = UTF8FromLatin1(text);
-				}
-				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
+XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
+	if (PFont(font_)->pfd) {
+		std::string utfForm;
+		pango_layout_set_font_description(layout, PFont(font_)->pfd);
+		if (et == UTF8) {
+			pango_layout_set_text(layout, text.data(), text.length());
+		} else {
+			SetConverter(PFont(font_)->characterSet);
+			utfForm = UTF8FromIconv(conv, text);
+			if (utfForm.empty()) {	// iconv failed so treat as Latin1
+				utfForm = UTF8FromLatin1(text);
 			}
-			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
-			PangoRectangle pos {};
-			pango_layout_line_get_extents(pangoLine, nullptr, &pos);
-			return floatFromPangoUnits(pos.width);
+			pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 		}
-		return 1;
-	} else {
-		return 1;
+		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
+		PangoRectangle pos {};
+		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
+		return floatFromPangoUnits(pos.width);
 	}
+	return 1;
 }
 
 // Ascent and descent determined by Pango font metrics.
 
-XYPOSITION SurfaceImpl::Ascent(Font &font_) {
-	if (!(font_.GetID()))
-		return 1;
+XYPOSITION SurfaceImpl::Ascent(const Font *font_) {
 	XYPOSITION ascent = 0;
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
@@ -925,9 +902,7 @@ XYPOSITION SurfaceImpl::Ascent(Font &font_) {
 	return ascent;
 }
 
-XYPOSITION SurfaceImpl::Descent(Font &font_) {
-	if (!(font_.GetID()))
-		return 1;
+XYPOSITION SurfaceImpl::Descent(const Font *font_) {
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 					    PFont(font_)->pfd, pango_context_get_language(pcontext));
@@ -939,15 +914,15 @@ XYPOSITION SurfaceImpl::Descent(Font &font_) {
 	return 0;
 }
 
-XYPOSITION SurfaceImpl::InternalLeading(Font &) {
+XYPOSITION SurfaceImpl::InternalLeading(const Font *) {
 	return 0;
 }
 
-XYPOSITION SurfaceImpl::Height(Font &font_) {
+XYPOSITION SurfaceImpl::Height(const Font *font_) {
 	return Ascent(font_) + Descent(font_);
 }
 
-XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
+XYPOSITION SurfaceImpl::AverageCharWidth(const Font *font_) {
 	return WidthText(font_, "n");
 }
 
@@ -1092,7 +1067,7 @@ void Window::InvalidateRectangle(PRectangle rc) {
 	}
 }
 
-void Window::SetFont(Font &) {
+void Window::SetFont(const Font *) {
 	// Can not be done generically but only needed for ListBox
 }
 
@@ -1240,7 +1215,7 @@ public:
 		}
 #endif
 	}
-	void SetFont(Font &font) override;
+	void SetFont(const Font *font) override;
 	void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_, int technology_) override;
 	void SetAverageCharWidth(int width) override;
 	void SetVisibleRows(int rows) override;
@@ -1508,7 +1483,7 @@ void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
 				     GTK_WINDOW(top));
 }
 
-void ListBoxX::SetFont(Font &font) {
+void ListBoxX::SetFont(const Font *font) {
 	// Only do for Pango font as there have been crashes for GDK fonts
 	if (Created() && PFont(font)->pfd) {
 		// Current font is Pango font

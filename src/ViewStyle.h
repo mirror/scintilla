@@ -29,7 +29,7 @@ public:
 
 class FontRealised : public FontMeasurements {
 public:
-	Font font;
+	std::shared_ptr<Font> font;
 	FontRealised() noexcept;
 	// FontRealised objects can not be copied.
 	FontRealised(const FontRealised &) = delete;

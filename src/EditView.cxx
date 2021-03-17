@@ -90,7 +90,7 @@ static int WidthStyledText(Surface *surface, const ViewStyle &vs, int styleOffse
 		size_t endSegment = start;
 		while ((endSegment + 1 < len) && (styles[endSegment + 1] == style))
 			endSegment++;
-		FontAlias fontText = vs.styles[style + styleOffset].font;
+		const Font *fontText = vs.styles[style + styleOffset].font.get();
 		const std::string_view sv(text + start, endSegment - start + 1);
 		width += static_cast<int>(surface->WidthText(fontText, sv));
 		start = endSegment + 1;
@@ -107,7 +107,7 @@ int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, cons
 		if (st.multipleStyles) {
 			widthSubLine = WidthStyledText(surface, vs, styleOffset, st.text + start, st.styles + start, lenLine);
 		} else {
-			FontAlias fontText = vs.styles[styleOffset + st.style].font;
+			const Font *fontText = vs.styles[styleOffset + st.style].font.get();
 			const std::string_view text(st.text + start, lenLine);
 			widthSubLine = static_cast<int>(surface->WidthText(fontText, text));
 		}
@@ -120,7 +120,7 @@ int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, cons
 
 void DrawTextNoClipPhase(Surface *surface, PRectangle rc, const Style &style, XYPOSITION ybase,
 	std::string_view text, DrawPhase phase) {
-	FontAlias fontText = style.font;
+	const Font *fontText = style.font.get();
 	if (phase & drawBack) {
 		if (phase & drawText) {
 			// Drawing both
@@ -146,7 +146,7 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 			while (end < length - 1 && st.styles[start + end + 1] == style)
 				end++;
 			style += styleOffset;
-			FontAlias fontText = vs.styles[style].font;
+			const Font *fontText = vs.styles[style].font.get();
 			const std::string_view text(st.text + start + i, end - i + 1);
 			const int width = static_cast<int>(surface->WidthText(fontText, text));
 			PRectangle rcSegment = rcText;
@@ -601,9 +601,9 @@ void EditView::UpdateBidiData(const EditModel &model, const ViewStyle &vstyle, L
 	if (model.BidirectionalEnabled()) {
 		ll->EnsureBidiData();
 		for (int stylesInLine = 0; stylesInLine < ll->numCharsInLine; stylesInLine++) {
-			ll->bidiData->stylesFonts[stylesInLine].MakeAlias(vstyle.styles[ll->styles[stylesInLine]].font);
+			ll->bidiData->stylesFonts[stylesInLine] = vstyle.styles[ll->styles[stylesInLine]].font;
 		}
-		ll->bidiData->stylesFonts[ll->numCharsInLine].ClearFont();
+		ll->bidiData->stylesFonts[ll->numCharsInLine].reset();
 
 		for (int charsInLine = 0; charsInLine < ll->numCharsInLine; charsInLine++) {
 			const int charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(&ll->chars[charsInLine]), ll->numCharsInLine - charsInLine);
@@ -877,7 +877,7 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 	if (fillBackground) {
 		surface->FillRectangle(rcSegment, textBack);
 	}
-	FontAlias ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
+	const Font *ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font.get();
 	const int normalCharHeight = static_cast<int>(std::ceil(vsDraw.styles[STYLE_CONTROLCHAR].capitalHeight));
 	PRectangle rcCChar = rcSegment;
 	rcCChar.left = rcCChar.left + 1;
@@ -1202,7 +1202,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 
 	PRectangle rcSegment = rcLine;
 	const std::string_view foldDisplayText(text);
-	FontAlias fontText = vsDraw.styles[STYLE_FOLDDISPLAYTEXT].font;
+	const Font *fontText = vsDraw.styles[STYLE_FOLDDISPLAYTEXT].font.get();
 	const int widthFoldDisplayText = static_cast<int>(surface->WidthText(fontText, foldDisplayText));
 
 	int eolInSelection = 0;
@@ -1300,7 +1300,7 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	const size_t style = stEOLAnnotation.style + vsDraw.eolAnnotationStyleOffset;
 
 	PRectangle rcSegment = rcLine;
-	FontAlias fontText = vsDraw.styles[style].font;
+	const Font *fontText = vsDraw.styles[style].font.get();
 	const int widthEOLAnnotationText = static_cast<int>(surface->WidthText(fontText, eolAnnotationText));
 
 	const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
@@ -1493,7 +1493,7 @@ static void DrawBlockCaret(Surface *surface, const EditModel &model, const ViewS
 	// This character is where the caret block is, we override the colours
 	// (inversed) for drawing the caret here.
 	const int styleMain = ll->styles[offsetFirstChar];
-	FontAlias fontText = vsDraw.styles[styleMain].font;
+	const Font *fontText = vsDraw.styles[styleMain].font.get();
 	const std::string_view text(&ll->chars[offsetFirstChar], numCharsToDraw);
 	surface->DrawTextClipped(rcCaret, fontText,
 		rcCaret.top + vsDraw.maxAscent, text, vsDraw.styles[styleMain].back,
@@ -1883,7 +1883,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 		if (rcSegment.Intersects(rcLine)) {
 			const int styleMain = ll->styles[i];
 			ColourDesired textFore = vsDraw.styles[styleMain].fore;
-			FontAlias textFont = vsDraw.styles[styleMain].font;
+			const Font *textFont = vsDraw.styles[styleMain].font.get();
 			//hotspot foreground
 			const bool inHotspot = (ll->hotspot.Valid()) && ll->hotspot.ContainsCharacter(iDoc);
 			if (inHotspot) {
@@ -1961,7 +1961,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						// Using one font for all control characters so it can be controlled independently to ensure
 						// the box goes around the characters tightly. Seems to be no way to work out what height
 						// is taken by an individual character - internal leading gives varying results.
-						FontAlias ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
+						const Font *ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font.get();
 						const char cc[2] = { static_cast<char>(vsDraw.controlCharSymbol), '\0' };
 						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
 							rcSegment.top + vsDraw.maxAscent,
@@ -2509,7 +2509,7 @@ Sci::Position EditView::FormatRange(bool draw, const Sci_RangeToFormat *pfr, Sur
 	// Determining width must happen after fonts have been realised in Refresh
 	int lineNumberWidth = 0;
 	if (lineNumberIndex >= 0) {
-		lineNumberWidth = static_cast<int>(surfaceMeasure->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
+		lineNumberWidth = static_cast<int>(surfaceMeasure->WidthText(vsPrint.styles[STYLE_LINENUMBER].font.get(),
 			"99999" lineNumberPrintSpace));
 		vsPrint.ms[lineNumberIndex].width = lineNumberWidth;
 		vsPrint.Refresh(*surfaceMeasure, model.pdoc->tabInChars);	// Recalculate fixedColumnWidth
@@ -2589,9 +2589,9 @@ Sci::Position EditView::FormatRange(bool draw, const Sci_RangeToFormat *pfr, Sur
 			rcNumber.right = rcNumber.left + lineNumberWidth;
 			// Right justify
 			rcNumber.left = rcNumber.right - surfaceMeasure->WidthText(
-				vsPrint.styles[STYLE_LINENUMBER].font, number);
+				vsPrint.styles[STYLE_LINENUMBER].font.get(), number);
 			surface->FlushCachedState();
-			surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
+			surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font.get(),
 				static_cast<XYPOSITION>(ypos + vsPrint.maxAscent), number,
 				vsPrint.styles[STYLE_LINENUMBER].fore,
 				vsPrint.styles[STYLE_LINENUMBER].back);

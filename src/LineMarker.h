@@ -13,7 +13,7 @@ namespace Scintilla {
 class XPM;
 class RGBAImage;
 
-typedef void (*DrawLineMarkerFn)(Surface *surface, PRectangle &rcWhole, Font &fontForCharacter, int tFold, int marginStyle, const void *lineMarker);
+typedef void (*DrawLineMarkerFn)(Surface *surface, PRectangle &rcWhole, const Font *fontForCharacter, int tFold, int marginStyle, const void *lineMarker);
 
 /**
  */
@@ -44,7 +44,7 @@ public:
 	void SetXPM(const char *textForm);
 	void SetXPM(const char *const *linesForm);
 	void SetRGBAImage(Point sizeRGBAImage, float scale, const unsigned char *pixelsRGBAImage);
-	void Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharacter, FoldPart part, int marginStyle) const;
+	void Draw(Surface *surface, PRectangle &rcWhole, const Font *fontForCharacter, FoldPart part, int marginStyle) const;
 };
 
 }

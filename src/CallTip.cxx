@@ -67,7 +67,6 @@ CallTip::CallTip() noexcept {
 }
 
 CallTip::~CallTip() {
-	font.Release();
 	wCallTip.Destroy();
 }
 
@@ -168,11 +167,11 @@ int CallTip::DrawChunk(Surface *surface, int x, std::string_view sv,
 			xEnd = NextTabPos(x);
 		} else {
 			const std::string_view segText = sv.substr(startSeg, endSeg - startSeg);
-			xEnd = x + static_cast<int>(std::lround(surface->WidthText(font, segText)));
+			xEnd = x + static_cast<int>(std::lround(surface->WidthText(font.get(), segText)));
 			if (draw) {
 				rcClient.left = static_cast<XYPOSITION>(x);
 				rcClient.right = static_cast<XYPOSITION>(xEnd);
-				surface->DrawTextTransparent(rcClient, font, static_cast<XYPOSITION>(ytext),
+				surface->DrawTextTransparent(rcClient, font.get(), static_cast<XYPOSITION>(ytext),
 									segText, asHighlight ? colourSel : colourUnSel);
 			}
 		}
@@ -189,12 +188,12 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 	PRectangle rcClient(1.0f, 1.0f, rcClientSize.right - 1, rcClientSize.bottom - 1);
 
 	// To make a nice small call tip window, it is only sized to fit most normal characters without accents
-	const int ascent = static_cast<int>(std::round(surfaceWindow->Ascent(font) - surfaceWindow->InternalLeading(font)));
+	const int ascent = static_cast<int>(std::round(surfaceWindow->Ascent(font.get()) - surfaceWindow->InternalLeading(font.get())));
 
 	// For each line...
 	// Draw the definition in three parts: before highlight, highlighted, after highlight
 	int ytext = static_cast<int>(rcClient.top) + ascent + 1;
-	rcClient.bottom = ytext + surfaceWindow->Descent(font) + 1;
+	rcClient.bottom = ytext + surfaceWindow->Descent(font.get()) + 1;
 	std::string_view remaining(val);
 	int maxWidth = 0;
 	size_t lineStart = 0;
@@ -286,7 +285,7 @@ PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, co
 	posStartCallTip = pos;
 	const XYPOSITION deviceHeight = static_cast<XYPOSITION>(surfaceMeasure->DeviceHeightFont(size));
 	const FontParameters fp(faceName, deviceHeight / SC_FONT_SIZE_MULTIPLIER, SC_WEIGHT_NORMAL, false, 0, technology, characterSet);
-	font.Create(fp);
+	font = Font::Allocate(fp);
 	// Look for multiple lines in the text
 	// Only support \n here - simply means container must avoid \r!
 	const int numLines = 1 + static_cast<int>(std::count(val.begin(), val.end(), '\n'));
@@ -294,12 +293,12 @@ PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, co
 	rectDown = PRectangle(0,0,0,0);
 	offsetMain = insetX;            // changed to right edge of any arrows
 	const int width = PaintContents(surfaceMeasure.get(), false) + insetX;
-	lineHeight = static_cast<int>(std::lround(surfaceMeasure->Height(font)));
+	lineHeight = static_cast<int>(std::lround(surfaceMeasure->Height(font.get())));
 
 	// The returned
 	// rectangle is aligned to the right edge of the last arrow encountered in
 	// the tip text, else to the tip text left edge.
-	const int height = lineHeight * numLines - static_cast<int>(surfaceMeasure->InternalLeading(font)) + borderHeight * 2;
+	const int height = lineHeight * numLines - static_cast<int>(surfaceMeasure->InternalLeading(font.get())) + borderHeight * 2;
 	if (above) {
 		return PRectangle(pt.x - offsetMain, pt.y - verticalOffset - height, pt.x + width - offsetMain, pt.y - verticalOffset);
 	} else {

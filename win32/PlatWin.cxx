@@ -152,85 +152,6 @@ bool LoadD2D() {
 
 #endif
 
-struct FormatAndMetrics {
-	int technology;
-	HFONT hfont;
-#if defined(USE_D2D)
-	IDWriteTextFormat *pTextFormat;
-#endif
-	int extraFontFlag;
-	int characterSet;
-	FLOAT yAscent;
-	FLOAT yDescent;
-	FLOAT yInternalLeading;
-	FormatAndMetrics(HFONT hfont_, int extraFontFlag_, int characterSet_) noexcept :
-		technology(SCWIN_TECH_GDI), hfont(hfont_),
-#if defined(USE_D2D)
-		pTextFormat(nullptr),
-#endif
-		extraFontFlag(extraFontFlag_), characterSet(characterSet_), yAscent(2), yDescent(1), yInternalLeading(0) {
-	}
-#if defined(USE_D2D)
-	FormatAndMetrics(IDWriteTextFormat *pTextFormat_,
-	        int extraFontFlag_,
-	        int characterSet_,
-	        FLOAT yAscent_,
-	        FLOAT yDescent_,
-	        FLOAT yInternalLeading_) noexcept :
-		technology(SCWIN_TECH_DIRECTWRITE),
-		hfont{},
-		pTextFormat(pTextFormat_),
-		extraFontFlag(extraFontFlag_),
-		characterSet(characterSet_),
-		yAscent(yAscent_),
-		yDescent(yDescent_),
-		yInternalLeading(yInternalLeading_) {
-	}
-#endif
-	FormatAndMetrics(const FormatAndMetrics &) = delete;
-	FormatAndMetrics(FormatAndMetrics &&) = delete;
-	FormatAndMetrics &operator=(const FormatAndMetrics &) = delete;
-	FormatAndMetrics &operator=(FormatAndMetrics &&) = delete;
-
-	~FormatAndMetrics() {
-		if (hfont)
-			::DeleteObject(hfont);
-#if defined(USE_D2D)
-		ReleaseUnknown(pTextFormat);
-#endif
-		extraFontFlag = 0;
-		characterSet = 0;
-		yAscent = 2;
-		yDescent = 1;
-		yInternalLeading = 0;
-	}
-	HFONT HFont() noexcept;
-};
-
-HFONT FormatAndMetrics::HFont() noexcept {
-	LOGFONTW lf = {};
-#if defined(USE_D2D)
-	if (technology == SCWIN_TECH_GDI) {
-		if (0 == ::GetObjectW(hfont, sizeof(lf), &lf)) {
-			return {};
-		}
-	} else {
-		const HRESULT hr = pTextFormat->GetFontFamilyName(lf.lfFaceName, LF_FACESIZE);
-		if (!SUCCEEDED(hr)) {
-			return {};
-		}
-		lf.lfWeight = pTextFormat->GetFontWeight();
-		lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
-		lf.lfHeight = -static_cast<int>(pTextFormat->GetFontSize());
-	}
-#else
-	if (0 == ::GetObjectW(hfont, sizeof(lf), &lf)) {
-		return {};
-	}
-#endif
-	return ::CreateFontIndirectW(&lf);
-}
-
 #ifndef CLEARTYPE_QUALITY
 #define CLEARTYPE_QUALITY 5
 #endif
@@ -287,10 +208,6 @@ void LoadDpiForWindow() noexcept {
 
 HINSTANCE hinstPlatformRes {};
 
-FormatAndMetrics *FamFromFontID(void *fid) noexcept {
-	return static_cast<FormatAndMetrics *>(fid);
-}
-
 constexpr BYTE Win32MapFontQuality(int extraFontFlag) noexcept {
 	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
 
@@ -327,6 +244,11 @@ constexpr D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) noexc
 }
 #endif
 
+// Both GDI and DirectWrite can produce a HFONT for use in list boxes
+struct FontWin : public Font {
+	virtual HFONT HFont() const noexcept = 0;
+};
+
 void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	lf = LOGFONTW();
 	// The negative is to allow for leading
@@ -338,16 +260,44 @@ void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, float size
 	UTF16FromUTF8(faceName, lf.lfFaceName, LF_FACESIZE);
 }
 
-FontID CreateFontFromParameters(const FontParameters &fp) {
-	LOGFONTW lf;
-	SetLogFont(lf, fp.faceName, fp.characterSet, fp.size, fp.weight, fp.italic, fp.extraFontFlag);
-	FontID fid = nullptr;
-	if (fp.technology == SCWIN_TECH_GDI) {
-		HFONT hfont = ::CreateFontIndirectW(&lf);
-		fid = new FormatAndMetrics(hfont, fp.extraFontFlag, fp.characterSet);
-	} else {
+struct FontGDI : public FontWin {
+	HFONT hfont = {};
+	FontGDI(const FontParameters &fp) {
+		LOGFONTW lf;
+		SetLogFont(lf, fp.faceName, fp.characterSet, fp.size, fp.weight, fp.italic, fp.extraFontFlag);
+		hfont = ::CreateFontIndirectW(&lf);
+	}
+	// Deleted so FontGDI objects can not be copied.
+	FontGDI(const FontGDI &) = delete;
+	FontGDI(FontGDI &&) = delete;
+	FontGDI &operator=(const FontGDI &) = delete;
+	FontGDI &operator=(FontGDI &&) = delete;
+	~FontGDI() {
+		if (hfont)
+			::DeleteObject(hfont);
+	}
+	HFONT HFont() const noexcept override {
+		// Duplicating hfont
+		LOGFONTW lf = {};
+		if (0 == ::GetObjectW(hfont, sizeof(lf), &lf)) {
+			return {};
+		}
+		return ::CreateFontIndirectW(&lf);
+	}
+};
+
 #if defined(USE_D2D)
-		IDWriteTextFormat *pTextFormat = nullptr;
+struct FontDirectWrite : public FontWin {
+	IDWriteTextFormat *pTextFormat = nullptr;
+	int extraFontFlag = SC_EFF_QUALITY_DEFAULT;
+	int characterSet = 0;
+	FLOAT yAscent = 2.0f;
+	FLOAT yDescent = 1.0f;
+	FLOAT yInternalLeading = 0.0f;
+
+	FontDirectWrite(const FontParameters &fp) :
+		extraFontFlag(fp.extraFontFlag),
+		characterSet(fp.characterSet) {
 		const std::wstring wsFace = WStringFromUTF8(fp.faceName);
 		const FLOAT fHeight = fp.size;
 		const DWRITE_FONT_STYLE style = fp.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
@@ -358,9 +308,6 @@ FontID CreateFontFromParameters(const FontParameters &fp) {
 		if (SUCCEEDED(hr)) {
 			pTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 
-			FLOAT yAscent = 1.0f;
-			FLOAT yDescent = 1.0f;
-			FLOAT yInternalLeading = 0.0f;
 			IDWriteTextLayout *pTextLayout = nullptr;
 			hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat,
 					100.0f, 100.0f, &pTextLayout);
@@ -382,31 +329,39 @@ FontID CreateFontFromParameters(const FontParameters &fp) {
 				ReleaseUnknown(pTextLayout);
 				pTextFormat->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, lineMetrics[0].height, lineMetrics[0].baseline);
 			}
-			fid = new FormatAndMetrics(pTextFormat, fp.extraFontFlag, fp.characterSet, yAscent, yDescent, yInternalLeading);
 		}
-#endif
 	}
-	return fid;
-}
+	// Deleted so FontDirectWrite objects can not be copied.
+	FontDirectWrite(const FontDirectWrite &) = delete;
+	FontDirectWrite(FontDirectWrite &&) = delete;
+	FontDirectWrite &operator=(const FontDirectWrite &) = delete;
+	FontDirectWrite &operator=(FontDirectWrite &&) = delete;
+	~FontDirectWrite() {
+		ReleaseUnknown(pTextFormat);
+	}
+	HFONT HFont() const noexcept override {
+		LOGFONTW lf = {};
+		const HRESULT hr = pTextFormat->GetFontFamilyName(lf.lfFaceName, LF_FACESIZE);
+		if (!SUCCEEDED(hr)) {
+			return {};
+		}
+		lf.lfWeight = pTextFormat->GetFontWeight();
+		lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
+		lf.lfHeight = -static_cast<int>(pTextFormat->GetFontSize());
+		return ::CreateFontIndirectW(&lf);
+	}
+};
+#endif
 
 }
 
-Font::Font() noexcept : fid{} {
-}
-
-Font::~Font() {
-}
-
-void Font::Create(const FontParameters &fp) {
-	Release();
-	if (fp.faceName)
-		fid = CreateFontFromParameters(fp);
-}
-
-void Font::Release() {
-	if (fid)
-		delete FamFromFontID(fid);
-	fid = nullptr;
+std::shared_ptr<Font> Font::Allocate(const FontParameters &fp) {
+#if defined(USE_D2D)
+	if (fp.technology == SCWIN_TECH_DIRECTWRITE) {
+		return std::make_shared<FontDirectWrite>(fp);
+	}
+#endif
+	return std::make_shared<FontGDI>(fp);
 }
 
 // Buffer to hold strings and string position arrays without always allocating on heap.
@@ -501,7 +456,7 @@ class SurfaceGDI : public Surface {
 	int codePage = 0;
 
 	void BrushColour(ColourDesired back) noexcept;
-	void SetFont(const Font &font_) noexcept;
+	void SetFont(const Font *font_) noexcept;
 	void Clear() noexcept;
 
 public:
@@ -539,17 +494,17 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
-	void MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) override;
-	XYPOSITION WidthText(Font &font_, std::string_view text) override;
-	XYPOSITION Ascent(Font &font_) override;
-	XYPOSITION Descent(Font &font_) override;
-	XYPOSITION InternalLeading(Font &font_) override;
-	XYPOSITION Height(Font &font_) override;
-	XYPOSITION AverageCharWidth(Font &font_) override;
+	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
+	XYPOSITION Ascent(const Font *font_) override;
+	XYPOSITION Descent(const Font *font_) override;
+	XYPOSITION InternalLeading(const Font *font_) override;
+	XYPOSITION Height(const Font *font_) override;
+	XYPOSITION AverageCharWidth(const Font *font_) override;
 
 	void SetClip(PRectangle rc) override;
 	void FlushCachedState() override;
@@ -659,9 +614,9 @@ void SurfaceGDI::BrushColour(ColourDesired back) noexcept {
 	brushOld = SelectBrush(hdc, brush);
 }
 
-void SurfaceGDI::SetFont(const Font &font_) noexcept {
-	const FormatAndMetrics *pfm = FamFromFontID(font_.GetID());
-	PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_GDI);
+void SurfaceGDI::SetFont(const Font *font_) noexcept {
+	const FontGDI *pfm = dynamic_cast<const FontGDI *>(font_);
+	PLATFORM_ASSERT(pfm);
 	if (fontOld) {
 		SelectFont(hdc, pfm->hfont);
 	} else {
@@ -989,7 +944,7 @@ std::unique_ptr<IScreenLineLayout> SurfaceGDI::Layout(const IScreenLine *) {
 
 typedef VarBuffer<int, stackBufferLength> TextPositionsI;
 
-void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
+void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
 	SetFont(font_);
 	const RECT rcw = RectFromPRectangle(rc);
 	const int x = static_cast<int>(rc.left);
@@ -1003,21 +958,21 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION yba
 	}
 }
 
-void SurfaceGDI::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceGDI::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore, ColourDesired back) {
 	::SetTextColor(hdc, fore.AsInteger());
 	::SetBkColor(hdc, back.AsInteger());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE);
 }
 
-void SurfaceGDI::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceGDI::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore, ColourDesired back) {
 	::SetTextColor(hdc, fore.AsInteger());
 	::SetBkColor(hdc, back.AsInteger());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
 }
 
-void SurfaceGDI::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceGDI::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
@@ -1031,7 +986,7 @@ void SurfaceGDI::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybas
 	}
 }
 
-XYPOSITION SurfaceGDI::WidthText(Font &font_, std::string_view text) {
+XYPOSITION SurfaceGDI::WidthText(const Font *font_, std::string_view text) {
 	SetFont(font_);
 	SIZE sz={0,0};
 	if (!unicodeMode) {
@@ -1043,7 +998,7 @@ XYPOSITION SurfaceGDI::WidthText(Font &font_, std::string_view text) {
 	return static_cast<XYPOSITION>(sz.cx);
 }
 
-void SurfaceGDI::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) {
+void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	// Zero positions to avoid random behaviour on failure.
 	std::fill(positions, positions + text.length(), 0.0f);
 	SetFont(font_);
@@ -1085,35 +1040,35 @@ void SurfaceGDI::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *p
 	std::fill(positions+i, positions + text.length(), lastPos);
 }
 
-XYPOSITION SurfaceGDI::Ascent(Font &font_) {
+XYPOSITION SurfaceGDI::Ascent(const Font *font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(hdc, &tm);
 	return static_cast<XYPOSITION>(tm.tmAscent);
 }
 
-XYPOSITION SurfaceGDI::Descent(Font &font_) {
+XYPOSITION SurfaceGDI::Descent(const Font *font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(hdc, &tm);
 	return static_cast<XYPOSITION>(tm.tmDescent);
 }
 
-XYPOSITION SurfaceGDI::InternalLeading(Font &font_) {
+XYPOSITION SurfaceGDI::InternalLeading(const Font *font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(hdc, &tm);
 	return static_cast<XYPOSITION>(tm.tmInternalLeading);
 }
 
-XYPOSITION SurfaceGDI::Height(Font &font_) {
+XYPOSITION SurfaceGDI::Height(const Font *font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(hdc, &tm);
 	return static_cast<XYPOSITION>(tm.tmHeight);
 }
 
-XYPOSITION SurfaceGDI::AverageCharWidth(Font &font_) {
+XYPOSITION SurfaceGDI::AverageCharWidth(const Font *font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(hdc, &tm);
@@ -1176,7 +1131,7 @@ class SurfaceD2D : public Surface {
 	int logPixelsY;
 
 	void Clear() noexcept;
-	void SetFont(const Font &font_) noexcept;
+	void SetFont(const Font *font_) noexcept;
 	HRESULT GetBitmap(ID2D1Bitmap **ppBitmap);
 
 public:
@@ -1218,17 +1173,17 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
-	void MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) override;
-	XYPOSITION WidthText(Font &font_, std::string_view text) override;
-	XYPOSITION Ascent(Font &font_) override;
-	XYPOSITION Descent(Font &font_) override;
-	XYPOSITION InternalLeading(Font &font_) override;
-	XYPOSITION Height(Font &font_) override;
-	XYPOSITION AverageCharWidth(Font &font_) override;
+	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
+	XYPOSITION Ascent(const Font *font_) override;
+	XYPOSITION Descent(const Font *font_) override;
+	XYPOSITION InternalLeading(const Font *font_) override;
+	XYPOSITION Height(const Font *font_) override;
+	XYPOSITION AverageCharWidth(const Font *font_) override;
 
 	void SetClip(PRectangle rc) override;
 	void FlushCachedState() override;
@@ -1361,9 +1316,9 @@ void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 	}
 }
 
-void SurfaceD2D::SetFont(const Font &font_) noexcept {
-	const FormatAndMetrics *pfm = FamFromFontID(font_.GetID());
-	PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_DIRECTWRITE);
+void SurfaceD2D::SetFont(const Font *font_) noexcept {
+	const FontDirectWrite *pfm = dynamic_cast<const FontDirectWrite *>(font_);
+	PLATFORM_ASSERT(pfm);
 	pTextFormat = pfm->pTextFormat;
 	yAscent = pfm->yAscent;
 	yDescent = pfm->yDescent;
@@ -1830,8 +1785,8 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 			textLayout->SetInlineObject(&blobs.back(), textRange);
 		};
 
-		FormatAndMetrics *pfm =
-			static_cast<FormatAndMetrics *>(screenLine->FontOfPosition(bytePosition)->GetID());
+		const FontDirectWrite *pfm =
+			dynamic_cast<const FontDirectWrite *>(screenLine->FontOfPosition(bytePosition));
 
 		const unsigned int fontFamilyNameSize = pfm->pTextFormat->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(fontFamilyNameSize, 0);
@@ -1888,7 +1843,7 @@ ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) {
 	text = screenLine->Text();
 
 	// Get textFormat
-	FormatAndMetrics *pfm = static_cast<FormatAndMetrics *>(screenLine->FontOfPosition(0)->GetID());
+	const FontDirectWrite *pfm = dynamic_cast<const FontDirectWrite *>(screenLine->FontOfPosition(0));
 
 	if (!pIDWriteFactory || !pfm->pTextFormat) {
 		return;
@@ -2058,7 +2013,7 @@ std::unique_ptr<IScreenLineLayout> SurfaceD2D::Layout(const IScreenLine *screenL
 	return std::make_unique<ScreenLineLayout>(screenLine);
 }
 
-void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
+void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
 	SetFont(font_);
 
 	// Use Unicode calls
@@ -2085,7 +2040,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font &font_, XYPOSITION yba
 	}
 }
 
-void SurfaceD2D::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceD2D::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
@@ -2094,7 +2049,7 @@ void SurfaceD2D::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, st
 	}
 }
 
-void SurfaceD2D::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceD2D::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
@@ -2103,7 +2058,7 @@ void SurfaceD2D::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, s
 	}
 }
 
-void SurfaceD2D::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
+void SurfaceD2D::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
@@ -2117,7 +2072,7 @@ void SurfaceD2D::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybas
 	}
 }
 
-XYPOSITION SurfaceD2D::WidthText(Font &font_, std::string_view text) {
+XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	const TextWide tbuf(text, unicodeMode, codePageText);
@@ -2135,7 +2090,7 @@ XYPOSITION SurfaceD2D::WidthText(Font &font_, std::string_view text) {
 	return width;
 }
 
-void SurfaceD2D::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) {
+void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	SetFont(font_);
 	if (!pIDWriteFactory || !pTextFormat) {
 		// SetFont failed or no access to DirectWrite so give up.
@@ -2216,26 +2171,26 @@ void SurfaceD2D::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *p
 	}
 }
 
-XYPOSITION SurfaceD2D::Ascent(Font &font_) {
+XYPOSITION SurfaceD2D::Ascent(const Font *font_) {
 	SetFont(font_);
 	return std::ceil(yAscent);
 }
 
-XYPOSITION SurfaceD2D::Descent(Font &font_) {
+XYPOSITION SurfaceD2D::Descent(const Font *font_) {
 	SetFont(font_);
 	return std::ceil(yDescent);
 }
 
-XYPOSITION SurfaceD2D::InternalLeading(Font &font_) {
+XYPOSITION SurfaceD2D::InternalLeading(const Font *font_) {
 	SetFont(font_);
 	return std::floor(yInternalLeading);
 }
 
-XYPOSITION SurfaceD2D::Height(Font &font_) {
+XYPOSITION SurfaceD2D::Height(const Font *font_) {
 	return Ascent(font_) + Descent(font_);
 }
 
-XYPOSITION SurfaceD2D::AverageCharWidth(Font &font_) {
+XYPOSITION SurfaceD2D::AverageCharWidth(const Font *font_) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {
@@ -2386,8 +2341,9 @@ void Window::InvalidateRectangle(PRectangle rc) {
 	::InvalidateRect(HwndFromWindowID(wid), &rcw, FALSE);
 }
 
-void Window::SetFont(Font &font) {
-	SetWindowFont(HwndFromWindowID(wid), font.GetID(), 0);
+void Window::SetFont(const Font *font) {
+	const FontWin *pfm = dynamic_cast<const FontWin *>(font);
+	SetWindowFont(HwndFromWindowID(wid), pfm->HFont(), 0);
 }
 
 namespace {
@@ -2541,7 +2497,7 @@ ListBox::~ListBox() {
 
 class ListBoxX : public ListBox {
 	int lineHeight;
-	FontID fontCopy;
+	HFONT fontCopy;
 	int technology;
 	RGBAImageSet images;
 	LineToItem lti;
@@ -2598,7 +2554,7 @@ public:
 			fontCopy = 0;
 		}
 	}
-	void SetFont(Font &font) override;
+	void SetFont(const Font *font) override;
 	void Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, int technology_) override;
 	void SetAverageCharWidth(int width) override;
 	void SetVisibleRows(int rows) override;
@@ -2651,13 +2607,13 @@ void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHei
 	location = PointFromPOINT(locationw);
 }
 
-void ListBoxX::SetFont(Font &font) {
-	if (font.GetID()) {
+void ListBoxX::SetFont(const Font *font) {
+	const FontWin *pfm = dynamic_cast<const FontWin *>(font);
+	if (pfm) {
 		if (fontCopy) {
 			::DeleteObject(fontCopy);
 			fontCopy = 0;
 		}
-		FormatAndMetrics *pfm = static_cast<FormatAndMetrics *>(font.GetID());
 		fontCopy = pfm->HFont();
 		SetWindowFont(lb, fontCopy, 0);
 	}

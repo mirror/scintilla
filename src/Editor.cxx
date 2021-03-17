@@ -1829,7 +1829,7 @@ long Editor::TextWidth(uptr_t style, const char *text) {
 	RefreshStyleData();
 	AutoSurface surface(this);
 	if (surface) {
-		return std::lround(surface->WidthText(vs.styles[style].font, text));
+		return std::lround(surface->WidthText(vs.styles[style].font.get(), text));
 	} else {
 		return 1;
 	}

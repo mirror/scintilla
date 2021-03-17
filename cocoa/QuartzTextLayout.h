@@ -33,7 +33,7 @@ public:
 		}
 	}
 
-	CFStringEncoding setText(std::string_view sv, CFStringEncoding encoding, const QuartzTextStyle &r) {
+	CFStringEncoding setText(std::string_view sv, CFStringEncoding encoding, const QuartzTextStyle *r) {
 		// First clear current values in case of failure.
 		if (mString) {
 			CFRelease(mString);
@@ -58,7 +58,7 @@ public:
 
 		stringLength = CFStringGetLength(str);
 
-		CFMutableDictionaryRef stringAttribs = r.getCTStyle();
+		CFMutableDictionaryRef stringAttribs = r->getCTStyle();
 
 		mString = ::CFAttributedStringCreate(NULL, str, stringAttribs);
 

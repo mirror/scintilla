@@ -37,7 +37,6 @@ MarginStyle::MarginStyle(int style_, int width_, int mask_) noexcept :
 FontRealised::FontRealised() noexcept = default;
 
 FontRealised::~FontRealised() {
-	font.Release();
 }
 
 void FontRealised::Realise(Surface &surface, int zoomLevel, int technology, const FontSpecification &fs) {
@@ -48,13 +47,13 @@ void FontRealised::Realise(Surface &surface, int zoomLevel, int technology, cons
 
 	const float deviceHeight = static_cast<float>(surface.DeviceHeightFont(sizeZoomed));
 	const FontParameters fp(fs.fontName, deviceHeight / SC_FONT_SIZE_MULTIPLIER, fs.weight, fs.italic, fs.extraFontFlag, technology, fs.characterSet);
-	font.Create(fp);
+	font = Font::Allocate(fp);
 
-	ascent = static_cast<unsigned int>(surface.Ascent(font));
-	descent = static_cast<unsigned int>(surface.Descent(font));
-	capitalHeight = surface.Ascent(font) - surface.InternalLeading(font);
-	aveCharWidth = surface.AverageCharWidth(font);
-	spaceWidth = surface.WidthText(font, " ");
+	ascent = static_cast<unsigned int>(surface.Ascent(font.get()));
+	descent = static_cast<unsigned int>(surface.Descent(font.get()));
+	capitalHeight = surface.Ascent(font.get()) - surface.InternalLeading(font.get());
+	aveCharWidth = surface.AverageCharWidth(font.get());
+	spaceWidth = surface.WidthText(font.get(), " ");
 }
 
 ViewStyle::ViewStyle() : markers(MARKER_MAX + 1), indicators(INDICATOR_MAX + 1) {
@@ -345,7 +344,7 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	controlCharWidth = 0.0;
 	if (controlCharSymbol >= 32) {
 		const char cc[2] = { static_cast<char>(controlCharSymbol), '\0' };
-		controlCharWidth = surface.WidthText(styles[STYLE_CONTROLCHAR].font, cc);
+		controlCharWidth = surface.WidthText(styles[STYLE_CONTROLCHAR].font.get(), cc);
 	}
 
 	CalculateMarginWidthAndMask();

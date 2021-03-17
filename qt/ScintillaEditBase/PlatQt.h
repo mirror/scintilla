@@ -113,20 +113,20 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextNoClip(PRectangle rc, Font &font, XYPOSITION ybase,
+	void DrawTextNoClip(PRectangle rc, const Font *font, XYPOSITION ybase,
 		std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, Font &font, XYPOSITION ybase,
+	void DrawTextClipped(PRectangle rc, const Font *font, XYPOSITION ybase,
 		std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, Font &font, XYPOSITION ybase,
+	void DrawTextTransparent(PRectangle rc, const Font *font, XYPOSITION ybase,
 		std::string_view text, ColourDesired fore) override;
-	void MeasureWidths(Font &font, std::string_view text,
+	void MeasureWidths(const Font *font, std::string_view text,
 		XYPOSITION *positions) override;
-	XYPOSITION WidthText(Font &font, std::string_view text) override;
-	XYPOSITION Ascent(Font &font) override;
-	XYPOSITION Descent(Font &font) override;
-	XYPOSITION InternalLeading(Font &font) override;
-	XYPOSITION Height(Font &font) override;
-	XYPOSITION AverageCharWidth(Font &font) override;
+	XYPOSITION WidthText(const Font *font, std::string_view text) override;
+	XYPOSITION Ascent(const Font *font) override;
+	XYPOSITION Descent(const Font *font) override;
+	XYPOSITION InternalLeading(const Font *font) override;
+	XYPOSITION Height(const Font *font) override;
+	XYPOSITION AverageCharWidth(const Font *font) override;
 
 	void SetClip(PRectangle rc) override;
 	void FlushCachedState() override;
@@ -136,8 +136,8 @@ public:
 	void SetBidiR2L(bool bidiR2L_) override;
 
 	void BrushColour(ColourDesired back);
-	void SetCodec(const Font &font);
-	void SetFont(const Font &font);
+	void SetCodec(const Font *font);
+	void SetFont(const Font *font);
 
 	QPaintDevice *GetPaintDevice();
 	void SetPainter(QPainter *painter);

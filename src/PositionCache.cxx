@@ -342,7 +342,7 @@ XYPOSITION ScreenLine::TabWidthMinimumPixels() const {
 }
 
 const Font *ScreenLine::FontOfPosition(size_t position) const {
-	return &ll->bidiData->stylesFonts[start + position];
+	return ll->bidiData->stylesFonts[start + position].get();
 }
 
 XYPOSITION ScreenLine::RepresentationWidth(size_t position) const {
@@ -795,7 +795,7 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 			probe = probe2;
 		}
 	}
-	FontAlias fontStyle = vstyle.styles[styleNumber].font;
+	const Font *fontStyle = vstyle.styles[styleNumber].font.get();
 	if (len > BreakFinder::lengthStartSubdivision) {
 		// Break up into segments
 		unsigned int startSegment = 0;
