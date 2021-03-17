@@ -1673,7 +1673,7 @@ public:
 	int GetVisibleRows() const override;
 	PRectangle GetDesiredRect() override;
 	int CaretFromEdge() override;
-	void Clear() override;
+	void Clear() noexcept override;
 	void Append(char *s, int type = -1) override;
 	int Length() override;
 	void Select(int n) override;
@@ -1820,7 +1820,7 @@ void ListBoxImpl::ReleaseViews() {
 	ds = nil;
 }
 
-void ListBoxImpl::Clear() {
+void ListBoxImpl::Clear() noexcept {
 	maxItemWidth = 0;
 	maxIconWidth = 0;
 	ld.Clear();
@@ -1975,7 +1975,7 @@ ListBox *ListBox::Allocate() {
 
 //--------------------------------------------------------------------------------------------------
 
-void Window::Destroy() {
+void Window::Destroy() noexcept {
 	ListBoxImpl *listbox = dynamic_cast<ListBoxImpl *>(this);
 	if (listbox) {
 		listbox->ReleaseViews();
@@ -2025,7 +2025,7 @@ void Menu::CreatePopUp() {
 
 //--------------------------------------------------------------------------------------------------
 
-void Menu::Destroy() {
+void Menu::Destroy() noexcept {
 	CFBridgingRelease(mid);
 	mid = nullptr;
 }

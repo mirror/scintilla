@@ -2294,7 +2294,7 @@ Surface *Surface::Allocate(int technology) {
 Window::~Window() {
 }
 
-void Window::Destroy() {
+void Window::Destroy() noexcept {
 	if (wid)
 		::DestroyWindow(HwndFromWindowID(wid));
 	wid = nullptr;
@@ -2605,7 +2605,7 @@ public:
 	int GetVisibleRows() const override;
 	PRectangle GetDesiredRect() override;
 	int CaretFromEdge() override;
-	void Clear() override;
+	void Clear() noexcept override;
 	void Append(char *s, int type = -1) override;
 	int Length() override;
 	void Select(int n) override;
@@ -2730,7 +2730,7 @@ int ListBoxX::CaretFromEdge() {
 	return TextOffset() + static_cast<int>(TextInset.x + (0 - rc.left) - 1);
 }
 
-void ListBoxX::Clear() {
+void ListBoxX::Clear() noexcept {
 	ListBox_ResetContent(lb);
 	maxItemCharacters = 0;
 	widestItem = nullptr;
@@ -3398,7 +3398,7 @@ void Menu::CreatePopUp() {
 	mid = ::CreatePopupMenu();
 }
 
-void Menu::Destroy() {
+void Menu::Destroy() noexcept {
 	if (mid)
 		::DestroyMenu(static_cast<HMENU>(mid));
 	mid = 0;

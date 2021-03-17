@@ -247,7 +247,7 @@ public:
 	virtual ~Window();
 	WindowID GetID() const noexcept { return wid; }
 	bool Created() const noexcept { return wid != nullptr; }
-	void Destroy();
+	void Destroy() noexcept;
 	PRectangle GetPosition() const;
 	void SetPosition(PRectangle rc);
 	void SetPositionRelative(PRectangle rc, const Window *relativeTo);
@@ -293,7 +293,7 @@ public:
 	virtual int GetVisibleRows() const=0;
 	virtual PRectangle GetDesiredRect()=0;
 	virtual int CaretFromEdge()=0;
-	virtual void Clear()=0;
+	virtual void Clear() noexcept=0;
 	virtual void Append(char *s, int type = -1)=0;
 	virtual int Length()=0;
 	virtual void Select(int n)=0;
@@ -316,7 +316,7 @@ public:
 	Menu() noexcept;
 	MenuID GetID() const noexcept { return mid; }
 	void CreatePopUp();
-	void Destroy();
+	void Destroy() noexcept;
 	void Show(Point pt, Window &w);
 };
 

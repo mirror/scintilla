@@ -978,7 +978,7 @@ Surface *Surface::Allocate(int) {
 
 Window::~Window() {}
 
-void Window::Destroy() {
+void Window::Destroy() noexcept {
 	if (wid) {
 		ListBox *listbox = dynamic_cast<ListBox *>(this);
 		if (listbox) {
@@ -1248,7 +1248,7 @@ public:
 	int GetRowHeight();
 	PRectangle GetDesiredRect() override;
 	int CaretFromEdge() override;
-	void Clear() override;
+	void Clear() noexcept override;
 	void Append(char *s, int type = -1) override;
 	int Length() override;
 	void Select(int n) override;
@@ -1659,13 +1659,13 @@ int ListBoxX::CaretFromEdge() {
 	return 4 + renderer_width;
 }
 
-void ListBoxX::Clear() {
+void ListBoxX::Clear() noexcept {
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 	maxItemCharacters = 0;
 }
 
-static void init_pixmap(ListImage *list_image) {
+static void init_pixmap(ListImage *list_image) noexcept {
 	if (list_image->rgba_data) {
 		// Drop any existing pixmap/bitmap as data may have changed
 		if (list_image->pixbuf)
@@ -1916,7 +1916,7 @@ void Menu::CreatePopUp() {
 	g_object_ref_sink(G_OBJECT(mid));
 }
 
-void Menu::Destroy() {
+void Menu::Destroy() noexcept {
 	if (mid)
 		g_object_unref(G_OBJECT(mid));
 	mid = nullptr;

@@ -658,7 +658,7 @@ QRect ScreenRectangleForPoint(QPoint posGlobal)
 
 Window::~Window() {}
 
-void Window::Destroy()
+void Window::Destroy() noexcept
 {
 	if (wid)
 		delete window(wid);
@@ -801,7 +801,7 @@ public:
 	int GetVisibleRows() const override;
 	PRectangle GetDesiredRect() override;
 	int CaretFromEdge() override;
-	void Clear() override;
+	void Clear() noexcept override;
 	void Append(char *s, int type = -1) override;
 	int Length() override;
 	void Select(int n) override;
@@ -928,7 +928,7 @@ int ListBoxImpl::CaretFromEdge()
 #endif
 	return maxIconWidth + (2 * list->frameWidth()) + extra;
 }
-void ListBoxImpl::Clear()
+void ListBoxImpl::Clear() noexcept
 {
 	ListWidget *list = GetWidget();
 	list->clear();
@@ -1117,7 +1117,7 @@ void Menu::CreatePopUp()
 	mid = new QMenu();
 }
 
-void Menu::Destroy()
+void Menu::Destroy() noexcept
 {
 	if (mid) {
 		QMenu *menu = static_cast<QMenu *>(mid);
