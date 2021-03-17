@@ -1067,10 +1067,6 @@ void Window::InvalidateRectangle(PRectangle rc) {
 	}
 }
 
-void Window::SetFont(const Font *) {
-	// Can not be done generically but only needed for ListBox
-}
-
 void Window::SetCursor(Cursor curs) {
 	// We don't set the cursor to same value numerous times under gtk because
 	// it stores the cursor in the window once it's set

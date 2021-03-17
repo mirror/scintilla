@@ -2341,11 +2341,6 @@ void Window::InvalidateRectangle(PRectangle rc) {
 	::InvalidateRect(HwndFromWindowID(wid), &rcw, FALSE);
 }
 
-void Window::SetFont(const Font *font) {
-	const FontWin *pfm = dynamic_cast<const FontWin *>(font);
-	SetWindowFont(HwndFromWindowID(wid), pfm->HFont(), 0);
-}
-
 namespace {
 
 void FlipBitmap(HBITMAP bitmap, int width, int height) noexcept {

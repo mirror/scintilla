@@ -710,12 +710,6 @@ void Window::InvalidateRectangle(PRectangle rc)
 		window(wid)->update(QRectFromPRect(rc));
 }
 
-void Window::SetFont(const Font *font)
-{
-	if (wid)
-		window(wid)->setFont(*FontPointer(font));
-}
-
 void Window::SetCursor(Cursor curs)
 {
 	if (wid) {

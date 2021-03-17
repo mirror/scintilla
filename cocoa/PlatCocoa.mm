@@ -1406,12 +1406,6 @@ void Window::InvalidateRectangle(PRectangle rc) {
 
 //--------------------------------------------------------------------------------------------------
 
-void Window::SetFont(const Font *) {
-	// Implemented on list subclass on Cocoa.
-}
-
-//--------------------------------------------------------------------------------------------------
-
 /**
  * Converts the Scintilla cursor enum into an NSCursor and stores it in the associated NSView,
  * which then will take care to set up a new mouse tracking rectangle.

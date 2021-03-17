@@ -245,7 +245,6 @@ public:
 	void Show(bool show=true);
 	void InvalidateAll();
 	void InvalidateRectangle(PRectangle rc);
-	virtual void SetFont(const Font *font);
 	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow, cursorHand };
 	void SetCursor(Cursor curs);
 	PRectangle GetMonitorRect(Point pt);
@@ -276,7 +275,7 @@ public:
 	~ListBox() override;
 	static ListBox *Allocate();
 
-	void SetFont(const Font *font) override =0;
+	virtual void SetFont(const Font *font)=0;
 	virtual void Create(Window &parent, int ctrlID, Point location, int lineHeight_, bool unicodeMode_, int technology_)=0;
 	virtual void SetAverageCharWidth(int width)=0;
 	virtual void SetVisibleRows(int rows)=0;
