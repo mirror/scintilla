@@ -1125,7 +1125,7 @@ void Menu::Destroy() noexcept
 	}
 	mid = nullptr;
 }
-void Menu::Show(Point pt, Window & /*w*/)
+void Menu::Show(Point pt, const Window & /*w*/)
 {
 	QMenu *menu = static_cast<QMenu *>(mid);
 	menu->exec(QPoint(pt.x, pt.y));

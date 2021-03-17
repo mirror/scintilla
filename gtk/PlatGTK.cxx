@@ -1930,7 +1930,7 @@ static void MenuPositionFunc(GtkMenu *, gint *x, gint *y, gboolean *, gpointer u
 }
 #endif
 
-void Menu::Show(Point pt, Window &w) {
+void Menu::Show(Point pt, const Window &w) {
 	GtkMenu *widget = static_cast<GtkMenu *>(mid);
 	gtk_widget_show_all(GTK_WIDGET(widget));
 #if GTK_CHECK_VERSION(3,22,0)

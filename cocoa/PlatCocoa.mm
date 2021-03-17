@@ -2032,7 +2032,7 @@ void Menu::Destroy() noexcept {
 
 //--------------------------------------------------------------------------------------------------
 
-void Menu::Show(Point, Window &) {
+void Menu::Show(Point, const Window &) {
 	// Cocoa menus are handled a bit differently. We only create the menu. The framework
 	// takes care to show it properly.
 }

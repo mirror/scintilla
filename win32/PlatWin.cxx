@@ -3404,7 +3404,7 @@ void Menu::Destroy() noexcept {
 	mid = 0;
 }
 
-void Menu::Show(Point pt, Window &w) {
+void Menu::Show(Point pt, const Window &w) {
 	::TrackPopupMenu(static_cast<HMENU>(mid),
 		TPM_RIGHTBUTTON, static_cast<int>(pt.x - 4), static_cast<int>(pt.y), 0,
 		HwndFromWindow(w), nullptr);

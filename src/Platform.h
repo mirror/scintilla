@@ -317,7 +317,7 @@ public:
 	MenuID GetID() const noexcept { return mid; }
 	void CreatePopUp();
 	void Destroy() noexcept;
-	void Show(Point pt, Window &w);
+	void Show(Point pt, const Window &w);
 };
 
 #if defined(__clang__)
