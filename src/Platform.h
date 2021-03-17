@@ -223,13 +223,13 @@ class Window {
 protected:
 	WindowID wid;
 public:
-	Window() noexcept : wid(nullptr), cursorLast(cursorInvalid) {
+	Window() noexcept : wid(nullptr), cursorLast(Cursor::invalid) {
 	}
 	Window(const Window &source) = delete;
 	Window(Window &&) = delete;
 	Window &operator=(WindowID wid_) noexcept {
 		wid = wid_;
-		cursorLast = cursorInvalid;
+		cursorLast = Cursor::invalid;
 		return *this;
 	}
 	Window &operator=(const Window &) = delete;
@@ -245,7 +245,7 @@ public:
 	void Show(bool show=true);
 	void InvalidateAll();
 	void InvalidateRectangle(PRectangle rc);
-	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow, cursorHand };
+	enum class Cursor { invalid, text, arrow, up, wait, horizontal, vertical, reverseArrow, hand };
 	void SetCursor(Cursor curs);
 	PRectangle GetMonitorRect(Point pt);
 private:

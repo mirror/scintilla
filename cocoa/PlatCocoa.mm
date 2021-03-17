@@ -1415,7 +1415,7 @@ void Window::SetCursor(Cursor curs) {
 		id idWin = (__bridge id)(wid);
 		if ([idWin isKindOfClass: [SCIContentView class]]) {
 			SCIContentView *container = idWin;
-			[container setCursor: curs];
+			[container setCursor: static_cast<int>(curs)];
 		}
 	}
 }

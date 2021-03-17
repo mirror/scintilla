@@ -39,19 +39,19 @@ NSString *const SCIUpdateUINotification = @"SCIUpdateUI";
  */
 static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 	switch (cursor) {
-	case Window::cursorText:
+	case Window::Cursor::text:
 		return [NSCursor IBeamCursor];
-	case Window::cursorArrow:
+	case Window::Cursor::arrow:
 		return [NSCursor arrowCursor];
-	case Window::cursorWait:
+	case Window::Cursor::wait:
 		return waitCursor;
-	case Window::cursorHoriz:
+	case Window::Cursor::horizontal:
 		return [NSCursor resizeLeftRightCursor];
-	case Window::cursorVert:
+	case Window::Cursor::vertical:
 		return [NSCursor resizeUpDownCursor];
-	case Window::cursorReverseArrow:
+	case Window::Cursor::reverseArrow:
 		return reverseArrowCursor;
-	case Window::cursorUp:
+	case Window::Cursor::up:
 	default:
 		return [NSCursor arrowCursor];
 	}

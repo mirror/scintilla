@@ -347,9 +347,9 @@ void ScintillaGTK::MapThis() {
 		MapWidget(PWidget(wText));
 		MapWidget(PWidget(scrollbarh));
 		MapWidget(PWidget(scrollbarv));
-		wMain.SetCursor(Window::cursorArrow);
-		scrollbarv.SetCursor(Window::cursorArrow);
-		scrollbarh.SetCursor(Window::cursorArrow);
+		wMain.SetCursor(Window::Cursor::arrow);
+		scrollbarv.SetCursor(Window::Cursor::arrow);
+		scrollbarh.SetCursor(Window::Cursor::arrow);
 		ChangeSize();
 		gdk_window_show(PWindow(wMain));
 	} catch (...) {

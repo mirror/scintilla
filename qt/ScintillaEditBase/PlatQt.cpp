@@ -716,14 +716,14 @@ void Window::SetCursor(Cursor curs)
 		Qt::CursorShape shape;
 
 		switch (curs) {
-			case cursorText:  shape = Qt::IBeamCursor;        break;
-			case cursorArrow: shape = Qt::ArrowCursor;        break;
-			case cursorUp:    shape = Qt::UpArrowCursor;      break;
-			case cursorWait:  shape = Qt::WaitCursor;         break;
-			case cursorHoriz: shape = Qt::SizeHorCursor;      break;
-			case cursorVert:  shape = Qt::SizeVerCursor;      break;
-			case cursorHand:  shape = Qt::PointingHandCursor; break;
-			default:          shape = Qt::ArrowCursor;        break;
+			case Cursor::text:  shape = Qt::IBeamCursor;        break;
+			case Cursor::arrow: shape = Qt::ArrowCursor;        break;
+			case Cursor::up:    shape = Qt::UpArrowCursor;      break;
+			case Cursor::wait:  shape = Qt::WaitCursor;         break;
+			case Cursor::horizontal: shape = Qt::SizeHorCursor; break;
+			case Cursor::vertical:  shape = Qt::SizeVerCursor;  break;
+			case Cursor::hand:  shape = Qt::PointingHandCursor; break;
+			default:            shape = Qt::ArrowCursor;        break;
 		}
 
 		QCursor cursor = QCursor(shape);

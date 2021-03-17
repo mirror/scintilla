@@ -1078,27 +1078,27 @@ void Window::SetCursor(Cursor curs) {
 
 	GdkCursor *gdkCurs;
 	switch (curs) {
-	case cursorText:
+	case Cursor::text:
 		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_XTERM);
 		break;
-	case cursorArrow:
+	case Cursor::arrow:
 		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_LEFT_PTR);
 		break;
-	case cursorUp:
+	case Cursor::up:
 		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_CENTER_PTR);
 		break;
-	case cursorWait:
+	case Cursor::wait:
 		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_WATCH);
 		break;
-	case cursorHand:
+	case Cursor::hand:
 		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_HAND2);
 		break;
-	case cursorReverseArrow:
+	case Cursor::reverseArrow:
 		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_RIGHT_PTR);
 		break;
 	default:
 		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_LEFT_PTR);
-		cursorLast = cursorArrow;
+		cursorLast = Cursor::arrow;
 		break;
 	}
 

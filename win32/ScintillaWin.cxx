@@ -692,7 +692,7 @@ void ScintillaWin::DisplayCursor(Window::Cursor c) {
 	if (cursorMode != SC_CURSORNORMAL) {
 		c = static_cast<Window::Cursor>(cursorMode);
 	}
-	if (c == Window::cursorReverseArrow) {
+	if (c == Window::Cursor::reverseArrow) {
 		::SetCursor(reverseArrowCursor.Load(dpi));
 	} else {
 		wMain.SetCursor(c);
@@ -1366,23 +1366,23 @@ sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
 
 Window::Cursor ScintillaWin::ContextCursor(Point pt) {
 	if (inDragDrop == ddDragging) {
-		return Window::cursorUp;
+		return Window::Cursor::up;
 	} else {
 		// Display regular (drag) cursor over selection
 		if (PointInSelMargin(pt)) {
 			return GetMarginCursor(pt);
 		} else if (!SelectionEmpty() && PointInSelection(pt)) {
-			return Window::cursorArrow;
+			return Window::Cursor::arrow;
 		} else if (PointIsHotspot(pt)) {
-			return Window::cursorHand;
+			return Window::Cursor::hand;
 		} else if (hoverIndicatorPos != Sci::invalidPosition) {
 			const Sci::Position pos = PositionFromLocation(pt, true, true);
 			if (pos != Sci::invalidPosition) {
-				return Window::cursorHand;
+				return Window::Cursor::hand;
 			}
 		}
 	}
-	return Window::cursorText;
+	return Window::Cursor::text;
 }
 
 sptr_t ScintillaWin::ShowContextMenu(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
