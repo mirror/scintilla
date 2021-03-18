@@ -268,11 +268,11 @@ void EditView::DropGraphics(bool freeObjects) {
 
 void EditView::AllocateGraphics(const ViewStyle &vsDraw) {
 	if (!pixmapLine)
-		pixmapLine.reset(Surface::Allocate(vsDraw.technology));
+		pixmapLine = Surface::Allocate(vsDraw.technology);
 	if (!pixmapIndentGuide)
-		pixmapIndentGuide.reset(Surface::Allocate(vsDraw.technology));
+		pixmapIndentGuide = Surface::Allocate(vsDraw.technology);
 	if (!pixmapIndentGuideHighlight)
-		pixmapIndentGuideHighlight.reset(Surface::Allocate(vsDraw.technology));
+		pixmapIndentGuideHighlight = Surface::Allocate(vsDraw.technology);
 }
 
 static const char *ControlCharacterString(unsigned char ch) noexcept {

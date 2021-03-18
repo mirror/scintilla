@@ -949,8 +949,8 @@ void SurfaceImpl::SetDBCSMode(int codePage) {
 void SurfaceImpl::SetBidiR2L(bool) {
 }
 
-Surface *Surface::Allocate(int) {
-	return new SurfaceImpl();
+std::unique_ptr<Surface> Surface::Allocate(int) {
+	return std::make_unique<SurfaceImpl>();
 }
 
 Window::~Window() {}

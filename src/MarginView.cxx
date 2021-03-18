@@ -126,11 +126,11 @@ void MarginView::DropGraphics(bool freeObjects) {
 
 void MarginView::AllocateGraphics(const ViewStyle &vsDraw) {
 	if (!pixmapSelMargin)
-		pixmapSelMargin.reset(Surface::Allocate(vsDraw.technology));
+		pixmapSelMargin = Surface::Allocate(vsDraw.technology);
 	if (!pixmapSelPattern)
-		pixmapSelPattern.reset(Surface::Allocate(vsDraw.technology));
+		pixmapSelPattern = Surface::Allocate(vsDraw.technology);
 	if (!pixmapSelPatternOffset1)
-		pixmapSelPatternOffset1.reset(Surface::Allocate(vsDraw.technology));
+		pixmapSelPatternOffset1 = Surface::Allocate(vsDraw.technology);
 }
 
 void MarginView::RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw) {

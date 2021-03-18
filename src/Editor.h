@@ -643,7 +643,7 @@ private:
 public:
 	AutoSurface(const Editor *ed, int technology = -1) {
 		if (ed->wMain.GetID()) {
-			surf.reset(Surface::Allocate(technology != -1 ? technology : ed->technology));
+			surf = Surface::Allocate(technology != -1 ? technology : ed->technology);
 			surf->Init(ed->wMain.GetID());
 			surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
 			surf->SetDBCSMode(ed->CodePage());
@@ -652,7 +652,7 @@ public:
 	}
 	AutoSurface(SurfaceID sid, Editor *ed, int technology = -1) {
 		if (ed->wMain.GetID()) {
-			surf.reset(Surface::Allocate(technology != -1 ? technology : ed->technology));
+			surf = Surface::Allocate(technology != -1 ? technology : ed->technology);
 			surf->Init(sid, ed->wMain.GetID());
 			surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
 			surf->SetDBCSMode(ed->CodePage());

@@ -668,12 +668,11 @@ public:
 	void paintEvent(QPaintEvent *) override
 	{
 		if (pct->inCallTipMode) {
-			Surface *surfaceWindow = Surface::Allocate(0);
+			std::unique_ptr<Surface> surfaceWindow = Surface::Allocate(0);
 			surfaceWindow->Init(this);
 			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == pct->codePage);
 			surfaceWindow->SetDBCSMode(pct->codePage);
-			pct->PaintCT(surfaceWindow);
-			delete surfaceWindow;
+			pct->PaintCT(surfaceWindow.get());
 		}
 	}
 

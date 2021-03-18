@@ -168,7 +168,7 @@ public:
 	Surface &operator=(const Surface &) = delete;
 	Surface &operator=(Surface &&) = delete;
 	virtual ~Surface() {}
-	static Surface *Allocate(int technology);
+	static std::unique_ptr<Surface> Allocate(int technology);
 
 	virtual void Init(WindowID wid)=0;
 	virtual void Init(SurfaceID sid, WindowID wid)=0;

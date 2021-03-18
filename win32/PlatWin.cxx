@@ -2237,14 +2237,14 @@ void SurfaceD2D::SetBidiR2L(bool) {
 
 #endif
 
-Surface *Surface::Allocate(int technology) {
+std::unique_ptr<Surface> Surface::Allocate(int technology) {
 #if defined(USE_D2D)
 	if (technology == SCWIN_TECH_GDI)
-		return new SurfaceGDI;
+		return std::make_unique<SurfaceGDI>();
 	else
-		return new SurfaceD2D;
+		return std::make_unique<SurfaceD2D>();
 #else
-	return new SurfaceGDI;
+	return std::make_unique<SurfaceGDI>();
 #endif
 }
 

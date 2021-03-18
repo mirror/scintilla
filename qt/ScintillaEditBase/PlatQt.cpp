@@ -611,9 +611,9 @@ QPainter *SurfaceImpl::GetPainter()
 	return painter;
 }
 
-Surface *Surface::Allocate(int)
+std::unique_ptr<Surface> Surface::Allocate(int)
 {
-	return new SurfaceImpl;
+	return std::make_unique<SurfaceImpl>();
 }
 
 
