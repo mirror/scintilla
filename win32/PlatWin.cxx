@@ -130,7 +130,7 @@ void LoadD2DOnce() noexcept {
 	if (pIDWriteFactory) {
 		const HRESULT hr = pIDWriteFactory->CreateRenderingParams(&defaultRenderingParams);
 		if (SUCCEEDED(hr)) {
-			unsigned int clearTypeContrast;
+			unsigned int clearTypeContrast = 0;
 			if (::SystemParametersInfo(SPI_GETFONTSMOOTHINGCONTRAST, 0, &clearTypeContrast, 0)) {
 
 				FLOAT gamma;
@@ -1302,11 +1302,12 @@ void SurfaceD2D::PenColour(ColourDesired fore) {
 
 void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 	if (pRenderTarget) {
-		D2D_COLOR_F col;
-		col.r = fore.GetRedComponent();
-		col.g = fore.GetGreenComponent();
-		col.b = fore.GetBlueComponent();
-		col.a = alpha / 255.0f;
+		const D2D_COLOR_F col {
+			fore.GetRedComponent(),
+			fore.GetGreenComponent(),
+			fore.GetBlueComponent(),
+			alpha / 255.0f
+		};
 		if (pBrush) {
 			pBrush->SetColor(col);
 		} else {
@@ -1512,21 +1513,22 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 
 namespace {
 
-D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {
-	D2D_COLOR_F col;
-	col.r = colour.GetRedComponent();
-	col.g = colour.GetGreenComponent();
-	col.b = colour.GetBlueComponent();
-	col.a = colour.GetAlphaComponent();
-	return col;
+constexpr D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {
+	return D2D_COLOR_F{
+		colour.GetRedComponent(),
+		colour.GetGreenComponent(),
+		colour.GetBlueComponent(),
+		colour.GetAlphaComponent()
+	};
 }
 
 }
 
 void SurfaceD2D::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
 	if (pRenderTarget) {
-		D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES lgbp;
-		lgbp.startPoint = D2D1::Point2F(rc.left, rc.top);
+		D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES lgbp {
+			D2D1::Point2F(rc.left, rc.top), {}
+		};
 		switch (options) {
 		case GradientOptions::leftToRight:
 			lgbp.endPoint = D2D1::Point2F(rc.right, rc.top);
@@ -2000,11 +2002,7 @@ std::vector<Interval> ScreenLineLayout::FindRangeIntervals(size_t start, size_t 
 	for (size_t i = 0; i < actualHitTestCount; ++i) {
 		// Store selection rectangle
 		const DWRITE_HIT_TEST_METRICS &htm = hitTestMetrics[i];
-		Interval selectionInterval;
-
-		selectionInterval.left = htm.left;
-		selectionInterval.right = htm.left + htm.width;
-
+		const Interval selectionInterval { htm.left, htm.left + htm.width };
 		ret.push_back(selectionInterval);
 	}
 
@@ -2375,7 +2373,7 @@ HCURSOR LoadReverseArrowCursor(UINT dpi) noexcept {
 
 	ICONINFO info;
 	if (::GetIconInfo(cursor, &info)) {
-		BITMAP bmp;
+		BITMAP bmp {};
 		if (::GetObject(info.hbmMask, sizeof(bmp), &bmp)) {
 			FlipBitmap(info.hbmMask, bmp.bmWidth, bmp.bmHeight);
 			if (info.hbmColor)
@@ -2964,6 +2962,8 @@ void ListBoxX::ResizeToCursor() {
 			rc.bottom = pt.y;
 			rc.right = pt.x;
 			break;
+		default:
+			break;
 	}
 
 	const POINT ptMin = MinTrackSize();
@@ -3055,6 +3055,8 @@ LRESULT ListBoxX::NcHitTest(WPARAM wParam, LPARAM lParam) const {
 				if (rc.bottom <= location.y)
 					hit = HTERROR;
 			}
+			break;
+		default:
 			break;
 	}
 
@@ -3165,6 +3167,9 @@ LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam,
 		case WM_MBUTTONDOWN:
 			// disable the scroll wheel button click action
 			return 0;
+
+		default:
+			break;
 		}
 
 		WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
