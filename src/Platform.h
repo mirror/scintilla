@@ -101,7 +101,7 @@ struct FontParameters {
 	int technology;
 	int characterSet;
 
-	FontParameters(
+	constexpr FontParameters(
 		const char *faceName_,
 		float size_=10,
 		int weight_=400,
