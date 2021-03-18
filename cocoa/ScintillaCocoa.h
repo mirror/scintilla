@@ -120,7 +120,7 @@ protected:
 	void Redraw() override;
 
 	void Init();
-	CaseFolder *CaseFolderForEncoding() override;
+	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
 	std::string CaseMapString(const std::string &s, int caseMapping) override;
 	void CancelModes() override;
 

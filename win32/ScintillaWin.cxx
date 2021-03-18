@@ -428,7 +428,7 @@ class ScintillaWin :
 	int GetCtrlID() override;
 	void NotifyParent(SCNotification scn) override;
 	void NotifyDoubleClick(Point pt, int modifiers) override;
-	CaseFolder *CaseFolderForEncoding() override;
+	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
 	std::string CaseMapString(const std::string &s, int caseMapping) override;
 	void Copy() override;
 	bool CanPaste() override;
@@ -2356,13 +2356,13 @@ public:
 	}
 };
 
-CaseFolder *ScintillaWin::CaseFolderForEncoding() {
+std::unique_ptr<CaseFolder> ScintillaWin::CaseFolderForEncoding() {
 	const UINT cpDest = CodePageOfDocument();
 	if (cpDest == SC_CP_UTF8) {
-		return new CaseFolderUnicode();
+		return std::make_unique<CaseFolderUnicode>();
 	} else {
 		if (pdoc->dbcsCodePage == 0) {
-			CaseFolderTable *pcf = new CaseFolderTable();
+			std::unique_ptr<CaseFolderTable> pcf = std::make_unique<CaseFolderTable>();
 			pcf->StandardASCII();
 			// Only for single byte encodings
 			for (int i=0x80; i<0x100; i++) {
@@ -2391,7 +2391,7 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 			}
 			return pcf;
 		} else {
-			return new CaseFolderDBCS(cpDest);
+			return std::make_unique<CaseFolderDBCS>(cpDest);
 		}
 	}
 }

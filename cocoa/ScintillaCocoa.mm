@@ -585,14 +585,14 @@ public:
 	}
 };
 
-CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
+std::unique_ptr<CaseFolder> ScintillaCocoa::CaseFolderForEncoding() {
 	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
-		return new CaseFolderUnicode();
+		return std::make_unique<CaseFolderUnicode>();
 	} else {
 		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
 					    vs.styles[STYLE_DEFAULT].characterSet);
 		if (pdoc->dbcsCodePage == 0) {
-			CaseFolderTable *pcf = new CaseFolderTable();
+			std::unique_ptr<CaseFolderTable> pcf = std::make_unique<CaseFolderTable>();
 			pcf->StandardASCII();
 			// Only for single byte encodings
 			for (int i=0x80; i<0x100; i++) {
@@ -615,7 +615,7 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
 			}
 			return pcf;
 		} else {
-			return new CaseFolderDBCS(encoding);
+			return std::make_unique<CaseFolderDBCS>(encoding);
 		}
 	}
 }

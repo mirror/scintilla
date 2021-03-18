@@ -123,7 +123,7 @@ private:
 	void NotifyKey(int key, int modifiers);
 	void NotifyURIDropped(const char *list);
 	const char *CharacterSetID() const;
-	CaseFolder *CaseFolderForEncoding() override;
+	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
 	std::string CaseMapString(const std::string &s, int caseMapping) override;
 	int KeyDefault(int key, int modifiers) override;
 	void CopyToClipboard(const SelectionText &selectedText) override;

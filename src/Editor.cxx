@@ -4057,9 +4057,9 @@ public:
 };
 
 
-CaseFolder *Editor::CaseFolderForEncoding() {
+std::unique_ptr<CaseFolder> Editor::CaseFolderForEncoding() {
 	// Simple default that only maps ASCII upper case to lower case.
-	return new CaseFolderASCII();
+	return std::make_unique<CaseFolderASCII>();
 }
 
 /**

@@ -481,7 +481,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void Indent(bool forwards);
 
-	virtual CaseFolder *CaseFolderForEncoding();
+	virtual std::unique_ptr<CaseFolder> CaseFolderForEncoding();
 	Sci::Position FindText(uptr_t wParam, sptr_t lParam);
 	void SearchAnchor();
 	Sci::Position SearchText(unsigned int iMessage, uptr_t wParam, sptr_t lParam);

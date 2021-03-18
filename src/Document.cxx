@@ -1971,8 +1971,8 @@ bool Document::HasCaseFolder() const noexcept {
 	return pcf != nullptr;
 }
 
-void Document::SetCaseFolder(CaseFolder *pcf_) noexcept {
-	pcf.reset(pcf_);
+void Document::SetCaseFolder(std::unique_ptr<CaseFolder> pcf_) noexcept {
+	pcf = std::move(pcf_);
 }
 
 Document::CharacterExtracted Document::ExtractCharacter(Sci::Position position) const noexcept {

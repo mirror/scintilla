@@ -135,7 +135,7 @@ private:
 	const char *CharacterSetIDOfDocument() const;
 	QString StringFromDocument(const char *s) const;
 	QByteArray BytesForDocument(const QString &text) const;
-	CaseFolder *CaseFolderForEncoding() override;
+	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
 	std::string CaseMapString(const std::string &s, int caseMapping) override;
 
 	void CreateCallTipWindow(PRectangle rc) override;

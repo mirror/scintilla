@@ -1150,14 +1150,14 @@ public:
 	}
 };
 
-CaseFolder *ScintillaGTK::CaseFolderForEncoding() {
+std::unique_ptr<CaseFolder> ScintillaGTK::CaseFolderForEncoding() {
 	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
-		return new CaseFolderUnicode();
+		return std::make_unique<CaseFolderUnicode>();
 	} else {
 		const char *charSetBuffer = CharacterSetID();
 		if (charSetBuffer) {
 			if (pdoc->dbcsCodePage == 0) {
-				CaseFolderTable *pcf = new CaseFolderTable();
+				std::unique_ptr<CaseFolderTable> pcf = std::make_unique<CaseFolderTable>();
 				pcf->StandardASCII();
 				// Only for single byte encodings
 				for (int i=0x80; i<0x100; i++) {
@@ -1180,7 +1180,7 @@ CaseFolder *ScintillaGTK::CaseFolderForEncoding() {
 				}
 				return pcf;
 			} else {
-				return new CaseFolderDBCS(charSetBuffer);
+				return std::make_unique<CaseFolderDBCS>(charSetBuffer);
 			}
 		}
 		return nullptr;
