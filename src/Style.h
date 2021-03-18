@@ -48,8 +48,8 @@ public:
 	ColourDesired back;
 	bool eolFilled;
 	bool underline;
-	enum ecaseForced {caseMixed, caseUpper, caseLower, caseCamel};
-	ecaseForced caseForce;
+	enum class CaseForce {mixed, upper, lower, camel};
+	CaseForce caseForce;
 	bool visible;
 	bool changeable;
 	bool hotspot;
@@ -66,7 +66,7 @@ public:
 	           int size_,
 	           const char *fontName_, int characterSet_,
 	           int weight_, bool italic_, bool eolFilled_,
-	           bool underline_, ecaseForced caseForce_,
+	           bool underline_, CaseForce caseForce_,
 	           bool visible_, bool changeable_, bool hotspot_) noexcept;
 	void ClearTo(const Style &source) noexcept;
 	void Copy(std::shared_ptr<Font> font_, const FontMeasurements &fm_) noexcept;

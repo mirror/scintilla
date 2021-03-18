@@ -66,7 +66,7 @@ EditModel::EditModel() : braces{} {
 	bracesMatchStyle = STYLE_BRACEBAD;
 	highlightGuideColumn = 0;
 	primarySelection = true;
-	imeInteraction = imeWindowed;
+	imeInteraction = IMEInteraction::windowed;
 	bidirectional = Bidirectional::bidiDisabled;
 	foldFlags = 0;
 	foldDisplayTextStyle = SC_FOLDDISPLAYTEXT_HIDDEN;

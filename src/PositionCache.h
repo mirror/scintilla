@@ -38,10 +38,11 @@ public:
 // There are two points for some positions and this enumeration
 // can choose between the end of the first line or subline
 // and the start of the next line or subline.
-enum PointEnd {
-	peDefault = 0x0,
-	peLineEnd = 0x1,
-	peSubLineEnd = 0x2
+enum class PointEnd {
+	start = 0x0,
+	lineEnd = 0x1,
+	subLineEnd = 0x2,
+	endEither = lineEnd | subLineEnd,
 };
 
 class BidiData {

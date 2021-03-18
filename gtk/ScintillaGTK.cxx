@@ -652,8 +652,8 @@ void ScintillaGTK::Init() {
 		caret.period = 0;
 	}
 
-	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
-		timers[tr].reason = tr;
+	for (size_t tr = static_cast<size_t>(TickReason::caret); tr <= static_cast<size_t>(TickReason::dwell); tr++) {
+		timers[tr].reason = static_cast<TickReason>(tr);
 		timers[tr].scintilla = this;
 	}
 	vs.indicators[SC_INDICATOR_UNKNOWN] = Indicator(INDIC_HIDDEN, ColourDesired(0, 0, 0xff));
@@ -663,8 +663,8 @@ void ScintillaGTK::Init() {
 }
 
 void ScintillaGTK::Finalise() {
-	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
-		FineTickerCancel(tr);
+	for (size_t tr = static_cast<size_t>(TickReason::caret); tr <= static_cast<size_t>(TickReason::dwell); tr++) {
+		FineTickerCancel(static_cast<TickReason>(tr));
 	}
 	if (accessible) {
 		gtk_accessible_set_widget(GTK_ACCESSIBLE(accessible), nullptr);
@@ -676,7 +676,7 @@ void ScintillaGTK::Finalise() {
 }
 
 bool ScintillaGTK::AbandonPaint() {
-	if ((paintState == painting) && !paintingAllText) {
+	if ((paintState == PaintState::painting) && !paintingAllText) {
 		repaintFullWindow = true;
 	}
 	return false;
@@ -697,7 +697,7 @@ bool ScintillaGTK::DragThreshold(Point ptStart, Point ptNow) {
 void ScintillaGTK::StartDrag() {
 	PLATFORM_ASSERT(evbtn);
 	dragWasDropped = false;
-	inDragDrop = ddDragging;
+	inDragDrop = DragDrop::dragging;
 	GtkTargetList *tl = gtk_target_list_new(clipboardCopyTargets, nClipboardCopyTargets);
 #if GTK_CHECK_VERSION(3,10,0)
 	gtk_drag_begin_with_coordinates(GTK_WIDGET(PWidget(wMain)),
@@ -902,18 +902,20 @@ sptr_t ScintillaGTK::DefWndProc(unsigned int, uptr_t, sptr_t) {
 }
 
 bool ScintillaGTK::FineTickerRunning(TickReason reason) {
-	return timers[reason].timer != 0;
+	return timers[static_cast<size_t>(reason)].timer != 0;
 }
 
 void ScintillaGTK::FineTickerStart(TickReason reason, int millis, int /* tolerance */) {
 	FineTickerCancel(reason);
-	timers[reason].timer = gdk_threads_add_timeout(millis, TimeOut, &timers[reason]);
+	const size_t reasonIndex = static_cast<size_t>(reason);
+	timers[reasonIndex].timer = gdk_threads_add_timeout(millis, TimeOut, &timers[reasonIndex]);
 }
 
 void ScintillaGTK::FineTickerCancel(TickReason reason) {
-	if (timers[reason].timer) {
-		g_source_remove(timers[reason].timer);
-		timers[reason].timer = 0;
+	const size_t reasonIndex = static_cast<size_t>(reason);
+	if (timers[reasonIndex].timer) {
+		g_source_remove(timers[reasonIndex].timer);
+		timers[reasonIndex].timer = 0;
 	}
 }
 
@@ -975,7 +977,7 @@ bool ScintillaGTK::PaintContains(PRectangle rc) {
 	// This allows optimization when a rectangle is completely in the update region.
 	// It is OK to return false when too difficult to determine as that just performs extra drawing
 	bool contains = true;
-	if (paintState == painting) {
+	if (paintState == PaintState::painting) {
 		if (!rcPaint.Contains(rc)) {
 			contains = false;
 		} else if (rgnUpdate) {
@@ -1081,7 +1083,7 @@ bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 #endif
 		modified = true;
 	}
-	if (modified && (paintState == painting)) {
+	if (modified && (paintState == PaintState::painting)) {
 		repaintFullWindow = true;
 	}
 
@@ -1228,14 +1230,14 @@ struct CaseMapper {
 
 }
 
-std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
-	if ((s.size() == 0) || (caseMapping == cmSame))
+std::string ScintillaGTK::CaseMapString(const std::string &s, CaseMapping caseMapping) {
+	if ((s.size() == 0) || (caseMapping == CaseMapping::same))
 		return s;
 
 	if (IsUnicodeMode()) {
 		std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
 		const size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
-					 (caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
+					 (caseMapping == CaseMapping::upper) ? CaseConversionUpper : CaseConversionLower);
 		retMapped.resize(lenMapped);
 		return retMapped;
 	}
@@ -1243,13 +1245,13 @@ std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
 	const char *charSetBuffer = CharacterSetID();
 
 	if (!*charSetBuffer) {
-		CaseMapper mapper(s, caseMapping == cmUpper);
+		CaseMapper mapper(s, caseMapping == CaseMapping::upper);
 		return std::string(mapper.mapped, strlen(mapper.mapped));
 	} else {
 		// Change text to UTF-8
 		std::string sUTF8 = ConvertText(s.c_str(), s.length(),
 						"UTF-8", charSetBuffer, false);
-		CaseMapper mapper(sUTF8, caseMapping == cmUpper);
+		CaseMapper mapper(sUTF8, caseMapping == CaseMapping::upper);
 		return ConvertText(mapper.mapped, strlen(mapper.mapped), charSetBuffer, "UTF-8", false);
 	}
 }
@@ -1468,7 +1470,7 @@ void ScintillaGTK::InsertSelection(GtkClipboard *clipBoard, GtkSelectionData *se
 		}
 
 		InsertPasteShape(selText.Data(), selText.Length(),
-				 selText.rectangular ? pasteRectangular : pasteStream);
+				 selText.rectangular ? PasteShape::rectangular : PasteShape::stream);
 		EnsureCaretVisible();
 	} else {
 		GdkAtom target = gtk_selection_data_get_target(selectionData);
@@ -2504,7 +2506,7 @@ void ScintillaGTK::PreeditChangedWindowedThis() {
 }
 
 void ScintillaGTK::PreeditChanged(GtkIMContext *, ScintillaGTK *sciThis) {
-	if ((sciThis->imeInteraction == imeInline) || (sciThis->KoreanIME())) {
+	if ((sciThis->imeInteraction == IMEInteraction::internal) || (sciThis->KoreanIME())) {
 		sciThis->PreeditChangedInlineThis();
 	} else {
 		sciThis->PreeditChangedWindowedThis();
@@ -2574,7 +2576,7 @@ void ScintillaGTK::Destroy(GObject *object) {
 
 gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 	try {
-		paintState = painting;
+		paintState = PaintState::painting;
 		repaintFullWindow = false;
 
 		rcPaint = GetClientRectangle();
@@ -2600,18 +2602,18 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		surfaceWindow->Init(cr, PWidget(wText));
 		Paint(surfaceWindow.get(), rcPaint);
 		surfaceWindow->Release();
-		if ((paintState == paintAbandoned) || repaintFullWindow) {
+		if ((paintState == PaintState::abandoned) || repaintFullWindow) {
 			// Painting area was insufficient to cover new styling or brace highlight positions
 			FullPaint();
 		}
-		paintState = notPainting;
+		paintState = PaintState::notPainting;
 		repaintFullWindow = false;
 
 		if (rgnUpdate) {
 			cairo_rectangle_list_destroy(rgnUpdate);
 		}
 		rgnUpdate = 0;
-		paintState = notPainting;
+		paintState = PaintState::notPainting;
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2672,7 +2674,7 @@ gboolean ScintillaGTK::DrawMain(GtkWidget *widget, cairo_t *cr) {
 
 gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *ose) {
 	try {
-		paintState = painting;
+		paintState = PaintState::painting;
 
 		rcPaint = PRectangle::FromInts(
 				  ose->area.x,
@@ -2690,11 +2692,11 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		Paint(surfaceWindow.get(), rcPaint);
 		surfaceWindow->Release();
 		cairo_destroy(cr);
-		if ((paintState == paintAbandoned) || repaintFullWindow) {
+		if ((paintState == PaintState::abandoned) || repaintFullWindow) {
 			// Painting area was insufficient to cover new styling or brace highlight positions
 			FullPaint();
 		}
-		paintState = notPainting;
+		paintState = PaintState::notPainting;
 		repaintFullWindow = false;
 
 		if (rgnUpdate) {
@@ -2795,7 +2797,7 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 		GdkDragAction preferredAction = gdk_drag_context_get_suggested_action(context);
 		const GdkDragAction actions = gdk_drag_context_get_actions(context);
 		const SelectionPosition pos = SPositionFromLocation(npt);
-		if ((inDragDrop == ddDragging) && (PositionInSelection(pos.Position()))) {
+		if ((inDragDrop == DragDrop::dragging) && (PositionInSelection(pos.Position()))) {
 			// Avoid dragging selection onto itself as that produces a move
 			// with no real effect but which creates undo actions.
 			preferredAction = static_cast<GdkDragAction>(0);
@@ -2833,7 +2835,7 @@ void ScintillaGTK::DragEnd(GtkWidget *widget, GdkDragContext * /*context*/) {
 			sciThis->SetEmptySelection(sciThis->posDrag);
 		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 		//Platform::DebugPrintf("DragEnd %x %d\n", sciThis, sciThis->dragWasDropped);
-		sciThis->inDragDrop = ddNone;
+		sciThis->inDragDrop = DragDrop::none;
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2921,7 +2923,7 @@ void ScintillaGTK::IdleWork() {
 	styleIdleID = 0;
 }
 
-void ScintillaGTK::QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) {
+void ScintillaGTK::QueueIdleWork(WorkItems items, Sci::Position upTo) {
 	Editor::QueueIdleWork(items, upTo);
 	if (!styleIdleID) {
 		// Only allow one style needed to be queued

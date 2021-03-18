@@ -409,9 +409,9 @@ class ScintillaWin :
 	std::string EncodeWString(std::wstring_view wsv);
 	sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 	void IdleWork() override;
-	void QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) override;
+	void QueueIdleWork(WorkItems items, Sci::Position upTo) override;
 	bool SetIdle(bool on) override;
-	UINT_PTR timers[tickDwell+1] {};
+	UINT_PTR timers[static_cast<int>(TickReason::dwell)+1] {};
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
 	void FineTickerCancel(TickReason reason) override;
@@ -432,7 +432,7 @@ class ScintillaWin :
 	void NotifyParent(SCNotification scn) override;
 	void NotifyDoubleClick(Point pt, int modifiers) override;
 	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
-	std::string CaseMapString(const std::string &s, int caseMapping) override;
+	std::string CaseMapString(const std::string &s, CaseMapping caseMapping) override;
 	void Copy() override;
 	bool CanPaste() override;
 	void Paste() override;
@@ -590,7 +590,8 @@ void ScintillaWin::Init() {
 
 void ScintillaWin::Finalise() {
 	ScintillaBase::Finalise();
-	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+	for (TickReason tr = TickReason::caret; tr <= TickReason::dwell;
+		tr = static_cast<TickReason>(static_cast<int>(tr) + 1)) {
 		FineTickerCancel(tr);
 	}
 	SetIdle(false);
@@ -713,7 +714,7 @@ bool ScintillaWin::DragThreshold(Point ptStart, Point ptNow) {
 }
 
 void ScintillaWin::StartDrag() {
-	inDragDrop = ddDragging;
+	inDragDrop = DragDrop::dragging;
 	DWORD dwEffect = 0;
 	dropWentOutside = true;
 	IDataObject *pDataObject = reinterpret_cast<IDataObject *>(&dob);
@@ -730,7 +731,7 @@ void ScintillaWin::StartDrag() {
 			ClearSelection();
 		}
 	}
-	inDragDrop = ddNone;
+	inDragDrop = DragDrop::none;
 	SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
@@ -941,7 +942,7 @@ sptr_t ScintillaWin::WndPaint() {
 
 	// Redirect assertions to debug output and save current state
 	const bool assertsPopup = Platform::ShowAssertionPopUps(false);
-	paintState = painting;
+	paintState = PaintState::painting;
 	PAINTSTRUCT ps = {};
 
 	// Removed since this interferes with reporting other assertions as it occurs repeatedly
@@ -953,7 +954,7 @@ sptr_t ScintillaWin::WndPaint() {
 	const PRectangle rcClient = GetClientRectangle();
 	paintingAllText = BoundsContains(rcPaint, hRgnUpdate, rcClient);
 	if (!PaintDC(ps.hdc)) {
-		paintState = paintAbandoned;
+		paintState = PaintState::abandoned;
 	}
 	if (hRgnUpdate) {
 		::DeleteRgn(hRgnUpdate);
@@ -961,12 +962,12 @@ sptr_t ScintillaWin::WndPaint() {
 	}
 
 	::EndPaint(MainHWND(), &ps);
-	if (paintState == paintAbandoned) {
+	if (paintState == PaintState::abandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
 		FullPaint();
 		::ValidateRect(MainHWND(), nullptr);
 	}
-	paintState = notPainting;
+	paintState = PaintState::notPainting;
 
 	// Restore debug output state
 	Platform::ShowAssertionPopUps(assertsPopup);
@@ -1370,7 +1371,7 @@ sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
 }
 
 Window::Cursor ScintillaWin::ContextCursor(Point pt) {
-	if (inDragDrop == ddDragging) {
+	if (inDragDrop == DragDrop::dragging) {
 		return Window::Cursor::up;
 	} else {
 		// Display regular (drag) cursor over selection
@@ -1411,7 +1412,7 @@ sptr_t ScintillaWin::ShowContextMenu(unsigned int iMessage, uptr_t wParam, sptr_
 
 void ScintillaWin::SizeWindow() {
 #if defined(USE_D2D)
-	if (paintState == notPainting) {
+	if (paintState == PaintState::notPainting) {
 		DropRenderTarget();
 	} else {
 		renderTargetValid = false;
@@ -1651,7 +1652,7 @@ sptr_t ScintillaWin::IMEMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 		}
 
 	case WM_IME_STARTCOMPOSITION:
-		if (KoreanIME() || imeInteraction == imeInline) {
+		if (KoreanIME() || imeInteraction == IMEInteraction::internal) {
 			return 0;
 		} else {
 			ImeStartComposition();
@@ -1663,14 +1664,14 @@ sptr_t ScintillaWin::IMEMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 		return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 	case WM_IME_COMPOSITION:
-		if (KoreanIME() || imeInteraction == imeInline) {
+		if (KoreanIME() || imeInteraction == IMEInteraction::internal) {
 			return HandleCompositionInline(wParam, lParam);
 		} else {
 			return HandleCompositionWindowed(wParam, lParam);
 		}
 
 	case WM_IME_SETCONTEXT:
-		if (KoreanIME() || imeInteraction == imeInline) {
+		if (KoreanIME() || imeInteraction == IMEInteraction::internal) {
 			if (wParam) {
 				LPARAM NoImeWin = lParam;
 				NoImeWin = NoImeWin & (~ISC_SHOWUICOMPOSITIONWINDOW);
@@ -1736,7 +1737,7 @@ sptr_t ScintillaWin::EditMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 				return 0;
 			}
 			const CHARRANGE *pCR = reinterpret_cast<const CHARRANGE *>(lParam);
-			sel.selType = Selection::selStream;
+			sel.selType = Selection::SelTypes::stream;
 			if (pCR->cpMin == 0 && pCR->cpMax == -1) {
 				SetSelection(pCR->cpMin, pdoc->Length());
 			} else {
@@ -2081,23 +2082,25 @@ sptr_t ScintillaWin::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 }
 
 bool ScintillaWin::FineTickerRunning(TickReason reason) {
-	return timers[reason] != 0;
+	return timers[static_cast<size_t>(reason)] != 0;
 }
 
 void ScintillaWin::FineTickerStart(TickReason reason, int millis, int tolerance) {
 	FineTickerCancel(reason);
-	const UINT_PTR eventID = static_cast<UINT_PTR>(fineTimerStart) + reason;
+	const UINT_PTR reasonIndex = static_cast<UINT_PTR>(reason);
+	const UINT_PTR eventID = static_cast<UINT_PTR>(fineTimerStart) + reasonIndex;
 	if (SetCoalescableTimerFn && tolerance) {
-		timers[reason] = SetCoalescableTimerFn(MainHWND(), eventID, millis, nullptr, tolerance);
+		timers[reasonIndex] = SetCoalescableTimerFn(MainHWND(), eventID, millis, nullptr, tolerance);
 	} else {
-		timers[reason] = ::SetTimer(MainHWND(), eventID, millis, nullptr);
+		timers[reasonIndex] = ::SetTimer(MainHWND(), eventID, millis, nullptr);
 	}
 }
 
 void ScintillaWin::FineTickerCancel(TickReason reason) {
-	if (timers[reason]) {
-		::KillTimer(MainHWND(), timers[reason]);
-		timers[reason] = 0;
+	const UINT_PTR reasonIndex = static_cast<UINT_PTR>(reason);
+	if (timers[reasonIndex]) {
+		::KillTimer(MainHWND(), timers[reasonIndex]);
+		timers[reasonIndex] = 0;
 	}
 }
 
@@ -2124,7 +2127,7 @@ void ScintillaWin::IdleWork() {
 	Editor::IdleWork();
 }
 
-void ScintillaWin::QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) {
+void ScintillaWin::QueueIdleWork(WorkItems items, Sci::Position upTo) {
 	Editor::QueueIdleWork(items, upTo);
 	if (!styleIdleInQueue) {
 		if (PostMessage(MainHWND(), SC_WORK_IDLE, 0, 0)) {
@@ -2163,7 +2166,7 @@ void ScintillaWin::SetTrackMouseLeaveEvent(bool on) noexcept {
 }
 
 bool ScintillaWin::PaintContains(PRectangle rc) {
-	if (paintState == painting) {
+	if (paintState == PaintState::painting) {
 		return BoundsContains(rcPaint, hRgnUpdate, rc);
 	}
 	return true;
@@ -2419,20 +2422,20 @@ std::unique_ptr<CaseFolder> ScintillaWin::CaseFolderForEncoding() {
 	}
 }
 
-std::string ScintillaWin::CaseMapString(const std::string &s, int caseMapping) {
-	if ((s.size() == 0) || (caseMapping == cmSame))
+std::string ScintillaWin::CaseMapString(const std::string &s, CaseMapping caseMapping) {
+	if ((s.size() == 0) || (caseMapping == CaseMapping::same))
 		return s;
 
 	const UINT cpDoc = CodePageOfDocument();
 	if (cpDoc == SC_CP_UTF8) {
-		return CaseConvertString(s, (caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
+		return CaseConvertString(s, (caseMapping == CaseMapping::upper) ? CaseConversionUpper : CaseConversionLower);
 	}
 
 	// Change text to UTF-16
 	const std::wstring wsText = StringDecode(s, cpDoc);
 
 	const DWORD mapFlags = LCMAP_LINGUISTIC_CASING |
-		((caseMapping == cmUpper) ? LCMAP_UPPERCASE : LCMAP_LOWERCASE);
+		((caseMapping == CaseMapping::upper) ? LCMAP_UPPERCASE : LCMAP_LOWERCASE);
 
 	// Change case
 	const std::wstring wsConverted = StringMapCase(wsText, mapFlags);
@@ -2553,7 +2556,7 @@ void ScintillaWin::Paste() {
 			memBorlandSelection.Unlock();
 		}
 	}
-	const PasteShape pasteShape = isRectangular ? pasteRectangular : (isLine ? pasteLine : pasteStream);
+	const PasteShape pasteShape = isRectangular ? PasteShape::rectangular : (isLine ? PasteShape::line : PasteShape::stream);
 
 	// Use CF_UNICODETEXT if available
 	GlobalMemory memUSelection(::GetClipboardData(CF_UNICODETEXT));
@@ -3157,11 +3160,11 @@ void ScintillaWin::FullPaint() {
  * This paint will not be abandoned.
  */
 void ScintillaWin::FullPaintDC(HDC hdc) {
-	paintState = painting;
+	paintState = PaintState::painting;
 	rcPaint = GetClientRectangle();
 	paintingAllText = true;
 	PaintDC(hdc);
-	paintState = notPainting;
+	paintState = PaintState::notPainting;
 }
 
 namespace {
@@ -3187,7 +3190,7 @@ bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) noexcept {
 DWORD ScintillaWin::EffectFromState(DWORD grfKeyState) const noexcept {
 	// These are the Wordpad semantics.
 	DWORD dwEffect;
-	if (inDragDrop == ddDragging)	// Internal defaults to move
+	if (inDragDrop == DragDrop::dragging)	// Internal defaults to move
 		dwEffect = DROPEFFECT_MOVE;
 	else
 		dwEffect = DROPEFFECT_COPY;

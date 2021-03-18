@@ -61,13 +61,13 @@ void FontMeasurements::ClearMeasurements() noexcept {
 Style::Style() : FontSpecification() {
 	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
 	      Platform::DefaultFontSize() * SC_FONT_SIZE_MULTIPLIER, nullptr, SC_CHARSET_DEFAULT,
-	      SC_WEIGHT_NORMAL, false, false, false, caseMixed, true, true, false);
+	      SC_WEIGHT_NORMAL, false, false, false, CaseForce::mixed, true, true, false);
 }
 
 Style::Style(const Style &source) noexcept : FontSpecification(), FontMeasurements() {
 	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
 	      0, nullptr, 0,
-	      SC_WEIGHT_NORMAL, false, false, false, caseMixed, true, true, false);
+	      SC_WEIGHT_NORMAL, false, false, false, CaseForce::mixed, true, true, false);
 	fore = source.fore;
 	back = source.back;
 	characterSet = source.characterSet;
@@ -91,7 +91,7 @@ Style &Style::operator=(const Style &source) noexcept {
 		return * this;
 	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
 	      0, nullptr, SC_CHARSET_DEFAULT,
-	      SC_WEIGHT_NORMAL, false, false, false, caseMixed, true, true, false);
+	      SC_WEIGHT_NORMAL, false, false, false, CaseForce::mixed, true, true, false);
 	fore = source.fore;
 	back = source.back;
 	characterSet = source.characterSet;
@@ -110,7 +110,7 @@ Style &Style::operator=(const Style &source) noexcept {
 void Style::Clear(ColourDesired fore_, ColourDesired back_, int size_,
         const char *fontName_, int characterSet_,
         int weight_, bool italic_, bool eolFilled_,
-        bool underline_, ecaseForced caseForce_,
+        bool underline_, CaseForce caseForce_,
         bool visible_, bool changeable_, bool hotspot_) noexcept {
 	fore = fore_;
 	back = back_;

@@ -123,15 +123,15 @@ int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, cons
 void DrawTextNoClipPhase(Surface *surface, PRectangle rc, const Style &style, XYPOSITION ybase,
 	std::string_view text, DrawPhase phase) {
 	const Font *fontText = style.font.get();
-	if (phase & drawBack) {
-		if (phase & drawText) {
+	if (FlagSet(phase, DrawPhase::back)) {
+		if (FlagSet(phase, DrawPhase::text)) {
 			// Drawing both
 			surface->DrawTextNoClip(rc, fontText, ybase, text,
 				style.fore, style.back);
 		} else {
 			surface->FillRectangle(rc, style.back);
 		}
-	} else if (phase & drawText) {
+	} else if (FlagSet(phase, DrawPhase::text)) {
 		surface->DrawTextTransparent(rc, fontText, ybase, text, style.fore);
 	}
 }
@@ -174,7 +174,7 @@ EditView::EditView() {
 	hideSelection = false;
 	drawOverstrikeCaret = true;
 	bufferedDraw = true;
-	phasesDraw = phasesTwo;
+	phasesDraw = PhasesDraw::two;
 	lineWidthMaxSeen = 0;
 	additionalCaretsBlink = true;
 	additionalCaretsVisible = true;
@@ -190,7 +190,7 @@ EditView::~EditView() {
 }
 
 bool EditView::SetTwoPhaseDraw(bool twoPhaseDraw) noexcept {
-	const PhasesDraw phasesDrawNew = twoPhaseDraw ? phasesTwo : phasesOne;
+	const PhasesDraw phasesDrawNew = twoPhaseDraw ? PhasesDraw::two : PhasesDraw::one;
 	const bool redraw = phasesDraw != phasesDrawNew;
 	phasesDraw = phasesDrawNew;
 	return redraw;
@@ -204,7 +204,7 @@ bool EditView::SetPhasesDraw(int phases) noexcept {
 }
 
 bool EditView::LinesOverlap() const noexcept {
-	return phasesDraw == phasesMultiple;
+	return phasesDraw == PhasesDraw::multiple;
 }
 
 void EditView::ClearAllTabstops() noexcept {
@@ -347,15 +347,15 @@ constexpr XYPOSITION epsilon = 0.0001f;	// A small nudge to avoid floating point
 * This only affects ASCII characters and is provided for languages with case-insensitive
 * ASCII keywords where the user wishes to view keywords in a preferred case.
 */
-inline char CaseForce(Style::ecaseForced caseForce, char chDoc, char chPrevious) {
+inline char CaseForce(Style::CaseForce caseForce, char chDoc, char chPrevious) {
 	switch (caseForce) {
-	case Style::caseMixed:
+	case Style::CaseForce::mixed:
 		return chDoc;
-	case Style::caseLower:
+	case Style::CaseForce::lower:
 		return MakeLowerCase(chDoc);
-	case Style::caseUpper:
+	case Style::CaseForce::upper:
 		return MakeUpperCase(chDoc);
-	case Style::caseCamel:
+	case Style::CaseForce::camel:
 	default:	// default should not occur, included to avoid warnings
 		if (IsUpperOrLowerCase(chDoc) && !IsUpperOrLowerCase(chPrevious)) {
 			return MakeUpperCase(chDoc);
@@ -635,7 +635,7 @@ Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, S
 		return pt;
 	Sci::Line lineDoc = model.pdoc->SciLineFromPosition(pos.Position());
 	Sci::Position posLineStart = model.pdoc->LineStart(lineDoc);
-	if ((pe & peLineEnd) && (lineDoc > 0) && (pos.Position() == posLineStart)) {
+	if (FlagSet(pe, PointEnd::lineEnd) && (lineDoc > 0) && (pos.Position() == posLineStart)) {
 		// Want point at end of first line
 		lineDoc--;
 		posLineStart = model.pdoc->LineStart(lineDoc);
@@ -1016,7 +1016,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			} else {
 				surface->FillRectangle(rcSegment, textBack);
 			}
-			DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, phasesDraw == phasesOne);
+			DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, phasesDraw == PhasesDraw::one);
 			if (eolInSelection && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
 				SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection), alpha);
 			}
@@ -1236,7 +1236,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 		}
 	}
 
-	if (phase & drawBack) {
+	if (FlagSet(phase, DrawPhase::back)) {
 		surface->FillRectangle(rcSegment, textBack);
 
 		// Fill Remainder of the line
@@ -1248,8 +1248,8 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 		FillLineRemainder(surface, model, vsDraw, ll, line, rcRemainder, subLine);
 	}
 
-	if (phase & drawText) {
-		if (phasesDraw != phasesOne) {
+	if (FlagSet(phase, DrawPhase::text)) {
+		if (phasesDraw != PhasesDraw::one) {
 			surface->DrawTextTransparent(rcSegment, fontText,
 				rcSegment.top + vsDraw.maxAscent, foldDisplayText,
 				textFore);
@@ -1260,7 +1260,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 		}
 	}
 
-	if (phase & drawIndicatorsFore) {
+	if (FlagSet(phase, DrawPhase::indicatorsFore)) {
 		if (model.foldDisplayTextStyle == SC_FOLDDISPLAYTEXT_BOXED) {
 			surface->PenColour(textFore);
 			PRectangle rcBox = rcSegment;
@@ -1278,7 +1278,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 		}
 	}
 
-	if (phase & drawSelectionTranslucent) {
+	if (FlagSet(phase, DrawPhase::selectionTranslucent)) {
 		if (eolInSelection && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1) && alpha != SC_ALPHA_NOALPHA) {
 			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection), alpha);
 		}
@@ -1331,7 +1331,7 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 		}
 	}
 
-	if (phase & drawBack) {
+	if (FlagSet(phase, DrawPhase::back)) {
 		surface->FillRectangle(rcSegment, textBack);
 
 		// Fill Remainder of the line
@@ -1343,8 +1343,8 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 		FillLineRemainder(surface, model, vsDraw, ll, line, rcRemainder, subLine);
 	}
 
-	if (phase & drawText) {
-		if (phasesDraw != phasesOne) {
+	if (FlagSet(phase, DrawPhase::text)) {
+		if (phasesDraw != PhasesDraw::one) {
 			surface->DrawTextTransparent(rcSegment, fontText,
 			rcSegment.top + vsDraw.maxAscent, eolAnnotationText,
 			textFore);
@@ -1355,7 +1355,7 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 		}
 	}
 
-	if (phase & drawIndicatorsFore) {
+	if (FlagSet(phase, DrawPhase::indicatorsFore)) {
 		if (vsDraw.eolAnnotationVisible == EOLANNOTATION_BOXED ) {
 			surface->PenColour(textFore);
 			PRectangle rcBox = rcSegment;
@@ -1385,7 +1385,7 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 	const int annotationLine = subLine - ll->lines;
 	const StyledText stAnnotation = model.pdoc->AnnotationStyledText(line);
 	if (stAnnotation.text && ValidStyledText(vsDraw, vsDraw.annotationStyleOffset, stAnnotation)) {
-		if (phase & drawBack) {
+		if (FlagSet(phase, DrawPhase::back)) {
 			surface->FillRectangle(rcSegment, vsDraw.styles[0].back);
 		}
 		rcSegment.left = static_cast<XYPOSITION>(xStart);
@@ -1410,14 +1410,14 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 			lineInAnnotation++;
 		}
 		PRectangle rcText = rcSegment;
-		if ((phase & drawBack) && AnnotationBoxedOrIndented(vsDraw.annotationVisible)) {
+		if ((FlagSet(phase, DrawPhase::back)) && AnnotationBoxedOrIndented(vsDraw.annotationVisible)) {
 			surface->FillRectangle(rcText,
 				vsDraw.styles[stAnnotation.StyleAt(start) + vsDraw.annotationStyleOffset].back);
 			rcText.left += vsDraw.spaceWidth;
 		}
 		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText,
 			stAnnotation, start, lengthAnnotation, phase);
-		if ((phase & drawBack) && (vsDraw.annotationVisible == ANNOTATION_BOXED)) {
+		if ((FlagSet(phase, DrawPhase::back)) && (vsDraw.annotationVisible == ANNOTATION_BOXED)) {
 			surface->PenColour(vsDraw.styles[vsDraw.annotationStyleOffset].fore);
 			const IntegerRectangle ircSegment(rcSegment);
 			surface->MoveTo(ircSegment.left, ircSegment.top);
@@ -1869,7 +1869,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 
 	// Foreground drawing loop
 	BreakFinder bfFore(ll, &model.sel, lineRange, posLineStart, xStartVisible,
-		(((phasesDraw == phasesOne) && selBackDrawn) || vsDraw.selColours.fore.isSet), model.pdoc, &model.reprs, &vsDraw);
+		(((phasesDraw == PhasesDraw::one) && selBackDrawn) || vsDraw.selColours.fore.isSet), model.pdoc, &model.reprs, &vsDraw);
 
 	while (bfFore.More()) {
 
@@ -1927,7 +1927,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			if (ts.representation) {
 				if (ll->chars[i] == '\t') {
 					// Tab display
-					if (phasesDraw == phasesOne) {
+					if (phasesDraw == PhasesDraw::one) {
 						if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
 							textBack = vsDraw.whitespaceColours.back;
 						surface->FillRectangle(rcSegment, textBack);
@@ -1970,14 +1970,14 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							cc, textBack, textFore);
 					} else {
 						DrawTextBlob(surface, vsDraw, rcSegment, ts.representation->stringRep,
-							textBack, textFore, phasesDraw == phasesOne);
+							textBack, textFore, phasesDraw == PhasesDraw::one);
 					}
 				}
 			} else {
 				// Normal text display
 				if (vsDraw.styles[styleMain].visible) {
 					const std::string_view text(&ll->chars[ts.start], i - ts.start + 1);
-					if (phasesDraw != phasesOne) {
+					if (phasesDraw != PhasesDraw::one) {
 						surface->DrawTextTransparent(rcSegment, textFont,
 							rcSegment.top + vsDraw.maxAscent, text, textFore);
 					} else {
@@ -1994,7 +1994,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 									textFore = vsDraw.whitespaceColours.fore;
 								if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 									const XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
-									if ((phasesDraw == phasesOne) && drawWhitespaceBackground) {
+									if ((phasesDraw == PhasesDraw::one) && drawWhitespaceBackground) {
 										textBack = vsDraw.whitespaceColours.back;
 										const PRectangle rcSpace(
 											ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
@@ -2120,26 +2120,27 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
 
 	if ((ll->wrapIndent != 0) && (subLine > 0)) {
-		if (phase & drawBack) {
+		if (FlagSet(phase, DrawPhase::back)) {
 			DrawWrapIndentAndMarker(surface, vsDraw, ll, xStart, rcLine, background, customDrawWrapMarker, model.caret.active);
 		}
 		xStart += static_cast<int>(ll->wrapIndent);
 	}
 
-	if (phasesDraw != phasesOne) {
-		if (phase & drawBack) {
+	if (phasesDraw != PhasesDraw::one) {
+		if (FlagSet(phase, DrawPhase::back)) {
 			DrawBackground(surface, model, vsDraw, ll, rcLine, lineRange, posLineStart, xStart,
 				subLine, background);
-			DrawFoldDisplayText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, drawBack);
-			DrawEOLAnnotationText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, drawBack);
-			phase = static_cast<DrawPhase>(phase & ~drawBack);	// Remove drawBack to not draw again in DrawFoldDisplayText
+			DrawFoldDisplayText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, DrawPhase::back);
+			DrawEOLAnnotationText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, DrawPhase::back);
+			// Remove drawBack to not draw again in DrawFoldDisplayText
+			phase = static_cast<DrawPhase>(static_cast<int>(phase) & ~static_cast<int>(DrawPhase::back));
 			DrawEOL(surface, model, vsDraw, ll, rcLine, line, lineRange.end,
 				xStart, subLine, subLineStart, background);
 			if (vsDraw.IsLineFrameOpaque(model.caret.active, ll->containsCaret))
 				DrawCaretLineFramed(surface, vsDraw, ll, rcLine, subLine);
 		}
 
-		if (phase & drawIndicatorsBack) {
+		if (FlagSet(phase, DrawPhase::indicatorsBack)) {
 			DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine,
 				lineRangeIncludingEnd.end, true, tabWidthMinimumPixels);
 			DrawEdgeLine(surface, vsDraw, ll, rcLine, lineRange, xStart);
@@ -2147,16 +2148,16 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 		}
 	}
 
-	if (phase & drawText) {
+	if (FlagSet(phase, DrawPhase::text)) {
 		DrawForeground(surface, model, vsDraw, ll, lineVisible, rcLine, lineRange, posLineStart, xStart,
 			subLine, background);
 	}
 
-	if (phase & drawIndentationGuides) {
+	if (FlagSet(phase, DrawPhase::indentationGuides)) {
 		DrawIndentGuidesOverEmpty(surface, model, vsDraw, ll, line, lineVisible, rcLine, xStart, subLine);
 	}
 
-	if (phase & drawIndicatorsFore) {
+	if (FlagSet(phase, DrawPhase::indicatorsFore)) {
 		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine,
 			lineRangeIncludingEnd.end, false, tabWidthMinimumPixels);
 	}
@@ -2164,7 +2165,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	DrawFoldDisplayText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, phase);
 	DrawEOLAnnotationText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, phase);
 
-	if (phasesDraw == phasesOne) {
+	if (phasesDraw == PhasesDraw::one) {
 		DrawEOL(surface, model, vsDraw, ll, rcLine, line, lineRange.end,
 			xStart, subLine, subLineStart, background);
 		if (vsDraw.IsLineFrameOpaque(model.caret.active, ll->containsCaret))
@@ -2173,11 +2174,11 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 		DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
 	}
 
-	if (!hideSelection && (phase & drawSelectionTranslucent)) {
+	if (!hideSelection && FlagSet(phase, DrawPhase::selectionTranslucent)) {
 		DrawTranslucentSelection(surface, model, vsDraw, ll, line, rcLine, subLine, lineRange, xStart, tabWidthMinimumPixels);
 	}
 
-	if (phase & drawLineTranslucent) {
+	if (FlagSet(phase, DrawPhase::lineTranslucent)) {
 		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine, subLine);
 	}
 }
@@ -2264,12 +2265,12 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		Sci::Line lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
 		AutoLineLayout ll(llc, nullptr);
 		std::vector<DrawPhase> phases;
-		if ((phasesDraw == phasesMultiple) && !bufferedDraw) {
-			for (DrawPhase phase = drawBack; phase <= drawCarets; phase = static_cast<DrawPhase>(phase * 2)) {
+		if ((phasesDraw == PhasesDraw::multiple) && !bufferedDraw) {
+			for (DrawPhase phase = DrawPhase::back; phase <= DrawPhase::carets; phase = static_cast<DrawPhase>(static_cast<int>(phase) * 2)) {
 				phases.push_back(phase);
 			}
 		} else {
-			phases.push_back(drawAll);
+			phases.push_back(DrawPhase::all);
 		}
 		for (const DrawPhase &phase : phases) {
 			int ypos = 0;
@@ -2314,7 +2315,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 					ll->SetBracesHighlight(rangeLine, model.braces, static_cast<char>(model.bracesMatchStyle),
 						static_cast<int>(model.highlightGuideColumn * vsDraw.spaceWidth), bracesIgnoreStyle);
 
-					if (leftTextOverlap && (bufferedDraw || ((phasesDraw < phasesMultiple) && (phase & drawBack)))) {
+					if (leftTextOverlap && (bufferedDraw || ((phasesDraw < PhasesDraw::multiple) && (FlagSet(phase, DrawPhase::back))))) {
 						// Clear the left margin
 						PRectangle rcSpacer = rcLine;
 						rcSpacer.right = rcSpacer.left;
@@ -2334,11 +2335,11 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 					// Restore the previous styles for the brace highlights in case layout is in cache.
 					ll->RestoreBracesHighlight(rangeLine, model.braces, bracesIgnoreStyle);
 
-					if (phase & drawFoldLines) {
+					if (FlagSet(phase, DrawPhase::foldLines)) {
 						DrawFoldLines(surface, model, vsDraw, lineDoc, rcLine);
 					}
 
-					if (phase & drawCarets) {
+					if (FlagSet(phase, DrawPhase::carets)) {
 						DrawCarets(surface, model, vsDraw, ll, lineDoc, xStart, rcLine, subLine);
 					}
 
@@ -2608,7 +2609,7 @@ Sci::Position EditView::FormatRange(bool draw, const Sci_RangeToFormat *pfr, Sur
 					if (draw) {
 						rcLine.top = static_cast<XYPOSITION>(ypos);
 						rcLine.bottom = static_cast<XYPOSITION>(ypos + vsPrint.lineHeight);
-						DrawLine(surface, model, vsPrint, &ll, lineDoc, visibleLine, xStart, rcLine, iwl, drawAll);
+						DrawLine(surface, model, vsPrint, &ll, lineDoc, visibleLine, xStart, rcLine, iwl, DrawPhase::all);
 					}
 					ypos += vsPrint.lineHeight;
 				}

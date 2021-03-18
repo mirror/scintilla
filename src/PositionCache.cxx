@@ -161,7 +161,7 @@ int LineLayout::SubLineFromPosition(int posInLine, PointEnd pe) const noexcept {
 	}
 
 	for (int line = 0; line < lines; line++) {
-		if (pe & peSubLineEnd) {
+		if (FlagSet(pe, PointEnd::subLineEnd)) {
 			// Return subline not start of next
 			if (lineStarts[line + 1] <= posInLine + 1)
 				return line;
@@ -276,9 +276,9 @@ Point LineLayout::PointFromPosition(int posInLine, int lineHeight, PointEnd pe) 
 				pt.x = positions[posInLine] - positions[rangeSubLine.start];
 				if (rangeSubLine.start != 0)	// Wrapped lines may be indented
 					pt.x += wrapIndent;
-				if (pe & peSubLineEnd)	// Return end of first subline not start of next
+				if (FlagSet(pe, PointEnd::subLineEnd))	// Return end of first subline not start of next
 					break;
-			} else if ((pe & peLineEnd) && (subLine == (lines-1))) {
+			} else if (FlagSet(pe, PointEnd::lineEnd) && (subLine == (lines-1))) {
 				pt.x = positions[numCharsInLine] - positions[rangeSubLine.start];
 				if (rangeSubLine.start != 0)	// Wrapped lines may be indented
 					pt.x += wrapIndent;

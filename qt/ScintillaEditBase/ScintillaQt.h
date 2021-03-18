@@ -123,7 +123,7 @@ private:
 	void NotifyFocus(bool focus) override;
 	void NotifyParent(SCNotification scn) override;
 	void NotifyURIDropped(const char *uri);
-	int timers[tickDwell+1];
+	int timers[static_cast<size_t>(TickReason::dwell)+1];
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
 	void CancelTimers();
@@ -138,7 +138,7 @@ private:
 	QString StringFromDocument(const char *s) const;
 	QByteArray BytesForDocument(const QString &text) const;
 	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
-	std::string CaseMapString(const std::string &s, int caseMapping) override;
+	std::string CaseMapString(const std::string &s, CaseMapping caseMapping) override;
 
 	void CreateCallTipWindow(PRectangle rc) override;
 	void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override;

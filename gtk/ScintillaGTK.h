@@ -102,9 +102,9 @@ private:
 		TickReason reason;
 		ScintillaGTK *scintilla;
 		guint timer;
-		TimeThunk() noexcept : reason(tickCaret), scintilla(nullptr), timer(0) {}
+		TimeThunk() noexcept : reason(TickReason::caret), scintilla(nullptr), timer(0) {}
 	};
-	TimeThunk timers[tickDwell+1];
+	TimeThunk timers[static_cast<size_t>(TickReason::dwell)+1];
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
 	void FineTickerCancel(TickReason reason) override;
@@ -126,7 +126,7 @@ private:
 	void NotifyURIDropped(const char *list);
 	const char *CharacterSetID() const;
 	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
-	std::string CaseMapString(const std::string &s, int caseMapping) override;
+	std::string CaseMapString(const std::string &s, CaseMapping caseMapping) override;
 	int KeyDefault(int key, int modifiers) override;
 	void CopyToClipboard(const SelectionText &selectedText) override;
 	void Copy() override;
@@ -243,7 +243,7 @@ private:
 	static gboolean IdleCallback(gpointer pSci);
 	static gboolean StyleIdle(gpointer pSci);
 	void IdleWork() override;
-	void QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) override;
+	void QueueIdleWork(WorkItems items, Sci::Position upTo) override;
 	void SetDocPointer(Document *document) override;
 	static void PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis);
 

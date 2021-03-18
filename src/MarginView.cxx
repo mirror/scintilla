@@ -401,7 +401,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 						const XYPOSITION xpos = rcNumber.right - width - vs.marginNumberPadding;
 						rcNumber.left = xpos;
 						DrawTextNoClipPhase(surface, rcNumber, vs.styles[STYLE_LINENUMBER],
-							rcNumber.top + vs.maxAscent, sNumber, drawAll);
+							rcNumber.top + vs.maxAscent, sNumber, DrawPhase::all);
 					} else if (vs.wrapVisualFlags & SC_WRAPVISUALFLAG_MARGIN) {
 						PRectangle rcWrapMarker = rcMarker;
 						rcWrapMarker.right -= wrapMarkerPaddingRight;
@@ -424,7 +424,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 								rcText.left = rcText.right - width - 3;
 							}
 							DrawStyledText(surface, vs, vs.marginStyleOffset, rcText,
-								stMargin, 0, stMargin.length, drawAll);
+								stMargin, 0, stMargin.length, DrawPhase::all);
 						} else {
 							// if we're displaying annotation lines, colour the margin to match the associated document line
 							const int annotationLines = model.pdoc->AnnotationLines(lineDoc);

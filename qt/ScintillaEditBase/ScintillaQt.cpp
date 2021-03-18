@@ -32,7 +32,7 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 
 	wMain = scrollArea->viewport();
 
-	imeInteraction = imeInline;
+	imeInteraction = IMEInteraction::internal;
 
 	// On OS X drawing text into a pixmap moves it around 1 pixel to
 	// the right compared to drawing it directly onto a window.
@@ -41,9 +41,7 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 
 	Init();
 
-	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
-		timers[tr] = 0;
-	}
+	std::fill(timers, std::end(timers), 0);
 }
 
 ScintillaQt::~ScintillaQt()
@@ -389,7 +387,7 @@ void ScintillaQt::PasteFromMode(QClipboard::Mode clipboardMode_)
 	UndoGroup ug(pdoc);
 	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
 	InsertPasteShape(selText.Data(), selText.Length(),
-		isRectangular ? pasteRectangular : (isLine ? pasteLine : pasteStream));
+		isRectangular ? PasteShape::rectangular : (isLine ? PasteShape::line : PasteShape::stream));
 	EnsureCaretVisible();
 }
 
@@ -452,20 +450,20 @@ void ScintillaQt::NotifyURIDropped(const char *uri)
 
 bool ScintillaQt::FineTickerRunning(TickReason reason)
 {
-	return timers[reason] != 0;
+	return timers[static_cast<size_t>(reason)] != 0;
 }
 
 void ScintillaQt::FineTickerStart(TickReason reason, int millis, int /* tolerance */)
 {
 	FineTickerCancel(reason);
-	timers[reason] = startTimer(millis);
+	timers[static_cast<size_t>(reason)] = startTimer(millis);
 }
 
 // CancelTimers cleans up all fine-ticker timers and is non-virtual to avoid warnings when
 // called during destruction.
 void ScintillaQt::CancelTimers()
 {
-	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+	for (size_t tr = static_cast<size_t>(TickReason::caret); tr <= static_cast<size_t>(TickReason::dwell); tr++) {
 		if (timers[tr]) {
 			killTimer(timers[tr]);
 			timers[tr] = 0;
@@ -475,9 +473,10 @@ void ScintillaQt::CancelTimers()
 
 void ScintillaQt::FineTickerCancel(TickReason reason)
 {
-	if (timers[reason]) {
-		killTimer(timers[reason]);
-		timers[reason] = 0;
+	const size_t reasonIndex = static_cast<size_t>(reason);
+	if (timers[reasonIndex]) {
+		killTimer(timers[reasonIndex]);
+		timers[reasonIndex] = 0;
 	}
 }
 
@@ -612,15 +611,15 @@ std::unique_ptr<CaseFolder> ScintillaQt::CaseFolderForEncoding()
 	}
 }
 
-std::string ScintillaQt::CaseMapString(const std::string &s, int caseMapping)
+std::string ScintillaQt::CaseMapString(const std::string &s, CaseMapping caseMapping)
 {
-	if ((s.size() == 0) || (caseMapping == cmSame))
+	if ((s.size() == 0) || (caseMapping == CaseMapping::same))
 		return s;
 
 	if (IsUnicodeMode()) {
 		std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
 		size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
-			(caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
+			(caseMapping == CaseMapping::upper) ? CaseConversionUpper : CaseConversionLower);
 		retMapped.resize(lenMapped);
 		return retMapped;
 	}
@@ -628,7 +627,7 @@ std::string ScintillaQt::CaseMapString(const std::string &s, int caseMapping)
 	QTextCodec *codec = QTextCodec::codecForName(CharacterSetIDOfDocument());
 	QString text = codec->toUnicode(s.c_str(), static_cast<int>(s.length()));
 
-	if (caseMapping == cmUpper) {
+	if (caseMapping == CaseMapping::upper) {
 		text = text.toUpper();
 	} else {
 		text = text.toLower();
@@ -653,7 +652,7 @@ bool ScintillaQt::HaveMouseCapture()
 
 void ScintillaQt::StartDrag()
 {
-	inDragDrop = ddDragging;
+	inDragDrop = DragDrop::dragging;
 	dropWentOutside = true;
 	if (drag.Length()) {
 		QMimeData *mimeData = new QMimeData;
@@ -672,7 +671,7 @@ void ScintillaQt::StartDrag()
 			ClearSelection();
 		}
 	}
-	inDragDrop = ddNone;
+	inDragDrop = DragDrop::none;
 	SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
@@ -780,7 +779,7 @@ sptr_t ScintillaQt::DirectFunction(
 void ScintillaQt::PartialPaint(const PRectangle &rect)
 {
 	rcPaint = rect;
-	paintState = painting;
+	paintState = PaintState::painting;
 	PRectangle rcClient = GetClientRectangle();
 	paintingAllText = rcPaint.Contains(rcClient);
 
@@ -788,11 +787,11 @@ void ScintillaQt::PartialPaint(const PRectangle &rect)
 	Paint(surfacePaint, rcPaint);
 	surfacePaint->Release();
 
-	if (paintState == paintAbandoned) {
+	if (paintState == PaintState::abandoned) {
 		// FIXME: Failure to paint the requested rectangle in each
 		// paint event causes flicker on some platforms (Mac?)
 		// Paint rect immediately.
-		paintState = painting;
+		paintState = PaintState::painting;
 		paintingAllText = true;
 
 		AutoSurface surface(this);
@@ -803,7 +802,7 @@ void ScintillaQt::PartialPaint(const PRectangle &rect)
 		scrollArea->viewport()->update();
 	}
 
-	paintState = notPainting;
+	paintState = PaintState::notPainting;
 }
 
 void ScintillaQt::DragEnter(const Point &point)
@@ -845,9 +844,9 @@ void ScintillaQt::DropUrls(const QMimeData *data)
 
 void ScintillaQt::timerEvent(QTimerEvent *event)
 {
-	for (TickReason tr=tickCaret; tr<=tickDwell; tr = static_cast<TickReason>(tr+1)) {
+	for (size_t tr=static_cast<size_t>(TickReason::caret); tr<=static_cast<size_t>(TickReason::dwell); tr++) {
 		if (timers[tr] == event->timerId()) {
-			TickFor(tr);
+			TickFor(static_cast<TickReason>(tr));
 		}
 	}
 }

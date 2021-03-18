@@ -337,7 +337,7 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 		[](const Style &style) noexcept { return style.IsProtected(); });
 
 	someStylesForceCase = std::any_of(styles.cbegin(), styles.cend(),
-		[](const Style &style) noexcept { return style.caseForce != Style::caseMixed; });
+		[](const Style &style) noexcept { return style.caseForce != Style::CaseForce::mixed; });
 
 	aveCharWidth = styles[STYLE_DEFAULT].aveCharWidth;
 	spaceWidth = styles[STYLE_DEFAULT].spaceWidth;
@@ -378,7 +378,7 @@ void ViewStyle::ResetDefaultStyle() {
 	        ColourDesired(0xff,0xff,0xff),
 	        Platform::DefaultFontSize() * SC_FONT_SIZE_MULTIPLIER, fontNames.Save(Platform::DefaultFont()),
 	        SC_CHARSET_DEFAULT,
-	        SC_WEIGHT_NORMAL, false, false, false, Style::caseMixed, true, true, false);
+	        SC_WEIGHT_NORMAL, false, false, false, Style::CaseForce::mixed, true, true, false);
 }
 
 void ViewStyle::ClearStyles() {

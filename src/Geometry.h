@@ -13,6 +13,12 @@ namespace Scintilla {
 typedef float XYPOSITION;
 typedef double XYACCUMULATOR;
 
+// Test if an enum class value has the bit flag(s) of test set.
+template <typename T>
+constexpr bool FlagSet(T value, T test) {
+	return (static_cast<int>(value) & static_cast<int>(test)) == static_cast<int>(test);
+}
+
 /**
  * A geometric point class.
  * Point is similar to the Win32 POINT and GTK+ GdkPoint types.

@@ -20,17 +20,18 @@ struct PrintParameters {
 /**
 * The view may be drawn in separate phases.
 */
-enum DrawPhase {
-	drawBack = 0x1,
-	drawIndicatorsBack = 0x2,
-	drawText = 0x4,
-	drawIndentationGuides = 0x8,
-	drawIndicatorsFore = 0x10,
-	drawSelectionTranslucent = 0x20,
-	drawLineTranslucent = 0x40,
-	drawFoldLines = 0x80,
-	drawCarets = 0x100,
-	drawAll = 0x1FF
+enum class DrawPhase {
+	none = 0x0,
+	back = 0x1,
+	indicatorsBack = 0x2,
+	text = 0x4,
+	indentationGuides = 0x8,
+	indicatorsFore = 0x10,
+	selectionTranslucent = 0x20,
+	lineTranslucent = 0x40,
+	foldLines = 0x80,
+	carets = 0x100,
+	all = 0x1FF
 };
 
 bool ValidStyledText(const ViewStyle &vs, size_t styleOffset, const StyledText &st) noexcept;
@@ -64,7 +65,7 @@ public:
 	* In multiPhaseDraw mode, drawing is performed in multiple phases with each phase drawing
 	* one feature over the whole drawing area, instead of within one line. This allows text to
 	* overlap from one line to the next. */
-	enum PhasesDraw { phasesOne, phasesTwo, phasesMultiple };
+	enum class PhasesDraw { one, two, multiple };
 	PhasesDraw phasesDraw;
 
 	int lineWidthMaxSeen;
