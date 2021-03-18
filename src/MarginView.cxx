@@ -109,7 +109,7 @@ MarginView::MarginView() noexcept {
 	customDrawWrapMarker = nullptr;
 }
 
-void MarginView::DropGraphics(bool freeObjects) {
+void MarginView::DropGraphics(bool freeObjects) noexcept {
 	if (freeObjects) {
 		pixmapSelMargin.reset();
 		pixmapSelPattern.reset();

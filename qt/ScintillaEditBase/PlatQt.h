@@ -89,7 +89,7 @@ public:
 	void InitPixMap(int width, int height,
 		Surface *surface, WindowID wid) override;
 
-	void Release() override;
+	void Release() noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;

@@ -365,7 +365,7 @@ void SurfaceImpl::Clear() {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::Release() {
+void SurfaceImpl::Release() noexcept {
 	Clear();
 }
 

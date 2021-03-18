@@ -251,7 +251,7 @@ void EditView::LinesAddedOrRemoved(Sci::Line lineOfPos, Sci::Line linesAdded) {
 	}
 }
 
-void EditView::DropGraphics(bool freeObjects) {
+void EditView::DropGraphics(bool freeObjects) noexcept {
 	if (freeObjects) {
 		pixmapLine.reset();
 		pixmapIndentGuide.reset();

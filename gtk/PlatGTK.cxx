@@ -150,7 +150,7 @@ public:
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 
 	void Clear() noexcept;
-	void Release() override;
+	void Release() noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;
@@ -285,7 +285,7 @@ void SurfaceImpl::Clear() noexcept {
 	createdGC = false;
 }
 
-void SurfaceImpl::Release() {
+void SurfaceImpl::Release() noexcept {
 	Clear();
 }
 

@@ -200,7 +200,7 @@ void SurfaceImpl::InitPixMap(int width,
 	SetDBCSMode(psurfOther->codePage);
 }
 
-void SurfaceImpl::Release()
+void SurfaceImpl::Release() noexcept
 {
 	Clear();
 }

@@ -262,7 +262,7 @@ void Editor::SetRepresentations() {
 	}
 }
 
-void Editor::DropGraphics(bool freeObjects) {
+void Editor::DropGraphics(bool freeObjects) noexcept {
 	marginView.DropGraphics(freeObjects);
 	view.DropGraphics(freeObjects);
 }

@@ -475,7 +475,7 @@ public:
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 
-	void Release() override;
+	void Release() noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;
@@ -554,7 +554,7 @@ void SurfaceGDI::Clear() noexcept {
 	}
 }
 
-void SurfaceGDI::Release() {
+void SurfaceGDI::Release() noexcept {
 	Clear();
 }
 
@@ -1150,7 +1150,7 @@ public:
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 
-	void Release() override;
+	void Release() noexcept override;
 	bool Initialised() override;
 
 	HRESULT FlushDrawing();
@@ -1239,7 +1239,7 @@ void SurfaceD2D::Clear() noexcept {
 	pBitmapRenderTarget = nullptr;
 }
 
-void SurfaceD2D::Release() {
+void SurfaceD2D::Release() noexcept {
 	Clear();
 }
 

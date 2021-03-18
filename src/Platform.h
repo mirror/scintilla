@@ -174,7 +174,7 @@ public:
 	virtual void Init(SurfaceID sid, WindowID wid)=0;
 	virtual void InitPixMap(int width, int height, Surface *surface_, WindowID wid)=0;
 
-	virtual void Release()=0;
+	virtual void Release() noexcept=0;
 	virtual bool Initialised()=0;
 	virtual void PenColour(ColourDesired fore)=0;
 	virtual int LogPixelsY()=0;

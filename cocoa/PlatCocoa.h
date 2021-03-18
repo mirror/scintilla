@@ -78,7 +78,7 @@ public:
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 	CGContextRef GetContext() { return gc; }
 
-	void Release() override;
+	void Release() noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 
