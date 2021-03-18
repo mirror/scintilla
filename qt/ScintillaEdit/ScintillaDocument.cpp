@@ -6,6 +6,7 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <optional>
 #include <memory>
 
 #include "ScintillaDocument.h"

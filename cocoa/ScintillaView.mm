@@ -14,6 +14,7 @@
 
 #include <string_view>
 #include <vector>
+#include <optional>
 
 #import "Debugging.h"
 #import "Geometry.h"

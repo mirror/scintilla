@@ -18,6 +18,7 @@
 
 #include <string_view>
 #include <vector>
+#include <optional>
 
 #import <Cocoa/Cocoa.h>
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5

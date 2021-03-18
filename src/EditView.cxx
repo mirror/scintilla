@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <forward_list>
+#include <optional>
 #include <algorithm>
 #include <iterator>
 #include <memory>
