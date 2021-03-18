@@ -1680,6 +1680,7 @@ public:
 		delegate = lbDelegate;
 	}
 	void SetList(const char *list, char separator, char typesep) override;
+	void SetOptions(ListOptions options_) override;
 
 	// To clean up when closed
 	void ReleaseViews();
@@ -1864,6 +1865,9 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep) {
 		Append(startword, numword?atoi(numword + 1):-1);
 	}
 	[table reloadData];
+}
+
+void ListBoxImpl::SetOptions(ListOptions) {
 }
 
 int ListBoxImpl::Length() {

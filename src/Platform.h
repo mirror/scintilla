@@ -269,6 +269,9 @@ public:
 	virtual void ListNotify(ListBoxEvent *plbe)=0;
 };
 
+struct ListOptions {
+};
+
 class ListBox : public Window {
 public:
 	ListBox() noexcept;
@@ -294,6 +297,7 @@ public:
 	virtual void ClearRegisteredImages()=0;
 	virtual void SetDelegate(IListBoxDelegate *lbDelegate)=0;
 	virtual void SetList(const char* list, char separator, char typesep)=0;
+	virtual void SetOptions(ListOptions options_)=0;
 };
 
 /**

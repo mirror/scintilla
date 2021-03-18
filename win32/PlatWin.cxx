@@ -2512,6 +2512,7 @@ class ListBoxX : public ListBox {
 	Point dragOffset;
 	Point location;	// Caret location at which the list is opened
 	int wheelDelta; // mouse wheel residue
+	ListOptions options;
 
 	HWND GetHWND() const noexcept;
 	void AppendListItem(const char *text, const char *numword);
@@ -2568,6 +2569,7 @@ public:
 	void ClearRegisteredImages() override;
 	void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *list, char separator, char typesep) override;
+	void SetOptions(ListOptions options_) override;
 	void Draw(DRAWITEMSTRUCT *pDrawItem);
 	LRESULT WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	static LRESULT PASCAL StaticWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
@@ -2872,6 +2874,10 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 		ListBox_AddItemData(lb, j+1);
 	}
 	SetRedraw(true);
+}
+
+void ListBoxX::SetOptions(ListOptions options_) {
+	options = options_;
 }
 
 void ListBoxX::AdjustWindowRect(PRectangle *rc, UINT dpi) noexcept {

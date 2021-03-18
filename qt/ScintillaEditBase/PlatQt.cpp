@@ -792,6 +792,7 @@ public:
 	void ClearRegisteredImages() override;
 	void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *list, char separator, char typesep) override;
+	void SetOptions(ListOptions options_) override;
 
 	ListWidget *GetWidget() const noexcept;
 private:
@@ -1033,6 +1034,9 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 			*numword = '\0';
 		Append(startword, numword?atoi(numword + 1):-1);
 	}
+}
+void ListBoxImpl::SetOptions(ListOptions)
+{
 }
 ListWidget *ListBoxImpl::GetWidget() const noexcept
 {

@@ -1232,6 +1232,7 @@ public:
 	void ClearRegisteredImages() override;
 	void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *listText, char separator, char typesep) override;
+	void SetOptions(ListOptions options_) override;
 };
 
 std::unique_ptr<ListBox> ListBox::Allocate() {
@@ -1876,6 +1877,9 @@ void ListBoxX::SetList(const char *listText, char separator, char typesep) {
 			*numword = '\0';
 		Append(startword, numword?atoi(numword + 1):-1);
 	}
+}
+
+void ListBoxX::SetOptions(ListOptions) {
 }
 
 Menu::Menu() noexcept : mid(nullptr) {}
