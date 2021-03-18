@@ -2875,6 +2875,11 @@ set void EOLAnnotationSetStyleOffset=2747(int style,)
 # Get the start of the range of style numbers used for end of line annotations
 get int EOLAnnotationGetStyleOffset=2748(,)
 
+enu Supports=SC_SUPPORTS_
+
+# Get whether a feature is supported
+get int SupportsFeature=2750(Supports feature,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

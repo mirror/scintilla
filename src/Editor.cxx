@@ -5177,6 +5177,10 @@ void Editor::QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) {
 	workNeeded.Need(items, upTo);
 }
 
+int Editor::SupportsFeature(int /* feature */) {
+	return 0;
+}
+
 bool Editor::PaintContains(PRectangle rc) {
 	if (rc.Empty()) {
 		return true;
@@ -8149,6 +8153,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ALLOCATEEXTENDEDSTYLES:
 		return vs.AllocateExtendedStyles(static_cast<int>(wParam));
+
+	case SCI_SUPPORTSFEATURE:
+		return SupportsFeature(static_cast<int>(wParam));
 
 	case SCI_ADDUNDOACTION:
 		pdoc->AddUndoAction(static_cast<Sci::Position>(wParam), lParam & UNDO_MAY_COALESCE);
