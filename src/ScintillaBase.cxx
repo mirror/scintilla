@@ -584,14 +584,22 @@ LexState::LexState(Document *pdoc_) noexcept : LexInterface(pdoc_) {
 
 LexState::~LexState() {
 	if (instance) {
-		instance->Release();
+		try {
+			instance->Release();
+		} catch (...) {
+			// ILexer5::Release must not throw, ignore if it does.
+		}
 		instance = nullptr;
 	}
 }
 
 void LexState::SetInstance(ILexer5 *instance_) {
 	if (instance) {
-		instance->Release();
+		try {
+			instance->Release();
+		} catch (...) {
+			// ILexer5::Release must not throw, ignore if it does.
+		}
 		instance = nullptr;
 	}
 	instance = instance_;
