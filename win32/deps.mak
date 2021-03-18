@@ -5,6 +5,7 @@ HanjaDic.o: \
 	HanjaDic.h
 PlatWin.o: \
 	PlatWin.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../src/XPM.h \
@@ -19,6 +20,7 @@ ScintillaDLL.o: \
 	ScintillaWin.h
 ScintillaWin.o: \
 	ScintillaWin.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -59,6 +61,7 @@ ScintillaWin.o: \
 	ScintillaWin.h
 AutoComplete.o: \
 	../src/AutoComplete.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
@@ -68,6 +71,7 @@ AutoComplete.o: \
 	../src/AutoComplete.h
 CallTip.o: \
 	../src/CallTip.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
@@ -85,8 +89,7 @@ CaseFolder.o: \
 	../src/CaseConvert.h
 CellBuffer.o: \
 	../src/CellBuffer.cxx \
-	../src/Geometry.h \
-	../src/Platform.h \
+	../src/Debugging.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -106,8 +109,7 @@ CharClassify.o: \
 	../src/CharClassify.h
 ContractionState.o: \
 	../src/ContractionState.cxx \
-	../src/Geometry.h \
-	../src/Platform.h \
+	../src/Debugging.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -120,8 +122,7 @@ DBCS.o: \
 	../src/DBCS.h
 Decoration.o: \
 	../src/Decoration.cxx \
-	../src/Geometry.h \
-	../src/Platform.h \
+	../src/Debugging.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -131,8 +132,7 @@ Decoration.o: \
 	../src/Decoration.h
 Document.o: \
 	../src/Document.cxx \
-	../src/Geometry.h \
-	../src/Platform.h \
+	../src/Debugging.h \
 	../include/ILoader.h \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
@@ -154,6 +154,7 @@ Document.o: \
 	../src/ElapsedPeriod.h
 EditModel.o: \
 	../src/EditModel.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -183,6 +184,7 @@ EditModel.o: \
 	../src/EditModel.h
 Editor.o: \
 	../src/Editor.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -218,6 +220,7 @@ Editor.o: \
 	../src/ElapsedPeriod.h
 EditView.o: \
 	../src/EditView.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -253,6 +256,7 @@ EditView.o: \
 	../src/ElapsedPeriod.h
 Indicator.o: \
 	../src/Indicator.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
@@ -262,13 +266,13 @@ Indicator.o: \
 	../src/XPM.h
 KeyMap.o: \
 	../src/KeyMap.cxx \
-	../src/Geometry.h \
-	../src/Platform.h \
+	../src/Debugging.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/KeyMap.h
 LineMarker.o: \
 	../src/LineMarker.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
@@ -278,6 +282,7 @@ LineMarker.o: \
 	../src/LineMarker.h
 MarginView.o: \
 	../src/MarginView.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -310,6 +315,7 @@ MarginView.o: \
 	../src/EditView.h
 PerLine.o: \
 	../src/PerLine.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
@@ -321,6 +327,7 @@ PerLine.o: \
 	../src/PerLine.h
 PositionCache.o: \
 	../src/PositionCache.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -354,8 +361,7 @@ RESearch.o: \
 	../src/RESearch.h
 RunStyles.o: \
 	../src/RunStyles.cxx \
-	../src/Geometry.h \
-	../src/Platform.h \
+	../src/Debugging.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
@@ -364,6 +370,7 @@ RunStyles.o: \
 	../src/RunStyles.h
 ScintillaBase.o: \
 	../src/ScintillaBase.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -398,6 +405,7 @@ ScintillaBase.o: \
 	../src/ScintillaBase.h
 ScintillaBaseL.o: \
 	../src/ScintillaBase.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/ILoader.h \
@@ -432,14 +440,14 @@ ScintillaBaseL.o: \
 	../src/ScintillaBase.h
 Selection.o: \
 	../src/Selection.cxx \
-	../src/Geometry.h \
-	../src/Platform.h \
+	../src/Debugging.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
 	../src/Selection.h
 Style.o: \
 	../src/Style.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
@@ -453,6 +461,7 @@ UniqueString.o: \
 	../src/UniqueString.h
 ViewStyle.o: \
 	../src/ViewStyle.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../include/Scintilla.h \
@@ -466,6 +475,7 @@ ViewStyle.o: \
 	../src/ViewStyle.h
 XPM.o: \
 	../src/XPM.cxx \
+	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
 	../src/XPM.h

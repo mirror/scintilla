@@ -89,6 +89,7 @@
 // Non-platform-specific headers
 
 // src platform interface
+#include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
 

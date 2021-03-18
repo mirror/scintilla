@@ -313,16 +313,6 @@ public:
 	void Show(Point pt, const Window &w);
 };
 
-#if defined(__clang__)
-# if __has_feature(attribute_analyzer_noreturn)
-#  define CLANG_ANALYZER_NORETURN __attribute__((analyzer_noreturn))
-# else
-#  define CLANG_ANALYZER_NORETURN
-# endif
-#else
-# define CLANG_ANALYZER_NORETURN
-#endif
-
 /**
  * Platform namespace used to retrieve system wide parameters such as double click speed
  * and chrome colour.
@@ -338,18 +328,7 @@ constexpr long LongFromTwoShorts(short a,short b) noexcept {
 	return (a) | ((b) << 16);
 }
 
-void DebugDisplay(const char *s) noexcept;
-void DebugPrintf(const char *format, ...) noexcept;
-bool ShowAssertionPopUps(bool assertionPopUps_) noexcept;
-void Assert(const char *c, const char *file, int line) noexcept CLANG_ANALYZER_NORETURN;
-
 }
-
-#ifdef  NDEBUG
-#define PLATFORM_ASSERT(c) ((void)0)
-#else
-#define PLATFORM_ASSERT(c) ((c) ? (void)(0) : Scintilla::Platform::Assert(#c, __FILE__, __LINE__))
-#endif
 
 }
 

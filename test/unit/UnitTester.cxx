@@ -12,8 +12,7 @@
 #include <vector>
 #include <memory>
 
-#include "Geometry.h"
-#include "Platform.h"
+#include "Debugging.h"
 
 #define CATCH_CONFIG_WINDOWS_CRTDBG
 #define CATCH_CONFIG_RUNNER

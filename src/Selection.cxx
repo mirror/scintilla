@@ -14,8 +14,7 @@
 #include <algorithm>
 #include <memory>
 
-#include "Geometry.h"
-#include "Platform.h"
+#include "Debugging.h"
 
 #include "Scintilla.h"
 

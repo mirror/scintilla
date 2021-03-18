@@ -38,8 +38,7 @@
 #include <vector>
 #include <memory>
 
-#include "Geometry.h"
-#include "Platform.h"
+#include "Debugging.h"
 
 #if defined(__GNUC__)
 // Want to avoid misleading indentation warnings in catch.hpp but the pragma

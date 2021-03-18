@@ -32,6 +32,7 @@
 
 #import <Foundation/NSGeometry.h>
 
+#import "Debugging.h"
 #import "Geometry.h"
 #import "Platform.h"
 

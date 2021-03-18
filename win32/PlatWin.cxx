@@ -44,6 +44,7 @@
 #include <dwrite.h>
 #endif
 
+#include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
 #include "XPM.h"

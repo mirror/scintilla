@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
 

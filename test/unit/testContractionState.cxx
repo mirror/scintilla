@@ -9,8 +9,7 @@
 #include <algorithm>
 #include <memory>
 
-#include "Geometry.h"
-#include "Platform.h"
+#include "Debugging.h"
 
 #include "Position.h"
 #include "UniqueString.h"
