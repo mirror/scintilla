@@ -1228,7 +1228,7 @@ public:
 	int GetSelection() override;
 	int Find(const char *prefix) override;
 	void GetValue(int n, char *value, int len) override;
-	void RegisterRGBA(int type, RGBAImage *image);
+	void RegisterRGBA(int type, std::unique_ptr<RGBAImage> image);
 	void RegisterImage(int type, const char *xpm_data) override;
 	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
 	void ClearRegisteredImages() override;
@@ -1815,8 +1815,9 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 #pragma warning(disable: 4127)
 #endif
 
-void ListBoxX::RegisterRGBA(int type, RGBAImage *image) {
-	images.Add(type, image);
+void ListBoxX::RegisterRGBA(int type, std::unique_ptr<RGBAImage> image) {
+	images.AddImage(type, std::move(image));
+	const RGBAImage * const observe = images.Get(type);
 
 	if (!pixhash) {
 		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -1828,10 +1829,10 @@ void ListBoxX::RegisterRGBA(int type, RGBAImage *image) {
 		if (list_image->pixbuf)
 			g_object_unref(list_image->pixbuf);
 		list_image->pixbuf = nullptr;
-		list_image->rgba_data = image;
+		list_image->rgba_data = observe;
 	} else {
 		list_image = g_new0(ListImage, 1);
-		list_image->rgba_data = image;
+		list_image->rgba_data = observe;
 		g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type),
 				    (gpointer) list_image);
 	}
@@ -1840,11 +1841,11 @@ void ListBoxX::RegisterRGBA(int type, RGBAImage *image) {
 void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 	g_return_if_fail(xpm_data);
 	XPM xpmImage(xpm_data);
-	RegisterRGBA(type, new RGBAImage(xpmImage));
+	RegisterRGBA(type, std::make_unique<RGBAImage>(xpmImage));
 }
 
 void ListBoxX::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
-	RegisterRGBA(type, new RGBAImage(width, height, 1.0, pixelsImage));
+	RegisterRGBA(type, std::make_unique<RGBAImage>(width, height, 1.0f, pixelsImage));
 }
 
 void ListBoxX::ClearRegisteredImages() {

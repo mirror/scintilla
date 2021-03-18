@@ -2728,11 +2728,11 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 
 void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 	XPM xpmImage(xpm_data);
-	images.Add(type, new RGBAImage(xpmImage));
+	images.AddImage(type, std::make_unique<RGBAImage>(xpmImage));
 }
 
 void ListBoxX::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
-	images.Add(type, new RGBAImage(width, height, 1.0, pixelsImage));
+	images.AddImage(type, std::make_unique<RGBAImage>(width, height, 1.0f, pixelsImage));
 }
 
 void ListBoxX::ClearRegisteredImages() {
