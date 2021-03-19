@@ -136,6 +136,7 @@ class SurfaceImpl : public Surface {
 	Converter conv;
 	int characterSet;
 	void SetConverter(int characterSet_);
+	void CairoRectangle(PRectangle rc);
 public:
 	SurfaceImpl() noexcept;
 	// Deleted so SurfaceImpl objects can not be copied.
@@ -186,6 +187,7 @@ public:
 	XYPOSITION AverageCharWidth(const Font *font_) override;
 
 	void SetClip(PRectangle rc) override;
+	void PopClip() override;
 	void FlushCachedState() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;
@@ -255,6 +257,10 @@ void SurfaceImpl::SetConverter(int characterSet_) {
 		characterSet = characterSet_;
 		conv.Open("UTF-8", CharacterSetID(characterSet), false);
 	}
+}
+
+void SurfaceImpl::CairoRectangle(PRectangle rc) {
+	cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 }
 
 SurfaceImpl::SurfaceImpl() noexcept : et(singleByte),
@@ -950,8 +956,14 @@ XYPOSITION SurfaceImpl::AverageCharWidth(const Font *font_) {
 
 void SurfaceImpl::SetClip(PRectangle rc) {
 	PLATFORM_ASSERT(context);
-	cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
+	cairo_save(context);
+	CairoRectangle(rc);
 	cairo_clip(context);
+}
+
+void SurfaceImpl::PopClip() {
+	PLATFORM_ASSERT(context);
+	cairo_restore(context);
 }
 
 void SurfaceImpl::FlushCachedState() {}

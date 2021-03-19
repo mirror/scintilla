@@ -470,7 +470,7 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc,
 {
 	SetClip(rc);
 	DrawTextNoClip(rc, font, ybase, text, fore, back);
-	GetPainter()->setClipping(false);
+	PopClip();
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc,
@@ -489,7 +489,13 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc,
 
 void SurfaceImpl::SetClip(PRectangle rc)
 {
+	GetPainter()->save();
 	GetPainter()->setClipRect(QRectFFromPRect(rc));
+}
+
+void SurfaceImpl::PopClip()
+{
+	GetPainter()->restore();
 }
 
 void SurfaceImpl::MeasureWidths(const Font *font,

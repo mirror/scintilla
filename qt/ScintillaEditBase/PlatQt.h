@@ -133,6 +133,7 @@ public:
 	XYPOSITION AverageCharWidth(const Font *font) override;
 
 	void SetClip(PRectangle rc) override;
+	void PopClip() override;
 	void FlushCachedState() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;

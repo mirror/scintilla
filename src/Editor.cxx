@@ -1806,6 +1806,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				NeedWrapping(pcs->DocFromDisplay(topLine));
 			}
 		}
+		if (!view.bufferedDraw)
+			surfaceWindow->PopClip();
 		return;
 	}
 
@@ -1817,6 +1819,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			FineTickerStart(TickReason::widen, 50, 5);
 		}
 	}
+
+	if (!view.bufferedDraw)
+		surfaceWindow->PopClip();
 
 	NotifyPainted();
 }

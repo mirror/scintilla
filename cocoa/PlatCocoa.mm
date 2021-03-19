@@ -1270,7 +1270,12 @@ XYPOSITION SurfaceImpl::AverageCharWidth(const Font *font_) {
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {
+	CGContextSaveGState(gc);
 	CGContextClipToRect(gc, PRectangleToCGRect(rc));
+}
+
+void SurfaceImpl::PopClip() {
+	CGContextRestoreGState(gc);
 }
 
 void SurfaceImpl::FlushCachedState() {

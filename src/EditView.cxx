@@ -2246,7 +2246,8 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 
 		// Remove selection margin from drawing area so text will not be drawn
 		// on it in unbuffered mode.
-		if (!bufferedDraw && vsDraw.marginInside) {
+		const bool clipping = !bufferedDraw && vsDraw.marginInside;
+		if (clipping) {
 			PRectangle rcClipText = rcTextArea;
 			rcClipText.left -= leftTextOverlap;
 			surfaceWindow->SetClip(rcClipText);
@@ -2394,6 +2395,10 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				}
 			}
 		}
+
+		if (clipping)
+			surfaceWindow->PopClip();
+
 		//Platform::DebugPrintf("start display %d, offset = %d\n", model.pdoc->Length(), model.xOffset);
 #if defined(TIME_PAINTING)
 		Platform::DebugPrintf(

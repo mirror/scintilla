@@ -513,6 +513,7 @@ public:
 	XYPOSITION AverageCharWidth(const Font *font_) override;
 
 	void SetClip(PRectangle rc) override;
+	void PopClip() override;
 	void FlushCachedState() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;
@@ -1091,8 +1092,13 @@ XYPOSITION SurfaceGDI::AverageCharWidth(const Font *font_) {
 }
 
 void SurfaceGDI::SetClip(PRectangle rc) {
+	::SaveDC(hdc);
 	::IntersectClipRect(hdc, static_cast<int>(rc.left), static_cast<int>(rc.top),
 		static_cast<int>(rc.right), static_cast<int>(rc.bottom));
+}
+
+void SurfaceGDI::PopClip() {
+	::RestoreDC(hdc, -1);
 }
 
 void SurfaceGDI::FlushCachedState() {
@@ -1207,6 +1213,7 @@ public:
 	XYPOSITION AverageCharWidth(const Font *font_) override;
 
 	void SetClip(PRectangle rc) override;
+	void PopClip() override;
 	void FlushCachedState() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;
@@ -2247,6 +2254,14 @@ void SurfaceD2D::SetClip(PRectangle rc) {
 		const D2D1_RECT_F rcClip = RectangleFromPRectangle(rc);
 		pRenderTarget->PushAxisAlignedClip(rcClip, D2D1_ANTIALIAS_MODE_ALIASED);
 		clipsActive++;
+	}
+}
+
+void SurfaceD2D::PopClip() {
+	if (pRenderTarget) {
+		PLATFORM_ASSERT(clipsActive > 0);
+		pRenderTarget->PopAxisAlignedClip();
+		clipsActive--;
 	}
 }
 

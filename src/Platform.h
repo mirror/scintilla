@@ -215,6 +215,7 @@ public:
 	virtual XYPOSITION AverageCharWidth(const Font *font_)=0;
 
 	virtual void SetClip(PRectangle rc)=0;
+	virtual void PopClip()=0;
 	virtual void FlushCachedState()=0;
 
 	virtual void SetUnicodeMode(bool unicodeMode_)=0;
