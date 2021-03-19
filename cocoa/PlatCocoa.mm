@@ -1294,6 +1294,9 @@ void SurfaceImpl::SetDBCSMode(int codePage_) {
 void SurfaceImpl::SetBidiR2L(bool) {
 }
 
+void SurfaceImpl::FlushDrawing() {
+}
+
 std::unique_ptr<Surface> Surface::Allocate(int) {
 	return std::make_unique<SurfaceImpl>();
 }

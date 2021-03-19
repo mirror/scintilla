@@ -324,6 +324,8 @@ void EditView::RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewSt
 			pixmapIndentGuide->FillRectangle(rcPixel, vsDraw.styles[STYLE_INDENTGUIDE].fore);
 			pixmapIndentGuideHighlight->FillRectangle(rcPixel, vsDraw.styles[STYLE_BRACELIGHT].fore);
 		}
+		pixmapIndentGuide->FlushDrawing();
+		pixmapIndentGuideHighlight->FlushDrawing();
 	}
 }
 
@@ -2349,6 +2351,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 						const PRectangle rcCopyArea = PRectangle::FromInts(vsDraw.textStart - leftTextOverlap, yposScreen,
 							static_cast<int>(rcClient.right - vsDraw.rightMarginWidth),
 							yposScreen + vsDraw.lineHeight);
+						pixmapLine->FlushDrawing();
 						surfaceWindow->Copy(rcCopyArea, from, *pixmapLine);
 					}
 

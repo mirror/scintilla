@@ -189,6 +189,7 @@ public:
 	void SetClip(PRectangle rc) override;
 	void PopClip() override;
 	void FlushCachedState() override;
+	void FlushDrawing() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage) override;
@@ -979,6 +980,9 @@ void SurfaceImpl::SetDBCSMode(int codePage) {
 }
 
 void SurfaceImpl::SetBidiR2L(bool) {
+}
+
+void SurfaceImpl::FlushDrawing() {
 }
 
 std::unique_ptr<Surface> Surface::Allocate(int) {

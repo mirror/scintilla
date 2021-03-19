@@ -1713,6 +1713,7 @@ void Editor::PaintSelMargin(Surface *surfaceWindow, const PRectangle &rc) {
 	marginView.PaintMargin(surface, topLine, rc, rcMargin, *this, vs);
 
 	if (view.bufferedDraw) {
+		marginView.pixmapSelMargin->FlushDrawing();
 		surfaceWindow->Copy(rcMargin, Point(rcMargin.left, rcMargin.top), *marginView.pixmapSelMargin);
 	}
 }

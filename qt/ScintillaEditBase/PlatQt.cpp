@@ -612,6 +612,10 @@ void SurfaceImpl::SetBidiR2L(bool)
 {
 }
 
+void SurfaceImpl::FlushDrawing()
+{
+}
+
 QPaintDevice *SurfaceImpl::GetPaintDevice()
 {
 	return device;

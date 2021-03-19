@@ -135,6 +135,7 @@ public:
 	void SetClip(PRectangle rc) override;
 	void PopClip() override;
 	void FlushCachedState() override;
+	void FlushDrawing() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage_) override;

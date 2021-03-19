@@ -515,6 +515,7 @@ public:
 	void SetClip(PRectangle rc) override;
 	void PopClip() override;
 	void FlushCachedState() override;
+	void FlushDrawing() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage_) override;
@@ -1106,6 +1107,9 @@ void SurfaceGDI::FlushCachedState() {
 	brush = {};
 }
 
+void SurfaceGDI::FlushDrawing() {
+}
+
 void SurfaceGDI::SetUnicodeMode(bool unicodeMode_) {
 	unicodeMode=unicodeMode_;
 }
@@ -1177,8 +1181,6 @@ public:
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 
-	HRESULT FlushDrawing();
-
 	void PenColour(ColourDesired fore) override;
 	void D2DPenColour(ColourDesired fore, int alpha=255);
 	int LogPixelsY() override;
@@ -1215,6 +1217,7 @@ public:
 	void SetClip(PRectangle rc) override;
 	void PopClip() override;
 	void FlushCachedState() override;
+	void FlushDrawing() override;
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage_) override;
@@ -1283,10 +1286,6 @@ int SurfaceD2D::Supports(int feature) noexcept {
 
 bool SurfaceD2D::Initialised() {
 	return pRenderTarget != nullptr;
-}
-
-HRESULT SurfaceD2D::FlushDrawing() {
-	return pRenderTarget->Flush();
 }
 
 void SurfaceD2D::Init(WindowID wid) {
@@ -1485,7 +1484,6 @@ void SurfaceD2D::FillRectangle(PRectangle rc, ColourDesired back) {
 void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	SurfaceD2D *psurfOther = dynamic_cast<SurfaceD2D *>(&surfacePattern);
 	PLATFORM_ASSERT(psurfOther);
-	psurfOther->FlushDrawing();
 	ID2D1Bitmap *pBitmap = nullptr;
 	HRESULT hr = psurfOther->GetBitmap(&pBitmap);
 	if (SUCCEEDED(hr) && pBitmap) {
@@ -1642,18 +1640,13 @@ void SurfaceD2D::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) 
 
 void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	SurfaceD2D &surfOther = dynamic_cast<SurfaceD2D &>(surfaceSource);
-	surfOther.FlushDrawing();
 	ID2D1Bitmap *pBitmap = nullptr;
-	HRESULT hr = surfOther.GetBitmap(&pBitmap);
+	const HRESULT hr = surfOther.GetBitmap(&pBitmap);
 	if (SUCCEEDED(hr) && pBitmap) {
 		const D2D1_RECT_F rcDestination = RectangleFromPRectangle(rc);
 		D2D1_RECT_F rcSource = {from.x, from.y, from.x + rc.Width(), from.y + rc.Height()};
 		pRenderTarget->DrawBitmap(pBitmap, rcDestination, 1.0f,
 			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, rcSource);
-		hr = pRenderTarget->Flush();
-		if (FAILED(hr)) {
-			Platform::DebugPrintf("Failed Flush 0x%lx\n", hr);
-		}
 		ReleaseUnknown(pBitmap);
 	}
 }
@@ -2266,6 +2259,12 @@ void SurfaceD2D::PopClip() {
 }
 
 void SurfaceD2D::FlushCachedState() {
+}
+
+void SurfaceD2D::FlushDrawing() {
+	if (pRenderTarget) {
+		pRenderTarget->Flush();
+	}
 }
 
 void SurfaceD2D::SetUnicodeMode(bool unicodeMode_) {
