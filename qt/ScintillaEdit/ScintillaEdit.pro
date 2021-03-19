@@ -35,6 +35,7 @@ SOURCES += \
     ../../src/LineMarker.cxx \
     ../../src/KeyMap.cxx \
     ../../src/Indicator.cxx \
+    ../../src/Geometry.cxx \
     ../../src/EditView.cxx \
     ../../src/Editor.cxx \
     ../../src/EditModel.cxx \

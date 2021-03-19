@@ -35,6 +35,10 @@ public:
 		return Point(static_cast<XYPOSITION>(x_), static_cast<XYPOSITION>(y_));
 	}
 
+	constexpr bool operator==(Point other) const noexcept {
+		return (x == other.x) && (y == other.y);
+	}
+
 	constexpr bool operator!=(Point other) const noexcept {
 		return (x != other.x) || (y != other.y);
 	}
@@ -50,9 +54,24 @@ public:
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
 };
 
-struct Interval {
+
+/**
+ * A geometric interval class.
+ */
+class Interval {
+public:
 	XYPOSITION left;
 	XYPOSITION right;
+	constexpr bool operator==(const Interval &other) const noexcept {
+		return (left == other.left) && (right == other.right);
+	}
+	constexpr XYPOSITION Width() const noexcept { return right - left; }
+	constexpr bool Empty() const noexcept {
+		return Width() <= 0;
+	}
+	constexpr bool Intersects(Interval other) const noexcept {
+		return (right > other.left) && (left < other.right);
+	}
 };
 
 /**
@@ -105,12 +124,38 @@ public:
 		right += xDelta;
 		bottom += yDelta;
 	}
+
+	constexpr PRectangle Inset(XYPOSITION delta) const noexcept {
+		return PRectangle(left + delta, top + delta, right - delta, bottom - delta);
+	}
+
+	constexpr Point Centre() const noexcept {
+		return Point((left + right) / 2, (top + bottom) / 2);
+	}
+
 	constexpr XYPOSITION Width() const noexcept { return right - left; }
 	constexpr XYPOSITION Height() const noexcept { return bottom - top; }
 	constexpr bool Empty() const noexcept {
 		return (Height() <= 0) || (Width() <= 0);
 	}
 };
+
+enum class Edge { left, top, bottom, right };
+
+PRectangle Clamp(PRectangle rc, Edge edge, XYPOSITION position) noexcept;
+PRectangle Side(PRectangle rc, Edge edge, XYPOSITION size) noexcept;
+
+Interval Intersection(Interval a, Interval b) noexcept;
+PRectangle Intersection(PRectangle rc, Interval horizontalBounds) noexcept;
+Interval HorizontalBounds(PRectangle rc) noexcept;
+
+XYPOSITION PixelAlign(XYPOSITION xy, int pixelDivisions) noexcept;
+XYPOSITION PixelAlignFloor(XYPOSITION xy, int pixelDivisions) noexcept;
+
+Point PixelAlign(const Point &pt, int pixelDivisions) noexcept;
+
+PRectangle PixelAlign(const PRectangle &rc, int pixelDivisions) noexcept;
+PRectangle PixelAlignOutside(const PRectangle &rc, int pixelDivisions) noexcept;
 
 /**
  * Holds an RGB colour with 8 bits for each component.
@@ -165,16 +210,16 @@ public:
 	constexpr explicit ColourAlpha(int co_ = 0) noexcept : ColourDesired(co_) {
 	}
 
-	constexpr ColourAlpha(unsigned int red, unsigned int green, unsigned int blue) noexcept :
-		ColourDesired(red | (green << 8) | (blue << 16)) {
-	}
-
-	constexpr ColourAlpha(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha) noexcept :
+	constexpr ColourAlpha(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha=0xff) noexcept :
 		ColourDesired(red | (green << 8) | (blue << 16) | (alpha << 24)) {
 	}
 
 	constexpr ColourAlpha(ColourDesired cd, unsigned int alpha) noexcept :
 		ColourDesired(cd.AsInteger() | (alpha << 24)) {
+	}
+
+	constexpr ColourAlpha(ColourDesired cd) noexcept :
+		ColourDesired(cd.AsInteger() | (0xff << 24)) {
 	}
 
 	constexpr ColourDesired GetColour() const noexcept {
@@ -189,6 +234,10 @@ public:
 		return GetAlpha() / componentMaximum;
 	}
 
+	constexpr bool IsOpaque() const noexcept {
+		return GetAlpha() == 0xff;
+	}
+
 	constexpr ColourAlpha MixedWith(ColourAlpha other) const noexcept {
 		const unsigned int red = (GetRed() + other.GetRed()) / 2;
 		const unsigned int green = (GetGreen() + other.GetGreen()) / 2;
@@ -199,13 +248,51 @@ public:
 };
 
 /**
+* Holds an RGBA colour and stroke width to stroke a shape.
+*/
+class Stroke {
+public:
+	ColourAlpha colourStroke;
+	XYPOSITION widthStroke;
+	constexpr Stroke(ColourAlpha colourStroke_, XYPOSITION widthStroke_=1.0f) noexcept : 
+		colourStroke(colourStroke_), widthStroke(widthStroke_) {
+	}
+};
+
+/**
+* Holds an RGBA colour to fill a shape.
+*/
+class Fill {
+public:
+	ColourAlpha colourFill;
+	constexpr Fill(ColourAlpha colourFill_) noexcept : 
+		colourFill(colourFill_) {
+	}
+};
+
+/**
+* Holds a pair of RGBA colours and stroke width to fill and stroke a shape.
+*/
+class FillStroke {
+public:
+	Fill fill;
+	Stroke stroke;
+	constexpr FillStroke(ColourAlpha colourFill_, ColourAlpha colourStroke_, XYPOSITION widthStroke_=1.0f) noexcept : 
+		fill(colourFill_), stroke(colourStroke_, widthStroke_) {
+	}
+	constexpr FillStroke(ColourAlpha colourBoth, XYPOSITION widthStroke_=1.0f) noexcept : 
+		fill(colourBoth), stroke(colourBoth, widthStroke_) {
+	}
+};
+
+/**
 * Holds an element of a gradient with an RGBA colour and a relative position.
 */
 class ColourStop {
 public:
 	float position;
 	ColourAlpha colour;
-	ColourStop(float position_, ColourAlpha colour_) noexcept :
+	constexpr ColourStop(float position_, ColourAlpha colour_) noexcept :
 		position(position_), colour(colour_) {
 	}
 };

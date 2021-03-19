@@ -288,6 +288,9 @@ EditView.o: \
 	../src/MarginView.h \
 	../src/EditView.h \
 	../src/ElapsedPeriod.h
+Geometry.o: \
+	../src/Geometry.cxx \
+	../src/Geometry.h
 Indicator.o: \
 	../src/Indicator.cxx \
 	../src/Debugging.h \

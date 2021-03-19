@@ -254,6 +254,9 @@ $(DIR_O)/EditView.obj: \
 	../src/MarginView.h \
 	../src/EditView.h \
 	../src/ElapsedPeriod.h
+$(DIR_O)/Geometry.obj: \
+	../src/Geometry.cxx \
+	../src/Geometry.h
 $(DIR_O)/Indicator.obj: \
 	../src/Indicator.cxx \
 	../src/Debugging.h \

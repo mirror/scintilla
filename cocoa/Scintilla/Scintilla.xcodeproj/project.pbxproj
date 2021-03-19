@@ -87,6 +87,9 @@
 		286F8E6425F84F7400EC8D60 /* ILexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 286F8E6025F84F7400EC8D60 /* ILexer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		286F8E6525F84F7400EC8D60 /* ILoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 286F8E6125F84F7400EC8D60 /* ILoader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		286F8E6625F84F7400EC8D60 /* Scintilla.h in Headers */ = {isa = PBXBuildFile; fileRef = 286F8E6225F84F7400EC8D60 /* Scintilla.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		286F8EDE260448C300EC8D60 /* Platform.h in Headers */ = {isa = PBXBuildFile; fileRef = 286F8EDB260448C300EC8D60 /* Platform.h */; };
+		286F8EDF260448C300EC8D60 /* Geometry.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 286F8EDC260448C300EC8D60 /* Geometry.cxx */; };
+		286F8EE0260448C300EC8D60 /* Geometry.h in Headers */ = {isa = PBXBuildFile; fileRef = 286F8EDD260448C300EC8D60 /* Geometry.h */; };
 		287F3C6A246F90240040E76F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 287F3C69246F90240040E76F /* Cocoa.framework */; };
 		287F3C6C246F90300040E76F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 287F3C6B246F90300040E76F /* QuartzCore.framework */; };
 		28EA9CAE255894B4007710C4 /* CharacterCategory.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28EA9CAA255894B4007710C4 /* CharacterCategory.cxx */; };
@@ -177,6 +180,9 @@
 		286F8E6025F84F7400EC8D60 /* ILexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ILexer.h; path = ../../include/ILexer.h; sourceTree = "<group>"; };
 		286F8E6125F84F7400EC8D60 /* ILoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ILoader.h; path = ../../include/ILoader.h; sourceTree = "<group>"; };
 		286F8E6225F84F7400EC8D60 /* Scintilla.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scintilla.h; path = ../../include/Scintilla.h; sourceTree = "<group>"; };
+		286F8EDB260448C300EC8D60 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../src/Platform.h; sourceTree = "<group>"; };
+		286F8EDC260448C300EC8D60 /* Geometry.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Geometry.cxx; path = ../../src/Geometry.cxx; sourceTree = "<group>"; };
+		286F8EDD260448C300EC8D60 /* Geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Geometry.h; path = ../../src/Geometry.h; sourceTree = "<group>"; };
 		287F3C41246F8DC70040E76F /* Scintilla.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Scintilla.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		287F3C69246F90240040E76F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		287F3C6B246F90300040E76F /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -254,6 +260,8 @@
 				2829371324E2D58600C84BA2 /* EditView.h */,
 				282936EC24E2D58400C84BA2 /* ElapsedPeriod.h */,
 				2829372024E2D58700C84BA2 /* FontQuality.h */,
+				286F8EDC260448C300EC8D60 /* Geometry.cxx */,
+				286F8EDD260448C300EC8D60 /* Geometry.h */,
 				286F8E6025F84F7400EC8D60 /* ILexer.h */,
 				286F8E6125F84F7400EC8D60 /* ILoader.h */,
 				282936F624E2D58400C84BA2 /* Indicator.cxx */,
@@ -268,6 +276,7 @@
 				2829371F24E2D58700C84BA2 /* Partitioning.h */,
 				2829371024E2D58500C84BA2 /* PerLine.cxx */,
 				282936FA24E2D58400C84BA2 /* PerLine.h */,
+				286F8EDB260448C300EC8D60 /* Platform.h */,
 				282936F824E2D58400C84BA2 /* Position.h */,
 				2829370224E2D58500C84BA2 /* PositionCache.cxx */,
 				282936EE24E2D58400C84BA2 /* PositionCache.h */,
@@ -351,6 +360,7 @@
 				2829373224E2D58800C84BA2 /* KeyMap.h in Headers */,
 				2829376324E2D58800C84BA2 /* FontQuality.h in Headers */,
 				2829373E24E2D58800C84BA2 /* Indicator.h in Headers */,
+				286F8EDE260448C300EC8D60 /* Platform.h in Headers */,
 				2829375C24E2D58800C84BA2 /* CellBuffer.h in Headers */,
 				2829373F24E2D58800C84BA2 /* UniConversion.h in Headers */,
 				2829373D24E2D58800C84BA2 /* PerLine.h in Headers */,
@@ -391,6 +401,7 @@
 				2829374D24E2D58800C84BA2 /* AutoComplete.h in Headers */,
 				2829374124E2D58800C84BA2 /* CharClassify.h in Headers */,
 				2829373124E2D58800C84BA2 /* PositionCache.h in Headers */,
+				286F8EE0260448C300EC8D60 /* Geometry.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,6 +504,7 @@
 				28EA9CAE255894B4007710C4 /* CharacterCategory.cxx in Sources */,
 				2829374024E2D58800C84BA2 /* XPM.cxx in Sources */,
 				2829374B24E2D58800C84BA2 /* Decoration.cxx in Sources */,
+				286F8EDF260448C300EC8D60 /* Geometry.cxx in Sources */,
 				2829373624E2D58800C84BA2 /* UniqueString.cxx in Sources */,
 				282936E824E2D55D00C84BA2 /* ScintillaView.mm in Sources */,
 				2829376924E2D58800C84BA2 /* CellBuffer.cxx in Sources */,
