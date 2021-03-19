@@ -390,6 +390,38 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc,
 	}
 }
 
+void SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke)
+{
+	QColor qFill = QColorFromColourAlpha(fillStroke.fill.colour);
+	QBrush brushFill(qFill);
+	GetPainter()->setBrush(brushFill);
+	if (fillStroke.fill.colour == fillStroke.stroke.colour) {
+		painter->setPen(Qt::NoPen);
+		QRectF rect = QRectFFromPRect(rc);
+		if (cornerSize > 0.0f) {
+			// A radius of 1 shows no curve so add 1
+			qreal radius = cornerSize+1;
+			GetPainter()->drawRoundedRect(rect, radius, radius);
+		} else {
+			GetPainter()->fillRect(rect, brushFill);
+		}
+	} else {
+		QColor qOutline = QColorFromColourAlpha(fillStroke.stroke.colour);
+		QPen penOutline(qOutline);
+		penOutline.setWidthF(fillStroke.stroke.width);
+		GetPainter()->setPen(penOutline);
+
+		QRectF rect = QRectFFromPRect(rc.Inset(fillStroke.stroke.width / 2));
+		if (cornerSize > 0.0f) {
+			// A radius of 1 shows no curve so add 1
+			qreal radius = cornerSize+1;
+			GetPainter()->drawRoundedRect(rect, radius, radius);
+		} else {
+			GetPainter()->drawRect(rect);
+		}
+	}
+}
+
 void SurfaceImpl::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
 	QRectF rect = QRectFFromPRect(rc);
 	QLinearGradient linearGradient;

@@ -62,6 +62,7 @@ private:
 	void FillColour(const ColourDesired &back);
 	void FillColour(ColourAlpha fill);
 
+	void PenColourAlpha(ColourAlpha fore);
 
 	// 24-bit RGB+A bitmap data constants
 	static const int BITS_PER_COMPONENT = 8;
@@ -101,6 +102,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 			    ColourDesired outline, int alphaOutline, int flags) override;
+	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;

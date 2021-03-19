@@ -196,6 +196,7 @@ public:
 	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags)=0;
+	virtual void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke)=0;
 	enum class GradientOptions { leftToRight, topToBottom };
 	virtual void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)=0;
 	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) = 0;

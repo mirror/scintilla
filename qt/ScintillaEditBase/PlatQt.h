@@ -109,6 +109,7 @@ public:
 		ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill,
 		int alphaFill, ColourDesired outline, int alphaOutline, int flags) override;
+	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height,
 		const unsigned char *pixelsImage) override;

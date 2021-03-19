@@ -502,6 +502,17 @@ void SurfaceImpl::FillColour(const ColourDesired &back) {
 
 //--------------------------------------------------------------------------------------------------
 
+void SurfaceImpl::PenColourAlpha(ColourAlpha fore) {
+	// Set the Stroke color to match
+	CGContextSetRGBStrokeColor(gc,
+				   fore.GetRedComponent(),
+				   fore.GetGreenComponent(),
+				   fore.GetBlueComponent(),
+				   fore.GetAlphaComponent());
+}
+
+//--------------------------------------------------------------------------------------------------
+
 CGImageRef SurfaceImpl::CreateImage() {
 	// For now, assume that CreateImage can only be called on PixMap surfaces.
 	if (!bitmapData)
@@ -889,6 +900,55 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, Colou
 				rcFill.right -= 0.5;
 				rcFill.bottom -= 0.5;
 				DrawChamferedRectangle(gc, rcFill, cornerSize-1, kCGPathFill);
+				DrawChamferedRectangle(gc, rc, cornerSize, kCGPathStroke);
+			}
+		}
+	}
+}
+
+void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
+	if (gc) {
+		const XYPOSITION halfStroke = fillStroke.stroke.width / 2.0f;
+		// Set the Fill color to match
+		FillColour(fillStroke.fill.colour);
+		PenColourAlpha(fillStroke.stroke.colour);
+		PRectangle rcFill = rc;
+		if (cornerSize == 0) {
+			// A simple rectangle, no rounded corners
+			if (fillStroke.fill.colour == fillStroke.stroke.colour) {
+				// Optimization for simple case
+				CGRect rect = PRectangleToCGRect(rcFill);
+				CGContextFillRect(gc, rect);
+			} else {
+				rcFill.left += fillStroke.stroke.width;
+				rcFill.top += fillStroke.stroke.width;
+				rcFill.right -= fillStroke.stroke.width;
+				rcFill.bottom -= fillStroke.stroke.width;
+				CGRect rect = PRectangleToCGRect(rcFill);
+				CGContextFillRect(gc, rect);
+				CGContextAddRect(gc, CGRectMake(rc.left + halfStroke, rc.top + halfStroke,
+								rc.Width() - fillStroke.stroke.width, rc.Height() - fillStroke.stroke.width));
+				CGContextStrokeRectWithWidth(gc,
+							     CGRectMake(rc.left + halfStroke, rc.top + halfStroke,
+									rc.Width() - fillStroke.stroke.width, rc.Height() - fillStroke.stroke.width),
+							     fillStroke.stroke.width);
+			}
+		} else {
+			// Approximate rounded corners with 45 degree chamfers.
+			// Drawing real circular arcs often leaves some over- or under-drawn pixels.
+			if (fillStroke.fill.colour == fillStroke.stroke.colour) {
+				// Specializing this case avoids a few stray light/dark pixels in corners.
+				rcFill.left -= halfStroke;
+				rcFill.top -= halfStroke;
+				rcFill.right += halfStroke;
+				rcFill.bottom += halfStroke;
+				DrawChamferedRectangle(gc, rcFill, cornerSize, kCGPathFill);
+			} else {
+				rcFill.left += halfStroke;
+				rcFill.top += halfStroke;
+				rcFill.right -= halfStroke;
+				rcFill.bottom -= halfStroke;
+				DrawChamferedRectangle(gc, rcFill, cornerSize-fillStroke.stroke.width, kCGPathFill);
 				DrawChamferedRectangle(gc, rc, cornerSize, kCGPathStroke);
 			}
 		}

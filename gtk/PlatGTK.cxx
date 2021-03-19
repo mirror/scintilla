@@ -169,6 +169,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 			    ColourDesired outline, int alphaOutline, int flags) override;
+	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
@@ -588,6 +589,31 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fi
 			PathRoundRectangle(context, rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1, cornerSize);
 		else
 			cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1);
+		cairo_stroke(context);
+	}
+}
+
+void SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
+	if (context && rc.Width() > 0) {
+		const float halfStroke = fillStroke.stroke.width / 2.0f;
+		const float doubleStroke = fillStroke.stroke.width * 2.0f;
+		PenColourAlpha(fillStroke.fill.colour);
+		if (cornerSize > 0)
+			PathRoundRectangle(context, rc.left + fillStroke.stroke.width, rc.top + fillStroke.stroke.width,
+				rc.Width() - doubleStroke, rc.Height() - doubleStroke, cornerSize);
+		else
+			cairo_rectangle(context, rc.left + fillStroke.stroke.width, rc.top + fillStroke.stroke.width,
+				rc.Width() - doubleStroke, rc.Height() - doubleStroke);
+		cairo_fill(context);
+
+		PenColourAlpha(fillStroke.stroke.colour);
+		if (cornerSize > 0)
+			PathRoundRectangle(context, rc.left + halfStroke, rc.top + halfStroke,
+				rc.Width() - fillStroke.stroke.width, rc.Height() - fillStroke.stroke.width, cornerSize);
+		else
+			cairo_rectangle(context, rc.left + halfStroke, rc.top + halfStroke,
+				rc.Width() - fillStroke.stroke.width, rc.Height() - fillStroke.stroke.width);
+		cairo_set_line_width(context, fillStroke.stroke.width);
 		cairo_stroke(context);
 	}
 }

@@ -494,6 +494,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags) override;
+	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
@@ -908,6 +909,55 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 	}
 }
 
+void SurfaceGDI::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
+	// TODO: Implement strokeWidth
+	const RECT rcw = RectFromPRectangle(rc);
+	const SIZE size = SizeOfRect(rcw);
+
+	if (size.cx > 0) {
+
+		DIBSection section(hdc, size);
+
+		if (section) {
+
+			// Ensure not distorted too much by corners when small
+			const LONG corner = std::min(static_cast<LONG>(cornerSize), (std::min(size.cx, size.cy) / 2) - 2);
+
+			constexpr DWORD valEmpty = dwordFromBGRA(0,0,0,0);
+			const DWORD valFill = dwordMultiplied(fillStroke.fill.colour, fillStroke.fill.colour.GetAlpha());
+			const DWORD valOutline = dwordMultiplied(fillStroke.stroke.colour, fillStroke.stroke.colour.GetAlpha());
+
+			// Draw a framed rectangle
+			for (int y=0; y<size.cy; y++) {
+				for (int x=0; x<size.cx; x++) {
+					if ((x==0) || (x==size.cx-1) || (y == 0) || (y == size.cy -1)) {
+						section.SetPixel(x, y, valOutline);
+					} else {
+						section.SetPixel(x, y, valFill);
+					}
+				}
+			}
+
+			// Make the corners transparent
+			for (LONG c=0; c<corner; c++) {
+				for (LONG x=0; x<c+1; x++) {
+					section.SetSymmetric(x, c - x, valEmpty);
+				}
+			}
+
+			// Draw the corner frame pieces
+			for (LONG x=1; x<corner; x++) {
+				section.SetSymmetric(x, corner - x, valOutline);
+			}
+
+			AlphaBlend(hdc, rcw.left, rcw.top, size.cx, size.cy, section.DC(), 0, 0, size.cx, size.cy, mergeAlpha);
+		}
+	} else {
+		BrushColour(fillStroke.stroke.colour);
+		FrameRect(hdc, &rcw, brush);
+	}
+}
+
 void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
 
 	const RECT rcw = RectFromPRectangle(rc);
@@ -1242,6 +1292,14 @@ constexpr D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {
 	};
 }
 
+constexpr D2D1_RECT_F RectangleInset(D2D1_RECT_F rect, FLOAT inset) noexcept {
+	return D2D1_RECT_F{
+		rect.left + inset,
+		rect.top + inset,
+		rect.right - inset,
+		rect.bottom - inset };
+}
+
 }
 
 class BlobInline;
@@ -1305,6 +1363,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags) override;
+	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
@@ -1669,6 +1728,34 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 				cornerSizeF, cornerSizeF};
 			D2DPenColour(outline, alphaOutline);
 			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
+		}
+	}
+}
+
+void SurfaceD2D::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
+	const D2D1_RECT_F rect = RectangleFromPRectangle(rc);
+	const D2D1_RECT_F rectFill = RectangleInset(rect, fillStroke.stroke.width);
+	const float halfStroke = fillStroke.stroke.width / 2.0f;
+	const D2D1_RECT_F rectOutline = RectangleInset(rect, halfStroke);
+	if (pRenderTarget) {
+		if (cornerSize == 0) {
+			// When corner size is zero, draw square rectangle to prevent blurry pixels at corners
+			D2DPenColourAlpha(fillStroke.fill.colour);
+			pRenderTarget->FillRectangle(rectFill, pBrush);
+
+			D2DPenColourAlpha(fillStroke.stroke.colour);
+			pRenderTarget->DrawRectangle(rectOutline, pBrush, fillStroke.stroke.width);
+		} else {
+			const float cornerSizeF = static_cast<float>(cornerSize);
+			D2D1_ROUNDED_RECT roundedRectFill = {
+				rectFill, cornerSizeF - 1.0f, cornerSizeF - 1.0f };
+			D2DPenColourAlpha(fillStroke.fill.colour);
+			pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
+
+			D2D1_ROUNDED_RECT roundedRect = {
+				rectOutline, cornerSizeF, cornerSizeF};
+			D2DPenColourAlpha(fillStroke.stroke.colour);
+			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.width);
 		}
 	}
 }
