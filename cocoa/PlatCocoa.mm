@@ -657,6 +657,39 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 
 //--------------------------------------------------------------------------------------------------
 
+void SurfaceImpl::LineDraw(Point start, Point end, Stroke stroke) {
+	PenColourAlpha(stroke.colour);
+	CGContextSetLineWidth(gc, stroke.width);
+
+	CGContextBeginPath(gc);
+	CGContextMoveToPoint(gc, start.x, start.y);
+	CGContextAddLineToPoint(gc, end.x, end.y);
+	CGContextStrokePath(gc);
+
+	CGContextSetLineWidth(gc, 1.0f);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
+	PLATFORM_ASSERT(gc && (npts > 1));
+	if (!gc || (npts <= 1)) {
+		return;
+	}
+	PenColourAlpha(stroke.colour);
+	CGContextSetLineWidth(gc, stroke.width);
+	CGContextBeginPath(gc);
+	CGContextMoveToPoint(gc, pts[0].x, pts[0].y);
+	for (size_t i = 1; i < npts; i++) {
+		CGContextAddLineToPoint(gc, pts[i].x, pts[i].y);
+	}
+	CGContextStrokePath(gc);
+
+	CGContextSetLineWidth(gc, 1.0f);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 void SurfaceImpl::Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore,
 			  ColourDesired back) {
 	// Allocate memory for the array of points.

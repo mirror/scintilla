@@ -96,6 +96,8 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
+	void LineDraw(Point start, Point end, Stroke stroke) override;
+	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
 	void Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Scintilla::Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;

@@ -163,6 +163,8 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
+	void LineDraw(Point start, Point end, Stroke stroke) override;
+	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
 	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
@@ -486,6 +488,31 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 	}
 	x = x_;
 	y = y_;
+}
+
+void SurfaceImpl::LineDraw(Point start, Point end, Stroke stroke) {
+	PLATFORM_ASSERT(context);
+	if (!context)
+		return;
+	PenColourAlpha(stroke.colour);
+	cairo_set_line_width(context, stroke.width);
+	cairo_move_to(context, start.x, start.y);
+	cairo_line_to(context, end.x, end.y);
+	cairo_stroke(context);
+}
+
+void SurfaceImpl::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
+	// TODO: set line joins and caps
+	PLATFORM_ASSERT(context && npts > 1);
+	if (!context)
+		return;
+	PenColourAlpha(stroke.colour);
+	cairo_set_line_width(context, stroke.width);
+	cairo_move_to(context, pts[0].x, pts[0].y);
+	for (size_t i = 1; i < npts; i++) {
+		cairo_line_to(context, pts[i].x, pts[i].y);
+	}
+	cairo_stroke(context);
 }
 
 void SurfaceImpl::Polygon(Point *pts, size_t npts, ColourDesired fore,

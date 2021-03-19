@@ -301,6 +301,22 @@ void SurfaceImpl::LineTo(int x_, int y_)
 	y = y_;
 }
 
+void SurfaceImpl::LineDraw(Point start, Point end, Stroke stroke)
+{
+	PenColourWidth(stroke.colour, stroke.width);
+	QLineF line(start.x, start.y, end.x, end.y);
+	GetPainter()->drawLine(line);
+}
+
+void SurfaceImpl::PolyLine(const Point *pts, size_t npts, Stroke stroke)
+{
+	// TODO: set line joins and caps
+	PenColourWidth(stroke.colour, stroke.width);
+	std::vector<QPointF> qpts;
+	std::transform(pts, pts + npts, std::back_inserter(qpts), QPointFFromPoint);
+	GetPainter()->drawPolyline(&qpts[0], static_cast<int>(npts));
+}
+
 void SurfaceImpl::Polygon(Point *pts,
 			  size_t npts,
                           ColourDesired fore,

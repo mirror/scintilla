@@ -196,6 +196,8 @@ public:
 	virtual int DeviceHeightFont(int points)=0;
 	virtual void MoveTo(int x_, int y_)=0;
 	virtual void LineTo(int x_, int y_)=0;
+	virtual void LineDraw(Point start, Point end, Stroke stroke)=0;
+	virtual void PolyLine(const Point *pts, size_t npts, Stroke stroke)=0;
 	virtual void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back)=0;
 	virtual void Polygon(const Point *pts, size_t npts, FillStroke fillStroke)=0;
 	virtual void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)=0;

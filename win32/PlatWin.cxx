@@ -488,6 +488,8 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
+	void LineDraw(Point start, Point end, Stroke stroke) override;
+	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
 	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
@@ -695,6 +697,23 @@ void SurfaceGDI::MoveTo(int x_, int y_) {
 
 void SurfaceGDI::LineTo(int x_, int y_) {
 	::LineTo(hdc, x_, y_);
+}
+
+void SurfaceGDI::LineDraw(Point start, Point end, Stroke stroke) {
+	PenColour(stroke.colour, stroke.width);
+	::MoveToEx(hdc, std::lround(std::floor(start.x)), std::lround(std::floor(start.y)), nullptr);
+	::LineTo(hdc, std::lround(std::floor(end.x)), std::lround(std::floor(end.y)));
+}
+
+void SurfaceGDI::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
+	PLATFORM_ASSERT(npts > 1);
+	if (npts <= 1) {
+		return;
+	}
+	PenColour(stroke.colour, stroke.width);
+	std::vector<POINT> outline;
+	std::transform(pts, pts + npts, std::back_inserter(outline), POINTFromPoint);
+	::Polyline(hdc, outline.data(), static_cast<int>(npts));
 }
 
 void SurfaceGDI::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) {
@@ -1424,7 +1443,9 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
+	void LineDraw(Point start, Point end, Stroke stroke) override;
 	ID2D1PathGeometry *Geometry(const Point *pts, size_t npts, D2D1_FIGURE_BEGIN figureBegin) noexcept;
+	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
 	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
@@ -1686,6 +1707,31 @@ void SurfaceD2D::LineTo(int x_, int y_) {
 	}
 }
 
+void SurfaceD2D::LineDraw(Point start, Point end, Stroke stroke) {
+	D2DPenColourAlpha(stroke.colour);
+
+	D2D1_STROKE_STYLE_PROPERTIES strokeProps {};
+	strokeProps.startCap = D2D1_CAP_STYLE_SQUARE;
+	strokeProps.endCap = D2D1_CAP_STYLE_SQUARE;
+	strokeProps.dashCap = D2D1_CAP_STYLE_FLAT;
+	strokeProps.lineJoin = D2D1_LINE_JOIN_MITER;
+	strokeProps.miterLimit = 4.0f;
+	strokeProps.dashStyle = D2D1_DASH_STYLE_SOLID;
+	strokeProps.dashOffset = 0;
+
+	// get the stroke style to apply
+	ID2D1StrokeStyle *pStrokeStyle = nullptr;
+	const HRESULT hr = pD2DFactory->CreateStrokeStyle(
+		strokeProps, nullptr, 0, &pStrokeStyle);
+	if (SUCCEEDED(hr)) {
+		pRenderTarget->DrawLine(
+			D2D1::Point2F(start.x, start.y),
+			D2D1::Point2F(end.x, end.y), pBrush, stroke.width, pStrokeStyle);
+	}
+
+	ReleaseUnknown(pStrokeStyle);
+}
+
 ID2D1PathGeometry *SurfaceD2D::Geometry(const Point *pts, size_t npts, D2D1_FIGURE_BEGIN figureBegin) noexcept {
 	ID2D1PathGeometry *geometry = nullptr;
 	HRESULT hr = pD2DFactory->CreatePathGeometry(&geometry);
@@ -1704,6 +1750,39 @@ ID2D1PathGeometry *SurfaceD2D::Geometry(const Point *pts, size_t npts, D2D1_FIGU
 		}
 	}
 	return geometry;
+}
+
+void SurfaceD2D::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
+	PLATFORM_ASSERT(pRenderTarget && (npts > 1));
+	if (!pRenderTarget || (npts <= 1)) {
+		return;
+	}
+
+	ID2D1PathGeometry *geometry = Geometry(pts, npts, D2D1_FIGURE_BEGIN_HOLLOW);
+	PLATFORM_ASSERT(geometry);
+	if (!geometry) {
+		return;
+	}
+
+	D2DPenColourAlpha(stroke.colour);
+	D2D1_STROKE_STYLE_PROPERTIES strokeProps {};
+	strokeProps.startCap = D2D1_CAP_STYLE_ROUND;
+	strokeProps.endCap = D2D1_CAP_STYLE_ROUND;
+	strokeProps.dashCap = D2D1_CAP_STYLE_FLAT;
+	strokeProps.lineJoin = D2D1_LINE_JOIN_MITER;
+	strokeProps.miterLimit = 4.0f;
+	strokeProps.dashStyle = D2D1_DASH_STYLE_SOLID;
+	strokeProps.dashOffset = 0;
+
+	// get the stroke style to apply
+	ID2D1StrokeStyle *pStrokeStyle = nullptr;
+	const HRESULT hr = pD2DFactory->CreateStrokeStyle(
+		strokeProps, nullptr, 0, &pStrokeStyle);
+	if (SUCCEEDED(hr)) {
+		pRenderTarget->DrawGeometry(geometry, pBrush, stroke.width, pStrokeStyle);
+	}
+	ReleaseUnknown(pStrokeStyle);
+	ReleaseUnknown(geometry);
 }
 
 void SurfaceD2D::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) {
