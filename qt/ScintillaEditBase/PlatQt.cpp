@@ -346,6 +346,14 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke)
 	GetPainter()->drawRect(rect);
 }
 
+void SurfaceImpl::RectangleFrame(PRectangle rc, Stroke stroke) {
+	PenColourWidth(stroke.colour, stroke.width);
+	// Default QBrush is Qt::NoBrush so does not fill
+	GetPainter()->setBrush(QBrush());
+	const QRectF rect = QRectFFromPRect(rc.Inset(stroke.width / 2));
+	GetPainter()->drawRect(rect);
+}
+
 void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back)
 {
 	GetPainter()->fillRect(QRectFFromPRect(rc), QColorFromCA(back));

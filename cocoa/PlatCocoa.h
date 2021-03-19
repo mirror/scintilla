@@ -100,6 +100,7 @@ public:
 	void Polygon(const Scintilla::Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
+	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;

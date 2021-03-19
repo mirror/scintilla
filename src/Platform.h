@@ -192,6 +192,7 @@ public:
 	virtual void Polygon(const Point *pts, size_t npts, FillStroke fillStroke)=0;
 	virtual void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void RectangleDraw(PRectangle rc, FillStroke fillStroke)=0;
+	virtual void RectangleFrame(PRectangle rc, Stroke stroke)=0;
 	virtual void FillRectangle(PRectangle rc, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, Fill fill)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;

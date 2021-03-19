@@ -492,6 +492,7 @@ public:
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
+	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
@@ -721,6 +722,12 @@ void SurfaceGDI::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired 
 void SurfaceGDI::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
 	FillRectangle(rc, fillStroke.stroke.colour);
 	FillRectangle(rc.Inset(fillStroke.stroke.width), fillStroke.fill.colour);
+}
+
+void SurfaceGDI::RectangleFrame(PRectangle rc, Stroke stroke) {
+	BrushColour(stroke.colour);
+	const RECT rcw = RectFromPRectangle(rc);
+	::FrameRect(hdc, &rcw, brush);
 }
 
 void SurfaceGDI::FillRectangle(PRectangle rc, ColourDesired back) {
@@ -1416,6 +1423,7 @@ public:
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
+	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
@@ -1757,6 +1765,16 @@ void SurfaceD2D::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
 	pRenderTarget->FillRectangle(&rectFill, pBrush);
 	D2DPenColourAlpha(fillStroke.stroke.colour);
 	pRenderTarget->DrawRectangle(&rectOutline, pBrush, fillStroke.stroke.width);
+}
+
+void SurfaceD2D::RectangleFrame(PRectangle rc, Stroke stroke) {
+	if (pRenderTarget) {
+		const XYPOSITION halfStroke = stroke.width / 2.0f;
+		const D2D1_RECT_F rectangle1 = D2D1::RectF(rc.left + halfStroke, rc.top + halfStroke,
+			rc.right - halfStroke, rc.bottom - halfStroke);
+		D2DPenColourAlpha(stroke.colour);
+		pRenderTarget->DrawRectangle(&rectangle1, pBrush, stroke.width);
+	}
 }
 
 void SurfaceD2D::FillRectangle(PRectangle rc, ColourDesired back) {

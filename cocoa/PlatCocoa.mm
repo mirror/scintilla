@@ -737,6 +737,24 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
 
 //--------------------------------------------------------------------------------------------------
 
+void SurfaceImpl::RectangleFrame(PRectangle rc, Stroke stroke) {
+	if (!gc)
+		return;
+
+	CGContextBeginPath(gc);
+	PenColourAlpha(stroke.colour);
+	CGContextSetLineWidth(gc, stroke.width);
+
+	CGContextAddRect(gc, CGRectFromPRectangleInset(rc, stroke.width));
+
+	CGContextDrawPath(gc, kCGPathStroke);
+
+	// Restore as not all paths set
+	CGContextSetLineWidth(gc, 1.0f);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 	if (gc) {
 		FillColour(back);

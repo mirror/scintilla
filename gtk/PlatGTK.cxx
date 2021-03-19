@@ -165,6 +165,7 @@ public:
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
+	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
@@ -530,6 +531,15 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
 		cairo_fill_preserve(context);
 		PenColourAlpha(fillStroke.stroke.colour);
 		cairo_set_line_width(context, fillStroke.stroke.width);
+		cairo_stroke(context);
+	}
+}
+
+void SurfaceImpl::RectangleFrame(PRectangle rc, Stroke stroke) {
+	if (context) {
+		CairoRectangle(rc.Inset(stroke.width / 2));
+		PenColourAlpha(stroke.colour);
+		cairo_set_line_width(context, stroke.width);
 		cairo_stroke(context);
 	}
 }
