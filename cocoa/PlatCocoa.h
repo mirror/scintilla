@@ -104,6 +104,7 @@ public:
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
+
 	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore,
 			    ColourDesired back) override;
 	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore,
@@ -111,6 +112,15 @@ public:
 	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
+
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore,
+			    ColourDesired back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore,
+			     ColourDesired back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
+
 	XYPOSITION Ascent(const Font *font_) override;
 	XYPOSITION Descent(const Font *font_) override;
 	XYPOSITION InternalLeading(const Font *font_) override;

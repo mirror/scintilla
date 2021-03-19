@@ -180,6 +180,14 @@ public:
 	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
+
+	void DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore);
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
+
 	XYPOSITION Ascent(const Font *font_) override;
 	XYPOSITION Descent(const Font *font_) override;
 	XYPOSITION InternalLeading(const Font *font_) override;
@@ -908,6 +916,86 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 		}
 		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
 		PangoRectangle pos {};
+		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
+		return floatFromPangoUnits(pos.width);
+	}
+	return 1;
+}
+
+void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore) {
+	PenColour(fore);
+	if (context) {
+		const XYPOSITION xText = rc.left;
+		if (PFont(font_)->pfd) {
+			pango_layout_set_text(layout, text.data(), text.length());
+			pango_layout_set_font_description(layout, PFont(font_)->pfd);
+			pango_cairo_update_layout(context, layout);
+			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout, 0);
+			cairo_move_to(context, xText, ybase);
+			pango_cairo_show_layout_line(context, pll);
+		}
+	}
+}
+
+void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore, ColourDesired back) {
+	FillRectangle(rc, back);
+	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
+}
+
+// On GTK+, exactly same as DrawTextNoClip
+void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore, ColourDesired back) {
+	FillRectangle(rc, back);
+	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
+}
+
+void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore) {
+	// Avoid drawing spaces in transparent mode
+	for (size_t i = 0; i < text.length(); i++) {
+		if (text[i] != ' ') {
+			DrawTextBaseUTF8(rc, font_, ybase, text, fore);
+			return;
+		}
+	}
+}
+
+void SurfaceImpl::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) {
+	if (PFont(font_)->pfd) {
+		pango_layout_set_font_description(layout, PFont(font_)->pfd);
+		// Simple and direct as UTF-8 is native Pango encoding
+		int i = 0;
+		pango_layout_set_text(layout, text.data(), text.length());
+		ClusterIterator iti(layout, text.length());
+		while (!iti.finished) {
+			iti.Next();
+			const int places = iti.curIndex - i;
+			while (i < iti.curIndex) {
+				// Evenly distribute space among bytes of this cluster.
+				// Would be better to find number of characters and then
+				// divide evenly between characters with each byte of a character
+				// being at the same position.
+				positions[i] = iti.position - (iti.curIndex - 1 - i) * iti.distance / places;
+				i++;
+			}
+		}
+		PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
+	} else {
+		// No font so return an ascending range of values
+		for (size_t i = 0; i < text.length(); i++) {
+			positions[i] = i + 1;
+		}
+	}
+}
+
+XYPOSITION SurfaceImpl::WidthTextUTF8(const Font *font_, std::string_view text) {
+	if (PFont(font_)->pfd) {
+		pango_layout_set_font_description(layout, PFont(font_)->pfd);
+		pango_layout_set_text(layout, text.data(), text.length());
+		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
+		PangoRectangle pos{};
 		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
 		return floatFromPangoUnits(pos.width);
 	}

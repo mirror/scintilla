@@ -557,6 +557,87 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font, std::string_view text)
 	return metrics.width(su);
 }
 
+void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc,
+				 const Font *font,
+				 XYPOSITION ybase,
+				 std::string_view text,
+				 ColourDesired fore,
+				 ColourDesired back)
+{
+	SetFont(font);
+	PenColour(fore);
+
+	GetPainter()->setBackground(QColorFromCA(back));
+	GetPainter()->setBackgroundMode(Qt::OpaqueMode);
+	QString su = QString::fromUtf8(text.data(), static_cast<int>(text.length()));
+	GetPainter()->drawText(QPointF(rc.left, ybase), su);
+}
+
+void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc,
+				  const Font *font,
+				  XYPOSITION ybase,
+				  std::string_view text,
+				  ColourDesired fore,
+				  ColourDesired back)
+{
+	SetClip(rc);
+	DrawTextNoClip(rc, font, ybase, text, fore, back);
+	PopClip();
+}
+
+void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc,
+				      const Font *font,
+				      XYPOSITION ybase,
+				      std::string_view text,
+	ColourDesired fore)
+{
+	SetFont(font);
+	PenColour(fore);
+
+	GetPainter()->setBackgroundMode(Qt::TransparentMode);
+	QString su = QString::fromUtf8(text.data(), static_cast<int>(text.length()));
+	GetPainter()->drawText(QPointF(rc.left, ybase), su);
+}
+
+void SurfaceImpl::MeasureWidthsUTF8(const Font *font,
+				std::string_view text,
+				XYPOSITION *positions)
+{
+	if (!font)
+		return;
+	QString su = QString::fromUtf8(text.data(), static_cast<int>(text.length()));
+	QTextLayout tlay(su, *FontPointer(font), GetPaintDevice());
+	tlay.beginLayout();
+	QTextLine tl = tlay.createLine();
+	tlay.endLayout();
+	int fit = su.size();
+	int ui=0;
+	size_t i=0;
+	while (ui<fit) {
+		const unsigned char uch = text[i];
+		const unsigned int byteCount = UTF8BytesOfLead[uch];
+		const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
+		qreal xPosition = tl.cursorToX(ui+codeUnits);
+		for (size_t bytePos=0; (bytePos<byteCount) && (i<text.length()); bytePos++) {
+			positions[i++] = xPosition;
+		}
+		ui += codeUnits;
+	}
+	XYPOSITION lastPos = 0;
+	if (i > 0)
+		lastPos = positions[i-1];
+	while (i<text.length()) {
+		positions[i++] = lastPos;
+	}
+}
+
+XYPOSITION SurfaceImpl::WidthTextUTF8(const Font *font, std::string_view text)
+{
+	QFontMetricsF metrics(*FontPointer(font), device);
+	QString su = QString::fromUtf8(text.data(), static_cast<int>(text.length()));
+	return metrics.width(su);
+}
+
 XYPOSITION SurfaceImpl::Ascent(const Font *font)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);

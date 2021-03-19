@@ -1227,6 +1227,104 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 	return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
 }
 
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+				 ColourDesired fore, ColourDesired back) {
+	FillRectangle(rc, back);
+	DrawTextTransparent(rc, font_, ybase, text, fore);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+				  ColourDesired fore, ColourDesired back) {
+	CGContextSaveGState(gc);
+	CGContextClipToRect(gc, PRectangleToCGRect(rc));
+	DrawTextNoClip(rc, font_, ybase, text, fore, back);
+	CGContextRestoreGState(gc);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+				      ColourDesired fore) {
+	QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
+		return;
+	}
+	const CFStringEncoding encoding = kCFStringEncodingUTF8;
+	ColourDesired colour(fore.AsInteger());
+	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
+
+	style->setCTStyleColour(color);
+
+	CGColorRelease(color);
+
+	textLayout->setText(text, encoding, style);
+	textLayout->draw(gc, rc.left, ybase);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) {
+	const QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
+		return;
+	}
+	const CFStringEncoding encoding = kCFStringEncodingUTF8;
+	const CFStringEncoding encodingUsed =
+		textLayout->setText(text, encoding, style);
+
+	CTLineRef mLine = textLayout->getCTLine();
+	assert(mLine);
+
+	if (encodingUsed != encoding) {
+		// Switched to MacRoman to make work so treat as single byte encoding.
+		for (int i=0; i<text.length(); i++) {
+			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, i+1, nullptr);
+			positions[i] = static_cast<XYPOSITION>(xPosition);
+		}
+		return;
+	}
+
+	// Map the widths given for UTF-16 characters back onto the UTF-8 input string
+	CFIndex fit = textLayout->getStringLength();
+	int ui=0;
+	int i=0;
+	std::vector<CGFloat> linePositions(fit);
+	GetPositions(mLine, linePositions);
+	while (ui<fit) {
+		const unsigned char uch = text[i];
+		const unsigned int byteCount = UTF8BytesOfLead[uch];
+		const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
+		const CGFloat xPosition = linePositions[ui];
+		for (unsigned int bytePos=0; (bytePos<byteCount) && (i<text.length()); bytePos++) {
+			positions[i++] = static_cast<XYPOSITION>(xPosition);
+		}
+		ui += codeUnits;
+	}
+	XYPOSITION lastPos = 0.0f;
+	if (i > 0)
+		lastPos = positions[i-1];
+	while (i<text.length()) {
+		positions[i++] = lastPos;
+	}
+}
+
+XYPOSITION SurfaceImpl::WidthTextUTF8(const Font *font_, std::string_view text) {
+	const QuartzTextStyle *style = TextStyleFromFont(font_);
+	if (!style) {
+		return 1;
+	}
+	textLayout->setText(text, kCFStringEncodingUTF8, style);
+
+	return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
+}
+
+//--------------------------------------------------------------------------------------------------
+
+
 // This string contains a good range of characters to test for size.
 const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
 			  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

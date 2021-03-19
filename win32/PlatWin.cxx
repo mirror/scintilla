@@ -506,6 +506,14 @@ public:
 	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
+
+	void DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
+
 	XYPOSITION Ascent(const Font *font_) override;
 	XYPOSITION Descent(const Font *font_) override;
 	XYPOSITION InternalLeading(const Font *font_) override;
@@ -1003,23 +1011,11 @@ void SurfaceGDI::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITIO
 	}
 }
 
-XYPOSITION SurfaceGDI::WidthText(const Font *font_, std::string_view text) {
-	SetFont(font_);
-	SIZE sz={0,0};
-	if (!unicodeMode) {
-		::GetTextExtentPoint32A(hdc, text.data(), std::min(static_cast<int>(text.length()), maxLenText), &sz);
-	} else {
-		const TextWide tbuf(text, unicodeMode, codePage);
-		::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
-	}
-	return static_cast<XYPOSITION>(sz.cx);
-}
-
 void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	// Zero positions to avoid random behaviour on failure.
 	std::fill(positions, positions + text.length(), 0.0f);
 	SetFont(font_);
-	SIZE sz={0,0};
+	SIZE sz = { 0,0 };
 	int fit = 0;
 	int i = 0;
 	const int len = static_cast<int>(text.length());
@@ -1037,7 +1033,7 @@ void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 			if (byteCount == 4) {	// Non-BMP
 				ui++;
 			}
-			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<len); bytePos++) {
+			for (unsigned int bytePos = 0; (bytePos < byteCount) && (i < len); bytePos++) {
 				positions[i++] = static_cast<XYPOSITION>(poses.buffer[ui]);
 			}
 		}
@@ -1047,14 +1043,102 @@ void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 			// Eeek - a NULL DC or other foolishness could cause this.
 			return;
 		}
-		while (i<fit) {
+		while (i < fit) {
 			positions[i] = static_cast<XYPOSITION>(poses.buffer[i]);
 			i++;
 		}
 	}
 	// If any positions not filled in then use the last position for them
 	const XYPOSITION lastPos = (fit > 0) ? positions[fit - 1] : 0.0f;
-	std::fill(positions+i, positions + text.length(), lastPos);
+	std::fill(positions + i, positions + text.length(), lastPos);
+}
+
+XYPOSITION SurfaceGDI::WidthText(const Font *font_, std::string_view text) {
+	SetFont(font_);
+	SIZE sz = { 0,0 };
+	if (!unicodeMode) {
+		::GetTextExtentPoint32A(hdc, text.data(), std::min(static_cast<int>(text.length()), maxLenText), &sz);
+	} else {
+		const TextWide tbuf(text, unicodeMode, codePage);
+		::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
+	}
+	return static_cast<XYPOSITION>(sz.cx);
+}
+
+void SurfaceGDI::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
+	SetFont(font_);
+	const RECT rcw = RectFromPRectangle(rc);
+	const int x = static_cast<int>(rc.left);
+	const int yBaseInt = static_cast<int>(ybase);
+
+	const TextWide tbuf(text, true);
+	::ExtTextOutW(hdc, x, yBaseInt, fuOptions, &rcw, tbuf.buffer, tbuf.tlen, nullptr);
+}
+
+void SurfaceGDI::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore, ColourDesired back) {
+	::SetTextColor(hdc, fore.AsInteger());
+	::SetBkColor(hdc, back.AsInteger());
+	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE);
+}
+
+void SurfaceGDI::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore, ColourDesired back) {
+	::SetTextColor(hdc, fore.AsInteger());
+	::SetBkColor(hdc, back.AsInteger());
+	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
+}
+
+void SurfaceGDI::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore) {
+	// Avoid drawing spaces in transparent mode
+	for (const char ch : text) {
+		if (ch != ' ') {
+			::SetTextColor(hdc, fore.AsInteger());
+			::SetBkMode(hdc, TRANSPARENT);
+			DrawTextCommonUTF8(rc, font_, ybase, text, 0);
+			::SetBkMode(hdc, OPAQUE);
+			return;
+		}
+	}
+}
+
+void SurfaceGDI::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) {
+	// Zero positions to avoid random behaviour on failure.
+	std::fill(positions, positions + text.length(), 0.0f);
+	SetFont(font_);
+	SIZE sz = { 0,0 };
+	int fit = 0;
+	int i = 0;
+	const int len = static_cast<int>(text.length());
+	const TextWide tbuf(text, true);
+	TextPositionsI poses(tbuf.tlen);
+	if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tbuf.tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
+		// Failure
+		return;
+	}
+	// Map the widths given for UTF-16 characters back onto the UTF-8 input string
+	for (int ui = 0; ui < fit; ui++) {
+		const unsigned char uch = text[i];
+		const unsigned int byteCount = UTF8BytesOfLead[uch];
+		if (byteCount == 4) {	// Non-BMP
+			ui++;
+		}
+		for (unsigned int bytePos = 0; (bytePos < byteCount) && (i < len); bytePos++) {
+			positions[i++] = static_cast<XYPOSITION>(poses.buffer[ui]);
+		}
+	}
+	// If any positions not filled in then use the last position for them
+	const XYPOSITION lastPos = (fit > 0) ? positions[fit - 1] : 0.0f;
+	std::fill(positions + i, positions + text.length(), lastPos);
+}
+
+XYPOSITION SurfaceGDI::WidthTextUTF8(const Font *font_, std::string_view text) {
+	SetFont(font_);
+	SIZE sz = { 0,0 };
+	const TextWide tbuf(text, true);
+	::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
+	return static_cast<XYPOSITION>(sz.cx);
 }
 
 XYPOSITION SurfaceGDI::Ascent(const Font *font_) {
@@ -1208,6 +1292,14 @@ public:
 	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
+
+	void DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
+
 	XYPOSITION Ascent(const Font *font_) override;
 	XYPOSITION Descent(const Font *font_) override;
 	XYPOSITION InternalLeading(const Font *font_) override;
@@ -2104,24 +2196,6 @@ void SurfaceD2D::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITIO
 	}
 }
 
-XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
-	FLOAT width = 1.0;
-	SetFont(font_);
-	const TextWide tbuf(text, unicodeMode, codePageText);
-	if (pIDWriteFactory && pTextFormat) {
-		// Create a layout
-		IDWriteTextLayout *pTextLayout = nullptr;
-		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 1000.0, 1000.0, &pTextLayout);
-		if (SUCCEEDED(hr) && pTextLayout) {
-			DWRITE_TEXT_METRICS textMetrics;
-			if (SUCCEEDED(pTextLayout->GetMetrics(&textMetrics)))
-				width = textMetrics.widthIncludingTrailingWhitespace;
-			ReleaseUnknown(pTextLayout);
-		}
-	}
-	return width;
-}
-
 void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	SetFont(font_);
 	if (!pIDWriteFactory || !pTextFormat) {
@@ -2201,6 +2275,157 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 			ui++;
 		}
 	}
+}
+
+XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
+	FLOAT width = 1.0;
+	SetFont(font_);
+	const TextWide tbuf(text, unicodeMode, codePageText);
+	if (pIDWriteFactory && pTextFormat) {
+		// Create a layout
+		IDWriteTextLayout *pTextLayout = nullptr;
+		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 1000.0, 1000.0, &pTextLayout);
+		if (SUCCEEDED(hr) && pTextLayout) {
+			DWRITE_TEXT_METRICS textMetrics;
+			if (SUCCEEDED(pTextLayout->GetMetrics(&textMetrics)))
+				width = textMetrics.widthIncludingTrailingWhitespace;
+			ReleaseUnknown(pTextLayout);
+		}
+	}
+	return width;
+}
+
+void SurfaceD2D::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
+	SetFont(font_);
+
+	// Use Unicode calls
+	const TextWide tbuf(text, true);
+	if (pRenderTarget && pTextFormat && pBrush) {
+		if (fuOptions & ETO_CLIPPED) {
+			D2D1_RECT_F rcClip = { rc.left, rc.top, rc.right, rc.bottom };
+			pRenderTarget->PushAxisAlignedClip(rcClip, D2D1_ANTIALIAS_MODE_ALIASED);
+		}
+
+		// Explicitly creating a text layout appears a little faster
+		IDWriteTextLayout *pTextLayout = nullptr;
+		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat,
+			rc.Width(), rc.Height(), &pTextLayout);
+		if (SUCCEEDED(hr)) {
+			D2D1_POINT_2F origin = {rc.left, ybase-yAscent};
+			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, d2dDrawTextOptions);
+			ReleaseUnknown(pTextLayout);
+		}
+
+		if (fuOptions & ETO_CLIPPED) {
+			pRenderTarget->PopAxisAlignedClip();
+		}
+	}
+}
+
+void SurfaceD2D::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore, ColourDesired back) {
+	if (pRenderTarget) {
+		FillRectangle(rc, back);
+		D2DPenColour(fore);
+		DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE);
+	}
+}
+
+void SurfaceD2D::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore, ColourDesired back) {
+	if (pRenderTarget) {
+		FillRectangle(rc, back);
+		D2DPenColour(fore);
+		DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
+	}
+}
+
+void SurfaceD2D::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
+	ColourDesired fore) {
+	// Avoid drawing spaces in transparent mode
+	for (const char ch : text) {
+		if (ch != ' ') {
+			if (pRenderTarget) {
+				D2DPenColour(fore);
+				DrawTextCommonUTF8(rc, font_, ybase, text, 0);
+			}
+			return;
+		}
+	}
+}
+
+void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) {
+	SetFont(font_);
+	if (!pIDWriteFactory || !pTextFormat) {
+		// SetFont failed or no access to DirectWrite so give up.
+		return;
+	}
+	const TextWide tbuf(text, true);
+	TextPositions poses(tbuf.tlen);
+	// Initialize poses for safety.
+	std::fill(poses.buffer, poses.buffer + tbuf.tlen, 0.0f);
+	// Create a layout
+	IDWriteTextLayout *pTextLayout = nullptr;
+	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 10000.0, 1000.0, &pTextLayout);
+	if (!SUCCEEDED(hrCreate)) {
+		return;
+	}
+	constexpr int clusters = stackBufferLength;
+	DWRITE_CLUSTER_METRICS clusterMetrics[clusters];
+	UINT32 count = 0;
+	const HRESULT hrGetCluster = pTextLayout->GetClusterMetrics(clusterMetrics, clusters, &count);
+	ReleaseUnknown(pTextLayout);
+	if (!SUCCEEDED(hrGetCluster)) {
+		return;
+	}
+	// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
+	FLOAT position = 0.0f;
+	size_t ti = 0;
+	for (size_t ci = 0; ci < count; ci++) {
+		for (size_t inCluster = 0; inCluster < clusterMetrics[ci].length; inCluster++) {
+			poses.buffer[ti++] = position + clusterMetrics[ci].width * (inCluster + 1) / clusterMetrics[ci].length;
+		}
+		position += clusterMetrics[ci].width;
+	}
+	PLATFORM_ASSERT(ti == static_cast<size_t>(tbuf.tlen));
+	// Map the widths given for UTF-16 characters back onto the UTF-8 input string
+	int ui = 0;
+	size_t i = 0;
+	while (ui < tbuf.tlen) {
+		const unsigned char uch = text[i];
+		const unsigned int byteCount = UTF8BytesOfLead[uch];
+		if (byteCount == 4) {	// Non-BMP
+			ui++;
+		}
+		for (unsigned int bytePos = 0; (bytePos < byteCount) && (i < text.length()); bytePos++) {
+			positions[i++] = poses.buffer[ui];
+		}
+		ui++;
+	}
+	XYPOSITION lastPos = 0.0f;
+	if (i > 0)
+		lastPos = positions[i - 1];
+	while (i < text.length()) {
+		positions[i++] = lastPos;
+	}
+}
+
+XYPOSITION SurfaceD2D::WidthTextUTF8(const Font * font_, std::string_view text) {
+	FLOAT width = 1.0;
+	SetFont(font_);
+	const TextWide tbuf(text, true);
+	if (pIDWriteFactory && pTextFormat) {
+		// Create a layout
+		IDWriteTextLayout *pTextLayout = nullptr;
+		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 1000.0, 1000.0, &pTextLayout);
+		if (SUCCEEDED(hr)) {
+			DWRITE_TEXT_METRICS textMetrics;
+			if (SUCCEEDED(pTextLayout->GetMetrics(&textMetrics)))
+				width = textMetrics.widthIncludingTrailingWhitespace;
+			ReleaseUnknown(pTextLayout);
+		}
+	}
+	return width;
 }
 
 XYPOSITION SurfaceD2D::Ascent(const Font *font_) {
