@@ -524,6 +524,64 @@ void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke)
 	GetPainter()->drawEllipse(rect);
 }
 
+void SurfaceImpl::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
+	const XYPOSITION halfStroke = fillStroke.stroke.width / 2.0f;
+	const XYPOSITION radius = rc.Height() / 2.0f - halfStroke;
+	PRectangle rcInner = rc;
+	rcInner.left += radius;
+	rcInner.right -= radius;
+	const XYPOSITION arcHeight = rc.Height() - fillStroke.stroke.width;
+
+	PenColourWidth(fillStroke.stroke.colour, fillStroke.stroke.width);
+	BrushColour(fillStroke.fill.colour);
+
+	QPainterPath path;
+
+	const Ends leftSide = static_cast<Ends>(static_cast<int>(ends) & 0xf);
+	const Ends rightSide = static_cast<Ends>(static_cast<int>(ends) & 0xf0);
+	switch (leftSide) {
+		case Ends::leftFlat:
+			path.moveTo(rc.left + halfStroke, rc.top + halfStroke);
+			path.lineTo(rc.left + halfStroke, rc.bottom - halfStroke);
+			break;
+		case Ends::leftAngle:
+			path.moveTo(rcInner.left + halfStroke, rc.top + halfStroke);
+			path.lineTo(rc.left + halfStroke, rc.Centre().y);
+			path.lineTo(rcInner.left + halfStroke, rc.bottom - halfStroke);
+			break;
+		case Ends::semiCircles:
+		default:
+			path.moveTo(rcInner.left + halfStroke, rc.top + halfStroke);
+			QRectF rectangleArc(rc.left + halfStroke, rc.top + halfStroke,
+					    arcHeight, arcHeight);
+			path.arcTo(rectangleArc, 90, 180);
+			break;
+	}
+
+	switch (rightSide) {
+		case Ends::rightFlat:
+			path.lineTo(rc.right - halfStroke, rc.bottom - halfStroke);
+			path.lineTo(rc.right - halfStroke, rc.top + halfStroke);
+			break;
+		case Ends::rightAngle:
+			path.lineTo(rcInner.right - halfStroke, rc.bottom - halfStroke);
+			path.lineTo(rc.right - halfStroke, rc.Centre().y);
+			path.lineTo(rcInner.right - halfStroke, rc.top + halfStroke);
+			break;
+		case Ends::semiCircles:
+		default:
+			path.lineTo(rcInner.right - halfStroke, rc.bottom - halfStroke);
+			QRectF rectangleArc(rc.right - arcHeight - halfStroke, rc.top + halfStroke,
+					    arcHeight, arcHeight);
+			path.arcTo(rectangleArc, 270, 180);
+			break;
+	}
+
+	// Close the path to enclose it for stroking and for filling, then draw it
+	path.closeSubpath();
+	GetPainter()->drawPath(path);
+}
+
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource)
 {
 	SurfaceImpl *source = dynamic_cast<SurfaceImpl *>(&surfaceSource);

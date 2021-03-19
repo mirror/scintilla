@@ -505,6 +505,7 @@ public:
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
+	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
@@ -1083,6 +1084,11 @@ void SurfaceGDI::Ellipse(PRectangle rc, FillStroke fillStroke) {
 	::Ellipse(hdc, rcw.left, rcw.top, rcw.right, rcw.bottom);
 }
 
+void SurfaceGDI::Stadium(PRectangle rc, FillStroke fillStroke, [[maybe_unused]] Ends ends) {
+	// TODO: Implement properly - the rectangle is just a placeholder
+	RectangleDraw(rc, fillStroke);
+}
+
 void SurfaceGDI::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	::BitBlt(hdc,
 		static_cast<int>(rc.left), static_cast<int>(rc.top),
@@ -1436,6 +1442,7 @@ public:
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
+	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
@@ -1997,6 +2004,102 @@ void SurfaceD2D::Ellipse(PRectangle rc, FillStroke fillStroke) {
 
 	D2DPenColourAlpha(fillStroke.stroke.colour);
 	pRenderTarget->DrawEllipse(ellipseOutline, pBrush, fillStroke.stroke.width);
+}
+
+void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
+	if (!pRenderTarget)
+		return;
+	if (rc.Width() < rc.Height()) {
+		// Can't draw nice ends so just draw a rectangle
+		RectangleDraw(rc, fillStroke);
+		return;
+	}
+	const float radius = rc.Height() / 2.0f;
+	const float radiusFill = radius - fillStroke.stroke.width;
+	const XYPOSITION halfStroke = fillStroke.stroke.width / 2.0f;
+	if (ends == Surface::Ends::semiCircles) {
+		const D2D1_RECT_F rect = { rc.left, rc.top, rc.right, rc.bottom };
+		D2D1_ROUNDED_RECT roundedRectFill = { RectangleInset(rect, fillStroke.stroke.width),
+			radiusFill, radiusFill };
+		D2DPenColourAlpha(fillStroke.fill.colour);
+		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
+
+		D2D1_ROUNDED_RECT roundedRect = { RectangleInset(rect, halfStroke),
+			radius, radius };
+		D2DPenColourAlpha(fillStroke.stroke.colour);
+		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.width);
+	} else {
+		const Ends leftSide = static_cast<Ends>(static_cast<int>(ends) & 0xf);
+		const Ends rightSide = static_cast<Ends>(static_cast<int>(ends) & 0xf0);
+		PRectangle rcInner = rc;
+		rcInner.left += radius;
+		rcInner.right -= radius;
+		ID2D1PathGeometry *pathGeometry = nullptr;
+		const HRESULT hrGeometry = pD2DFactory->CreatePathGeometry(&pathGeometry);
+		if (FAILED(hrGeometry) || !pathGeometry)
+			return;
+		ID2D1GeometrySink *pSink = nullptr;
+		const HRESULT hrSink = pathGeometry->Open(&pSink);
+		if (SUCCEEDED(hrSink) && pSink) {
+			switch (leftSide) {
+				case Ends::leftFlat:
+					pSink->BeginFigure(D2D1::Point2F(rc.left + halfStroke, rc.top + halfStroke), D2D1_FIGURE_BEGIN_FILLED);
+					pSink->AddLine(D2D1::Point2F(rc.left + halfStroke, rc.bottom - halfStroke));
+					break;
+				case Ends::leftAngle:
+					pSink->BeginFigure(D2D1::Point2F(rcInner.left + halfStroke, rc.top + halfStroke), D2D1_FIGURE_BEGIN_FILLED);
+					pSink->AddLine(D2D1::Point2F(rc.left + halfStroke, rc.Centre().y));
+					pSink->AddLine(D2D1::Point2F(rcInner.left + halfStroke, rc.bottom - halfStroke));
+					break;
+				case Ends::semiCircles:
+				default: {
+						pSink->BeginFigure(D2D1::Point2F(rcInner.left + halfStroke, rc.top + halfStroke), D2D1_FIGURE_BEGIN_FILLED);
+						D2D1_ARC_SEGMENT segment{};
+						segment.point = D2D1::Point2F(rcInner.left + halfStroke, rc.bottom - halfStroke);
+						segment.size = D2D1::SizeF(radiusFill, radiusFill);
+						segment.rotationAngle = 0.0f;
+						segment.sweepDirection = D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
+						segment.arcSize = D2D1_ARC_SIZE_SMALL;
+						pSink->AddArc(segment);
+					}
+					break;
+			}
+
+			switch (rightSide) {
+			case Ends::rightFlat:
+				pSink->AddLine(D2D1::Point2F(rc.right - halfStroke, rc.bottom - halfStroke));
+				pSink->AddLine(D2D1::Point2F(rc.right - halfStroke, rc.top + halfStroke));
+				break;
+			case Ends::rightAngle:
+				pSink->AddLine(D2D1::Point2F(rcInner.right - halfStroke, rc.bottom - halfStroke));
+				pSink->AddLine(D2D1::Point2F(rc.right - halfStroke, rc.Centre().y));
+				pSink->AddLine(D2D1::Point2F(rcInner.right - halfStroke, rc.top + halfStroke));
+				break;
+			case Ends::semiCircles:
+			default: {
+					pSink->AddLine(D2D1::Point2F(rcInner.right - halfStroke, rc.bottom - halfStroke));
+					D2D1_ARC_SEGMENT segment{};
+					segment.point = D2D1::Point2F(rcInner.right - halfStroke, rc.top + halfStroke);
+					segment.size = D2D1::SizeF(radiusFill, radiusFill);
+					segment.rotationAngle = 0.0f;
+					segment.sweepDirection = D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
+					segment.arcSize = D2D1_ARC_SIZE_SMALL;
+					pSink->AddArc(segment);
+				}
+				break;
+			}
+
+			pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+
+			pSink->Close();
+		}
+		ReleaseUnknown(pSink);
+		D2DPenColourAlpha(fillStroke.fill.colour);
+		pRenderTarget->FillGeometry(pathGeometry, pBrush);
+		D2DPenColourAlpha(fillStroke.stroke.colour);
+		pRenderTarget->DrawGeometry(pathGeometry, pBrush, fillStroke.stroke.width);
+		ReleaseUnknown(pathGeometry);
+	}
 }
 
 void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {

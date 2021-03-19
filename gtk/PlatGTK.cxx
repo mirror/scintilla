@@ -47,6 +47,8 @@ namespace {
 
 constexpr double kPi = 3.14159265358979323846;
 
+constexpr double degrees = kPi / 180.0;
+
 // The Pango version guard for pango_units_from_double and pango_units_to_double
 // is more complex than simply implementing these here.
 
@@ -178,6 +180,7 @@ public:
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
+	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
@@ -612,8 +615,6 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
 }
 
 static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, double radius) noexcept {
-	constexpr double degrees = kPi / 180.0;
-
 	cairo_new_sub_path(context);
 	cairo_arc(context, left + width - radius, top + radius, radius, -90 * degrees, 0 * degrees);
 	cairo_arc(context, left + width - radius, top + height - radius, radius, 0 * degrees, 90 * degrees);
@@ -744,6 +745,64 @@ void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke) {
 	cairo_arc(context, (rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2,
 		  (std::min(rc.Width(), rc.Height()) - fillStroke.stroke.width) / 2, 0, 2*kPi);
 	cairo_fill_preserve(context);
+	PenColourAlpha(fillStroke.stroke.colour);
+	cairo_set_line_width(context, fillStroke.stroke.width);
+	cairo_stroke(context);
+}
+
+void SurfaceImpl::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
+	const XYPOSITION midLine = rc.Centre().y;
+	const XYPOSITION halfStroke = fillStroke.stroke.width / 2.0f;
+	const XYPOSITION radius = rc.Height() / 2.0f - halfStroke;
+	PRectangle rcInner = rc;
+	rcInner.left += radius;
+	rcInner.right -= radius;
+
+	cairo_new_sub_path(context);
+
+	const Ends leftSide = static_cast<Ends>(static_cast<int>(ends) & 0xf);
+	const Ends rightSide = static_cast<Ends>(static_cast<int>(ends) & 0xf0);
+	switch (leftSide) {
+		case Ends::leftFlat:
+			cairo_move_to(context, rc.left + halfStroke, rc.top + halfStroke);
+			cairo_line_to(context, rc.left + halfStroke, rc.bottom - halfStroke);
+			break;
+		case Ends::leftAngle:
+			cairo_move_to(context, rcInner.left + halfStroke, rc.top + halfStroke);
+			cairo_line_to(context, rc.left + halfStroke, rc.Centre().y);
+			cairo_line_to(context, rcInner.left + halfStroke, rc.bottom - halfStroke);
+			break;
+		case Ends::semiCircles:
+		default:
+			cairo_move_to(context, rcInner.left + halfStroke, rc.top + halfStroke);
+			cairo_arc_negative(context, rcInner.left + halfStroke, midLine, radius,
+				270 * degrees, 90 * degrees);
+			break;
+	}
+
+	switch (rightSide) {
+		case Ends::rightFlat:
+			cairo_line_to(context, rc.right - halfStroke, rc.bottom - halfStroke);
+			cairo_line_to(context, rc.right - halfStroke, rc.top + halfStroke);
+			break;
+		case Ends::rightAngle:
+			cairo_line_to(context, rcInner.right - halfStroke, rc.bottom - halfStroke);
+			cairo_line_to(context, rc.right - halfStroke, rc.Centre().y);
+			cairo_line_to(context, rcInner.right - halfStroke, rc.top + halfStroke);
+			break;
+		case Ends::semiCircles:
+		default:
+			cairo_line_to(context, rcInner.right - halfStroke, rc.bottom - halfStroke);
+			cairo_arc_negative(context, rcInner.right - halfStroke, midLine, radius,
+				90 * degrees, 270 * degrees);
+			break;
+	}
+
+	// Close the path to enclose it for stroking and for filling, then draw it
+	cairo_close_path(context);
+	PenColourAlpha(fillStroke.fill.colour);
+	cairo_fill_preserve(context);
+
 	PenColourAlpha(fillStroke.stroke.colour);
 	cairo_set_line_width(context, fillStroke.stroke.width);
 	cairo_stroke(context);

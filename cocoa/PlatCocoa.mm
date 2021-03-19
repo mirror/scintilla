@@ -1231,6 +1231,61 @@ void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke) {
 	CGContextSetLineWidth(gc, 1.0f);
 }
 
+void SurfaceImpl::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
+	const CGFloat midLine = rc.Centre().y;
+	const CGFloat piOn2 = acos(0.0);
+	const XYPOSITION halfStroke = fillStroke.stroke.width / 2.0f;
+	const float radius = rc.Height() / 2.0f - halfStroke;
+	PRectangle rcInner = rc;
+	rcInner.left += radius;
+	rcInner.right -= radius;
+
+	SetFillStroke(fillStroke);
+	CGContextBeginPath(gc);
+
+	const Ends leftSide = static_cast<Ends>(static_cast<int>(ends) & 0xf);
+	const Ends rightSide = static_cast<Ends>(static_cast<int>(ends) & 0xf0);
+	switch (leftSide) {
+		case Ends::leftFlat:
+			CGContextMoveToPoint(gc, rc.left + halfStroke, rc.top + halfStroke);
+			CGContextAddLineToPoint(gc, rc.left + halfStroke, rc.bottom - halfStroke);
+			break;
+		case Ends::leftAngle:
+			CGContextMoveToPoint(gc, rcInner.left + halfStroke, rc.top + halfStroke);
+			CGContextAddLineToPoint(gc, rc.left + halfStroke, rc.Centre().y);
+			CGContextAddLineToPoint(gc, rcInner.left + halfStroke, rc.bottom - halfStroke);
+			break;
+		case Ends::semiCircles:
+		default:
+			CGContextMoveToPoint(gc, rcInner.left + halfStroke, rc.top + halfStroke);
+			CGContextAddArc(gc, rcInner.left + halfStroke, midLine, radius, -piOn2, piOn2, 1);
+			break;
+	}
+
+	switch (rightSide) {
+		case Ends::rightFlat:
+			CGContextAddLineToPoint(gc, rc.right - halfStroke, rc.bottom - halfStroke);
+			CGContextAddLineToPoint(gc, rc.right - halfStroke, rc.top + halfStroke);
+			break;
+		case Ends::rightAngle:
+			CGContextAddLineToPoint(gc, rcInner.right - halfStroke, rc.bottom - halfStroke);
+			CGContextAddLineToPoint(gc, rc.right - halfStroke, rc.Centre().y);
+			CGContextAddLineToPoint(gc, rcInner.right - halfStroke, rc.top + halfStroke);
+			break;
+		case Ends::semiCircles:
+		default:
+			CGContextAddLineToPoint(gc, rcInner.right - halfStroke, rc.bottom - halfStroke);
+			CGContextAddArc(gc, rcInner.right - halfStroke, midLine, radius, piOn2, -piOn2, 1);
+			break;
+	}
+
+	// Close the path to enclose it for stroking and for filling, then draw it
+	CGContextClosePath(gc);
+	CGContextDrawPath(gc, kCGPathFillStroke);
+
+	CGContextSetLineWidth(gc, 1.0f);
+}
+
 void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect, PRectangle dstRect) {
 	SurfaceImpl &source = static_cast<SurfaceImpl &>(surfaceSource);
 	CGImageRef image = source.CreateImage();

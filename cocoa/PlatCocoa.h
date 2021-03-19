@@ -113,6 +113,7 @@ public:
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
+	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 

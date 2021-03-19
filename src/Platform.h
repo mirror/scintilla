@@ -179,6 +179,14 @@ public:
 	virtual void Init(SurfaceID sid, WindowID wid)=0;
 	virtual void InitPixMap(int width, int height, Surface *surface_, WindowID wid)=0;
 
+	enum class Ends {
+		semiCircles = 0x0,
+		leftFlat = 0x1,
+		leftAngle = 0x2,
+		rightFlat = 0x10,
+		rightAngle = 0x20,
+	};
+
 	virtual void Release() noexcept=0;
 	virtual int Supports(int feature) noexcept=0;
 	virtual bool Initialised()=0;
@@ -206,6 +214,7 @@ public:
 	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) = 0;
 	virtual void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void Ellipse(PRectangle rc, FillStroke fillStroke)=0;
+	virtual void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
 	virtual std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) = 0;
