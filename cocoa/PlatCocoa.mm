@@ -319,6 +319,10 @@ void GetPositions(CTLineRef line, std::vector<CGFloat> &positions) {
 			 positions.begin(), std::plus<CGFloat>());
 }
 
+const int SupportsCocoa[] = {
+	SC_SUPPORTS_LINE_DRAWS_FINAL,
+};
+
 }
 
 //----------------- SurfaceImpl --------------------------------------------------------------------
@@ -448,6 +452,16 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 		unicodeMode = true;
 		codePage = SC_CP_UTF8;
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+
+int SurfaceImpl::Supports(int feature) noexcept {
+	for (const int f : SupportsCocoa) {
+		if (f == feature)
+			return 1;
+	}
+	return 0;
 }
 
 //--------------------------------------------------------------------------------------------------

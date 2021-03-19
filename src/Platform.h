@@ -180,6 +180,7 @@ public:
 	virtual void InitPixMap(int width, int height, Surface *surface_, WindowID wid)=0;
 
 	virtual void Release() noexcept=0;
+	virtual int Supports(int feature) noexcept=0;
 	virtual bool Initialised()=0;
 	virtual void PenColour(ColourDesired fore)=0;
 	virtual int LogPixelsY()=0;

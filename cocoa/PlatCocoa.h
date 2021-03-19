@@ -79,6 +79,7 @@ public:
 	CGContextRef GetContext() { return gc; }
 
 	void Release() noexcept override;
+	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 

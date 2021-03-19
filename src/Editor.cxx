@@ -5190,8 +5190,9 @@ void Editor::QueueIdleWork(WorkItems items, Sci::Position upTo) {
 	workNeeded.Need(items, upTo);
 }
 
-int Editor::SupportsFeature(int /* feature */) {
-	return 0;
+int Editor::SupportsFeature(int feature) {
+	AutoSurface surface(this);
+	return surface->Supports(feature);
 }
 
 bool Editor::PaintContains(PRectangle rc) {

@@ -48,6 +48,7 @@
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
+#include "Scintilla.h"
 #include "XPM.h"
 #include "UniConversion.h"
 #include "DBCS.h"
@@ -477,6 +478,7 @@ public:
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 
 	void Release() noexcept override;
+	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;
@@ -557,6 +559,10 @@ void SurfaceGDI::Clear() noexcept {
 
 void SurfaceGDI::Release() noexcept {
 	Clear();
+}
+
+int SurfaceGDI::Supports(int /* feature */) noexcept {
+	return 0;
 }
 
 bool SurfaceGDI::Initialised() {
@@ -1108,6 +1114,10 @@ constexpr D2D1_RECT_F RectangleFromPRectangle(PRectangle rc) noexcept {
 	return { rc.left, rc.top, rc.right, rc.bottom };
 }
 
+const int SupportsD2D[] = {
+	SC_SUPPORTS_LINE_DRAWS_FINAL,
+};
+
 }
 
 class BlobInline;
@@ -1152,6 +1162,7 @@ public:
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 
 	void Release() noexcept override;
+	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 
 	HRESULT FlushDrawing();
@@ -1246,6 +1257,14 @@ void SurfaceD2D::Release() noexcept {
 
 void SurfaceD2D::SetScale(WindowID wid) noexcept {
 	logPixelsY = DpiForWindow(wid);
+}
+
+int SurfaceD2D::Supports(int feature) noexcept {
+	for (const int f : SupportsD2D) {
+		if (f == feature)
+			return 1;
+	}
+	return 0;
 }
 
 bool SurfaceD2D::Initialised() {

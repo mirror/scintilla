@@ -90,6 +90,7 @@ public:
 		Surface *surface, WindowID wid) override;
 
 	void Release() noexcept override;
+	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;

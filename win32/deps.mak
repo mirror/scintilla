@@ -8,6 +8,8 @@ PlatWin.o: \
 	../src/Debugging.h \
 	../src/Geometry.h \
 	../src/Platform.h \
+	../include/Scintilla.h \
+	../include/Sci_Position.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
 	../src/DBCS.h \

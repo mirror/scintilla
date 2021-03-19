@@ -133,6 +133,10 @@ public:
 
 namespace {
 
+const int SupportsQt[] = {
+	SC_SUPPORTS_LINE_DRAWS_FINAL,
+};
+
 const FontAndCharacterSet *AsFontAndCharacterSet(const Font *f) {
 	return dynamic_cast<const FontAndCharacterSet *>(f);
 }
@@ -203,6 +207,15 @@ void SurfaceImpl::InitPixMap(int width,
 void SurfaceImpl::Release() noexcept
 {
 	Clear();
+}
+
+int SurfaceImpl::Supports(int feature) noexcept
+{
+	for (const int f : SupportsQt) {
+		if (f == feature)
+			return 1;
+	}
+	return 0;
 }
 
 bool SurfaceImpl::Initialised()

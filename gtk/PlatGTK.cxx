@@ -151,6 +151,7 @@ public:
 
 	void Clear() noexcept;
 	void Release() noexcept override;
+	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;
@@ -190,6 +191,11 @@ public:
 	void SetDBCSMode(int codePage) override;
 	void SetBidiR2L(bool bidiR2L_) override;
 };
+
+const int SupportsGTK[] = {
+	SC_SUPPORTS_LINE_DRAWS_FINAL,
+};
+
 }
 
 const char *CharacterSetID(int characterSet) noexcept {
@@ -365,6 +371,14 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 	createdGC = true;
 	inited = true;
 	et = surfImpl->et;
+}
+
+int SurfaceImpl::Supports(int feature) noexcept {
+	for (const int f : SupportsGTK) {
+		if (f == feature)
+			return 1;
+	}
+	return 0;
 }
 
 void SurfaceImpl::PenColour(ColourDesired fore) {
