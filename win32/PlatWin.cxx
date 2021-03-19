@@ -482,6 +482,7 @@ public:
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;
+	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
@@ -635,6 +636,11 @@ void SurfaceGDI::SetFont(const Font *font_) noexcept {
 
 int SurfaceGDI::LogPixelsY() {
 	return logPixelsY;
+}
+
+int SurfaceGDI::PixelDivisions() {
+	// Win32 uses device pixels.
+	return 1;
 }
 
 int SurfaceGDI::DeviceHeightFont(int points) {
@@ -1170,6 +1176,7 @@ public:
 	void PenColour(ColourDesired fore) override;
 	void D2DPenColour(ColourDesired fore, int alpha=255);
 	int LogPixelsY() override;
+	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
@@ -1365,6 +1372,11 @@ void SurfaceD2D::SetFont(const Font *font_) noexcept {
 
 int SurfaceD2D::LogPixelsY() {
 	return logPixelsY;
+}
+
+int SurfaceD2D::PixelDivisions() {
+	// Win32 uses device pixels.
+	return 1;
 }
 
 int SurfaceD2D::DeviceHeightFont(int points) {

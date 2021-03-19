@@ -155,6 +155,7 @@ public:
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;
+	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
@@ -393,6 +394,11 @@ void SurfaceImpl::PenColour(ColourDesired fore) {
 
 int SurfaceImpl::LogPixelsY() {
 	return 72;
+}
+
+int SurfaceImpl::PixelDivisions() {
+	// GTK uses device pixels.
+	return 1;
 }
 
 int SurfaceImpl::DeviceHeightFont(int points) {

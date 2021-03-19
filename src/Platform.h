@@ -184,6 +184,7 @@ public:
 	virtual bool Initialised()=0;
 	virtual void PenColour(ColourDesired fore)=0;
 	virtual int LogPixelsY()=0;
+	virtual int PixelDivisions()=0;
 	virtual int DeviceHeightFont(int points)=0;
 	virtual void MoveTo(int x_, int y_)=0;
 	virtual void LineTo(int x_, int y_)=0;

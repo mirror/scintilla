@@ -321,6 +321,7 @@ void GetPositions(CTLineRef line, std::vector<CGFloat> &positions) {
 
 const int SupportsCocoa[] = {
 	SC_SUPPORTS_LINE_DRAWS_FINAL,
+	SC_SUPPORTS_PIXEL_DIVISIONS,
 };
 
 }
@@ -551,6 +552,22 @@ CGImageRef SurfaceImpl::CreateImage() {
  */
 int SurfaceImpl::LogPixelsY() {
 	return 72;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Returns the number of device pixels per logical pixel.
+ * 1 for older displays and 2 for retina displays. Potentially 3 for some phones.
+ */
+int SurfaceImpl::PixelDivisions() {
+	if (gc) {
+		const CGSize szDevice = CGContextConvertSizeToDeviceSpace(gc, CGSizeMake(1.0, 1.0));
+		const int devicePixels = std::round(szDevice.width);
+		assert(devicePixels == 1 || devicePixels == 2);
+		return devicePixels;
+	}
+	return 1;
 }
 
 //--------------------------------------------------------------------------------------------------

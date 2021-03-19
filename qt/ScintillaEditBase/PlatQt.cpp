@@ -263,6 +263,12 @@ int SurfaceImpl::LogPixelsY()
 	return device->logicalDpiY();
 }
 
+int SurfaceImpl::PixelDivisions()
+{
+	// Qt uses device pixels.
+	return 1;
+}
+
 int SurfaceImpl::DeviceHeightFont(int points)
 {
 	return points;
