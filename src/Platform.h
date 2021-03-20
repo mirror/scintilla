@@ -189,6 +189,7 @@ public:
 	virtual void Init(WindowID wid)=0;
 	virtual void Init(SurfaceID sid, WindowID wid)=0;
 	virtual void InitPixMap(int width, int height, Surface *surface_, WindowID wid)=0;
+	virtual std::unique_ptr<Surface> AllocatePixMap(int width, int height)=0;
 
 	virtual void SetMode(SurfaceMode mode)=0;
 

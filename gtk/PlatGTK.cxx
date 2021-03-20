@@ -127,21 +127,22 @@ namespace Scintilla {
 // SurfaceID is a cairo_t*
 class SurfaceImpl : public Surface {
 	SurfaceMode mode;
-	encodingType et;
-	cairo_t *context;
-	cairo_surface_t *psurf;
-	int x;
-	int y;
-	bool inited;
-	bool createdGC;
-	PangoContext *pcontext;
-	PangoLayout *layout;
+	encodingType et= singleByte;
+	cairo_t *context = nullptr;
+	cairo_surface_t *psurf = nullptr;
+	int x = 0;
+	int y = 0;
+	bool inited = false;
+	bool createdGC = false;
+	PangoContext *pcontext = nullptr;
+	PangoLayout *layout = nullptr;
 	Converter conv;
-	int characterSet;
+	int characterSet = -1;
 	void SetConverter(int characterSet_);
 	void CairoRectangle(PRectangle rc);
 public:
 	SurfaceImpl() noexcept;
+	SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode mode_) noexcept;
 	// Deleted so SurfaceImpl objects can not be copied.
 	SurfaceImpl(const SurfaceImpl&) = delete;
 	SurfaceImpl(SurfaceImpl&&) = delete;
@@ -152,6 +153,7 @@ public:
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
+	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode_) override;
 
@@ -289,11 +291,28 @@ void SurfaceImpl::CairoRectangle(PRectangle rc) {
 	cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 }
 
-SurfaceImpl::SurfaceImpl() noexcept : et(singleByte),
-	context(nullptr),
-	psurf(nullptr),
-	x(0), y(0), inited(false), createdGC(false),
-	pcontext(nullptr), layout(nullptr), characterSet(-1) {
+SurfaceImpl::SurfaceImpl() noexcept {
+}
+
+SurfaceImpl::SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode mode_) noexcept {
+	if (height > 0 && width > 0) {
+		cairo_surface_t *psurfContext = cairo_get_target(context_);
+		psurf = cairo_surface_create_similar(
+			psurfContext,
+			CAIRO_CONTENT_COLOR_ALPHA, width, height);
+		context = cairo_create(psurf);
+		pcontext = pango_cairo_create_context(context);
+		PLATFORM_ASSERT(pcontext);
+		layout = pango_layout_new(pcontext);
+		PLATFORM_ASSERT(layout);
+		cairo_rectangle(context, 0, 0, width, height);
+		cairo_set_source_rgb(context, 1.0, 0, 0);
+		cairo_fill(context);
+		cairo_set_line_width(context, 1);
+		createdGC = true;
+		inited = true;
+		mode = mode_;
+	}
 }
 
 SurfaceImpl::~SurfaceImpl() {
@@ -404,6 +423,10 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 	createdGC = true;
 	inited = true;
 	SetMode(surfImpl->mode);
+}
+
+std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height) {
+	return std::make_unique<SurfaceImpl>(context, width, height, mode);
 }
 
 void SurfaceImpl::SetMode(SurfaceMode mode_) {

@@ -75,11 +75,13 @@ private:
 
 public:
 	SurfaceImpl();
+	SurfaceImpl(const SurfaceImpl *surface, int width, int height);
 	~SurfaceImpl() override;
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
+	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 	CGContextRef GetContext() { return gc; }
 
 	void SetMode(SurfaceMode mode) override;

@@ -73,25 +73,28 @@ constexpr PRectangle RectangleInset(PRectangle rc, XYPOSITION delta) noexcept {
 
 class SurfaceImpl : public Surface {
 private:
-	QPaintDevice *device;
-	QPainter *painter;
-	bool deviceOwned;
-	bool painterOwned;
-	float x, y;
+	QPaintDevice *device = nullptr;
+	QPainter *painter = nullptr;
+	bool deviceOwned = false;
+	bool painterOwned = false;
+	float x = 0;
+	float y = 0;
 	SurfaceMode mode;
-	const char *codecName;
-	QTextCodec *codec;
+	const char *codecName = nullptr;
+	QTextCodec *codec = nullptr;
 
 	void Clear();
 
 public:
 	SurfaceImpl();
+	SurfaceImpl(int width, int height, SurfaceMode mode_);
 	virtual ~SurfaceImpl();
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height,
 		Surface *surface, WindowID wid) override;
+	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode) override;
 

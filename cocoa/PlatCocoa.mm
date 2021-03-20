@@ -364,6 +364,54 @@ SurfaceImpl::SurfaceImpl() {
 	Release();
 }
 
+SurfaceImpl::SurfaceImpl(const SurfaceImpl *surface, int width, int height) {
+	x = 0;
+	y = 0;
+
+	textLayout.reset(new QuartzTextLayout());
+
+	// Create a new bitmap context, along with the RAM for the bitmap itself
+	bitmapWidth = width;
+	bitmapHeight = height;
+
+	const int bitmapBytesPerRow = (width * BYTES_PER_PIXEL);
+	const int bitmapByteCount = (bitmapBytesPerRow * height);
+
+	// Create an RGB color space.
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	if (colorSpace == NULL)
+		return;
+
+	// Create the bitmap.
+	bitmapData.reset(new uint8_t[bitmapByteCount]);
+	// create the context
+	gc = CGBitmapContextCreate(bitmapData.get(),
+				   width,
+				   height,
+				   BITS_PER_COMPONENT,
+				   bitmapBytesPerRow,
+				   colorSpace,
+				   kCGImageAlphaPremultipliedLast);
+
+	if (gc == NULL) {
+		// the context couldn't be created for some reason,
+		// and we have no use for the bitmap without the context
+		bitmapData.reset();
+	}
+
+	// the context retains the color space, so we can release it
+	CGColorSpaceRelease(colorSpace);
+
+	if (gc && bitmapData) {
+		// "Erase" to white.
+		CGContextClearRect(gc, CGRectMake(0, 0, width, height));
+		CGContextSetRGBFillColor(gc, 1.0, 1.0, 1.0, 1.0);
+		CGContextFillRect(gc, CGRectMake(0, 0, width, height));
+	}
+
+	mode = surface->mode;
+}
+
 //--------------------------------------------------------------------------------------------------
 
 SurfaceImpl::~SurfaceImpl() {
@@ -476,6 +524,10 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 	} else {
 		mode.codePage = SC_CP_UTF8;
 	}
+}
+
+std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height) {
+	return std::make_unique<SurfaceImpl>(this, width, height);
 }
 
 //--------------------------------------------------------------------------------------------------

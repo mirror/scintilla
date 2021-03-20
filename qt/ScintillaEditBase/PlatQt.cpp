@@ -157,6 +157,16 @@ SurfaceImpl::SurfaceImpl()
 : device(nullptr), painter(nullptr), deviceOwned(false), painterOwned(false), x(0), y(0),
 	  codecName(nullptr), codec(nullptr)
 {}
+
+SurfaceImpl::SurfaceImpl(int width, int height, SurfaceMode mode_)
+{
+	if (width < 1) width = 1;
+	if (height < 1) height = 1;
+	deviceOwned = true;
+	device = new QPixmap(width, height);
+	mode = mode_;
+}
+
 SurfaceImpl::~SurfaceImpl()
 {
 	Clear();
@@ -201,6 +211,11 @@ void SurfaceImpl::InitPixMap(int width,
 	device = new QPixmap(width, height);
 	SurfaceImpl *psurfOther = dynamic_cast<SurfaceImpl *>(surface);
 	mode = psurfOther->mode;
+}
+
+std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height)
+{
+	return std::make_unique<SurfaceImpl>(width, height, mode);
 }
 
 void SurfaceImpl::SetMode(SurfaceMode mode_)

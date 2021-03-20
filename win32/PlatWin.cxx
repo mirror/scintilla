@@ -465,6 +465,7 @@ class SurfaceGDI : public Surface {
 
 public:
 	SurfaceGDI() noexcept;
+	SurfaceGDI(HDC hdcCompatible, int width, int height, SurfaceMode mode_, int logPixelsY_) noexcept;
 	// Deleted so SurfaceGDI objects can not be copied.
 	SurfaceGDI(const SurfaceGDI &) = delete;
 	SurfaceGDI(SurfaceGDI &&) = delete;
@@ -476,6 +477,7 @@ public:
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
+	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode_) override;
 
@@ -544,6 +546,16 @@ public:
 };
 
 SurfaceGDI::SurfaceGDI() noexcept {
+}
+
+SurfaceGDI::SurfaceGDI(HDC hdcCompatible, int width, int height, SurfaceMode mode_, int logPixelsY_) noexcept {
+	hdc = ::CreateCompatibleDC(hdc);
+	hdcOwned = true;
+	bitmap = ::CreateCompatibleBitmap(hdcCompatible, width, height);
+	bitmapOld = SelectBitmap(hdc, bitmap);
+	::SetTextAlign(hdc, TA_BASELINE);
+	mode = mode_;
+	logPixelsY = logPixelsY_;
 }
 
 SurfaceGDI::~SurfaceGDI() noexcept {
@@ -622,6 +634,10 @@ void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID w
 	::SetTextAlign(hdc, TA_BASELINE);
 	mode = psurfOther->mode;
 	logPixelsY = DpiForWindow(wid);
+}
+
+std::unique_ptr<Surface> SurfaceGDI::AllocatePixMap(int width, int height) {
+	return std::make_unique<SurfaceGDI>(hdc, width, height, mode, logPixelsY);
 }
 
 void SurfaceGDI::SetMode(SurfaceMode mode_) {
@@ -1402,23 +1418,24 @@ class BlobInline;
 
 class SurfaceD2D : public Surface {
 	SurfaceMode mode;
-	int x, y;
+	int x = 0;
+	int y = 0;
 
-	int codePageText;
+	int codePageText = 0;
 
-	ID2D1RenderTarget *pRenderTarget;
-	ID2D1BitmapRenderTarget *pBitmapRenderTarget;
-	bool ownRenderTarget;
-	int clipsActive;
+	ID2D1RenderTarget *pRenderTarget = nullptr;
+	ID2D1BitmapRenderTarget *pBitmapRenderTarget = nullptr;
+	bool ownRenderTarget = false;
+	int clipsActive = 0;
 
-	IDWriteTextFormat *pTextFormat;
-	FLOAT yAscent;
-	FLOAT yDescent;
-	FLOAT yInternalLeading;
+	IDWriteTextFormat *pTextFormat = nullptr;
+	FLOAT yAscent = 2;
+	FLOAT yDescent = 1;
+	FLOAT yInternalLeading = 0;
 
-	ID2D1SolidColorBrush *pBrush;
+	ID2D1SolidColorBrush *pBrush = nullptr;
 
-	int logPixelsY;
+	int logPixelsY = USER_DEFAULT_SCREEN_DPI;
 
 	void Clear() noexcept;
 	void SetFont(const Font *font_) noexcept;
@@ -1426,6 +1443,7 @@ class SurfaceD2D : public Surface {
 
 public:
 	SurfaceD2D() noexcept;
+	SurfaceD2D(ID2D1RenderTarget *pRenderTargetCompatible, int width, int height, SurfaceMode mode_, int logPixelsY_) noexcept;
 	// Deleted so SurfaceD2D objects can not be copied.
 	SurfaceD2D(const SurfaceD2D &) = delete;
 	SurfaceD2D(SurfaceD2D &&) = delete;
@@ -1437,6 +1455,7 @@ public:
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
+	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode_) override;
 
@@ -1529,6 +1548,26 @@ SurfaceD2D::SurfaceD2D() noexcept :
 	logPixelsY = USER_DEFAULT_SCREEN_DPI;
 }
 
+SurfaceD2D::SurfaceD2D(ID2D1RenderTarget *pRenderTargetCompatible, int width, int height, SurfaceMode mode_, int logPixelsY_) noexcept {
+	const D2D1_SIZE_F desiredSize = D2D1::SizeF(static_cast<float>(width), static_cast<float>(height));
+	D2D1_PIXEL_FORMAT desiredFormat;
+#ifdef __MINGW32__
+	desiredFormat.format = DXGI_FORMAT_UNKNOWN;
+#else
+	desiredFormat = pRenderTargetCompatible->GetPixelFormat();
+#endif
+	desiredFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
+	const HRESULT hr = pRenderTargetCompatible->CreateCompatibleRenderTarget(
+		&desiredSize, nullptr, &desiredFormat, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, &pBitmapRenderTarget);
+	if (SUCCEEDED(hr)) {
+		pRenderTarget = pBitmapRenderTarget;
+		pRenderTarget->BeginDraw();
+		ownRenderTarget = true;
+	}
+	mode = mode_;
+	logPixelsY = logPixelsY_;
+}
+
 SurfaceD2D::~SurfaceD2D() {
 	Clear();
 }
@@ -1603,6 +1642,10 @@ void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID w
 		ownRenderTarget = true;
 	}
 	mode = psurfOther->mode;
+}
+
+std::unique_ptr<Surface> SurfaceD2D::AllocatePixMap(int width, int height) {
+	return std::make_unique<SurfaceD2D>(pRenderTarget, width, height, mode, logPixelsY);
 }
 
 void SurfaceD2D::SetMode(SurfaceMode mode_) {
