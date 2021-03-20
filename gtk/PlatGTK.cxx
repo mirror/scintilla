@@ -126,6 +126,7 @@ namespace Scintilla {
 
 // SurfaceID is a cairo_t*
 class SurfaceImpl : public Surface {
+	SurfaceMode mode;
 	encodingType et;
 	cairo_t *context;
 	cairo_surface_t *psurf;
@@ -151,6 +152,8 @@ public:
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
+
+	void SetMode(SurfaceMode mode_) override;
 
 	void Clear() noexcept;
 	void Release() noexcept override;
@@ -400,7 +403,18 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 	cairo_set_line_width(context, 1);
 	createdGC = true;
 	inited = true;
-	et = surfImpl->et;
+	SetMode(surfImpl->mode);
+}
+
+void SurfaceImpl::SetMode(SurfaceMode mode_) {
+	mode = mode_;
+	if (mode.codePage == SC_CP_UTF8) {
+		et = UTF8;
+	} else if (mode.codePage) {
+		et = dbcs;
+	} else {
+		et = singleByte;
+	}
 }
 
 int SurfaceImpl::Supports(int feature) noexcept {
@@ -1263,13 +1277,24 @@ void SurfaceImpl::PopClip() {
 void SurfaceImpl::FlushCachedState() {}
 
 void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
-	if (unicodeMode_)
+	if (unicodeMode_) {
+		mode.codePage = SC_CP_UTF8;
 		et = UTF8;
+	} else {
+		mode.codePage = 0;
+		et = singleByte;
+	}
 }
 
 void SurfaceImpl::SetDBCSMode(int codePage) {
-	if (codePage && (codePage != SC_CP_UTF8))
+	mode.codePage = codePage;
+	if (mode.codePage == SC_CP_UTF8) {
+		et = UTF8;
+	} else if (mode.codePage) {
 		et = dbcs;
+	} else {
+		et = singleByte;
+	}
 }
 
 void SurfaceImpl::SetBidiR2L(bool) {

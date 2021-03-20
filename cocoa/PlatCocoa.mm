@@ -350,13 +350,11 @@ const int SupportsCocoa[] = {
 //----------------- SurfaceImpl --------------------------------------------------------------------
 
 SurfaceImpl::SurfaceImpl() {
-	unicodeMode = true;
 	x = 0;
 	y = 0;
 	gc = NULL;
 
 	textLayout.reset(new QuartzTextLayout());
-	codePage = 0;
 	verticalDeviceResolution = 0;
 
 	bitmapData.reset(); // Release will try and delete bitmapData if != nullptr
@@ -370,6 +368,12 @@ SurfaceImpl::SurfaceImpl() {
 
 SurfaceImpl::~SurfaceImpl() {
 	Clear();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+bool SurfaceImpl::UnicodeMode() const noexcept {
+	return mode.codePage == SC_CP_UTF8;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -468,12 +472,16 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 
 	if (surface_) {
 		SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface_);
-		unicodeMode = psurfOther->unicodeMode;
-		codePage = psurfOther->codePage;
+		mode = psurfOther->mode;
 	} else {
-		unicodeMode = true;
-		codePage = SC_CP_UTF8;
+		mode.codePage = SC_CP_UTF8;
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::SetMode(SurfaceMode mode_) {
+	mode = mode_;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1472,7 +1480,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITI
 	if (!style) {
 		return;
 	}
-	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, style->getCharacterSet());
+	CFStringEncoding encoding = EncodingFromCharacterSet(UnicodeMode(), style->getCharacterSet());
 	ColourDesired colour(fore.AsInteger());
 	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
 
@@ -1491,7 +1499,7 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 	if (!style) {
 		return;
 	}
-	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, style->getCharacterSet());
+	CFStringEncoding encoding = EncodingFromCharacterSet(UnicodeMode(), style->getCharacterSet());
 	const CFStringEncoding encodingUsed =
 		textLayout->setText(text, encoding, style);
 
@@ -1507,7 +1515,7 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 		return;
 	}
 
-	if (unicodeMode) {
+	if (UnicodeMode()) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 		CFIndex fit = textLayout->getStringLength();
 		int ui=0;
@@ -1530,10 +1538,10 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 		while (i<text.length()) {
 			positions[i++] = lastPos;
 		}
-	} else if (codePage) {
+	} else if (mode.codePage) {
 		int ui = 0;
 		for (int i=0; i<text.length();) {
-			size_t lenChar = DBCSIsLeadByte(codePage, text[i]) ? 2 : 1;
+			size_t lenChar = DBCSIsLeadByte(mode.codePage, text[i]) ? 2 : 1;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<text.length()); bytePos++) {
 				positions[i++] = static_cast<XYPOSITION>(xPosition);
@@ -1554,7 +1562,7 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 	if (!style) {
 		return 1;
 	}
-	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, style->getCharacterSet());
+	CFStringEncoding encoding = EncodingFromCharacterSet(UnicodeMode(), style->getCharacterSet());
 	textLayout->setText(text, encoding, style);
 
 	return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
@@ -1714,12 +1722,11 @@ void SurfaceImpl::FlushCachedState() {
 }
 
 void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
-	unicodeMode = unicodeMode_;
+	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
 }
 
 void SurfaceImpl::SetDBCSMode(int codePage_) {
-	if (codePage_ && (codePage_ != SC_CP_UTF8))
-		codePage = codePage_;
+	mode.codePage = codePage_;
 }
 
 void SurfaceImpl::SetBidiR2L(bool) {

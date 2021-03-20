@@ -155,7 +155,7 @@ std::shared_ptr<Font> Font::Allocate(const FontParameters &fp)
 
 SurfaceImpl::SurfaceImpl()
 : device(nullptr), painter(nullptr), deviceOwned(false), painterOwned(false), x(0), y(0),
-	  unicodeMode(false), codePage(0), codecName(nullptr), codec(nullptr)
+	  codecName(nullptr), codec(nullptr)
 {}
 SurfaceImpl::~SurfaceImpl()
 {
@@ -200,8 +200,12 @@ void SurfaceImpl::InitPixMap(int width,
 	deviceOwned = true;
 	device = new QPixmap(width, height);
 	SurfaceImpl *psurfOther = dynamic_cast<SurfaceImpl *>(surface);
-	SetUnicodeMode(psurfOther->unicodeMode);
-	SetDBCSMode(psurfOther->codePage);
+	mode = psurfOther->mode;
+}
+
+void SurfaceImpl::SetMode(SurfaceMode mode_)
+{
+	mode = mode_;
 }
 
 void SurfaceImpl::Release() noexcept
@@ -253,7 +257,7 @@ void SurfaceImpl::SetCodec(const Font *font)
 	const FontAndCharacterSet *pfacs = AsFontAndCharacterSet(font);
 	if (pfacs && pfacs->pfont) {
 		const char *csid = "UTF-8";
-		if (!unicodeMode)
+		if (!(mode.codePage == SC_CP_UTF8))
 			csid = CharacterSetID(pfacs->characterSet);
 		if (csid != codecName) {
 			codecName = csid;
@@ -681,7 +685,7 @@ void SurfaceImpl::MeasureWidths(const Font *font,
 	tlay.beginLayout();
 	QTextLine tl = tlay.createLine();
 	tlay.endLayout();
-	if (unicodeMode) {
+	if (mode.codePage == SC_CP_UTF8) {
 		int fit = su.size();
 		int ui=0;
 		size_t i=0;
@@ -701,11 +705,11 @@ void SurfaceImpl::MeasureWidths(const Font *font,
 		while (i<text.length()) {
 			positions[i++] = lastPos;
 		}
-	} else if (codePage) {
+	} else if (mode.codePage) {
 		// DBCS
 		int ui = 0;
 		for (size_t i=0; i<text.length();) {
-			size_t lenChar = DBCSIsLeadByte(codePage, text[i]) ? 2 : 1;
+			size_t lenChar = DBCSIsLeadByte(mode.codePage, text[i]) ? 2 : 1;
 			qreal xPosition = tl.cursorToX(ui+1);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<text.length()); bytePos++) {
 				positions[i++] = xPosition;
@@ -852,12 +856,12 @@ void SurfaceImpl::FlushCachedState()
 
 void SurfaceImpl::SetUnicodeMode(bool unicodeMode_)
 {
-	unicodeMode=unicodeMode_;
+	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
 }
 
 void SurfaceImpl::SetDBCSMode(int codePage_)
 {
-	codePage = codePage_;
+	mode.codePage = codePage_;
 }
 
 void SurfaceImpl::SetBidiR2L(bool)

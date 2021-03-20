@@ -163,6 +163,17 @@ public:
 };
 
 /**
+ * Parameters for surfaces.
+ */
+struct SurfaceMode {
+	int codePage = 0;
+	bool bidiR2L = false;
+	SurfaceMode() = default;
+	explicit SurfaceMode(int codePage_, bool bidiR2L_) noexcept : codePage(codePage_), bidiR2L(bidiR2L_) {
+	}
+};
+
+/**
  * A surface abstracts a place to draw.
  */
 class Surface {
@@ -178,6 +189,8 @@ public:
 	virtual void Init(WindowID wid)=0;
 	virtual void Init(SurfaceID sid, WindowID wid)=0;
 	virtual void InitPixMap(int width, int height, Surface *surface_, WindowID wid)=0;
+
+	virtual void SetMode(SurfaceMode mode)=0;
 
 	enum class Ends {
 		semiCircles = 0x0,

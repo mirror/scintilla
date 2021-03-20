@@ -401,9 +401,9 @@ constexpr int stackBufferLength = 1000;
 class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
 public:
 	int tlen;	// Using int instead of size_t as most Win32 APIs take int.
-	TextWide(std::string_view text, bool unicodeMode, int codePage=0) :
+	TextWide(std::string_view text, int codePage) :
 		VarBuffer<wchar_t, stackBufferLength>(text.length()) {
-		if (unicodeMode) {
+		if (codePage == SC_CP_UTF8) {
 			tlen = static_cast<int>(UTF16FromUTF8(text, buffer, text.length()));
 		} else {
 			// Support Asian string display in 9x English
@@ -440,7 +440,7 @@ int SystemMetricsForDpi(int nIndex, UINT dpi) noexcept {
 }
 
 class SurfaceGDI : public Surface {
-	bool unicodeMode=false;
+	SurfaceMode mode;
 	HDC hdc{};
 	bool hdcOwned=false;
 	HPEN pen{};
@@ -456,8 +456,6 @@ class SurfaceGDI : public Surface {
 	int maxWidthMeasure = INT_MAX;
 	// There appears to be a 16 bit string length limit in GDI on NT.
 	int maxLenText = 65535;
-
-	int codePage = 0;
 
 	void PenColour(ColourAlpha fore, XYPOSITION widthStroke) noexcept;
 
@@ -478,6 +476,8 @@ public:
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
+
+	void SetMode(SurfaceMode mode_) override;
 
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
@@ -620,9 +620,12 @@ void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID w
 	bitmap = ::CreateCompatibleBitmap(psurfOther->hdc, width, height);
 	bitmapOld = SelectBitmap(hdc, bitmap);
 	::SetTextAlign(hdc, TA_BASELINE);
-	SetUnicodeMode(psurfOther->unicodeMode);
-	SetDBCSMode(psurfOther->codePage);
+	mode = psurfOther->mode;
 	logPixelsY = DpiForWindow(wid);
+}
+
+void SurfaceGDI::SetMode(SurfaceMode mode_) {
+	mode = mode_;
 }
 
 void SurfaceGDI::PenColour(ColourDesired fore) {
@@ -1133,8 +1136,8 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 	const int x = static_cast<int>(rc.left);
 	const int yBaseInt = static_cast<int>(ybase);
 
-	if (unicodeMode) {
-		const TextWide tbuf(text, unicodeMode, codePage);
+	if (mode.codePage == SC_CP_UTF8) {
+		const TextWide tbuf(text, mode.codePage);
 		::ExtTextOutW(hdc, x, yBaseInt, fuOptions, &rcw, tbuf.buffer, tbuf.tlen, nullptr);
 	} else {
 		::ExtTextOutA(hdc, x, yBaseInt, fuOptions, &rcw, text.data(), static_cast<UINT>(text.length()), nullptr);
@@ -1177,8 +1180,8 @@ void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 	int fit = 0;
 	int i = 0;
 	const int len = static_cast<int>(text.length());
-	if (unicodeMode) {
-		const TextWide tbuf(text, unicodeMode, codePage);
+	if (mode.codePage == SC_CP_UTF8) {
+		const TextWide tbuf(text, mode.codePage);
 		TextPositionsI poses(tbuf.tlen);
 		if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tbuf.tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
 			// Failure
@@ -1214,10 +1217,10 @@ void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 XYPOSITION SurfaceGDI::WidthText(const Font *font_, std::string_view text) {
 	SetFont(font_);
 	SIZE sz = { 0,0 };
-	if (!unicodeMode) {
+	if (!(mode.codePage == SC_CP_UTF8)) {
 		::GetTextExtentPoint32A(hdc, text.data(), std::min(static_cast<int>(text.length()), maxLenText), &sz);
 	} else {
-		const TextWide tbuf(text, unicodeMode, codePage);
+		const TextWide tbuf(text, mode.codePage);
 		::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
 	}
 	return static_cast<XYPOSITION>(sz.cx);
@@ -1229,7 +1232,7 @@ void SurfaceGDI::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION
 	const int x = static_cast<int>(rc.left);
 	const int yBaseInt = static_cast<int>(ybase);
 
-	const TextWide tbuf(text, true);
+	const TextWide tbuf(text, SC_CP_UTF8);
 	::ExtTextOutW(hdc, x, yBaseInt, fuOptions, &rcw, tbuf.buffer, tbuf.tlen, nullptr);
 }
 
@@ -1269,7 +1272,7 @@ void SurfaceGDI::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 	int fit = 0;
 	int i = 0;
 	const int len = static_cast<int>(text.length());
-	const TextWide tbuf(text, true);
+	const TextWide tbuf(text, SC_CP_UTF8);
 	TextPositionsI poses(tbuf.tlen);
 	if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tbuf.tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
 		// Failure
@@ -1294,7 +1297,7 @@ void SurfaceGDI::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 XYPOSITION SurfaceGDI::WidthTextUTF8(const Font *font_, std::string_view text) {
 	SetFont(font_);
 	SIZE sz = { 0,0 };
-	const TextWide tbuf(text, true);
+	const TextWide tbuf(text, SC_CP_UTF8);
 	::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
 	return static_cast<XYPOSITION>(sz.cx);
 }
@@ -1353,12 +1356,12 @@ void SurfaceGDI::FlushDrawing() {
 }
 
 void SurfaceGDI::SetUnicodeMode(bool unicodeMode_) {
-	unicodeMode=unicodeMode_;
+	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
 }
 
 void SurfaceGDI::SetDBCSMode(int codePage_) {
 	// No action on window as automatically handled by system.
-	codePage = codePage_;
+	mode.codePage = codePage_;
 }
 
 void SurfaceGDI::SetBidiR2L(bool) {
@@ -1398,10 +1401,9 @@ constexpr D2D1_RECT_F RectangleInset(D2D1_RECT_F rect, FLOAT inset) noexcept {
 class BlobInline;
 
 class SurfaceD2D : public Surface {
-	bool unicodeMode;
+	SurfaceMode mode;
 	int x, y;
 
-	int codePage;
 	int codePageText;
 
 	ID2D1RenderTarget *pRenderTarget;
@@ -1435,6 +1437,8 @@ public:
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
+
+	void SetMode(SurfaceMode mode_) override;
 
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
@@ -1505,10 +1509,8 @@ public:
 };
 
 SurfaceD2D::SurfaceD2D() noexcept :
-	unicodeMode(false),
 	x(0), y(0) {
 
-	codePage = 0;
 	codePageText = 0;
 
 	pRenderTarget = nullptr;
@@ -1600,8 +1602,11 @@ void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID w
 		pRenderTarget->BeginDraw();
 		ownRenderTarget = true;
 	}
-	SetUnicodeMode(psurfOther->unicodeMode);
-	SetDBCSMode(psurfOther->codePage);
+	mode = psurfOther->mode;
+}
+
+void SurfaceD2D::SetMode(SurfaceMode mode_) {
+	mode = mode_;
 }
 
 HRESULT SurfaceD2D::GetBitmap(ID2D1Bitmap **ppBitmap) {
@@ -1638,9 +1643,9 @@ void SurfaceD2D::SetFont(const Font *font_) noexcept {
 	yAscent = pfm->yAscent;
 	yDescent = pfm->yDescent;
 	yInternalLeading = pfm->yInternalLeading;
-	codePageText = codePage;
-	if (!unicodeMode && pfm->characterSet) {
-		codePageText = Scintilla::CodePageFromCharSet(pfm->characterSet, codePage);
+	codePageText = mode.codePage;
+	if (!(mode.codePage == SC_CP_UTF8) && pfm->characterSet) {
+		codePageText = Scintilla::CodePageFromCharSet(pfm->characterSet, mode.codePage);
 	}
 	if (pRenderTarget) {
 		D2D1_TEXT_ANTIALIAS_MODE aaMode;
@@ -2411,7 +2416,7 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 /* Convert to a wide character string and replace tabs with X to stop DirectWrite tab expansion */
 
 std::wstring ScreenLineLayout::ReplaceRepresentation(std::string_view text) {
-	const TextWide wideText(text, true);
+	const TextWide wideText(text, SC_CP_UTF8);
 	std::wstring ws(wideText.buffer, wideText.tlen);
 	std::replace(ws.begin(), ws.end(), L'\t', L'X');
 	return ws;
@@ -2602,7 +2607,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 	SetFont(font_);
 
 	// Use Unicode calls
-	const TextWide tbuf(text, unicodeMode, codePageText);
+	const TextWide tbuf(text, codePageText);
 	if (pRenderTarget && pTextFormat && pBrush) {
 		if (fuOptions & ETO_CLIPPED) {
 			const D2D1_RECT_F rcClip = RectangleFromPRectangle(rc);
@@ -2663,7 +2668,7 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 		// SetFont failed or no access to DirectWrite so give up.
 		return;
 	}
-	const TextWide tbuf(text, unicodeMode, codePageText);
+	const TextWide tbuf(text, codePageText);
 	TextPositions poses(tbuf.tlen);
 	// Initialize poses for safety.
 	std::fill(poses.buffer, poses.buffer + tbuf.tlen, 0.0f);
@@ -2691,7 +2696,7 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 		position += clusterMetrics[ci].width;
 	}
 	PLATFORM_ASSERT(ti == tbuf.tlen);
-	if (unicodeMode) {
+	if (mode.codePage == SC_CP_UTF8) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 		int ui=0;
 		size_t i=0;
@@ -2741,7 +2746,7 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
 	FLOAT width = 1.0;
 	SetFont(font_);
-	const TextWide tbuf(text, unicodeMode, codePageText);
+	const TextWide tbuf(text, codePageText);
 	if (pIDWriteFactory && pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = nullptr;
@@ -2760,7 +2765,7 @@ void SurfaceD2D::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION
 	SetFont(font_);
 
 	// Use Unicode calls
-	const TextWide tbuf(text, true);
+	const TextWide tbuf(text, SC_CP_UTF8);
 	if (pRenderTarget && pTextFormat && pBrush) {
 		if (fuOptions & ETO_CLIPPED) {
 			D2D1_RECT_F rcClip = { rc.left, rc.top, rc.right, rc.bottom };
@@ -2821,7 +2826,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 		// SetFont failed or no access to DirectWrite so give up.
 		return;
 	}
-	const TextWide tbuf(text, true);
+	const TextWide tbuf(text, SC_CP_UTF8);
 	TextPositions poses(tbuf.tlen);
 	// Initialize poses for safety.
 	std::fill(poses.buffer, poses.buffer + tbuf.tlen, 0.0f);
@@ -2874,7 +2879,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 XYPOSITION SurfaceD2D::WidthTextUTF8(const Font * font_, std::string_view text) {
 	FLOAT width = 1.0;
 	SetFont(font_);
-	const TextWide tbuf(text, true);
+	const TextWide tbuf(text, SC_CP_UTF8);
 	if (pIDWriteFactory && pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = nullptr;
@@ -2954,12 +2959,12 @@ void SurfaceD2D::FlushDrawing() {
 }
 
 void SurfaceD2D::SetUnicodeMode(bool unicodeMode_) {
-	unicodeMode=unicodeMode_;
+	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
 }
 
 void SurfaceD2D::SetDBCSMode(int codePage_) {
 	// No action on window as automatically handled by system.
-	codePage = codePage_;
+	mode.codePage = codePage_;
 }
 
 void SurfaceD2D::SetBidiR2L(bool) {

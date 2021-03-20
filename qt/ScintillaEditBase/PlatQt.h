@@ -78,8 +78,7 @@ private:
 	bool deviceOwned;
 	bool painterOwned;
 	float x, y;
-	bool unicodeMode;
-	int codePage;
+	SurfaceMode mode;
 	const char *codecName;
 	QTextCodec *codec;
 
@@ -93,6 +92,8 @@ public:
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height,
 		Surface *surface, WindowID wid) override;
+
+	void SetMode(SurfaceMode mode) override;
 
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;

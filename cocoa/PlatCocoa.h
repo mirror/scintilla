@@ -41,7 +41,7 @@ namespace Scintilla {
 // A class to do the actual text rendering for us using Quartz 2D.
 class SurfaceImpl : public Surface {
 private:
-	bool unicodeMode;
+	SurfaceMode mode;
 	float x;
 	float y;
 
@@ -49,7 +49,6 @@ private:
 
 	/** The text layout instance */
 	std::unique_ptr<QuartzTextLayout> textLayout;
-	int codePage;
 	int verticalDeviceResolution;
 
 	/** If the surface is a bitmap context, contains a reference to the bitmap data. */
@@ -71,6 +70,7 @@ private:
 	static const int BITS_PER_PIXEL = BITS_PER_COMPONENT * 4;
 	static const int BYTES_PER_PIXEL = BITS_PER_PIXEL / 8;
 
+	bool UnicodeMode() const noexcept;
 	void Clear();
 
 public:
@@ -81,6 +81,8 @@ public:
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 	CGContextRef GetContext() { return gc; }
+
+	void SetMode(SurfaceMode mode) override;
 
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
