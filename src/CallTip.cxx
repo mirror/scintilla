@@ -27,7 +27,6 @@
 #include "Scintilla.h"
 
 #include "Position.h"
-#include "IntegerRectangle.h"
 #include "CallTip.h"
 
 using namespace Scintilla;
@@ -96,28 +95,30 @@ constexpr bool IsArrowCharacter(char ch) noexcept {
 
 void DrawArrow(Scintilla::Surface *surface, const PRectangle &rc, bool upArrow, ColourDesired colourBG, ColourDesired colourUnSel) {
 	surface->FillRectangle(rc, colourBG);
-	const int width = static_cast<int>(rc.Width());
-	const int halfWidth = width / 2 - 3;
-	const int quarterWidth = halfWidth / 2;
-	const int centreX = static_cast<int>(rc.left) + width / 2 - 1;
-	const int centreY = static_cast<int>(rc.top + rc.bottom) / 2;
-	const PRectangle rcClientInner(rc.left + 1, rc.top + 1, rc.right - 2, rc.bottom - 1);
+	const PRectangle rcClientInner = Clamp(rc.Inset(1), Edge::right, rc.right - 2);
 	surface->FillRectangle(rcClientInner, colourUnSel);
 
+	const XYPOSITION width = std::floor(rcClientInner.Width());
+	const XYPOSITION halfWidth = std::floor(width / 2) - 1;
+	const XYPOSITION quarterWidth = std::floor(halfWidth / 2);
+	const XYPOSITION centreX = rcClientInner.left + width / 2;
+	const XYPOSITION centreY = std::floor((rcClientInner.top + rcClientInner.bottom) / 2);
+
+	constexpr XYPOSITION pixelMove = 0.0f;
 	if (upArrow) {      // Up arrow
 		Point pts[] = {
-			Point::FromInts(centreX - halfWidth, centreY + quarterWidth),
-			Point::FromInts(centreX + halfWidth, centreY + quarterWidth),
-			Point::FromInts(centreX, centreY - halfWidth + quarterWidth),
+			Point(centreX - halfWidth + pixelMove, centreY + quarterWidth + 0.5f),
+			Point(centreX + halfWidth + pixelMove, centreY + quarterWidth + 0.5f),
+			Point(centreX + pixelMove, centreY - halfWidth + quarterWidth + 0.5f),
 		};
-		surface->Polygon(pts, std::size(pts), colourBG, colourBG);
+		surface->Polygon(pts, std::size(pts), FillStroke(colourBG));
 	} else {            // Down arrow
 		Point pts[] = {
-			Point::FromInts(centreX - halfWidth, centreY - quarterWidth),
-			Point::FromInts(centreX + halfWidth, centreY - quarterWidth),
-			Point::FromInts(centreX, centreY + halfWidth - quarterWidth),
+			Point(centreX - halfWidth + pixelMove, centreY - quarterWidth + 0.5f),
+			Point(centreX + halfWidth + pixelMove, centreY - quarterWidth + 0.5f),
+			Point(centreX + pixelMove, centreY + halfWidth - quarterWidth + 0.5f),
 		};
-		surface->Polygon(pts, std::size(pts), colourBG, colourBG);
+		surface->Polygon(pts, std::size(pts), FillStroke(colourBG));
 	}
 }
 
@@ -252,14 +253,11 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 #ifndef __APPLE__
 	// OSX doesn't put borders on "help tags"
 	// Draw a raised border around the edges of the window
-	const IntegerRectangle ircClientSize(rcClientSize);
-	surfaceWindow->MoveTo(0, ircClientSize.bottom - 1);
-	surfaceWindow->PenColour(colourShade);
-	surfaceWindow->LineTo(ircClientSize.right - 1, ircClientSize.bottom - 1);
-	surfaceWindow->LineTo(ircClientSize.right - 1, 0);
-	surfaceWindow->PenColour(colourLight);
-	surfaceWindow->LineTo(0, 0);
-	surfaceWindow->LineTo(0, ircClientSize.bottom - 1);
+	constexpr XYPOSITION border = 1.0f;
+	surfaceWindow->FillRectangle(Side(rcClientSize, Edge::left, border), colourLight);
+	surfaceWindow->FillRectangle(Side(rcClientSize, Edge::right, border), colourShade);
+	surfaceWindow->FillRectangle(Side(rcClientSize, Edge::bottom, border), colourShade);
+	surfaceWindow->FillRectangle(Side(rcClientSize, Edge::top, border), colourLight);
 #endif
 }
 
@@ -280,8 +278,7 @@ PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, co
 	codePage = codePage_;
 	std::unique_ptr<Surface> surfaceMeasure = Surface::Allocate(technology);
 	surfaceMeasure->Init(wParent.GetID());
-	surfaceMeasure->SetUnicodeMode(SC_CP_UTF8 == codePage);
-	surfaceMeasure->SetDBCSMode(codePage);
+	surfaceMeasure->SetMode(SurfaceMode(codePage, false));
 	highlight = Chunk();
 	inCallTipMode = true;
 	posStartCallTip = pos;
@@ -294,8 +291,9 @@ PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, co
 	rectUp = PRectangle(0,0,0,0);
 	rectDown = PRectangle(0,0,0,0);
 	offsetMain = insetX;            // changed to right edge of any arrows
-	const int width = PaintContents(surfaceMeasure.get(), false) + insetX;
 	lineHeight = static_cast<int>(std::lround(surfaceMeasure->Height(font.get())));
+	widthArrow = lineHeight * 9 / 10;
+	const int width = PaintContents(surfaceMeasure.get(), false) + insetX;
 
 	// The returned
 	// rectangle is aligned to the right edge of the last arrow encountered in

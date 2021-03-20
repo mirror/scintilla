@@ -79,7 +79,6 @@ CallTip.o: \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
-	../src/IntegerRectangle.h \
 	../src/CallTip.h
 CaseConvert.o: \
 	../src/CaseConvert.cxx \
