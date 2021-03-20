@@ -266,7 +266,6 @@ Indicator.o: \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
-	../src/IntegerRectangle.h \
 	../src/Indicator.h \
 	../src/XPM.h
 KeyMap.o: \
