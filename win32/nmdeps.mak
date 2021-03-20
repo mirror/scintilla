@@ -281,7 +281,6 @@ $(DIR_O)/LineMarker.obj: \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
-	../src/IntegerRectangle.h \
 	../src/XPM.h \
 	../src/LineMarker.h
 $(DIR_O)/MarginView.obj: \
