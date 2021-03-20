@@ -847,7 +847,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 		case SCI_SETBIDIRECTIONAL:
 			bidirectional = static_cast<EditModel::Bidirectional>(wParam);
 			// Invalidate all cached information including layout.
-			DropGraphics(true);
+			DropGraphics();
 			InvalidateStyleRedraw();
 			return 0;
 

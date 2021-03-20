@@ -199,7 +199,7 @@ Editor::Editor() : durationWrapOneLine(0.00001, 0.000001, 0.0001) {
 
 Editor::~Editor() {
 	pdoc->RemoveWatcher(this, 0);
-	DropGraphics(true);
+	DropGraphics();
 }
 
 void Editor::Finalise() {
@@ -262,21 +262,15 @@ void Editor::SetRepresentations() {
 	}
 }
 
-void Editor::DropGraphics(bool freeObjects) noexcept {
-	marginView.DropGraphics(freeObjects);
-	view.DropGraphics(freeObjects);
-}
-
-void Editor::AllocateGraphics() {
-	marginView.AllocateGraphics(vs);
-	view.AllocateGraphics(vs);
+void Editor::DropGraphics() noexcept {
+	marginView.DropGraphics();
+	view.DropGraphics();
 }
 
 void Editor::InvalidateStyleData() {
 	stylesValid = false;
 	vs.technology = technology;
-	DropGraphics(false);
-	AllocateGraphics();
+	DropGraphics();
 	view.llc.Invalidate(LineLayout::ValidLevel::invalid);
 	view.posCache.Clear();
 }
@@ -1677,7 +1671,6 @@ void Editor::PaintSelMargin(Surface *surfaceWindow, const PRectangle &rc) {
 	if (vs.fixedColumnWidth == 0)
 		return;
 
-	AllocateGraphics();
 	RefreshStyleData();
 	RefreshPixMaps(surfaceWindow);
 
@@ -1719,18 +1712,16 @@ void Editor::PaintSelMargin(Surface *surfaceWindow, const PRectangle &rc) {
 }
 
 void Editor::RefreshPixMaps(Surface *surfaceWindow) {
-	view.RefreshPixMaps(surfaceWindow, wMain.GetID(), vs);
-	marginView.RefreshPixMaps(surfaceWindow, wMain.GetID(), vs);
+	view.RefreshPixMaps(surfaceWindow, vs);
+	marginView.RefreshPixMaps(surfaceWindow, vs);
 	if (view.bufferedDraw) {
 		const PRectangle rcClient = GetClientRectangle();
-		if (!view.pixmapLine->Initialised()) {
-
-			view.pixmapLine->InitPixMap(static_cast<int>(rcClient.Width()), vs.lineHeight,
-			        surfaceWindow, wMain.GetID());
+		if (!view.pixmapLine) {
+			view.pixmapLine = surfaceWindow->AllocatePixMap(static_cast<int>(rcClient.Width()), vs.lineHeight);
 		}
-		if (!marginView.pixmapSelMargin->Initialised()) {
-			marginView.pixmapSelMargin->InitPixMap(vs.fixedColumnWidth,
-				static_cast<int>(rcClient.Height()), surfaceWindow, wMain.GetID());
+		if (!marginView.pixmapSelMargin) {
+			marginView.pixmapSelMargin = surfaceWindow->AllocatePixMap(vs.fixedColumnWidth,
+				static_cast<int>(rcClient.Height()));
 		}
 	}
 }
@@ -1738,7 +1729,6 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	//Platform::DebugPrintf("Paint:%1d (%3d,%3d) ... (%3d,%3d)\n",
 	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
-	AllocateGraphics();
 
 	RefreshStyleData();
 	if (paintState == PaintState::abandoned)
@@ -1882,7 +1872,7 @@ void Editor::SetScrollBars() {
 }
 
 void Editor::ChangeSize() {
-	DropGraphics(false);
+	DropGraphics();
 	SetScrollBars();
 	if (Wrapping()) {
 		PRectangle rcTextArea = GetClientRectangle();

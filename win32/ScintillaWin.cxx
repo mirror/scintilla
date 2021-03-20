@@ -670,7 +670,7 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 #endif
 		// Pixmaps were created to be compatible with previous render target so
 		// need to be recreated.
-		DropGraphics(false);
+		DropGraphics();
 	}
 
 	if ((technology == SC_TECHNOLOGY_DIRECTWRITEDC) && pRenderTarget) {
@@ -1833,7 +1833,7 @@ sptr_t ScintillaWin::SciMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 #endif
 				technology = technologyNew;
 				// Invalidate all cached information including layout.
-				DropGraphics(true);
+				DropGraphics();
 				InvalidateStyleRedraw();
 			}
 		}
@@ -1846,7 +1846,7 @@ sptr_t ScintillaWin::SciMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 			bidirectional = static_cast<EditModel::Bidirectional>(wParam);
 		}
 		// Invalidate all cached information including layout.
-		DropGraphics(true);
+		DropGraphics();
 		InvalidateStyleRedraw();
 		break;
 

@@ -251,28 +251,10 @@ void EditView::LinesAddedOrRemoved(Sci::Line lineOfPos, Sci::Line linesAdded) {
 	}
 }
 
-void EditView::DropGraphics(bool freeObjects) noexcept {
-	if (freeObjects) {
-		pixmapLine.reset();
-		pixmapIndentGuide.reset();
-		pixmapIndentGuideHighlight.reset();
-	} else {
-		if (pixmapLine)
-			pixmapLine->Release();
-		if (pixmapIndentGuide)
-			pixmapIndentGuide->Release();
-		if (pixmapIndentGuideHighlight)
-			pixmapIndentGuideHighlight->Release();
-	}
-}
-
-void EditView::AllocateGraphics(const ViewStyle &vsDraw) {
-	if (!pixmapLine)
-		pixmapLine = Surface::Allocate(vsDraw.technology);
-	if (!pixmapIndentGuide)
-		pixmapIndentGuide = Surface::Allocate(vsDraw.technology);
-	if (!pixmapIndentGuideHighlight)
-		pixmapIndentGuideHighlight = Surface::Allocate(vsDraw.technology);
+void EditView::DropGraphics() noexcept {
+	pixmapLine.reset();
+	pixmapIndentGuide.reset();
+	pixmapIndentGuideHighlight.reset();
 }
 
 static const char *ControlCharacterString(unsigned char ch) noexcept {
@@ -311,11 +293,11 @@ static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const Vie
 	}
 }
 
-void EditView::RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw) {
-	if (!pixmapIndentGuide->Initialised()) {
+void EditView::RefreshPixMaps(Surface *surfaceWindow, const ViewStyle &vsDraw) {
+	if (!pixmapIndentGuide) {
 		// 1 extra pixel in height so can handle odd/even positions and so produce a continuous line
-		pixmapIndentGuide->InitPixMap(1, vsDraw.lineHeight + 1, surfaceWindow, wid);
-		pixmapIndentGuideHighlight->InitPixMap(1, vsDraw.lineHeight + 1, surfaceWindow, wid);
+		pixmapIndentGuide = surfaceWindow->AllocatePixMap(1, vsDraw.lineHeight + 1);
+		pixmapIndentGuideHighlight = surfaceWindow->AllocatePixMap(1, vsDraw.lineHeight + 1);
 		const PRectangle rcIG = PRectangle::FromInts(0, 0, 1, vsDraw.lineHeight);
 		pixmapIndentGuide->FillRectangle(rcIG, vsDraw.styles[STYLE_INDENTGUIDE].back);
 		pixmapIndentGuideHighlight->FillRectangle(rcIG, vsDraw.styles[STYLE_BRACELIGHT].back);

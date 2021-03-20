@@ -284,8 +284,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void InvalidateStyleRedraw();
 	void RefreshStyleData();
 	void SetRepresentations();
-	void DropGraphics(bool freeObjects) noexcept;
-	void AllocateGraphics();
+	void DropGraphics() noexcept;
 
 	// The top left visible point in main window coordinates. Will be 0,0 except for
 	// scroll views where it will be equivalent to the current scroll position.

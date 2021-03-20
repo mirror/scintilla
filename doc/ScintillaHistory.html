@@ -571,7 +571,7 @@
     </ul>
     <h2>Releases</h2>
     <h3>
-       <a href="https://www.scintilla.org/scite500.zip">Release 5.0.0</a>
+       <a href="https://www.scintilla.org/scite501.zip">Release 5.0.1</a>
     </h3>
     <ul>
 	<li>
@@ -580,6 +580,14 @@
 	<li>
 	Remove SetLexer, SetLexerLanguage, and LoadLexerLibrary methods.
 	These have been superceded by Lexilla and the SetILexer API.
+	</li>
+	<li>
+	Improve the platform layer interface.
+	Add support for stroke width and translucency to drawing methods.
+	Allow clipping to nest.
+	Add methods for UTF-8 text.
+	Add methods for encoding conversion.
+	Use these changes to improve appearance.
 	</li>
     </ul>
     <h3>

@@ -109,35 +109,17 @@ MarginView::MarginView() noexcept {
 	customDrawWrapMarker = nullptr;
 }
 
-void MarginView::DropGraphics(bool freeObjects) noexcept {
-	if (freeObjects) {
-		pixmapSelMargin.reset();
-		pixmapSelPattern.reset();
-		pixmapSelPatternOffset1.reset();
-	} else {
-		if (pixmapSelMargin)
-			pixmapSelMargin->Release();
-		if (pixmapSelPattern)
-			pixmapSelPattern->Release();
-		if (pixmapSelPatternOffset1)
-			pixmapSelPatternOffset1->Release();
-	}
+void MarginView::DropGraphics() noexcept {
+	pixmapSelMargin.reset();
+	pixmapSelPattern.reset();
+	pixmapSelPatternOffset1.reset();
 }
 
-void MarginView::AllocateGraphics(const ViewStyle &vsDraw) {
-	if (!pixmapSelMargin)
-		pixmapSelMargin = Surface::Allocate(vsDraw.technology);
-	if (!pixmapSelPattern)
-		pixmapSelPattern = Surface::Allocate(vsDraw.technology);
-	if (!pixmapSelPatternOffset1)
-		pixmapSelPatternOffset1 = Surface::Allocate(vsDraw.technology);
-}
-
-void MarginView::RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw) {
-	if (!pixmapSelPattern->Initialised()) {
+void MarginView::RefreshPixMaps(Surface *surfaceWindow, const ViewStyle &vsDraw) {
+	if (!pixmapSelPattern) {
 		const int patternSize = 8;
-		pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow, wid);
-		pixmapSelPatternOffset1->InitPixMap(patternSize, patternSize, surfaceWindow, wid);
+		pixmapSelPattern = surfaceWindow->AllocatePixMap(patternSize, patternSize);
+		pixmapSelPatternOffset1 = surfaceWindow->AllocatePixMap(patternSize, patternSize);
 		// This complex procedure is to reproduce the checkerboard dithered pattern used by windows
 		// for scroll bars and Visual Studio for its selection margin. The colour of this pattern is half
 		// way between the chrome colour and the chrome highlight colour making a nice transition

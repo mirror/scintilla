@@ -368,7 +368,7 @@ void ScintillaGTK::UnMapThis() {
 	try {
 		//Platform::DebugPrintf("ScintillaGTK::unmap this\n");
 		gtk_widget_set_mapped(PWidget(wMain), FALSE);
-		DropGraphics(false);
+		DropGraphics();
 		gdk_window_hide(PWindow(wMain));
 		gtk_widget_unmap(PWidget(wText));
 		if (PWidget(scrollbarh))
