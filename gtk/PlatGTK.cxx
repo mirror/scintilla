@@ -976,14 +976,14 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybas
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				 ColourAlpha fore, ColourAlpha back) {
-	FillRectangle(rc, back);
+	FillRectangleAligned(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				  ColourAlpha fore, ColourAlpha back) {
-	FillRectangle(rc, back);
+	FillRectangleAligned(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
@@ -1182,14 +1182,14 @@ void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION 
 
 void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
-	FillRectangle(rc, back);
+	FillRectangleAligned(rc, back);
 	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
-	FillRectangle(rc, back);
+	FillRectangleAligned(rc, back);
 	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
 }
 

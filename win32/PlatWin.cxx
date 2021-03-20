@@ -2676,7 +2676,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 void SurfaceD2D::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
-		FillRectangle(rc, back);
+		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
 		DrawTextCommon(rc, font_, ybase, text, codePageText, ETO_OPAQUE);
 	}
@@ -2685,7 +2685,7 @@ void SurfaceD2D::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION yba
 void SurfaceD2D::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
-		FillRectangle(rc, back);
+		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
 		DrawTextCommon(rc, font_, ybase, text, codePageText, ETO_OPAQUE | ETO_CLIPPED);
 	}
@@ -2807,7 +2807,7 @@ XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
 void SurfaceD2D::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
-		FillRectangle(rc, back);
+		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
 		DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, ETO_OPAQUE);
 	}
@@ -2816,7 +2816,7 @@ void SurfaceD2D::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION
 void SurfaceD2D::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
-		FillRectangle(rc, back);
+		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
 		DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, ETO_OPAQUE | ETO_CLIPPED);
 	}

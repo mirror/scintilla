@@ -1455,7 +1455,7 @@ std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *screen
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				 ColourAlpha fore, ColourAlpha back) {
-	FillRectangle(rc, back);
+	FillRectangleAligned(rc, back);
 	DrawTextTransparent(rc, font_, ybase, text, fore);
 }
 
@@ -1627,7 +1627,7 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 
 void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 				 ColourAlpha fore, ColourAlpha back) {
-	FillRectangle(rc, back);
+	FillRectangleAligned(rc, back);
 	DrawTextTransparentUTF8(rc, font_, ybase, text, fore);
 }
 

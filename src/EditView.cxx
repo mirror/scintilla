@@ -129,7 +129,7 @@ void DrawTextNoClipPhase(Surface *surface, PRectangle rc, const Style &style, XY
 			surface->DrawTextNoClip(rc, fontText, ybase, text,
 				style.fore, style.back);
 		} else {
-			surface->FillRectangle(rc, style.back);
+			surface->FillRectangleAligned(rc, Fill(style.back));
 		}
 	} else if (FlagSet(phase, DrawPhase::text)) {
 		surface->DrawTextTransparent(rc, fontText, ybase, text, style.fore);
@@ -852,7 +852,7 @@ void EditView::DrawIndentGuide(Surface *surface, Sci::Line lineVisible, int line
 
 static void SimpleAlphaRectangle(Surface *surface, PRectangle rc, ColourDesired fill, int alpha) {
 	if (alpha != SC_ALPHA_NOALPHA) {
-		surface->AlphaRectangle(rc, 0, fill, alpha, fill, alpha, 0);
+		surface->FillRectangleAligned(rc, ColourAlpha(fill, alpha));
 	}
 }
 
@@ -861,7 +861,7 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 	if (rcSegment.Empty())
 		return;
 	if (fillBackground) {
-		surface->FillRectangle(rcSegment, textBack);
+		surface->FillRectangleAligned(rcSegment, Fill(textBack));
 	}
 	const Font *ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font.get();
 	const int normalCharHeight = static_cast<int>(std::ceil(vsDraw.styles[STYLE_CONTROLCHAR].capitalHeight));
@@ -872,7 +872,7 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 	PRectangle rcCentral = rcCChar;
 	rcCentral.top++;
 	rcCentral.bottom--;
-	surface->FillRectangle(rcCentral, textFore);
+	surface->FillRectangleAligned(rcCentral, Fill(textFore));
 	PRectangle rcChar = rcCChar;
 	rcChar.left++;
 	rcChar.right--;
@@ -882,10 +882,11 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 }
 
 static void DrawFrame(Surface *surface, ColourDesired colour, int alpha, PRectangle rcFrame) {
-	if (alpha != SC_ALPHA_NOALPHA)
+	if (alpha != SC_ALPHA_NOALPHA) {
 		surface->AlphaRectangle(rcFrame, 0, colour, alpha, colour, alpha, 0);
-	else
-		surface->FillRectangle(rcFrame, colour);
+	} else {
+		surface->FillRectangleAligned(rcFrame, Fill(colour));
+	}
 }
 
 static void DrawCaretLineFramed(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine, int subLine) {
@@ -931,7 +932,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 	if (virtualSpace > 0.0f) {
 		rcSegment.left = xEol + xStart;
 		rcSegment.right = xEol + xStart + virtualSpace;
-		surface->FillRectangle(rcSegment, background.isSet ? background : vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
+		surface->FillRectangleAligned(rcSegment, Fill(background.isSet ? background : vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
 		if (!hideSelection && ((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA))) {
 			const SelectionSegment virtualSpaceRange(SelectionPosition(model.pdoc->LineEnd(line)),
 				SelectionPosition(model.pdoc->LineEnd(line),
@@ -948,7 +949,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 							static_cast<XYPOSITION>(subLineStart)+portion.end.VirtualSpace() * spaceWidth;
 						rcSegment.left = (rcSegment.left > rcLine.left) ? rcSegment.left : rcLine.left;
 						rcSegment.right = (rcSegment.right < rcLine.right) ? rcSegment.right : rcLine.right;
-						surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, r == model.sel.Main(), model.primarySelection));
+						surface->FillRectangleAligned(rcSegment, Fill(SelectionBackground(vsDraw, r == model.sel.Main(), model.primarySelection)));
 					}
 				}
 			}
@@ -993,12 +994,12 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			}
 			if (eolInSelection && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1)) {
 				if (alpha == SC_ALPHA_NOALPHA) {
-					surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection));
+					surface->FillRectangleAligned(rcSegment, Fill(SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection)));
 				} else {
-					surface->FillRectangle(rcSegment, textBack);
+					surface->FillRectangleAligned(rcSegment, Fill(textBack));
 				}
 			} else {
-				surface->FillRectangle(rcSegment, textBack);
+				surface->FillRectangleAligned(rcSegment, Fill(textBack));
 			}
 			DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, phasesDraw == PhasesDraw::one);
 			if (eolInSelection && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
@@ -1012,16 +1013,16 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 	rcSegment.right = rcSegment.left + vsDraw.aveCharWidth;
 
 	if (eolInSelection && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
-		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection));
+		surface->FillRectangleAligned(rcSegment, Fill(SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection)));
 	} else {
 		if (background.isSet) {
-			surface->FillRectangle(rcSegment, background);
+			surface->FillRectangleAligned(rcSegment, Fill(background));
 		} else if (line < model.pdoc->LinesTotal() - 1) {
-			surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
+			surface->FillRectangleAligned(rcSegment, Fill(vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
 		} else if (vsDraw.styles[ll->styles[ll->numCharsInLine]].eolFilled) {
-			surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
+			surface->FillRectangleAligned(rcSegment, Fill(vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
 		} else {
-			surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back);
+			surface->FillRectangleAligned(rcSegment, Fill(vsDraw.styles[STYLE_DEFAULT].back));
 		}
 		if (eolInSelection && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
 			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection), alpha);
@@ -1221,7 +1222,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	}
 
 	if (FlagSet(phase, DrawPhase::back)) {
-		surface->FillRectangle(rcSegment, textBack);
+		surface->FillRectangleAligned(rcSegment, Fill(textBack));
 
 		// Fill Remainder of the line
 		PRectangle rcRemainder = rcSegment;
@@ -1316,7 +1317,7 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	}
 
 	if (FlagSet(phase, DrawPhase::back)) {
-		surface->FillRectangle(rcSegment, textBack);
+		surface->FillRectangleAligned(rcSegment, Fill(textBack));
 
 		// Fill Remainder of the line
 		PRectangle rcRemainder = rcSegment;
@@ -1370,7 +1371,7 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 	const StyledText stAnnotation = model.pdoc->AnnotationStyledText(line);
 	if (stAnnotation.text && ValidStyledText(vsDraw, vsDraw.annotationStyleOffset, stAnnotation)) {
 		if (FlagSet(phase, DrawPhase::back)) {
-			surface->FillRectangle(rcSegment, vsDraw.styles[0].back);
+			surface->FillRectangleAligned(rcSegment, Fill(vsDraw.styles[0].back));
 		}
 		rcSegment.left = static_cast<XYPOSITION>(xStart);
 		if (model.trackLineWidth || AnnotationBoxedOrIndented(vsDraw.annotationVisible)) {
@@ -1395,8 +1396,8 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 		}
 		PRectangle rcText = rcSegment;
 		if ((FlagSet(phase, DrawPhase::back)) && AnnotationBoxedOrIndented(vsDraw.annotationVisible)) {
-			surface->FillRectangle(rcText,
-				vsDraw.styles[stAnnotation.StyleAt(start) + vsDraw.annotationStyleOffset].back);
+			surface->FillRectangleAligned(rcText,
+				Fill(vsDraw.styles[stAnnotation.StyleAt(start) + vsDraw.annotationStyleOffset].back));
 			rcText.left += vsDraw.spaceWidth;
 		}
 		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText,
@@ -1581,7 +1582,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 				if (drawBlockCaret) {
 					DrawBlockCaret(surface, model, vsDraw, ll, subLine, xStart, offset, posCaret.Position(), rcCaret, caretColour);
 				} else {
-					surface->FillRectangle(rcCaret, caretColour);
+					surface->FillRectangleAligned(rcCaret, Fill(caretColour));
 				}
 			}
 		}
@@ -1594,8 +1595,8 @@ static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, c
 	int xStart, PRectangle rcLine, ColourOptional background, DrawWrapMarkerFn customDrawWrapMarker,
 	bool caretActive) {
 	// default bgnd here..
-	surface->FillRectangle(rcLine, background.isSet ? background :
-		vsDraw.styles[STYLE_DEFAULT].back);
+	surface->FillRectangleAligned(rcLine, Fill(background.isSet ? background :
+		vsDraw.styles[STYLE_DEFAULT].back));
 
 	if (vsDraw.IsLineFrameOpaque(caretActive, ll->containsCaret)) {
 		const int width = vsDraw.GetFrameWidth();
@@ -1671,10 +1672,10 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 					// Blob display
 					inIndentation = false;
 				}
-				surface->FillRectangle(rcSegment, textBack);
+				surface->FillRectangleAligned(rcSegment, Fill(textBack));
 			} else {
 				// Normal text display
-				surface->FillRectangle(rcSegment, textBack);
+				surface->FillRectangleAligned(rcSegment, Fill(textBack));
 				if (vsDraw.viewWhitespace != wsInvisible) {
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
@@ -1684,7 +1685,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 									rcSegment.top,
 									ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
 									rcSegment.bottom);
-								surface->FillRectangle(rcSpace, vsDraw.whitespaceColours.back);
+								surface->FillRectangleAligned(rcSpace, Fill(vsDraw.whitespaceColours.back));
 							}
 						} else {
 							inIndentation = false;
@@ -1707,7 +1708,7 @@ static void DrawEdgeLine(Surface *surface, const ViewStyle &vsDraw, const LineLa
 		if ((ll->wrapIndent != 0) && (lineRange.start != 0))
 			rcSegment.left -= ll->wrapIndent;
 		rcSegment.right = rcSegment.left + 1;
-		surface->FillRectangle(rcSegment, vsDraw.theEdge.colour);
+		surface->FillRectangleAligned(rcSegment, Fill(vsDraw.theEdge.colour));
 	} else if (vsDraw.edgeState == EDGE_MULTILINE) {
 		for (size_t edge = 0; edge < vsDraw.theMultiEdge.size(); edge++) {
 			if (vsDraw.theMultiEdge[edge].column >= 0) {
@@ -1717,7 +1718,7 @@ static void DrawEdgeLine(Surface *surface, const ViewStyle &vsDraw, const LineLa
 				if ((ll->wrapIndent != 0) && (lineRange.start != 0))
 					rcSegment.left -= ll->wrapIndent;
 				rcSegment.right = rcSegment.left + 1;
-				surface->FillRectangle(rcSegment, vsDraw.theMultiEdge[edge].colour);
+				surface->FillRectangleAligned(rcSegment, Fill(vsDraw.theMultiEdge[edge].colour));
 			}
 		}
 	}
@@ -1732,7 +1733,7 @@ static void DrawMarkUnderline(Surface *surface, const EditModel &model, const Vi
 			(vsDraw.markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
 			PRectangle rcUnderline = rcLine;
 			rcUnderline.top = rcUnderline.bottom - 2;
-			surface->FillRectangle(rcUnderline, vsDraw.markers[markBit].back);
+			surface->FillRectangleAligned(rcUnderline, Fill(vsDraw.markers[markBit].back));
 		}
 		marks >>= 1;
 	}
@@ -1914,7 +1915,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					if (phasesDraw == PhasesDraw::one) {
 						if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
 							textBack = vsDraw.whitespaceColours.back;
-						surface->FillRectangle(rcSegment, textBack);
+						surface->FillRectangleAligned(rcSegment, Fill(textBack));
 					}
 					if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
 						for (int indentCount = static_cast<int>((ll->positions[i] + epsilon) / indentWidth);
@@ -1985,14 +1986,14 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 											rcSegment.top,
 											ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
 											rcSegment.bottom);
-										surface->FillRectangle(rcSpace, textBack);
+										surface->FillRectangleAligned(rcSpace, Fill(textBack));
 									}
 									const int halfDotWidth = vsDraw.whitespaceSize / 2;
 									PRectangle rcDot(xmid + xStart - halfDotWidth - static_cast<XYPOSITION>(subLineStart),
 										rcSegment.top + vsDraw.lineHeight / 2, 0.0f, 0.0f);
 									rcDot.right = rcDot.left + vsDraw.whitespaceSize;
 									rcDot.bottom = rcDot.top + vsDraw.whitespaceSize;
-									surface->FillRectangle(rcDot, textFore);
+									surface->FillRectangleAligned(rcDot, Fill(textFore));
 								}
 							}
 							if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
@@ -2017,14 +2018,14 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 				rcUL.bottom = rcUL.top + 1;
 				if (vsDraw.hotspotColours.fore.isSet)
-					surface->FillRectangle(rcUL, vsDraw.hotspotColours.fore);
+					surface->FillRectangleAligned(rcUL, Fill(vsDraw.hotspotColours.fore));
 				else
-					surface->FillRectangle(rcUL, textFore);
+					surface->FillRectangleAligned(rcUL, Fill(textFore));
 			} else if (vsDraw.styles[styleMain].underline) {
 				PRectangle rcUL = rcSegment;
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 				rcUL.bottom = rcUL.top + 1;
-				surface->FillRectangle(rcUL, textFore);
+				surface->FillRectangleAligned(rcUL, Fill(textFore));
 			}
 		} else if (rcSegment.left > rcLine.right) {
 			break;
@@ -2179,7 +2180,7 @@ static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewSt
 			(!expanded && (model.foldFlags & SC_FOLDFLAG_LINEBEFORE_CONTRACTED))) {
 			PRectangle rcFoldLine = rcLine;
 			rcFoldLine.bottom = rcFoldLine.top + 1;
-			surface->FillRectangle(rcFoldLine, vsDraw.styles[STYLE_DEFAULT].fore);
+			surface->FillRectangleAligned(rcFoldLine, Fill(vsDraw.styles[STYLE_DEFAULT].fore));
 		}
 		// Paint the line below the fold
 		if ((expanded && (model.foldFlags & SC_FOLDFLAG_LINEAFTER_EXPANDED))
@@ -2187,7 +2188,7 @@ static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewSt
 			(!expanded && (model.foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
 			PRectangle rcFoldLine = rcLine;
 			rcFoldLine.top = rcFoldLine.bottom - 1;
-			surface->FillRectangle(rcFoldLine, vsDraw.styles[STYLE_DEFAULT].fore);
+			surface->FillRectangleAligned(rcFoldLine, Fill(vsDraw.styles[STYLE_DEFAULT].fore));
 		}
 	}
 }
@@ -2206,9 +2207,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 			surface = pixmapLine.get();
 			PLATFORM_ASSERT(pixmapLine->Initialised());
 		}
-		surface->SetUnicodeMode(SC_CP_UTF8 == model.pdoc->dbcsCodePage);
-		surface->SetDBCSMode(model.pdoc->dbcsCodePage);
-		surface->SetBidiR2L(model.BidirectionalR2L());
+		surface->SetMode(SurfaceMode(model.pdoc->dbcsCodePage, model.BidirectionalR2L()));
 
 		const Point ptOrigin = model.GetVisibleOriginInMain();
 
@@ -2305,7 +2304,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 						PRectangle rcSpacer = rcLine;
 						rcSpacer.right = rcSpacer.left;
 						rcSpacer.left -= 1;
-						surface->FillRectangle(rcSpacer, vsDraw.styles[STYLE_DEFAULT].back);
+						surface->FillRectangleAligned(rcSpacer, Fill(vsDraw.styles[STYLE_DEFAULT].back));
 					}
 
 					if (model.BidirectionalEnabled()) {
@@ -2363,19 +2362,19 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		rcBeyondEOF.right = rcBeyondEOF.right - ((vsDraw.marginInside) ? vsDraw.rightMarginWidth : 0);
 		rcBeyondEOF.top = static_cast<XYPOSITION>((model.pcs->LinesDisplayed() - model.TopLineOfMain()) * vsDraw.lineHeight);
 		if (rcBeyondEOF.top < rcBeyondEOF.bottom) {
-			surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.styles[STYLE_DEFAULT].back);
+			surfaceWindow->FillRectangleAligned(rcBeyondEOF, Fill(vsDraw.styles[STYLE_DEFAULT].back));
 			if (vsDraw.edgeState == EDGE_LINE) {
 				const int edgeX = static_cast<int>(vsDraw.theEdge.column * vsDraw.spaceWidth);
 				rcBeyondEOF.left = static_cast<XYPOSITION>(edgeX + xStart);
 				rcBeyondEOF.right = rcBeyondEOF.left + 1;
-				surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.theEdge.colour);
+				surfaceWindow->FillRectangleAligned(rcBeyondEOF, Fill(vsDraw.theEdge.colour));
 			} else if (vsDraw.edgeState == EDGE_MULTILINE) {
 				for (size_t edge = 0; edge < vsDraw.theMultiEdge.size(); edge++) {
 					if (vsDraw.theMultiEdge[edge].column >= 0) {
 						const int edgeX = static_cast<int>(vsDraw.theMultiEdge[edge].column * vsDraw.spaceWidth);
 						rcBeyondEOF.left = static_cast<XYPOSITION>(edgeX + xStart);
 						rcBeyondEOF.right = rcBeyondEOF.left + 1;
-						surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.theMultiEdge[edge].colour);
+						surfaceWindow->FillRectangleAligned(rcBeyondEOF, Fill(vsDraw.theMultiEdge[edge].colour));
 					}
 				}
 			}
@@ -2406,14 +2405,14 @@ void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const
 		const ColourOptional background = vsDraw.Background(model.pdoc->GetMark(line), model.caret.active, ll->containsCaret);
 
 		if (eolInSelection && vsDraw.selEOLFilled && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
-			surface->FillRectangle(rcArea, SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection));
+			surface->FillRectangleAligned(rcArea, Fill(SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection)));
 		} else {
 			if (background.isSet) {
-				surface->FillRectangle(rcArea, background);
+				surface->FillRectangleAligned(rcArea, Fill(background));
 			} else if (vsDraw.styles[ll->styles[ll->numCharsInLine]].eolFilled) {
-				surface->FillRectangle(rcArea, vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
+				surface->FillRectangleAligned(rcArea, Fill(vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
 			} else {
-				surface->FillRectangle(rcArea, vsDraw.styles[STYLE_DEFAULT].back);
+				surface->FillRectangleAligned(rcArea, Fill(vsDraw.styles[STYLE_DEFAULT].back));
 			}
 			if (eolInSelection && vsDraw.selEOLFilled && vsDraw.selColours.back.isSet && (line < model.pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
 				SimpleAlphaRectangle(surface, rcArea, SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection), alpha);
