@@ -271,25 +271,35 @@ static const char *ControlCharacterString(unsigned char ch) noexcept {
 	}
 }
 
-static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const ViewStyle &vsDraw) {
-	const IntegerRectangle ircTab(rcTab);
-	if ((rcTab.left + 2) < (rcTab.right - 1))
-		surface->MoveTo(ircTab.left + 2, ymid);
-	else
-		surface->MoveTo(ircTab.right - 1, ymid);
-	surface->LineTo(ircTab.right - 1, ymid);
+static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const ViewStyle &vsDraw,
+	ColourAlpha textFore, XYPOSITION widthStroke) {
+
+	const XYPOSITION halfWidth = widthStroke / 2.0f;
+
+	const XYPOSITION leftStroke = std::round(std::min(rcTab.left + 2, rcTab.right - 1)) + halfWidth;
+	const XYPOSITION rightStroke = std::max(leftStroke, std::round(rcTab.right) - 1.0f - halfWidth);
+	const XYPOSITION yMidAligned = ymid + halfWidth;
+	const Point arrowPoint(rightStroke, yMidAligned);
+	if (rightStroke > leftStroke) {
+		// When not enough room, don't draw the arrow shaft
+		surface->LineDraw(Point(leftStroke, yMidAligned), arrowPoint,
+			Stroke(textFore, widthStroke));
+	}
 
 	// Draw the arrow head if needed
 	if (vsDraw.tabDrawMode == tdLongArrow) {
-		int ydiff = (ircTab.bottom - ircTab.top) / 2;
-		int xhead = ircTab.right - 1 - ydiff;
+		XYPOSITION ydiff = std::floor(rcTab.Height() / 2.0f);
+		XYPOSITION xhead = rightStroke - ydiff;
 		if (xhead <= rcTab.left) {
-			ydiff -= ircTab.left - xhead - 1;
-			xhead = ircTab.left - 1;
+			ydiff -= rcTab.left - xhead;
+			xhead = rcTab.left;
 		}
-		surface->LineTo(xhead, ymid - ydiff);
-		surface->MoveTo(ircTab.right - 1, ymid);
-		surface->LineTo(xhead, ymid + ydiff);
+		const Point ptsHead[] = {
+			Point(xhead, yMidAligned - ydiff),
+			arrowPoint,
+			Point(xhead, yMidAligned + ydiff)
+		};
+		surface->PolyLine(ptsHead, std::size(ptsHead), Stroke(textFore, widthStroke));
 	}
 }
 
@@ -1932,12 +1942,11 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 							if (vsDraw.whitespaceColours.fore.isSet)
 								textFore = vsDraw.whitespaceColours.fore;
-							surface->PenColour(textFore);
 							const PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
 							const int segmentTop = static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2);
 							if (!customDrawTabArrow)
-								DrawTabArrow(surface, rcTab, segmentTop, vsDraw);
+								DrawTabArrow(surface, rcTab, segmentTop, vsDraw, textFore, 1.0f);
 							else
 								customDrawTabArrow(surface, rcTab, segmentTop);
 						}
