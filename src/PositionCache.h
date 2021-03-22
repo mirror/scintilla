@@ -255,7 +255,7 @@ public:
 	// Try to make each subdivided run lengthEachSubdivision or shorter.
 	enum { lengthEachSubdivision = 100 };
 	BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart_,
-		int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw);
+		XYPOSITION xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw);
 	// Deleted so BreakFinder objects can not be copied.
 	BreakFinder(const BreakFinder &) = delete;
 	BreakFinder(BreakFinder &&) = delete;

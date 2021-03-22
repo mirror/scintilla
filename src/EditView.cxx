@@ -1621,7 +1621,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
 	// Does not take margin into account but not significant
-	const int xStartVisible = static_cast<int>(subLineStart)-xStart;
+	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
 
 	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, nullptr);
 
@@ -1837,7 +1837,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 	const XYPOSITION indentWidth = model.pdoc->IndentSize() * vsDraw.spaceWidth;
 
 	// Does not take margin into account but not significant
-	const int xStartVisible = static_cast<int>(subLineStart)-xStart;
+	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
 
 	// Foreground drawing loop
 	BreakFinder bfFore(ll, &model.sel, lineRange, posLineStart, xStartVisible,

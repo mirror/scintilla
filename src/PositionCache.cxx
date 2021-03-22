@@ -557,7 +557,7 @@ void BreakFinder::Insert(Sci::Position val) {
 }
 
 BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart_,
-	int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw) :
+	XYPOSITION xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw) :
 	ll(ll_),
 	lineRange(lineRange_),
 	posLineStart(posLineStart_),
@@ -572,7 +572,7 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 	// Search for first visible break
 	// First find the first visible character
 	if (xStart > 0.0f)
-		nextBreak = ll->FindBefore(static_cast<XYPOSITION>(xStart), lineRange);
+		nextBreak = ll->FindBefore(xStart, lineRange);
 	// Now back to a style break
 	while ((nextBreak > lineRange.start) && (ll->styles[nextBreak] == ll->styles[nextBreak - 1])) {
 		nextBreak--;
