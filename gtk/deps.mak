@@ -7,7 +7,6 @@ PlatGTK.o: \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../include/ScintillaWidget.h \
-	../src/IntegerRectangle.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
 	Converter.h

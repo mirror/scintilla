@@ -30,7 +30,6 @@
 
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
-#include "IntegerRectangle.h"
 #include "XPM.h"
 #include "UniConversion.h"
 
@@ -59,6 +58,20 @@ constexpr int pangoUnitsFromDouble(double d) noexcept {
 constexpr float floatFromPangoUnits(int pu) noexcept {
 	return static_cast<float>(pu) / PANGO_SCALE;
 }
+
+struct IntegerRectangle {
+	int left;
+	int top;
+	int right;
+	int bottom;
+
+	explicit IntegerRectangle(PRectangle rc) noexcept :
+		left(static_cast<int>(rc.left)), top(static_cast<int>(rc.top)),
+		right(static_cast<int>(rc.right)), bottom(static_cast<int>(rc.bottom)) {
+	}
+	int Width() const noexcept { return right - left; }
+	int Height() const noexcept { return bottom - top; }
+};
 
 GdkWindow *WindowFromWidget(GtkWidget *w) noexcept {
 	return gtk_widget_get_window(w);

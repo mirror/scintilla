@@ -39,7 +39,6 @@
 		2829374024E2D58800C84BA2 /* XPM.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 282936FD24E2D58400C84BA2 /* XPM.cxx */; };
 		2829374124E2D58800C84BA2 /* CharClassify.h in Headers */ = {isa = PBXBuildFile; fileRef = 282936FE24E2D58400C84BA2 /* CharClassify.h */; };
 		2829374224E2D58800C84BA2 /* Decoration.h in Headers */ = {isa = PBXBuildFile; fileRef = 282936FF24E2D58400C84BA2 /* Decoration.h */; };
-		2829374424E2D58800C84BA2 /* IntegerRectangle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2829370124E2D58500C84BA2 /* IntegerRectangle.h */; };
 		2829374524E2D58800C84BA2 /* PositionCache.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 2829370224E2D58500C84BA2 /* PositionCache.cxx */; };
 		2829374724E2D58800C84BA2 /* Style.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 2829370424E2D58500C84BA2 /* Style.cxx */; };
 		2829374824E2D58800C84BA2 /* RESearch.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 2829370524E2D58500C84BA2 /* RESearch.cxx */; };
@@ -131,7 +130,6 @@
 		282936FD24E2D58400C84BA2 /* XPM.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XPM.cxx; path = ../../src/XPM.cxx; sourceTree = "<group>"; };
 		282936FE24E2D58400C84BA2 /* CharClassify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharClassify.h; path = ../../src/CharClassify.h; sourceTree = "<group>"; };
 		282936FF24E2D58400C84BA2 /* Decoration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Decoration.h; path = ../../src/Decoration.h; sourceTree = "<group>"; };
-		2829370124E2D58500C84BA2 /* IntegerRectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IntegerRectangle.h; path = ../../src/IntegerRectangle.h; sourceTree = "<group>"; };
 		2829370224E2D58500C84BA2 /* PositionCache.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PositionCache.cxx; path = ../../src/PositionCache.cxx; sourceTree = "<group>"; };
 		2829370424E2D58500C84BA2 /* Style.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Style.cxx; path = ../../src/Style.cxx; sourceTree = "<group>"; };
 		2829370524E2D58500C84BA2 /* RESearch.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RESearch.cxx; path = ../../src/RESearch.cxx; sourceTree = "<group>"; };
@@ -266,7 +264,6 @@
 				286F8E6125F84F7400EC8D60 /* ILoader.h */,
 				282936F624E2D58400C84BA2 /* Indicator.cxx */,
 				282936FB24E2D58400C84BA2 /* Indicator.h */,
-				2829370124E2D58500C84BA2 /* IntegerRectangle.h */,
 				2829370B24E2D58500C84BA2 /* KeyMap.cxx */,
 				282936EF24E2D58400C84BA2 /* KeyMap.h */,
 				282936F024E2D58400C84BA2 /* LineMarker.cxx */,
@@ -394,7 +391,6 @@
 				2829373524E2D58800C84BA2 /* Style.h in Headers */,
 				282936E424E2D55D00C84BA2 /* PlatCocoa.h in Headers */,
 				2829376C24E2D58800C84BA2 /* Selection.h in Headers */,
-				2829374424E2D58800C84BA2 /* IntegerRectangle.h in Headers */,
 				2829376124E2D58800C84BA2 /* ScintillaBase.h in Headers */,
 				2829373824E2D58800C84BA2 /* RESearch.h in Headers */,
 				282936E524E2D55D00C84BA2 /* InfoBarCommunicator.h in Headers */,
