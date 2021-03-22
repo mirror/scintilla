@@ -231,7 +231,6 @@ $(DIR_O)/EditView.obj: \
 	../src/CharacterSet.h \
 	../src/CharacterCategory.h \
 	../src/Position.h \
-	../src/IntegerRectangle.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \

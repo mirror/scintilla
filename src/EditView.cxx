@@ -35,7 +35,6 @@
 #include "CharacterSet.h"
 #include "CharacterCategory.h"
 #include "Position.h"
-#include "IntegerRectangle.h"
 #include "UniqueString.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
@@ -893,7 +892,7 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 
 static void DrawFrame(Surface *surface, ColourDesired colour, int alpha, PRectangle rcFrame) {
 	if (alpha != SC_ALPHA_NOALPHA) {
-		surface->AlphaRectangle(rcFrame, 0, colour, alpha, colour, alpha, 0);
+		surface->AlphaRectangle(rcFrame, 0, FillStroke(ColourAlpha(colour, alpha)));
 	} else {
 		surface->FillRectangleAligned(rcFrame, Fill(colour));
 	}
@@ -1257,19 +1256,10 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 
 	if (FlagSet(phase, DrawPhase::indicatorsFore)) {
 		if (model.foldDisplayTextStyle == SC_FOLDDISPLAYTEXT_BOXED) {
-			surface->PenColour(textFore);
 			PRectangle rcBox = rcSegment;
 			rcBox.left = std::round(rcSegment.left);
 			rcBox.right = std::round(rcSegment.right);
-			const IntegerRectangle ircBox(rcBox);
-			surface->MoveTo(ircBox.left, ircBox.top);
-			surface->LineTo(ircBox.left, ircBox.bottom);
-			surface->MoveTo(ircBox.right, ircBox.top);
-			surface->LineTo(ircBox.right, ircBox.bottom);
-			surface->MoveTo(ircBox.left, ircBox.top);
-			surface->LineTo(ircBox.right, ircBox.top);
-			surface->MoveTo(ircBox.left, ircBox.bottom - 1);
-			surface->LineTo(ircBox.right, ircBox.bottom - 1);
+			surface->RectangleFrame(rcBox, Stroke(textFore));
 		}
 	}
 
@@ -1352,19 +1342,10 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 
 	if (FlagSet(phase, DrawPhase::indicatorsFore)) {
 		if (vsDraw.eolAnnotationVisible == EOLANNOTATION_BOXED ) {
-			surface->PenColour(textFore);
 			PRectangle rcBox = rcSegment;
 			rcBox.left = std::round(rcSegment.left);
 			rcBox.right = std::round(rcSegment.right);
-			const IntegerRectangle ircBox(rcBox);
-			surface->MoveTo(ircBox.left, ircBox.top);
-			surface->LineTo(ircBox.left, ircBox.bottom);
-			surface->MoveTo(ircBox.right, ircBox.top);
-			surface->LineTo(ircBox.right, ircBox.bottom);
-			surface->MoveTo(ircBox.left, ircBox.top);
-			surface->LineTo(ircBox.right, ircBox.top);
-			surface->MoveTo(ircBox.left, ircBox.bottom - 1);
-			surface->LineTo(ircBox.right, ircBox.bottom - 1);
+			surface->RectangleFrame(rcBox, Stroke(textFore));
 		}
 	}
 }
@@ -1413,19 +1394,15 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText,
 			stAnnotation, start, lengthAnnotation, phase);
 		if ((FlagSet(phase, DrawPhase::back)) && (vsDraw.annotationVisible == ANNOTATION_BOXED)) {
-			surface->PenColour(vsDraw.styles[vsDraw.annotationStyleOffset].fore);
-			const IntegerRectangle ircSegment(rcSegment);
-			surface->MoveTo(ircSegment.left, ircSegment.top);
-			surface->LineTo(ircSegment.left, ircSegment.bottom);
-			surface->MoveTo(ircSegment.right, ircSegment.top);
-			surface->LineTo(ircSegment.right, ircSegment.bottom);
+			const ColourDesired colourBorder = vsDraw.styles[vsDraw.annotationStyleOffset].fore;
+			const PRectangle rcBorder = PixelAlignOutside(rcSegment, surface->PixelDivisions());
+			surface->FillRectangle(Side(rcBorder, Edge::left, 1), colourBorder);
+			surface->FillRectangle(Side(rcBorder, Edge::right, 1), colourBorder);
 			if (subLine == ll->lines) {
-				surface->MoveTo(ircSegment.left, ircSegment.top);
-				surface->LineTo(ircSegment.right, ircSegment.top);
+				surface->FillRectangle(Side(rcBorder, Edge::top, 1), colourBorder);
 			}
 			if (subLine == ll->lines + annotationLines - 1) {
-				surface->MoveTo(ircSegment.left, ircSegment.bottom - 1);
-				surface->LineTo(ircSegment.right, ircSegment.bottom - 1);
+				surface->FillRectangle(Side(rcBorder, Edge::bottom, 1), colourBorder);
 			}
 		}
 	}
