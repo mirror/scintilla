@@ -2483,7 +2483,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 	// Create a layout
 	IDWriteTextLayout *pTextLayout = nullptr;
 	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 10000.0, 1000.0, &pTextLayout);
-	if (!SUCCEEDED(hrCreate)) {
+	if (!SUCCEEDED(hrCreate) || !pTextLayout) {
 		return;
 	}
 	constexpr int clusters = stackBufferLength;
@@ -2496,14 +2496,14 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 	}
 	// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
 	FLOAT position = 0.0f;
-	size_t ti = 0;
-	for (size_t ci = 0; ci < count; ci++) {
-		for (size_t inCluster = 0; inCluster < clusterMetrics[ci].length; inCluster++) {
+	int ti = 0;
+	for (unsigned int ci = 0; ci < count; ci++) {
+		for (unsigned int inCluster = 0; inCluster < clusterMetrics[ci].length; inCluster++) {
 			poses.buffer[ti++] = position + clusterMetrics[ci].width * (inCluster + 1) / clusterMetrics[ci].length;
 		}
 		position += clusterMetrics[ci].width;
 	}
-	PLATFORM_ASSERT(ti == static_cast<size_t>(tbuf.tlen));
+	PLATFORM_ASSERT(ti == tbuf.tlen);
 	// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 	int ui = 0;
 	size_t i = 0;
@@ -2513,7 +2513,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 		if (byteCount == 4) {	// Non-BMP
 			ui++;
 		}
-		for (unsigned int bytePos = 0; (bytePos < byteCount) && (i < text.length()); bytePos++) {
+		for (unsigned int bytePos=0; (bytePos<byteCount) && (i<text.length()); bytePos++) {
 			positions[i++] = poses.buffer[ui];
 		}
 		ui++;
