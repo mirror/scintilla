@@ -653,18 +653,14 @@ public:
 		if (ed->wMain.GetID()) {
 			surf = Surface::Allocate(technology != -1 ? technology : ed->technology);
 			surf->Init(ed->wMain.GetID());
-			surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
-			surf->SetDBCSMode(ed->CodePage());
-			surf->SetBidiR2L(ed->BidirectionalR2L());
+			surf->SetMode(SurfaceMode(ed->CodePage(), ed->BidirectionalR2L()));
 		}
 	}
 	AutoSurface(SurfaceID sid, Editor *ed, int technology = -1) {
 		if (ed->wMain.GetID()) {
 			surf = Surface::Allocate(technology != -1 ? technology : ed->technology);
 			surf->Init(sid, ed->wMain.GetID());
-			surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
-			surf->SetDBCSMode(ed->CodePage());
-			surf->SetBidiR2L(ed->BidirectionalR2L());
+			surf->SetMode(SurfaceMode(ed->CodePage(), ed->BidirectionalR2L()));
 		}
 	}
 	// Deleted so AutoSurface objects can not be copied.

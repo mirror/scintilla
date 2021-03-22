@@ -3492,9 +3492,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 					}
 #endif
 				}
-				surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == sciThis->ct.codePage);
-				surfaceWindow->SetDBCSMode(sciThis->ct.codePage);
-				surfaceWindow->SetBidiR2L(sciThis->BidirectionalR2L());
+				surfaceWindow->SetMode(SurfaceMode(sciThis->ct.codePage, sciThis->BidirectionalR2L()));
 				sciThis->ct.PaintCT(surfaceWindow.get());
 #if defined(USE_D2D)
 				if (pCTRenderTarget)

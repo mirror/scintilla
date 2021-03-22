@@ -1058,8 +1058,7 @@ void ScintillaCocoa::CTPaint(void *gc, NSRect rc) {
 #pragma unused(rc)
 	std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
 	surfaceWindow->Init(gc, wMain.GetID());
-	surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ct.codePage);
-	surfaceWindow->SetDBCSMode(ct.codePage);
+	surfaceWindow->SetMode(SurfaceMode(ct.codePage, BidirectionalR2L()));
 	ct.PaintCT(surfaceWindow.get());
 	surfaceWindow->Release();
 }
@@ -1428,8 +1427,7 @@ void ScintillaCocoa::StartDrag() {
 
 	SurfaceImpl pixmap;
 	pixmap.InitPixMap(static_cast<int>(imageRect.Width()), static_cast<int>(imageRect.Height()), NULL, NULL);
-	pixmap.SetUnicodeMode(IsUnicodeMode());
-	pixmap.SetDBCSMode(CodePage());
+	pixmap.SetMode(SurfaceMode(CodePage(), BidirectionalR2L()));
 
 	CGContextRef gc = pixmap.GetContext();
 	// To make Paint() work on a bitmap, we have to flip our coordinates and translate the origin

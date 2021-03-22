@@ -2980,8 +2980,7 @@ gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 	try {
 		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
 		surfaceWindow->Init(cr, widget);
-		surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
-		surfaceWindow->SetDBCSMode(ctip->codePage);
+		surfaceWindow->SetMode(SurfaceMode(ctip->codePage, false));
 		ctip->PaintCT(surfaceWindow.get());
 		surfaceWindow->Release();
 	} catch (...) {
@@ -2997,8 +2996,7 @@ gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, Cal
 		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
 		cairo_t *cr = gdk_cairo_create(WindowFromWidget(widget));
 		surfaceWindow->Init(cr, widget);
-		surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
-		surfaceWindow->SetDBCSMode(ctip->codePage);
+		surfaceWindow->SetMode(SurfaceMode(ctip->codePage, false));
 		ctip->PaintCT(surfaceWindow.get());
 		surfaceWindow->Release();
 		cairo_destroy(cr);

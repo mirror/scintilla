@@ -691,8 +691,7 @@ public:
 		if (pct->inCallTipMode) {
 			std::unique_ptr<Surface> surfaceWindow = Surface::Allocate(0);
 			surfaceWindow->Init(this);
-			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == pct->codePage);
-			surfaceWindow->SetDBCSMode(pct->codePage);
+			surfaceWindow->SetMode(SurfaceMode(pct->codePage, false));
 			pct->PaintCT(surfaceWindow.get());
 		}
 	}
