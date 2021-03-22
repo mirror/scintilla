@@ -532,6 +532,10 @@ std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height) {
 	return std::make_unique<SurfaceImpl>(this, width, height);
 }
 
+std::unique_ptr<SurfaceImpl> SurfaceImpl::AllocatePixMapImplementation(int width, int height) {
+	return std::make_unique<SurfaceImpl>(this, width, height);
+}
+
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::SetMode(SurfaceMode mode_) {
@@ -1387,9 +1391,8 @@ void SurfaceImpl::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 	CGContextSetLineWidth(gc, 1.0f);
 }
 
-void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect, PRectangle dstRect) {
-	SurfaceImpl &source = static_cast<SurfaceImpl &>(surfaceSource);
-	CGImageRef image = source.CreateImage();
+void SurfaceImpl::CopyImageRectangle(SurfaceImpl *source, PRectangle srcRect, PRectangle dstRect) {
+	CGImageRef image = source->CreateImage();
 
 	CGRect src = PRectangleToCGRect(srcRect);
 	CGRect dst = PRectangleToCGRect(dstRect);
@@ -1999,8 +2002,8 @@ static NSImage *ImageFromXPM(XPM *pxpm) {
 		const int width = pxpm->GetWidth();
 		const int height = pxpm->GetHeight();
 		PRectangle rcxpm(0, 0, width, height);
-		std::unique_ptr<Surface> surfaceXPM(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
-		surfaceXPM->InitPixMap(width, height, NULL, NULL);
+		std::unique_ptr<Surface> surfaceBase(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		std::unique_ptr<Surface> surfaceXPM = surfaceBase->AllocatePixMap(width, height);
 		SurfaceImpl *surfaceIXPM = static_cast<SurfaceImpl *>(surfaceXPM.get());
 		CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
 		pxpm->Draw(surfaceXPM.get(), rcxpm);

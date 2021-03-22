@@ -1411,36 +1411,35 @@ void ScintillaCocoa::StartDrag() {
 	SCIContentView *content = ContentView();
 
 	// To get a bitmap of the text we're dragging, we just use Paint on a pixmap surface.
-	SurfaceImpl sw;
-	sw.InitPixMap(static_cast<int>(client.Width()), static_cast<int>(client.Height()), NULL, NULL);
+	SurfaceImpl si;
+	si.SetMode(SurfaceMode(CodePage(), BidirectionalR2L()));
+	std::unique_ptr<SurfaceImpl> sw = si.AllocatePixMapImplementation(static_cast<int>(client.Width()), static_cast<int>(client.Height()));
 
 	const bool lastHideSelection = view.hideSelection;
 	view.hideSelection = true;
 	PRectangle imageRect = rcSel;
 	paintState = PaintState::painting;
 	paintingAllText = true;
-	CGContextRef gcsw = sw.GetContext();
+	CGContextRef gcsw = sw->GetContext();
 	CGContextTranslateCTM(gcsw, -client.left, -client.top);
-	Paint(&sw, client);
+	Paint(sw.get(), client);
 	paintState = PaintState::notPainting;
 	view.hideSelection = lastHideSelection;
 
-	SurfaceImpl pixmap;
-	pixmap.InitPixMap(static_cast<int>(imageRect.Width()), static_cast<int>(imageRect.Height()), NULL, NULL);
-	pixmap.SetMode(SurfaceMode(CodePage(), BidirectionalR2L()));
-
-	CGContextRef gc = pixmap.GetContext();
+	std::unique_ptr<SurfaceImpl> pixmap = si.AllocatePixMapImplementation(static_cast<int>(imageRect.Width()),
+								  static_cast<int>(imageRect.Height()));
+	CGContextRef gc = pixmap->GetContext();
 	// To make Paint() work on a bitmap, we have to flip our coordinates and translate the origin
 	CGContextTranslateCTM(gc, 0, imageRect.Height());
 	CGContextScaleCTM(gc, 1.0, -1.0);
 
-	pixmap.CopyImageRectangle(sw, imageRect, PRectangle(0.0f, 0.0f, imageRect.Width(), imageRect.Height()));
+	pixmap->CopyImageRectangle(sw.get(), imageRect, PRectangle(0.0f, 0.0f, imageRect.Width(), imageRect.Height()));
 	// XXX TODO: overwrite any part of the image that is not part of the
 	//           selection to make it transparent.  right now we just use
 	//           the full rectangle which may include non-selected text.
 
 	NSBitmapImageRep *bitmap = NULL;
-	CGImageRef imagePixmap = pixmap.CreateImage();
+	CGImageRef imagePixmap = pixmap->CreateImage();
 	if (imagePixmap)
 		bitmap = [[NSBitmapImageRep alloc] initWithCGImage: imagePixmap];
 	CGImageRelease(imagePixmap);

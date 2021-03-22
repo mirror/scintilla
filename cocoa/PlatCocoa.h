@@ -82,6 +82,7 @@ public:
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
+	std::unique_ptr<SurfaceImpl> AllocatePixMapImplementation(int width, int height);
 	CGContextRef GetContext() { return gc; }
 
 	void SetMode(SurfaceMode mode) override;
@@ -93,7 +94,7 @@ public:
 
 	/** Returns a CGImageRef that represents the surface. Returns NULL if this is not possible. */
 	CGImageRef CreateImage();
-	void CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect, PRectangle dstRect);
+	void CopyImageRectangle(SurfaceImpl *source, PRectangle srcRect, PRectangle dstRect);
 
 	int LogPixelsY() override;
 	int PixelDivisions() override;
