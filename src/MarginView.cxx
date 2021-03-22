@@ -31,7 +31,6 @@
 
 #include "CharacterCategory.h"
 #include "Position.h"
-#include "IntegerRectangle.h"
 #include "UniqueString.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
@@ -60,48 +59,53 @@ namespace Scintilla {
 
 void DrawWrapMarker(Surface *surface, PRectangle rcPlace,
 	bool isEndMarker, ColourDesired wrapColour) {
-	surface->PenColour(wrapColour);
 
-	const IntegerRectangle ircPlace(rcPlace);
+	const XYPOSITION extraFinalPixel = surface->Supports(SC_SUPPORTS_LINE_DRAWS_FINAL) ? 0.0f : 1.0f;
 
-	enum { xa = 1 }; // gap before start
-	const int w = ircPlace.Width() - xa - 1;
+	const PRectangle rcAligned = PixelAlignOutside(rcPlace, surface->PixelDivisions());
 
-	const bool xStraight = isEndMarker;  // x-mirrored symbol for start marker
+	const XYPOSITION widthStroke = std::floor(rcAligned.Width() / 6);
 
-	const int x0 = xStraight ? ircPlace.left : ircPlace.right - 1;
-	const int y0 = ircPlace.top;
+	constexpr XYPOSITION xa = 1; // gap before start
+	const XYPOSITION w = rcAligned.Width() - xa - widthStroke;
 
-	const int dy = ircPlace.Height() / 5;
-	const int y = ircPlace.Height() / 2 + dy;
+	// isEndMarker -> x-mirrored symbol for start marker
+
+	const XYPOSITION x0 = isEndMarker ? rcAligned.left : rcAligned.right - widthStroke;
+	const XYPOSITION y0 = rcAligned.top;
+
+	const XYPOSITION dy = std::floor(rcAligned.Height() / 5);
+	const XYPOSITION y = std::floor(rcAligned.Height() / 2) + dy;
 
 	struct Relative {
-		Surface *surface;
-		int xBase;
+		XYPOSITION xBase;
 		int xDir;
-		int yBase;
+		XYPOSITION yBase;
 		int yDir;
-		void MoveTo(int xRelative, int yRelative) {
-			surface->MoveTo(xBase + xDir * xRelative, yBase + yDir * yRelative);
-		}
-		void LineTo(int xRelative, int yRelative) {
-			surface->LineTo(xBase + xDir * xRelative, yBase + yDir * yRelative);
+		XYPOSITION halfWidth;
+		Point At(XYPOSITION xRelative, XYPOSITION yRelative) noexcept {
+			return Point(xBase + xDir * xRelative + halfWidth, yBase + yDir * yRelative + halfWidth);
 		}
 	};
-	Relative rel = { surface, x0, xStraight ? 1 : -1, y0, 1 };
+
+	Relative rel = { x0, isEndMarker ? 1 : -1, y0, 1, widthStroke / 2.0f };
 
 	// arrow head
-	rel.MoveTo(xa, y);
-	rel.LineTo(xa + 2 * w / 3, y - dy);
-	rel.MoveTo(xa, y);
-	rel.LineTo(xa + 2 * w / 3, y + dy);
+	const Point head[] = {
+		rel.At(xa + dy, y - dy),
+		rel.At(xa, y),
+		rel.At(xa + dy + extraFinalPixel, y + dy + extraFinalPixel)
+	};
+	surface->PolyLine(head, std::size(head), Stroke(wrapColour, widthStroke));
 
 	// arrow body
-	rel.MoveTo(xa, y);
-	rel.LineTo(xa + w, y);
-	rel.LineTo(xa + w, y - 2 * dy);
-	rel.LineTo(xa - 1,   // on windows lineto is exclusive endpoint, perhaps GTK not...
-		y - 2 * dy);
+	const Point body[] = {
+		rel.At(xa, y),
+		rel.At(xa + w, y),
+		rel.At(xa + w, y - 2 * dy),
+		rel.At(xa, y - 2 * dy),
+	};
+	surface->PolyLine(body, std::size(body), Stroke(wrapColour, widthStroke));
 }
 
 MarginView::MarginView() noexcept {
