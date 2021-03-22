@@ -53,7 +53,8 @@
 ##     bool -> integer, 1=true, 0=false
 ##     position -> intptr_t position in a document
 ##     line -> intptr_t line in a document
-##     colour -> colour integer containing red, green and blue bytes.
+##     colour -> colour integer containing red, green, and blue bytes.
+##     colouralpha -> colour integer containing red, green, blue, and alpha bytes.
 ##     string -> pointer to const character
 ##     stringresult -> pointer to character, NULL-> return size of result
 ##     cells -> pointer to array of cells, each cell containing a style byte and character byte
