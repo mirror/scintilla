@@ -915,6 +915,8 @@ QPainter *SurfaceImpl::GetPainter()
 		// Set text antialiasing unconditionally.
 		// The font's style strategy will override.
 		painter->setRenderHint(QPainter::TextAntialiasing, true);
+
+		painter->setRenderHint(QPainter::Antialiasing, true);
 	}
 
 	return painter;
