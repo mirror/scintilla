@@ -135,6 +135,8 @@ namespace {
 
 const int SupportsQt[] = {
 	SC_SUPPORTS_LINE_DRAWS_FINAL,
+	SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH,
+	SC_SUPPORTS_TRANSLUCENT_STROKE,
 };
 
 const FontAndCharacterSet *AsFontAndCharacterSet(const Font *f) {

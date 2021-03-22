@@ -2878,6 +2878,8 @@ get int EOLAnnotationGetStyleOffset=2748(,)
 enu Supports=SC_SUPPORTS_
 val SC_SUPPORTS_LINE_DRAWS_FINAL=0
 val SC_SUPPORTS_PIXEL_DIVISIONS=1
+val SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH=2
+val SC_SUPPORTS_TRANSLUCENT_STROKE=3
 
 # Get whether a feature is supported
 get int SupportsFeature=2750(Supports feature,)

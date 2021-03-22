@@ -343,6 +343,8 @@ void GetPositions(CTLineRef line, std::vector<CGFloat> &positions) {
 const int SupportsCocoa[] = {
 	SC_SUPPORTS_LINE_DRAWS_FINAL,
 	SC_SUPPORTS_PIXEL_DIVISIONS,
+	SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH,
+	SC_SUPPORTS_TRANSLUCENT_STROKE,
 };
 
 }

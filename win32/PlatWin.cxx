@@ -1393,6 +1393,8 @@ constexpr D2D1_RECT_F RectangleFromPRectangle(PRectangle rc) noexcept {
 
 const int SupportsD2D[] = {
 	SC_SUPPORTS_LINE_DRAWS_FINAL,
+	SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH,
+	SC_SUPPORTS_TRANSLUCENT_STROKE,
 };
 
 constexpr D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {

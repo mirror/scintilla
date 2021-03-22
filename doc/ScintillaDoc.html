@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 16 March 2021 NH</p>
+    <p>Last edited 22 March 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -3886,6 +3886,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GRABFOCUS">SCI_GRABFOCUS</a><br />
      <a class="message" href="#SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</a><br />
      <a class="message" href="#SCI_GETFOCUS">SCI_GETFOCUS &rarr; bool</a><br />
+     <a class="message" href="#SCI_SUPPORTSFEATURE">SCI_SUPPORTSFEATURE(int feature) &rarr; bool</a><br />
     </code>
 
     <p>To forward a message <code>(WM_XXXX, WPARAM, LPARAM)</code> to Scintilla, you can use
@@ -4043,6 +4044,42 @@ struct Sci_TextToFind {
     <p>The internal focus flag can be set with <code>SCI_SETFOCUS</code>. This is used by clients
     that have complex focus requirements such as having their own window that gets the real focus
     but with the need to indicate that Scintilla has the logical focus.</p>
+
+    <p><b id="SCI_SUPPORTSFEATURE">SCI_SUPPORTSFEATURE(int feature) &rarr; bool</b><br />
+     Different platforms support different features and <code>SCI_SUPPORTSFEATURE</code>
+     can be used to check which are currently available.
+     For example, on Win32, Direct2D supports drawing translucent lines but GDI does not so
+     <code>SCI_SUPPORTSFEATURE(SC_SUPPORTS_TRANSLUCENT_STROKE)</code>
+     will return 1 for Direct2D and 0 for GDI. Its possible that translucent line drawing will be implemented in a future
+     revision to the GDI platform layer or will be implmented on particular Windows versions.
+     This call allows applications to tailor their settings: perhaps displaying a box with translucent coloured fill on Direct2D but
+     a hollow box on GDI.</p>
+     <p>The features that can be queried are:</p>
+    <table class="standard" summary="Search flags">
+      <tbody>
+        <tr>
+          <td><code>SC_SUPPORTS_LINE_DRAWS_FINAL</code></td>
+          <td>Whether drawing a line draws its final position. Only false on Win32 GDI.</td>
+        </tr>
+
+        <tr>
+          <td><code>SC_SUPPORTS_PIXEL_DIVISIONS</code></td>
+          <td>Are logical pixels larger than physical pixels? Currently only true for macOS Cocoa with 'retina' displays.
+          When true, creating pixmaps at twice the resolution can produce clearer output with less blur.</td>
+        </tr>
+
+        <tr>
+          <td><code>SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH</code></td>
+          <td>Can lines be drawn with fractional widths like 1.5 or 0.5 pixels?</td>
+        </tr>
+
+        <tr>
+          <td><code>SC_SUPPORTS_TRANSLUCENT_STROKE</code></td>
+          <td>Can translucent lines, polygons, and ellipses, be drawn?</td>
+        </tr>
+
+      </tbody>
+    </table>
 
     <h2 id="BraceHighlighting">Brace highlighting</h2>
     <code><a class="message" href="#SCI_BRACEHIGHLIGHT">SCI_BRACEHIGHLIGHT(position posA, position
