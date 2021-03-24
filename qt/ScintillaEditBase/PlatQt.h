@@ -62,6 +62,11 @@ inline Point PointFromQPoint(QPoint qp)
 	return Point(qp.x(), qp.y());
 }
 
+inline QPointF QPointFFromPoint(Point qp)
+{
+	return QPointF(qp.x, qp.y);
+}
+
 constexpr PRectangle RectangleInset(PRectangle rc, XYPOSITION delta) noexcept {
 	return PRectangle(rc.left + delta, rc.top + delta, rc.right - delta, rc.bottom - delta);
 }
@@ -93,6 +98,7 @@ public:
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
+	void PenColourWidth(ColourAlpha fore, XYPOSITION strokeWidth);
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
@@ -100,13 +106,16 @@ public:
 	void LineTo(int x_, int y_) override;
 	void Polygon(Point *pts, size_t npts, ColourDesired fore,
 		ColourDesired back) override;
+	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore,
 		ColourDesired back) override;
+	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore,
 		ColourDesired back) override;
+	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill,
 		int alphaFill, ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
@@ -115,6 +124,7 @@ public:
 		const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore,
 		ColourDesired back) override;
+	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
@@ -155,6 +165,7 @@ public:
 	void SetBidiR2L(bool bidiR2L_) override;
 
 	void BrushColour(ColourDesired back);
+	void BrushColour(ColourAlpha back);
 	void SetCodec(const Font *font);
 	void SetFont(const Font *font);
 

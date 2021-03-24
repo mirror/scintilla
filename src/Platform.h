@@ -189,11 +189,14 @@ public:
 	virtual void MoveTo(int x_, int y_)=0;
 	virtual void LineTo(int x_, int y_)=0;
 	virtual void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back)=0;
+	virtual void Polygon(const Point *pts, size_t npts, FillStroke fillStroke)=0;
 	virtual void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
+	virtual void RectangleDraw(PRectangle rc, FillStroke fillStroke)=0;
 	virtual void FillRectangle(PRectangle rc, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, Fill fill)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
 	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
+	virtual void RoundedRectangle(PRectangle rc, FillStroke fillStroke)=0;
 	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags)=0;
 	virtual void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke)=0;
@@ -201,6 +204,7 @@ public:
 	virtual void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)=0;
 	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) = 0;
 	virtual void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
+	virtual void Ellipse(PRectangle rc, FillStroke fillStroke)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
 	virtual std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) = 0;

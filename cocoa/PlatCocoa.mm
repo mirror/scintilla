@@ -51,6 +51,15 @@ extern sptr_t scintilla_send_message(void *sci, unsigned int iMessage, uptr_t wP
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Converts a Point as used by Scintilla to a Quartz-style CGPoint.
+ */
+inline CGPoint CGPointFromPoint(Scintilla::Point pt) {
+	return CGPointMake(pt.x, pt.y);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Converts a PRectangle as used by Scintilla to standard Obj-C NSRect structure .
  */
 NSRect PRectangleToNSRect(const PRectangle &rc) {
@@ -75,6 +84,18 @@ PRectangle NSRectToPRectangle(NSRect &rc) {
  */
 inline CGRect PRectangleToCGRect(PRectangle &rc) {
 	return CGRectMake(rc.left, rc.top, rc.Width(), rc.Height());
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Converts a PRectangle as used by Scintilla to a Quartz-style rectangle.
+ * Result is inset by strokeWidth / 2 so stroking does not go outside the rectangle.
+ */
+inline CGRect CGRectFromPRectangleInset(PRectangle rc, XYPOSITION strokeWidth) {
+	const XYPOSITION halfStroke = strokeWidth / 2.0f;
+	const CGRect rect = PRectangleToCGRect(rc);
+	return CGRectInset(rect, halfStroke, halfStroke);
 }
 
 //----------------- FontQuartz ---------------------------------------------------------------------
@@ -513,6 +534,14 @@ void SurfaceImpl::PenColourAlpha(ColourAlpha fore) {
 
 //--------------------------------------------------------------------------------------------------
 
+void SurfaceImpl::SetFillStroke(FillStroke fillStroke) {
+	FillColour(fillStroke.fill.colour);
+	PenColourAlpha(fillStroke.stroke.colour);
+	CGContextSetLineWidth(gc, fillStroke.stroke.width);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 CGImageRef SurfaceImpl::CreateImage() {
 	// For now, assume that CreateImage can only be called on PixMap surfaces.
 	if (!bitmapData)
@@ -655,6 +684,27 @@ void SurfaceImpl::Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore
 
 //--------------------------------------------------------------------------------------------------
 
+void SurfaceImpl::Polygon(const Scintilla::Point *pts, size_t npts, FillStroke fillStroke) {
+	std::vector<CGPoint> points;
+	std::transform(pts, pts + npts, std::back_inserter(points), CGPointFromPoint);
+
+	CGContextBeginPath(gc);
+
+	SetFillStroke(fillStroke);
+
+	// Draw the polygon
+	CGContextAddLines(gc, points.data(), npts);
+
+	// Explicitly close the path, so it is closed for stroking AND filling (implicit close = filling only)
+	CGContextClosePath(gc);
+	CGContextDrawPath(gc, kCGPathFillStroke);
+
+	// Restore as not all paths set
+	CGContextSetLineWidth(gc, 1.0f);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (gc) {
 		CGContextBeginPath(gc);
@@ -667,6 +717,22 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired
 		CGContextAddRect(gc, CGRectMake(rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1));
 		CGContextDrawPath(gc, kCGPathFillStroke);
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
+	if (!gc)
+		return;
+	CGContextBeginPath(gc);
+	SetFillStroke(fillStroke);
+
+	CGContextAddRect(gc, CGRectFromPRectangleInset(rc, fillStroke.stroke.width));
+
+	CGContextDrawPath(gc, kCGPathFillStroke);
+
+	// Restore as not all paths set
+	CGContextSetLineWidth(gc, 1.0f);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -811,6 +877,70 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 	// Close the path to enclose it for stroking and for filling, then draw it
 	CGContextClosePath(gc);
 	CGContextDrawPath(gc, kCGPathFillStroke);
+}
+
+void SurfaceImpl::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
+	// This is only called from the margin marker drawing code for SC_MARK_ROUNDRECT
+	// The Win32 version does
+	//  ::RoundRect(hdc, rc.left + 1, rc.top, rc.right - 1, rc.bottom, 8, 8 );
+	// which is a rectangle with rounded corners each having a radius of 4 pixels.
+	// It would be almost as good just cutting off the corners with lines at
+	// 45 degrees as is done on GTK+.
+
+	// Create a rectangle with semicircles at the corners
+	const int MAX_RADIUS = 4;
+	const int radius = std::min(MAX_RADIUS, static_cast<int>(std::min(rc.Height()/2, rc.Width()/2)));
+
+	// Points go clockwise, starting from just below the top left
+	// Corners are kept together, so we can easily create arcs to connect them
+	CGPoint corners[4][3] = {
+		{
+			{ rc.left, rc.top + radius },
+			{ rc.left, rc.top },
+			{ rc.left + radius, rc.top },
+		},
+		{
+			{ rc.right - radius - 1, rc.top },
+			{ rc.right - 1, rc.top },
+			{ rc.right - 1, rc.top + radius },
+		},
+		{
+			{ rc.right - 1, rc.bottom - radius - 1 },
+			{ rc.right - 1, rc.bottom - 1 },
+			{ rc.right - radius - 1, rc.bottom - 1 },
+		},
+		{
+			{ rc.left + radius, rc.bottom - 1 },
+			{ rc.left, rc.bottom - 1 },
+			{ rc.left, rc.bottom - radius - 1 },
+		},
+	};
+
+	// Align the points in the middle of the pixels
+	for (int i = 0; i < 4; ++ i) {
+		for (int j = 0; j < 3; ++ j) {
+			corners[i][j].x += 0.5;
+			corners[i][j].y += 0.5;
+		}
+	}
+
+	SetFillStroke(fillStroke);
+
+	// Move to the last point to begin the path
+	CGContextBeginPath(gc);
+	CGContextMoveToPoint(gc, corners[3][2].x, corners[3][2].y);
+
+	for (int i = 0; i < 4; ++ i) {
+		CGContextAddLineToPoint(gc, corners[i][0].x, corners[i][0].y);
+		CGContextAddArcToPoint(gc, corners[i][1].x, corners[i][1].y, corners[i][2].x, corners[i][2].y, radius);
+	}
+
+	// Close the path to enclose it for stroking and for filling, then draw it
+	CGContextClosePath(gc);
+	CGContextDrawPath(gc, kCGPathFillStroke);
+
+	// Restore as not all paths set
+	CGContextSetLineWidth(gc, 1.0f);
 }
 
 // DrawChamferedRectangle is a helper function for AlphaRectangle that either fills or strokes a
@@ -1071,6 +1201,16 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)
 	CGContextBeginPath(gc);
 	CGContextAddEllipseInRect(gc, ellipseRect);
 	CGContextDrawPath(gc, kCGPathFillStroke);
+}
+
+void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke) {
+	const CGRect ellipseRect = CGRectFromPRectangleInset(rc, fillStroke.stroke.width / 2.0f);
+	SetFillStroke(fillStroke);
+	CGContextBeginPath(gc);
+	CGContextAddEllipseInRect(gc, ellipseRect);
+	CGContextDrawPath(gc, kCGPathFillStroke);
+	// Restore as not all paths set
+	CGContextSetLineWidth(gc, 1.0f);
 }
 
 void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect, PRectangle dstRect) {

@@ -64,6 +64,8 @@ private:
 
 	void PenColourAlpha(ColourAlpha fore);
 
+	void SetFillStroke(FillStroke fillStroke);
+
 	// 24-bit RGB+A bitmap data constants
 	static const int BITS_PER_COMPONENT = 8;
 	static const int BITS_PER_PIXEL = BITS_PER_COMPONENT * 4;
@@ -95,17 +97,21 @@ public:
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
 	void Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
+	void Polygon(const Scintilla::Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 			    ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 

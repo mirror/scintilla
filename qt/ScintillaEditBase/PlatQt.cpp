@@ -230,9 +230,22 @@ void SurfaceImpl::PenColour(ColourDesired fore)
 	GetPainter()->setPen(penOutline);
 }
 
+void SurfaceImpl::PenColourWidth(ColourAlpha fore, XYPOSITION strokeWidth) {
+	QPen penOutline(QColorFromColourAlpha(fore));
+	penOutline.setCapStyle(Qt::FlatCap);
+	penOutline.setJoinStyle(Qt::MiterJoin);
+	penOutline.setWidthF(strokeWidth);
+	GetPainter()->setPen(penOutline);
+}
+
 void SurfaceImpl::BrushColour(ColourDesired back)
 {
 	GetPainter()->setBrush(QBrush(QColorFromCA(back)));
+}
+
+void SurfaceImpl::BrushColour(ColourAlpha back)
+{
+	GetPainter()->setBrush(QBrush(QColorFromColourAlpha(back)));
 }
 
 void SurfaceImpl::SetCodec(const Font *font)
@@ -304,6 +317,17 @@ void SurfaceImpl::Polygon(Point *pts,
 	GetPainter()->drawPolygon(&qpts[0], static_cast<int>(npts));
 }
 
+void SurfaceImpl::Polygon(const Point *pts, size_t npts, FillStroke fillStroke)
+{
+	PenColourWidth(fillStroke.stroke.colour, fillStroke.stroke.width);
+	BrushColour(fillStroke.fill.colour);
+
+	std::vector<QPointF> qpts;
+	std::transform(pts, pts + npts, std::back_inserter(qpts), QPointFFromPoint);
+
+	GetPainter()->drawPolygon(&qpts[0], static_cast<int>(npts));
+}
+
 void SurfaceImpl::RectangleDraw(PRectangle rc,
                                 ColourDesired fore,
                                 ColourDesired back)
@@ -311,6 +335,14 @@ void SurfaceImpl::RectangleDraw(PRectangle rc,
 	PenColour(fore);
 	BrushColour(back);
 	QRectF rect(rc.left, rc.top, rc.Width() - 1, rc.Height() - 1);
+	GetPainter()->drawRect(rect);
+}
+
+void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke)
+{
+	PenColourWidth(fillStroke.stroke.colour, fillStroke.stroke.width);
+	BrushColour(fillStroke.fill.colour);
+	const QRectF rect = QRectFFromPRect(rc.Inset(fillStroke.stroke.width / 2));
 	GetPainter()->drawRect(rect);
 }
 
@@ -350,6 +382,13 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc,
 	PenColour(fore);
 	BrushColour(back);
 	GetPainter()->drawRoundedRect(QRectFFromPRect(RectangleInset(rc, 0.5f)), 3.0f, 3.0f);
+}
+
+void SurfaceImpl::RoundedRectangle(PRectangle rc, FillStroke fillStroke)
+{
+	PenColourWidth(fillStroke.stroke.colour, fillStroke.stroke.width);
+	BrushColour(fillStroke.fill.colour);
+	GetPainter()->drawRoundedRect(QRectFFromPRect(rc), 3.0f, 3.0f);
 }
 
 void SurfaceImpl::AlphaRectangle(PRectangle rc,
@@ -467,6 +506,14 @@ void SurfaceImpl::Ellipse(PRectangle rc,
 	PenColour(fore);
 	BrushColour(back);
 	GetPainter()->drawEllipse(QRectFFromPRect(rc));
+}
+
+void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke)
+{
+	PenColourWidth(fillStroke.stroke.colour, fillStroke.stroke.width);
+	BrushColour(fillStroke.fill.colour);
+	const QRectF rect = QRectFFromPRect(rc.Inset(fillStroke.stroke.width / 2));
+	GetPainter()->drawEllipse(rect);
 }
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource)

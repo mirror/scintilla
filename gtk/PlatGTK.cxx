@@ -162,17 +162,21 @@ public:
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
 	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
+	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 			    ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
@@ -494,6 +498,20 @@ void SurfaceImpl::Polygon(Point *pts, size_t npts, ColourDesired fore,
 	cairo_stroke(context);
 }
 
+void SurfaceImpl::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
+	PLATFORM_ASSERT(context);
+	PenColourAlpha(fillStroke.fill.colour);
+	cairo_move_to(context, pts[0].x, pts[0].y);
+	for (size_t i = 1; i < npts; i++) {
+		cairo_line_to(context, pts[i].x, pts[i].y);
+	}
+	cairo_close_path(context);
+	cairo_fill_preserve(context);
+	PenColourAlpha(fillStroke.stroke.colour);
+	cairo_set_line_width(context, fillStroke.stroke.width);
+	cairo_stroke(context);
+}
+
 void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (context) {
 		cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5,
@@ -501,6 +519,17 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired
 		PenColour(back);
 		cairo_fill_preserve(context);
 		PenColour(fore);
+		cairo_stroke(context);
+	}
+}
+
+void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
+	if (context) {
+		CairoRectangle(rc.Inset(fillStroke.stroke.width / 2));
+		PenColourAlpha(fillStroke.fill.colour);
+		cairo_fill_preserve(context);
+		PenColourAlpha(fillStroke.stroke.colour);
+		cairo_set_line_width(context, fillStroke.stroke.width);
 		cairo_stroke(context);
 	}
 }
@@ -550,6 +579,25 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 		Polygon(pts, std::size(pts), fore, back);
 	} else {
 		RectangleDraw(rc, fore, back);
+	}
+}
+
+void SurfaceImpl::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
+	if (((rc.right - rc.left) > 4) && ((rc.bottom - rc.top) > 4)) {
+		// Approximate a round rect with some cut off corners
+		Point pts[] = {
+			Point(rc.left + 2, rc.top),
+			Point(rc.right - 2, rc.top),
+			Point(rc.right, rc.top + 2),
+			Point(rc.right, rc.bottom - 2),
+			Point(rc.right - 2, rc.bottom),
+			Point(rc.left + 2, rc.bottom),
+			Point(rc.left, rc.bottom - 2),
+			Point(rc.left, rc.top + 2),
+		};
+		Polygon(pts, std::size(pts), fillStroke);
+	} else {
+		RectangleDraw(rc, fillStroke);
 	}
 }
 
@@ -677,6 +725,17 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)
 		  std::min(rc.Width(), rc.Height()) / 2, 0, 2*kPi);
 	cairo_fill_preserve(context);
 	PenColour(fore);
+	cairo_stroke(context);
+}
+
+void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke) {
+	PLATFORM_ASSERT(context);
+	PenColourAlpha(fillStroke.fill.colour);
+	cairo_arc(context, (rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2,
+		  (std::min(rc.Width(), rc.Height()) - fillStroke.stroke.width) / 2, 0, 2*kPi);
+	cairo_fill_preserve(context);
+	PenColourAlpha(fillStroke.stroke.colour);
+	cairo_set_line_width(context, fillStroke.stroke.width);
 	cairo_stroke(context);
 }
 
