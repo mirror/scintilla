@@ -105,6 +105,7 @@ public:
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
+	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;

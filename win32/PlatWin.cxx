@@ -497,6 +497,7 @@ public:
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
+	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
@@ -768,6 +769,10 @@ void SurfaceGDI::FillRectangle(PRectangle rc, Fill fill) {
 	} else {
 		AlphaRectangle(rc, 0, FillStroke(fill.colour));
 	}
+}
+
+void SurfaceGDI::FillRectangleAligned(PRectangle rc, Fill fill) {
+	FillRectangle(PixelAlign(rc, 1), fill);
 }
 
 void SurfaceGDI::FillRectangle(PRectangle rc, Surface &surfacePattern) {
@@ -1453,6 +1458,7 @@ public:
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
+	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
@@ -1877,6 +1883,10 @@ void SurfaceD2D::FillRectangle(PRectangle rc, Fill fill) {
 		const D2D1_RECT_F rectangle = RectangleFromPRectangle(rc);
 		pRenderTarget->FillRectangle(&rectangle, pBrush);
 	}
+}
+
+void SurfaceD2D::FillRectangleAligned(PRectangle rc, Fill fill) {
+	FillRectangle(PixelAlign(rc, 1), fill);
 }
 
 void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {

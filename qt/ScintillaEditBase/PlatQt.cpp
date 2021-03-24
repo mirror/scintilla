@@ -380,6 +380,11 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill)
 	GetPainter()->fillRect(QRectFFromPRect(rc), QColorFromColourAlpha(fill.colour));
 }
 
+void SurfaceImpl::FillRectangleAligned(PRectangle rc, Fill fill)
+{
+	FillRectangle(PixelAlign(rc, 1), fill);
+}
+
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
 {
 	// Tile pattern over rectangle

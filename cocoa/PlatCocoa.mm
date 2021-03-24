@@ -811,6 +811,12 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill) {
 
 //--------------------------------------------------------------------------------------------------
 
+void SurfaceImpl::FillRectangleAligned(PRectangle rc, Fill fill) {
+	FillRectangle(PixelAlign(rc, PixelDivisions()), fill);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 static void drawImageRefCallback(void *info, CGContextRef gc) {
 	CGImageRef pattern = static_cast<CGImageRef>(info);
 	CGContextDrawImage(gc, CGRectMake(0, 0, CGImageGetWidth(pattern), CGImageGetHeight(pattern)), pattern);

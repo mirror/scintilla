@@ -172,6 +172,7 @@ public:
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
+	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
@@ -590,6 +591,10 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill) {
 		CairoRectangle(rc);
 		cairo_fill(context);
 	}
+}
+
+void SurfaceImpl::FillRectangleAligned(PRectangle rc, Fill fill) {
+	FillRectangle(PixelAlign(rc, 1), fill);
 }
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {

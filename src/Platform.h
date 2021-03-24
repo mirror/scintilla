@@ -205,6 +205,7 @@ public:
 	virtual void RectangleFrame(PRectangle rc, Stroke stroke)=0;
 	virtual void FillRectangle(PRectangle rc, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, Fill fill)=0;
+	virtual void FillRectangleAligned(PRectangle rc, Fill fill)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
 	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void RoundedRectangle(PRectangle rc, FillStroke fillStroke)=0;
