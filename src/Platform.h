@@ -191,6 +191,7 @@ public:
 	virtual void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back)=0;
 	virtual void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, ColourDesired back)=0;
+	virtual void FillRectangle(PRectangle rc, Fill fill)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
 	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,

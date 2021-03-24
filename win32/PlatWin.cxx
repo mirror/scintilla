@@ -489,6 +489,7 @@ public:
 	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
+	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
@@ -686,6 +687,20 @@ void SurfaceGDI::FillRectangle(PRectangle rc, ColourDesired back) {
 	const RECT rcw = RectFromPRectangle(rc);
 	::SetBkColor(hdc, back.AsInteger());
 	::ExtTextOut(hdc, rcw.left, rcw.top, ETO_OPAQUE, &rcw, TEXT(""), 0, nullptr);
+}
+
+void SurfaceGDI::FillRectangle(PRectangle rc, Fill fill) {
+	if (fill.colour.IsOpaque()) {
+		// Using ExtTextOut rather than a FillRect ensures that no dithering occurs.
+		// There is no need to allocate a brush either.
+		const RECT rcw = RectFromPRectangle(rc);
+		::SetBkColor(hdc, fill.colour.GetColour().AsInteger());
+		::ExtTextOut(hdc, rcw.left, rcw.top, ETO_OPAQUE, &rcw, TEXT(""), 0, nullptr);
+	} else {
+		const ColourDesired fillOpaque = fill.colour.GetColour();
+		const int alpha = fill.colour.GetAlpha();
+		AlphaRectangle(rc, 0, fillOpaque, alpha, fillOpaque, alpha, 0);
+	}
 }
 
 void SurfaceGDI::FillRectangle(PRectangle rc, Surface &surfacePattern) {
@@ -1218,6 +1233,15 @@ const int SupportsD2D[] = {
 	SC_SUPPORTS_LINE_DRAWS_FINAL,
 };
 
+constexpr D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {
+	return D2D_COLOR_F{
+		colour.GetRedComponent(),
+		colour.GetGreenComponent(),
+		colour.GetBlueComponent(),
+		colour.GetAlphaComponent()
+	};
+}
+
 }
 
 class BlobInline;
@@ -1267,6 +1291,7 @@ public:
 
 	void PenColour(ColourDesired fore) override;
 	void D2DPenColour(ColourDesired fore, int alpha=255);
+	void D2DPenColourAlpha(ColourAlpha fore) noexcept;
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
@@ -1275,6 +1300,7 @@ public:
 	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
+	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
@@ -1426,13 +1452,12 @@ void SurfaceD2D::PenColour(ColourDesired fore) {
 }
 
 void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
+	D2DPenColourAlpha(ColourAlpha(fore, alpha));
+}
+
+void SurfaceD2D::D2DPenColourAlpha(ColourAlpha fore) noexcept {
 	if (pRenderTarget) {
-		const D2D_COLOR_F col {
-			fore.GetRedComponent(),
-			fore.GetGreenComponent(),
-			fore.GetBlueComponent(),
-			alpha / 255.0f
-		};
+		const D2D_COLOR_F col = ColorFromColourAlpha(fore);
 		if (pBrush) {
 			pBrush->SetColor(col);
 		} else {
@@ -1573,6 +1598,14 @@ void SurfaceD2D::FillRectangle(PRectangle rc, ColourDesired back) {
 	}
 }
 
+void SurfaceD2D::FillRectangle(PRectangle rc, Fill fill) {
+	if (pRenderTarget) {
+		D2DPenColourAlpha(fill.colour);
+		const D2D1_RECT_F rectangle = RectangleFromPRectangle(rc);
+		pRenderTarget->FillRectangle(&rectangle, pBrush);
+	}
+}
+
 void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	SurfaceD2D *psurfOther = dynamic_cast<SurfaceD2D *>(&surfacePattern);
 	PLATFORM_ASSERT(psurfOther);
@@ -1638,19 +1671,6 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
 		}
 	}
-}
-
-namespace {
-
-constexpr D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {
-	return D2D_COLOR_F{
-		colour.GetRedComponent(),
-		colour.GetGreenComponent(),
-		colour.GetBlueComponent(),
-		colour.GetAlphaComponent()
-	};
-}
-
 }
 
 void SurfaceD2D::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {

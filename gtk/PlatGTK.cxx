@@ -155,6 +155,7 @@ public:
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
+	void PenColourAlpha(ColourAlpha fore);
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
@@ -163,6 +164,7 @@ public:
 	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
+	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
@@ -399,11 +401,20 @@ int SurfaceImpl::Supports(int feature) noexcept {
 
 void SurfaceImpl::PenColour(ColourDesired fore) {
 	if (context) {
-		const ColourDesired cdFore(fore.AsInteger());
 		cairo_set_source_rgb(context,
-				     cdFore.GetRed() / 255.0,
-				     cdFore.GetGreen() / 255.0,
-				     cdFore.GetBlue() / 255.0);
+			fore.GetRed() / 255.0,
+			fore.GetGreen() / 255.0,
+			fore.GetBlue() / 255.0);
+	}
+}
+
+void SurfaceImpl::PenColourAlpha(ColourAlpha fore) {
+	if (context) {
+		cairo_set_source_rgba(context,
+			fore.GetRed() / 255.0,
+			fore.GetGreen() / 255.0,
+			fore.GetBlue() / 255.0,
+			fore.GetAlpha() / 255.0);
 	}
 }
 
@@ -499,6 +510,14 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 		rc.left = std::round(rc.left);
 		rc.right = std::round(rc.right);
 		cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
+		cairo_fill(context);
+	}
+}
+
+void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill) {
+	PenColourAlpha(fill.colour);
+	if (context && (rc.left < maxCoordinate)) {	// Protect against out of range
+		CairoRectangle(rc);
 		cairo_fill(context);
 	}
 }

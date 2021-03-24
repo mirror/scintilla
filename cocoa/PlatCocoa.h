@@ -60,6 +60,7 @@ private:
 
 	/** Set the CGContext's fill colour to the specified desired colour. */
 	void FillColour(const ColourDesired &back);
+	void FillColour(ColourAlpha fill);
 
 
 	// 24-bit RGB+A bitmap data constants
@@ -95,6 +96,7 @@ public:
 	void Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
+	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,

@@ -479,6 +479,17 @@ void SurfaceImpl::PenColour(ColourDesired fore) {
 
 //--------------------------------------------------------------------------------------------------
 
+void SurfaceImpl::FillColour(ColourAlpha fill) {
+	// Set the Fill color to match
+	CGContextSetRGBFillColor(gc,
+				 fill.GetRedComponent(),
+				 fill.GetGreenComponent(),
+				 fill.GetBlueComponent(),
+				 fill.GetAlphaComponent());
+}
+
+//--------------------------------------------------------------------------------------------------
+
 void SurfaceImpl::FillColour(const ColourDesired &back) {
 	if (gc) {
 		ColourDesired colour(back.AsInteger());
@@ -655,6 +666,16 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 		// Snap rectangle boundaries to nearest int
 		rc.left = std::round(rc.left);
 		rc.right = std::round(rc.right);
+		CGRect rect = PRectangleToCGRect(rc);
+		CGContextFillRect(gc, rect);
+	}
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill) {
+	if (gc) {
+		FillColour(fill.colour);
 		CGRect rect = PRectangleToCGRect(rc);
 		CGContextFillRect(gc, rect);
 	}

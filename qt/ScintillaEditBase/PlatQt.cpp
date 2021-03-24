@@ -319,6 +319,11 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back)
 	GetPainter()->fillRect(QRectFFromPRect(rc), QColorFromCA(back));
 }
 
+void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill)
+{
+	GetPainter()->fillRect(QRectFFromPRect(rc), QColorFromColourAlpha(fill.colour));
+}
+
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
 {
 	// Tile pattern over rectangle
