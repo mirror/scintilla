@@ -252,10 +252,10 @@ public:
 */
 class Stroke {
 public:
-	ColourAlpha colourStroke;
-	XYPOSITION widthStroke;
-	constexpr Stroke(ColourAlpha colourStroke_, XYPOSITION widthStroke_=1.0f) noexcept : 
-		colourStroke(colourStroke_), widthStroke(widthStroke_) {
+	ColourAlpha colour;
+	XYPOSITION width;
+	constexpr Stroke(ColourAlpha colour_, XYPOSITION width_=1.0f) noexcept : 
+		colour(colour_), width(width_) {
 	}
 };
 
@@ -264,9 +264,9 @@ public:
 */
 class Fill {
 public:
-	ColourAlpha colourFill;
-	constexpr Fill(ColourAlpha colourFill_) noexcept : 
-		colourFill(colourFill_) {
+	ColourAlpha colour;
+	constexpr Fill(ColourAlpha colour_) noexcept : 
+		colour(colour_) {
 	}
 };
 
