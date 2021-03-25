@@ -268,6 +268,9 @@ public:
 	constexpr Fill(ColourAlpha colour_) noexcept : 
 		colour(colour_) {
 	}
+	constexpr Fill(ColourDesired colour_) noexcept :
+		colour(colour_) {
+	}
 };
 
 /**
