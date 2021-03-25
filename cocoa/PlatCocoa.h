@@ -42,8 +42,6 @@ namespace Scintilla {
 class SurfaceImpl : public Surface {
 private:
 	SurfaceMode mode;
-	float x;
-	float y;
 
 	CGContextRef gc;
 
@@ -58,7 +56,6 @@ private:
 	int bitmapHeight;
 
 	/** Set the CGContext's fill colour to the specified desired colour. */
-	void FillColour(const ColourDesired &back);
 	void FillColour(ColourAlpha fill);
 
 	void PenColourAlpha(ColourAlpha fore);
@@ -80,7 +77,6 @@ public:
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
-	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 	std::unique_ptr<SurfaceImpl> AllocatePixMapImplementation(int width, int height);
 	CGContextRef GetContext() { return gc; }
@@ -90,7 +86,6 @@ public:
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
-	void PenColour(ColourDesired fore) override;
 
 	/** Returns a CGImageRef that represents the surface. Returns NULL if this is not possible. */
 	CGImageRef CreateImage();
@@ -99,27 +94,18 @@ public:
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
-	void MoveTo(int x_, int y_) override;
-	void LineTo(int x_, int y_) override;
 	void LineDraw(Point start, Point end, Stroke stroke) override;
 	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
-	void Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Scintilla::Point *pts, size_t npts, FillStroke fillStroke) override;
-	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
-	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
-	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-			    ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
-	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
@@ -152,9 +138,6 @@ public:
 	void FlushCachedState() override;
 	void FlushDrawing() override;
 
-	void SetUnicodeMode(bool unicodeMode_) override;
-	void SetDBCSMode(int codePage_) override;
-	void SetBidiR2L(bool bidiR2L_) override;
 }; // SurfaceImpl class
 
 } // Scintilla namespace

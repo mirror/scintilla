@@ -188,7 +188,6 @@ public:
 
 	virtual void Init(WindowID wid)=0;
 	virtual void Init(SurfaceID sid, WindowID wid)=0;
-	virtual void InitPixMap(int width, int height, Surface *surface_, WindowID wid)=0;
 	virtual std::unique_ptr<Surface> AllocatePixMap(int width, int height)=0;
 
 	virtual void SetMode(SurfaceMode mode)=0;
@@ -204,32 +203,22 @@ public:
 	virtual void Release() noexcept=0;
 	virtual int Supports(int feature) noexcept=0;
 	virtual bool Initialised()=0;
-	virtual void PenColour(ColourDesired fore)=0;
 	virtual int LogPixelsY()=0;
 	virtual int PixelDivisions()=0;
 	virtual int DeviceHeightFont(int points)=0;
-	virtual void MoveTo(int x_, int y_)=0;
-	virtual void LineTo(int x_, int y_)=0;
 	virtual void LineDraw(Point start, Point end, Stroke stroke)=0;
 	virtual void PolyLine(const Point *pts, size_t npts, Stroke stroke)=0;
-	virtual void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back)=0;
 	virtual void Polygon(const Point *pts, size_t npts, FillStroke fillStroke)=0;
-	virtual void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void RectangleDraw(PRectangle rc, FillStroke fillStroke)=0;
 	virtual void RectangleFrame(PRectangle rc, Stroke stroke)=0;
-	virtual void FillRectangle(PRectangle rc, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, Fill fill)=0;
 	virtual void FillRectangleAligned(PRectangle rc, Fill fill)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
-	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void RoundedRectangle(PRectangle rc, FillStroke fillStroke)=0;
-	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-		ColourDesired outline, int alphaOutline, int flags)=0;
 	virtual void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke)=0;
 	enum class GradientOptions { leftToRight, topToBottom };
 	virtual void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)=0;
 	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) = 0;
-	virtual void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void Ellipse(PRectangle rc, FillStroke fillStroke)=0;
 	virtual void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
@@ -258,10 +247,6 @@ public:
 	virtual void PopClip()=0;
 	virtual void FlushCachedState()=0;
 	virtual void FlushDrawing()=0;
-
-	virtual void SetUnicodeMode(bool unicodeMode_)=0;
-	virtual void SetDBCSMode(int codePage)=0;
-	virtual void SetBidiR2L(bool bidiR2L_)=0;
 };
 
 /**

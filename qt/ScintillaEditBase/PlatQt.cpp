@@ -156,8 +156,6 @@ std::shared_ptr<Font> Font::Allocate(const FontParameters &fp)
 }
 
 SurfaceImpl::SurfaceImpl()
-: device(nullptr), painter(nullptr), deviceOwned(false), painterOwned(false), x(0), y(0),
-	  codecName(nullptr), codec(nullptr)
 {}
 
 SurfaceImpl::SurfaceImpl(int width, int height, SurfaceMode mode_)
@@ -201,20 +199,6 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID /*wid*/)
 	device = static_cast<QPaintDevice *>(sid);
 }
 
-void SurfaceImpl::InitPixMap(int width,
-        int height,
-        Surface *surface,
-        WindowID /*wid*/)
-{
-	Release();
-	if (width < 1) width = 1;
-	if (height < 1) height = 1;
-	deviceOwned = true;
-	device = new QPixmap(width, height);
-	SurfaceImpl *psurfOther = dynamic_cast<SurfaceImpl *>(surface);
-	mode = psurfOther->mode;
-}
-
 std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height)
 {
 	return std::make_unique<SurfaceImpl>(width, height, mode);
@@ -244,13 +228,6 @@ bool SurfaceImpl::Initialised()
 	return device != nullptr;
 }
 
-void SurfaceImpl::PenColour(ColourDesired fore)
-{
-	QPen penOutline(QColorFromCA(fore));
-	penOutline.setCapStyle(Qt::FlatCap);
-	GetPainter()->setPen(penOutline);
-}
-
 void SurfaceImpl::PenColour(ColourAlpha fore)
 {
 	QPen penOutline(QColorFromColourAlpha(fore));
@@ -264,11 +241,6 @@ void SurfaceImpl::PenColourWidth(ColourAlpha fore, XYPOSITION strokeWidth) {
 	penOutline.setJoinStyle(Qt::MiterJoin);
 	penOutline.setWidthF(strokeWidth);
 	GetPainter()->setPen(penOutline);
-}
-
-void SurfaceImpl::BrushColour(ColourDesired back)
-{
-	GetPainter()->setBrush(QBrush(QColorFromCA(back)));
 }
 
 void SurfaceImpl::BrushColour(ColourAlpha back)
@@ -315,20 +287,6 @@ int SurfaceImpl::DeviceHeightFont(int points)
 	return points;
 }
 
-void SurfaceImpl::MoveTo(int x_, int y_)
-{
-	x = x_;
-	y = y_;
-}
-
-void SurfaceImpl::LineTo(int x_, int y_)
-{
-	QLineF line(x, y, x_, y_);
-	GetPainter()->drawLine(line);
-	x = x_;
-	y = y_;
-}
-
 void SurfaceImpl::LineDraw(Point start, Point end, Stroke stroke)
 {
 	PenColourWidth(stroke.colour, stroke.width);
@@ -345,22 +303,6 @@ void SurfaceImpl::PolyLine(const Point *pts, size_t npts, Stroke stroke)
 	GetPainter()->drawPolyline(&qpts[0], static_cast<int>(npts));
 }
 
-void SurfaceImpl::Polygon(Point *pts,
-			  size_t npts,
-                          ColourDesired fore,
-                          ColourDesired back)
-{
-	PenColour(fore);
-	BrushColour(back);
-
-	std::vector<QPoint> qpts(npts);
-	for (size_t i = 0; i < npts; i++) {
-		qpts[i] = QPoint(pts[i].x, pts[i].y);
-	}
-
-	GetPainter()->drawPolygon(&qpts[0], static_cast<int>(npts));
-}
-
 void SurfaceImpl::Polygon(const Point *pts, size_t npts, FillStroke fillStroke)
 {
 	PenColourWidth(fillStroke.stroke.colour, fillStroke.stroke.width);
@@ -370,16 +312,6 @@ void SurfaceImpl::Polygon(const Point *pts, size_t npts, FillStroke fillStroke)
 	std::transform(pts, pts + npts, std::back_inserter(qpts), QPointFFromPoint);
 
 	GetPainter()->drawPolygon(&qpts[0], static_cast<int>(npts));
-}
-
-void SurfaceImpl::RectangleDraw(PRectangle rc,
-                                ColourDesired fore,
-                                ColourDesired back)
-{
-	PenColour(fore);
-	BrushColour(back);
-	QRectF rect(rc.left, rc.top, rc.Width() - 1, rc.Height() - 1);
-	GetPainter()->drawRect(rect);
 }
 
 void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke)
@@ -396,11 +328,6 @@ void SurfaceImpl::RectangleFrame(PRectangle rc, Stroke stroke) {
 	GetPainter()->setBrush(QBrush());
 	const QRectF rect = QRectFFromPRect(rc.Inset(stroke.width / 2));
 	GetPainter()->drawRect(rect);
-}
-
-void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back)
-{
-	GetPainter()->fillRect(QRectFFromPRect(rc), QColorFromCA(back));
 }
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill)
@@ -432,58 +359,11 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
 	}
 }
 
-void SurfaceImpl::RoundedRectangle(PRectangle rc,
-                                   ColourDesired fore,
-                                   ColourDesired back)
-{
-	PenColour(fore);
-	BrushColour(back);
-	GetPainter()->drawRoundedRect(QRectFFromPRect(RectangleInset(rc, 0.5f)), 3.0f, 3.0f);
-}
-
 void SurfaceImpl::RoundedRectangle(PRectangle rc, FillStroke fillStroke)
 {
 	PenColourWidth(fillStroke.stroke.colour, fillStroke.stroke.width);
 	BrushColour(fillStroke.fill.colour);
 	GetPainter()->drawRoundedRect(QRectFFromPRect(rc), 3.0f, 3.0f);
-}
-
-void SurfaceImpl::AlphaRectangle(PRectangle rc,
-                                 int cornerSize,
-                                 ColourDesired fill,
-                                 int alphaFill,
-                                 ColourDesired outline,
-                                 int alphaOutline,
-                                 int /*flags*/)
-{
-	const QColor qFill = QColorFromColourAlpha(ColourAlpha(fill, alphaFill));
-	const QBrush brushFill(qFill);
-	GetPainter()->setBrush(brushFill);
-
-	if ((fill == outline) && (alphaFill == alphaOutline)) {
-		painter->setPen(Qt::NoPen);
-		const QRectF rect = QRectFFromPRect(rc);
-		if (cornerSize > 0.0f) {
-			// A radius of 1 shows no curve so add 1
-			qreal radius = cornerSize+1;
-			GetPainter()->drawRoundedRect(rect, radius, radius);
-		} else {
-			GetPainter()->fillRect(rect, brushFill);
-		}
-	} else {
-		const QColor qOutline = QColorFromColourAlpha(ColourAlpha(outline, alphaOutline));
-		const QPen penOutline(qOutline);
-		GetPainter()->setPen(penOutline);
-
-		const QRectF rect(rc.left, rc.top, rc.Width() - 1.5, rc.Height() - 1.5);
-		if (cornerSize > 0.0f) {
-			// A radius of 1 shows no curve so add 1
-			qreal radius = cornerSize+1;
-			GetPainter()->drawRoundedRect(rect, radius, radius);
-		} else {
-			GetPainter()->drawRect(rect);
-		}
-	}
 }
 
 void SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke)
@@ -554,15 +434,6 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 	QImage image(&imageBytes[0], width, height, QImage::Format_ARGB32);
 	QPoint pt(rc.left, rc.top);
 	GetPainter()->drawImage(pt, image);
-}
-
-void SurfaceImpl::Ellipse(PRectangle rc,
-                          ColourDesired fore,
-                          ColourDesired back)
-{
-	PenColour(fore);
-	BrushColour(back);
-	GetPainter()->drawEllipse(QRectFFromPRect(rc));
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke)
@@ -876,20 +747,6 @@ void SurfaceImpl::FlushCachedState()
 		GetPainter()->setPen(QPen());
 		GetPainter()->setBrush(QBrush());
 	}
-}
-
-void SurfaceImpl::SetUnicodeMode(bool unicodeMode_)
-{
-	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
-}
-
-void SurfaceImpl::SetDBCSMode(int codePage_)
-{
-	mode.codePage = codePage_;
-}
-
-void SurfaceImpl::SetBidiR2L(bool)
-{
 }
 
 void SurfaceImpl::FlushDrawing()

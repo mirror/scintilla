@@ -352,8 +352,6 @@ const int SupportsCocoa[] = {
 //----------------- SurfaceImpl --------------------------------------------------------------------
 
 SurfaceImpl::SurfaceImpl() {
-	x = 0;
-	y = 0;
 	gc = NULL;
 
 	textLayout.reset(new QuartzTextLayout());
@@ -367,8 +365,6 @@ SurfaceImpl::SurfaceImpl() {
 }
 
 SurfaceImpl::SurfaceImpl(const SurfaceImpl *surface, int width, int height) {
-	x = 0;
-	y = 0;
 
 	textLayout.reset(new QuartzTextLayout());
 
@@ -439,8 +435,6 @@ void SurfaceImpl::Clear() {
 
 	bitmapWidth = 0;
 	bitmapHeight = 0;
-	x = 0;
-	y = 0;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -476,58 +470,6 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID) {
 	CGContextSetLineWidth(gc, 1.0);
 }
 
-//--------------------------------------------------------------------------------------------------
-
-void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID /* wid */) {
-	Release();
-
-	// Create a new bitmap context, along with the RAM for the bitmap itself
-	bitmapWidth = width;
-	bitmapHeight = height;
-
-	const int bitmapBytesPerRow = (width * BYTES_PER_PIXEL);
-	const int bitmapByteCount = (bitmapBytesPerRow * height);
-
-	// Create an RGB color space.
-	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	if (colorSpace == NULL)
-		return;
-
-	// Create the bitmap.
-	bitmapData.reset(new uint8_t[bitmapByteCount]);
-	// create the context
-	gc = CGBitmapContextCreate(bitmapData.get(),
-				   width,
-				   height,
-				   BITS_PER_COMPONENT,
-				   bitmapBytesPerRow,
-				   colorSpace,
-				   kCGImageAlphaPremultipliedLast);
-
-	if (gc == NULL) {
-		// the context couldn't be created for some reason,
-		// and we have no use for the bitmap without the context
-		bitmapData.reset();
-	}
-
-	// the context retains the color space, so we can release it
-	CGColorSpaceRelease(colorSpace);
-
-	if (gc && bitmapData) {
-		// "Erase" to white.
-		CGContextClearRect(gc, CGRectMake(0, 0, width, height));
-		CGContextSetRGBFillColor(gc, 1.0, 1.0, 1.0, 1.0);
-		CGContextFillRect(gc, CGRectMake(0, 0, width, height));
-	}
-
-	if (surface_) {
-		SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface_);
-		mode = psurfOther->mode;
-	} else {
-		mode.codePage = SC_CP_UTF8;
-	}
-}
-
 std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height) {
 	return std::make_unique<SurfaceImpl>(this, width, height);
 }
@@ -554,18 +496,6 @@ int SurfaceImpl::Supports(int feature) noexcept {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::PenColour(ColourDesired fore) {
-	if (gc) {
-		ColourDesired colour(fore.AsInteger());
-
-		// Set the Stroke color to match
-		CGContextSetRGBStrokeColor(gc, colour.GetRed() / 255.0, colour.GetGreen() / 255.0,
-					   colour.GetBlue() / 255.0, 1.0);
-	}
-}
-
-//--------------------------------------------------------------------------------------------------
-
 void SurfaceImpl::FillColour(ColourAlpha fill) {
 	// Set the Fill color to match
 	CGContextSetRGBFillColor(gc,
@@ -573,18 +503,6 @@ void SurfaceImpl::FillColour(ColourAlpha fill) {
 				 fill.GetGreenComponent(),
 				 fill.GetBlueComponent(),
 				 fill.GetAlphaComponent());
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void SurfaceImpl::FillColour(const ColourDesired &back) {
-	if (gc) {
-		ColourDesired colour(back.AsInteger());
-
-		// Set the Fill color to match
-		CGContextSetRGBFillColor(gc, colour.GetRed() / 255.0, colour.GetGreen() / 255.0,
-					 colour.GetBlue() / 255.0, 1.0);
-	}
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -699,30 +617,6 @@ int SurfaceImpl::DeviceHeightFont(int points) {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::MoveTo(int x_, int y_) {
-	x = x_;
-	y = y_;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void SurfaceImpl::LineTo(int x_, int y_) {
-	CGContextBeginPath(gc);
-
-	// Because Quartz is based on floating point, lines are drawn with half their colour
-	// on each side of the line. Integer coordinates specify the INTERSECTION of the pixel
-	// division lines. If you specify exact pixel values, you get a line that
-	// is twice as thick but half as intense. To get pixel aligned rendering,
-	// we render the "middle" of the pixels by adding 0.5 to the coordinates.
-	CGContextMoveToPoint(gc, x + 0.5, y + 0.5);
-	CGContextAddLineToPoint(gc, x_ + 0.5, y_ + 0.5);
-	CGContextStrokePath(gc);
-	x = x_;
-	y = y_;
-}
-
-//--------------------------------------------------------------------------------------------------
-
 void SurfaceImpl::LineDraw(Point start, Point end, Stroke stroke) {
 	PenColourAlpha(stroke.colour);
 	CGContextSetLineWidth(gc, stroke.width);
@@ -756,33 +650,6 @@ void SurfaceImpl::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore,
-			  ColourDesired back) {
-	// Allocate memory for the array of points.
-	std::vector<CGPoint> points(npts);
-
-	for (size_t i = 0; i < npts; i++) {
-		// Quartz floating point issues: plot the MIDDLE of the pixels
-		points[i].x = pts[i].x + 0.5;
-		points[i].y = pts[i].y + 0.5;
-	}
-
-	CGContextBeginPath(gc);
-
-	// Set colours
-	FillColour(back);
-	PenColour(fore);
-
-	// Draw the polygon
-	CGContextAddLines(gc, points.data(), npts);
-
-	// Explicitly close the path, so it is closed for stroking AND filling (implicit close = filling only)
-	CGContextClosePath(gc);
-	CGContextDrawPath(gc, kCGPathFillStroke);
-}
-
-//--------------------------------------------------------------------------------------------------
-
 void SurfaceImpl::Polygon(const Scintilla::Point *pts, size_t npts, FillStroke fillStroke) {
 	std::vector<CGPoint> points;
 	std::transform(pts, pts + npts, std::back_inserter(points), CGPointFromPoint);
@@ -800,22 +667,6 @@ void SurfaceImpl::Polygon(const Scintilla::Point *pts, size_t npts, FillStroke f
 
 	// Restore as not all paths set
 	CGContextSetLineWidth(gc, 1.0f);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	if (gc) {
-		CGContextBeginPath(gc);
-		FillColour(back);
-		PenColour(fore);
-
-		// Quartz integer -> float point conversion fun (see comment in SurfaceImpl::LineTo)
-		// We subtract 1 from the Width() and Height() so that all our drawing is within the area defined
-		// by the PRectangle. Otherwise, we draw one pixel too far to the right and bottom.
-		CGContextAddRect(gc, CGRectMake(rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1));
-		CGContextDrawPath(gc, kCGPathFillStroke);
-	}
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -850,19 +701,6 @@ void SurfaceImpl::RectangleFrame(PRectangle rc, Stroke stroke) {
 
 	// Restore as not all paths set
 	CGContextSetLineWidth(gc, 1.0f);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
-	if (gc) {
-		FillColour(back);
-		// Snap rectangle boundaries to nearest int
-		rc.left = std::round(rc.left);
-		rc.right = std::round(rc.right);
-		CGRect rect = PRectangleToCGRect(rc);
-		CGContextFillRect(gc, rect);
-	}
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -938,68 +776,6 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 		CGPatternRelease(pattern);
 		pattern = NULL;
 	} /* pattern != NULL */
-}
-
-void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	// This is only called from the margin marker drawing code for SC_MARK_ROUNDRECT
-	// The Win32 version does
-	//  ::RoundRect(hdc, rc.left + 1, rc.top, rc.right - 1, rc.bottom, 8, 8 );
-	// which is a rectangle with rounded corners each having a radius of 4 pixels.
-	// It would be almost as good just cutting off the corners with lines at
-	// 45 degrees as is done on GTK+.
-
-	// Create a rectangle with semicircles at the corners
-	const int MAX_RADIUS = 4;
-	const int radius = std::min(MAX_RADIUS, static_cast<int>(std::min(rc.Height()/2, rc.Width()/2)));
-
-	// Points go clockwise, starting from just below the top left
-	// Corners are kept together, so we can easily create arcs to connect them
-	CGPoint corners[4][3] = {
-		{
-			{ rc.left, rc.top + radius },
-			{ rc.left, rc.top },
-			{ rc.left + radius, rc.top },
-		},
-		{
-			{ rc.right - radius - 1, rc.top },
-			{ rc.right - 1, rc.top },
-			{ rc.right - 1, rc.top + radius },
-		},
-		{
-			{ rc.right - 1, rc.bottom - radius - 1 },
-			{ rc.right - 1, rc.bottom - 1 },
-			{ rc.right - radius - 1, rc.bottom - 1 },
-		},
-		{
-			{ rc.left + radius, rc.bottom - 1 },
-			{ rc.left, rc.bottom - 1 },
-			{ rc.left, rc.bottom - radius - 1 },
-		},
-	};
-
-	// Align the points in the middle of the pixels
-	for (int i = 0; i < 4; ++ i) {
-		for (int j = 0; j < 3; ++ j) {
-			corners[i][j].x += 0.5;
-			corners[i][j].y += 0.5;
-		}
-	}
-
-	PenColour(fore);
-	FillColour(back);
-
-	// Move to the last point to begin the path
-	CGContextBeginPath(gc);
-	CGContextMoveToPoint(gc, corners[3][2].x, corners[3][2].y);
-
-	for (int i = 0; i < 4; ++ i) {
-		CGContextAddLineToPoint(gc, corners[i][0].x, corners[i][0].y);
-		CGContextAddArcToPoint(gc, corners[i][1].x, corners[i][1].y, corners[i][2].x, corners[i][2].y, radius);
-	}
-
-	// Close the path to enclose it for stroking and for filling, then draw it
-	CGContextClosePath(gc);
-	CGContextDrawPath(gc, kCGPathFillStroke);
 }
 
 void SurfaceImpl::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
@@ -1109,54 +885,6 @@ static void DrawChamferedRectangle(CGContextRef gc, PRectangle rc, int cornerSiz
 	// Close the path to enclose it for stroking and for filling, then draw it
 	CGContextClosePath(gc);
 	CGContextDrawPath(gc, mode);
-}
-
-void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-		ColourDesired outline, int alphaOutline, int /*flags*/) {
-	if (gc) {
-		// Snap rectangle boundaries to nearest int
-		rc.left = std::round(rc.left);
-		rc.right = std::round(rc.right);
-		// Set the Fill color to match
-		CGContextSetRGBFillColor(gc, fill.GetRed() / 255.0, fill.GetGreen() / 255.0, fill.GetBlue() / 255.0, alphaFill / 255.0);
-		CGContextSetRGBStrokeColor(gc, outline.GetRed() / 255.0, outline.GetGreen() / 255.0, outline.GetBlue() / 255.0, alphaOutline / 255.0);
-		PRectangle rcFill = rc;
-		if (cornerSize == 0) {
-			// A simple rectangle, no rounded corners
-			if ((fill == outline) && (alphaFill == alphaOutline)) {
-				// Optimization for simple case
-				CGRect rect = PRectangleToCGRect(rcFill);
-				CGContextFillRect(gc, rect);
-			} else {
-				rcFill.left += 1.0;
-				rcFill.top += 1.0;
-				rcFill.right -= 1.0;
-				rcFill.bottom -= 1.0;
-				CGRect rect = PRectangleToCGRect(rcFill);
-				CGContextFillRect(gc, rect);
-				CGContextAddRect(gc, CGRectMake(rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1));
-				CGContextStrokePath(gc);
-			}
-		} else {
-			// Approximate rounded corners with 45 degree chamfers.
-			// Drawing real circular arcs often leaves some over- or under-drawn pixels.
-			if ((fill == outline) && (alphaFill == alphaOutline)) {
-				// Specializing this case avoids a few stray light/dark pixels in corners.
-				rcFill.left -= 0.5;
-				rcFill.top -= 0.5;
-				rcFill.right += 0.5;
-				rcFill.bottom += 0.5;
-				DrawChamferedRectangle(gc, rcFill, cornerSize, kCGPathFill);
-			} else {
-				rcFill.left += 0.5;
-				rcFill.top += 0.5;
-				rcFill.right -= 0.5;
-				rcFill.bottom -= 0.5;
-				DrawChamferedRectangle(gc, rcFill, cornerSize-1, kCGPathFill);
-				DrawChamferedRectangle(gc, rc, cornerSize, kCGPathStroke);
-			}
-		}
-	}
 }
 
 void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
@@ -1315,15 +1043,6 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 		CGContextDrawImage(gc, drawRect, image);
 		CGImageRelease(image);
 	}
-}
-
-void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	CGRect ellipseRect = CGRectMake(rc.left, rc.top, rc.Width(), rc.Height());
-	FillColour(back);
-	PenColour(fore);
-	CGContextBeginPath(gc);
-	CGContextAddEllipseInRect(gc, ellipseRect);
-	CGContextDrawPath(gc, kCGPathFillStroke);
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke) {
@@ -1782,17 +1501,6 @@ void SurfaceImpl::PopClip() {
 
 void SurfaceImpl::FlushCachedState() {
 	CGContextSynchronize(gc);
-}
-
-void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
-	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
-}
-
-void SurfaceImpl::SetDBCSMode(int codePage_) {
-	mode.codePage = codePage_;
-}
-
-void SurfaceImpl::SetBidiR2L(bool) {
 }
 
 void SurfaceImpl::FlushDrawing() {

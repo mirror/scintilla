@@ -60,10 +60,6 @@ constexpr float floatFromPangoUnits(int pu) noexcept {
 	return static_cast<float>(pu) / PANGO_SCALE;
 }
 
-cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t content, int width, int height) noexcept {
-	return gdk_window_create_similar_surface(window, content, width, height);
-}
-
 GdkWindow *WindowFromWidget(GtkWidget *w) noexcept {
 	return gtk_widget_get_window(w);
 }
@@ -130,8 +126,6 @@ class SurfaceImpl : public Surface {
 	encodingType et= singleByte;
 	cairo_t *context = nullptr;
 	cairo_surface_t *psurf = nullptr;
-	int x = 0;
-	int y = 0;
 	bool inited = false;
 	bool createdGC = false;
 	PangoContext *pcontext = nullptr;
@@ -152,7 +146,6 @@ public:
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
-	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode_) override;
@@ -161,32 +154,23 @@ public:
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
-	void PenColour(ColourDesired fore) override;
+	void PenColour(ColourDesired fore);
 	void PenColourAlpha(ColourAlpha fore);
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
-	void MoveTo(int x_, int y_) override;
-	void LineTo(int x_, int y_) override;
 	void LineDraw(Point start, Point end, Stroke stroke) override;
 	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
-	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
-	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
-	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
-	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-			    ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
-	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
@@ -217,10 +201,6 @@ public:
 	void PopClip() override;
 	void FlushCachedState() override;
 	void FlushDrawing() override;
-
-	void SetUnicodeMode(bool unicodeMode_) override;
-	void SetDBCSMode(int codePage) override;
-	void SetBidiR2L(bool bidiR2L_) override;
 };
 
 const int SupportsGTK[] = {
@@ -339,8 +319,6 @@ void SurfaceImpl::Clear() noexcept {
 	pcontext = nullptr;
 	conv.Close();
 	characterSet = -1;
-	x = 0;
-	y = 0;
 	inited = false;
 	createdGC = false;
 }
@@ -395,36 +373,6 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
 	cairo_set_line_width(context, 1);
 	createdGC = true;
 	inited = true;
-}
-
-void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID wid) {
-	PLATFORM_ASSERT(surface_);
-	Release();
-	SurfaceImpl *surfImpl = dynamic_cast<SurfaceImpl *>(surface_);
-	PLATFORM_ASSERT(surfImpl);
-	PLATFORM_ASSERT(wid);
-	context = cairo_reference(surfImpl->context);
-	pcontext = gtk_widget_create_pango_context(PWidget(wid));
-	// update the Pango context in case surface_ isn't the widget's surface
-	pango_cairo_update_context(context, pcontext);
-	PLATFORM_ASSERT(pcontext);
-	layout = pango_layout_new(pcontext);
-	PLATFORM_ASSERT(layout);
-	if (height > 0 && width > 0)
-		psurf = CreateSimilarSurface(
-				WindowFromWidget(PWidget(wid)),
-				CAIRO_CONTENT_COLOR_ALPHA, width, height);
-	cairo_destroy(context);
-	context = cairo_create(psurf);
-	cairo_rectangle(context, 0, 0, width, height);
-	cairo_set_source_rgb(context, 1.0, 0, 0);
-	cairo_fill(context);
-	// This produces sharp drawing more similar to GDK:
-	//cairo_set_antialias(context, CAIRO_ANTIALIAS_NONE);
-	cairo_set_line_width(context, 1);
-	createdGC = true;
-	inited = true;
-	SetMode(surfImpl->mode);
 }
 
 std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height) {
@@ -483,53 +431,6 @@ int SurfaceImpl::DeviceHeightFont(int points) {
 	return (points * logPix + logPix / 2) / 72;
 }
 
-void SurfaceImpl::MoveTo(int x_, int y_) {
-	x = x_;
-	y = y_;
-}
-
-static int Delta(int difference) noexcept {
-	if (difference < 0)
-		return -1;
-	else if (difference > 0)
-		return 1;
-	else
-		return 0;
-}
-
-void SurfaceImpl::LineTo(int x_, int y_) {
-	// cairo_line_to draws the end position, unlike Win32 or GDK with GDK_CAP_NOT_LAST.
-	// For simple cases, move back one pixel from end.
-	if (context) {
-		const int xDiff = x_ - x;
-		const int xDelta = Delta(xDiff);
-		const int yDiff = y_ - y;
-		const int yDelta = Delta(yDiff);
-		if ((xDiff == 0) || (yDiff == 0)) {
-			// Horizontal or vertical lines can be more precisely drawn as a filled rectangle
-			const int xEnd = x_ - xDelta;
-			const int left = std::min(x, xEnd);
-			const int width = std::abs(x - xEnd) + 1;
-			const int yEnd = y_ - yDelta;
-			const int top = std::min(y, yEnd);
-			const int height = std::abs(y - yEnd) + 1;
-			cairo_rectangle(context, left, top, width, height);
-			cairo_fill(context);
-		} else if ((std::abs(xDiff) == std::abs(yDiff))) {
-			// 45 degree slope
-			cairo_move_to(context, x + 0.5, y + 0.5);
-			cairo_line_to(context, x_ + 0.5 - xDelta, y_ + 0.5 - yDelta);
-		} else {
-			// Line has a different slope so difficult to avoid last pixel
-			cairo_move_to(context, x + 0.5, y + 0.5);
-			cairo_line_to(context, x_ + 0.5, y_ + 0.5);
-		}
-		cairo_stroke(context);
-	}
-	x = x_;
-	y = y_;
-}
-
 void SurfaceImpl::LineDraw(Point start, Point end, Stroke stroke) {
 	PLATFORM_ASSERT(context);
 	if (!context)
@@ -555,20 +456,6 @@ void SurfaceImpl::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 	cairo_stroke(context);
 }
 
-void SurfaceImpl::Polygon(Point *pts, size_t npts, ColourDesired fore,
-			  ColourDesired back) {
-	PLATFORM_ASSERT(context);
-	PenColour(back);
-	cairo_move_to(context, pts[0].x + 0.5, pts[0].y + 0.5);
-	for (size_t i = 1; i < npts; i++) {
-		cairo_line_to(context, pts[i].x + 0.5, pts[i].y + 0.5);
-	}
-	cairo_close_path(context);
-	cairo_fill_preserve(context);
-	PenColour(fore);
-	cairo_stroke(context);
-}
-
 void SurfaceImpl::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
 	PLATFORM_ASSERT(context);
 	PenColourAlpha(fillStroke.fill.colour);
@@ -581,17 +468,6 @@ void SurfaceImpl::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) 
 	PenColourAlpha(fillStroke.stroke.colour);
 	cairo_set_line_width(context, fillStroke.stroke.width);
 	cairo_stroke(context);
-}
-
-void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	if (context) {
-		cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5,
-				rc.Width() - 1, rc.Height() - 1);
-		PenColour(back);
-		cairo_fill_preserve(context);
-		PenColour(fore);
-		cairo_stroke(context);
-	}
 }
 
 void SurfaceImpl::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
@@ -611,16 +487,6 @@ void SurfaceImpl::RectangleFrame(PRectangle rc, Stroke stroke) {
 		PenColourAlpha(stroke.colour);
 		cairo_set_line_width(context, stroke.width);
 		cairo_stroke(context);
-	}
-}
-
-void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
-	PenColour(back);
-	if (context && (rc.left < maxCoordinate)) {	// Protect against out of range
-		rc.left = std::round(rc.left);
-		rc.right = std::round(rc.right);
-		cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
-		cairo_fill(context);
 	}
 }
 
@@ -644,25 +510,6 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 		cairo_pattern_set_extend(cairo_get_source(context), CAIRO_EXTEND_REPEAT);
 		cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 		cairo_fill(context);
-	}
-}
-
-void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	if (((rc.right - rc.left) > 4) && ((rc.bottom - rc.top) > 4)) {
-		// Approximate a round rect with some cut off corners
-		Point pts[] = {
-			Point(rc.left + 2, rc.top),
-			Point(rc.right - 2, rc.top),
-			Point(rc.right, rc.top + 2),
-			Point(rc.right, rc.bottom - 2),
-			Point(rc.right - 2, rc.bottom),
-			Point(rc.left + 2, rc.bottom),
-			Point(rc.left, rc.bottom - 2),
-			Point(rc.left, rc.top + 2),
-		};
-		Polygon(pts, std::size(pts), fore, back);
-	} else {
-		RectangleDraw(rc, fore, back);
 	}
 }
 
@@ -692,35 +539,6 @@ static void PathRoundRectangle(cairo_t *context, double left, double top, double
 	cairo_arc(context, left + radius, top + height - radius, radius, 90 * degrees, 180 * degrees);
 	cairo_arc(context, left + radius, top + radius, radius, 180 * degrees, 270 * degrees);
 	cairo_close_path(context);
-}
-
-void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-				 ColourDesired outline, int alphaOutline, int /*flags*/) {
-	if (context && rc.Width() > 0) {
-		const ColourDesired cdFill(fill.AsInteger());
-		cairo_set_source_rgba(context,
-				      cdFill.GetRed() / 255.0,
-				      cdFill.GetGreen() / 255.0,
-				      cdFill.GetBlue() / 255.0,
-				      alphaFill / 255.0);
-		if (cornerSize > 0)
-			PathRoundRectangle(context, rc.left + 1.0, rc.top + 1.0, rc.Width() - 2.0, rc.Height() - 2.0, cornerSize);
-		else
-			cairo_rectangle(context, rc.left + 1.0, rc.top + 1.0, rc.Width() - 2.0, rc.Height() - 2.0);
-		cairo_fill(context);
-
-		const ColourDesired cdOutline(outline.AsInteger());
-		cairo_set_source_rgba(context,
-				      cdOutline.GetRed() / 255.0,
-				      cdOutline.GetGreen() / 255.0,
-				      cdOutline.GetBlue() / 255.0,
-				      alphaOutline / 255.0);
-		if (cornerSize > 0)
-			PathRoundRectangle(context, rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1, cornerSize);
-		else
-			cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1);
-		cairo_stroke(context);
-	}
 }
 
 void SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
@@ -798,16 +616,6 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 	cairo_fill(context);
 
 	cairo_surface_destroy(psurfImage);
-}
-
-void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	PLATFORM_ASSERT(context);
-	PenColour(back);
-	cairo_arc(context, (rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2,
-		  std::min(rc.Width(), rc.Height()) / 2, 0, 2*kPi);
-	cairo_fill_preserve(context);
-	PenColour(fore);
-	cairo_stroke(context);
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, FillStroke fillStroke) {
@@ -1300,30 +1108,6 @@ void SurfaceImpl::PopClip() {
 }
 
 void SurfaceImpl::FlushCachedState() {}
-
-void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
-	if (unicodeMode_) {
-		mode.codePage = SC_CP_UTF8;
-		et = UTF8;
-	} else {
-		mode.codePage = 0;
-		et = singleByte;
-	}
-}
-
-void SurfaceImpl::SetDBCSMode(int codePage) {
-	mode.codePage = codePage;
-	if (mode.codePage == SC_CP_UTF8) {
-		et = UTF8;
-	} else if (mode.codePage) {
-		et = dbcs;
-	} else {
-		et = singleByte;
-	}
-}
-
-void SurfaceImpl::SetBidiR2L(bool) {
-}
 
 void SurfaceImpl::FlushDrawing() {
 }

@@ -31,12 +31,6 @@ namespace Scintilla {
 
 const char *CharacterSetID(int characterSet);
 
-inline QColor QColorFromCA(ColourDesired ca)
-{
-	long c = ca.AsInteger();
-	return QColor(c & 0xff, (c >> 8) & 0xff, (c >> 16) & 0xff);
-}
-
 inline QColor QColorFromColourAlpha(ColourAlpha ca)
 {
 	return QColor(ca.GetRed(), ca.GetGreen(), ca.GetBlue(), ca.GetAlpha());
@@ -77,8 +71,6 @@ private:
 	QPainter *painter = nullptr;
 	bool deviceOwned = false;
 	bool painterOwned = false;
-	float x = 0;
-	float y = 0;
 	SurfaceMode mode;
 	const char *codecName = nullptr;
 	QTextCodec *codec = nullptr;
@@ -92,8 +84,6 @@ public:
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
-	void InitPixMap(int width, int height,
-		Surface *surface, WindowID wid) override;
 	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode) override;
@@ -101,38 +91,24 @@ public:
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
-	void PenColour(ColourDesired fore) override;
 	void PenColour(ColourAlpha fore);
 	void PenColourWidth(ColourAlpha fore, XYPOSITION strokeWidth);
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
-	void MoveTo(int x_, int y_) override;
-	void LineTo(int x_, int y_) override;
 	void LineDraw(Point start, Point end, Stroke stroke) override;
 	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
-	void Polygon(Point *pts, size_t npts, ColourDesired fore,
-		ColourDesired back) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
-	void RectangleDraw(PRectangle rc, ColourDesired fore,
-		ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
-	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
-	void RoundedRectangle(PRectangle rc, ColourDesired fore,
-		ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill,
-		int alphaFill, ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height,
 		const unsigned char *pixelsImage) override;
-	void Ellipse(PRectangle rc, ColourDesired fore,
-		ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
@@ -170,11 +146,6 @@ public:
 	void FlushCachedState() override;
 	void FlushDrawing() override;
 
-	void SetUnicodeMode(bool unicodeMode_) override;
-	void SetDBCSMode(int codePage_) override;
-	void SetBidiR2L(bool bidiR2L_) override;
-
-	void BrushColour(ColourDesired back);
 	void BrushColour(ColourAlpha back);
 	void SetCodec(const Font *font);
 	void SetFont(const Font *font);

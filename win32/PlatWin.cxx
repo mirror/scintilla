@@ -476,7 +476,6 @@ public:
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
-	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode_) override;
@@ -484,31 +483,21 @@ public:
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
-	void PenColour(ColourDesired fore) override;
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
-	void MoveTo(int x_, int y_) override;
-	void LineTo(int x_, int y_) override;
 	void LineDraw(Point start, Point end, Stroke stroke) override;
 	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
-	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
-	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
-	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
-	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-		ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
-	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
@@ -539,10 +528,6 @@ public:
 	void PopClip() override;
 	void FlushCachedState() override;
 	void FlushDrawing() override;
-
-	void SetUnicodeMode(bool unicodeMode_) override;
-	void SetDBCSMode(int codePage_) override;
-	void SetBidiR2L(bool bidiR2L_) override;
 };
 
 SurfaceGDI::SurfaceGDI() noexcept {
@@ -622,37 +607,12 @@ void SurfaceGDI::Init(SurfaceID sid, WindowID wid) {
 	logPixelsY = printing ? ::GetDeviceCaps(hdc, LOGPIXELSY) : DpiForWindow(wid);
 }
 
-void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID wid) {
-	Release();
-	SurfaceGDI *psurfOther = dynamic_cast<SurfaceGDI *>(surface_);
-	// Should only ever be called with a SurfaceGDI, not a SurfaceD2D
-	PLATFORM_ASSERT(psurfOther);
-	hdc = ::CreateCompatibleDC(psurfOther->hdc);
-	hdcOwned = true;
-	bitmap = ::CreateCompatibleBitmap(psurfOther->hdc, width, height);
-	bitmapOld = SelectBitmap(hdc, bitmap);
-	::SetTextAlign(hdc, TA_BASELINE);
-	mode = psurfOther->mode;
-	logPixelsY = DpiForWindow(wid);
-}
-
 std::unique_ptr<Surface> SurfaceGDI::AllocatePixMap(int width, int height) {
 	return std::make_unique<SurfaceGDI>(hdc, width, height, mode, logPixelsY);
 }
 
 void SurfaceGDI::SetMode(SurfaceMode mode_) {
 	mode = mode_;
-}
-
-void SurfaceGDI::PenColour(ColourDesired fore) {
-	if (pen) {
-		::SelectObject(hdc, penOld);
-		::DeleteObject(pen);
-		pen = {};
-		penOld = {};
-	}
-	pen = ::CreatePen(0,1,fore.AsInteger());
-	penOld = SelectPen(hdc, pen);
 }
 
 void SurfaceGDI::PenColour(ColourAlpha fore, XYPOSITION widthStroke) noexcept {
@@ -711,14 +671,6 @@ int SurfaceGDI::DeviceHeightFont(int points) {
 	return ::MulDiv(points, LogPixelsY(), 72);
 }
 
-void SurfaceGDI::MoveTo(int x_, int y_) {
-	::MoveToEx(hdc, x_, y_, nullptr);
-}
-
-void SurfaceGDI::LineTo(int x_, int y_) {
-	::LineTo(hdc, x_, y_);
-}
-
 void SurfaceGDI::LineDraw(Point start, Point end, Stroke stroke) {
 	PenColour(stroke.colour, stroke.width);
 	::MoveToEx(hdc, std::lround(std::floor(start.x)), std::lround(std::floor(start.y)), nullptr);
@@ -736,27 +688,12 @@ void SurfaceGDI::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 	::Polyline(hdc, outline.data(), static_cast<int>(npts));
 }
 
-void SurfaceGDI::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) {
-	PenColour(fore);
-	BrushColour(back);
-	std::vector<POINT> outline;
-	std::transform(pts, pts + npts, std::back_inserter(outline), POINTFromPoint);
-	::Polygon(hdc, outline.data(), static_cast<int>(npts));
-}
-
 void SurfaceGDI::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
 	PenColour(fillStroke.stroke.colour.GetColour(), fillStroke.stroke.width);
 	BrushColour(fillStroke.fill.colour.GetColour());
 	std::vector<POINT> outline;
 	std::transform(pts, pts + npts, std::back_inserter(outline), POINTFromPoint);
 	::Polygon(hdc, outline.data(), static_cast<int>(npts));
-}
-
-void SurfaceGDI::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	PenColour(fore);
-	BrushColour(back);
-	const RECT rcw = RectFromPRectangle(rc);
-	::Rectangle(hdc, rcw.left, rcw.top, rcw.right, rcw.bottom);
 }
 
 void SurfaceGDI::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
@@ -768,14 +705,6 @@ void SurfaceGDI::RectangleFrame(PRectangle rc, Stroke stroke) {
 	BrushColour(stroke.colour);
 	const RECT rcw = RectFromPRectangle(rc);
 	::FrameRect(hdc, &rcw, brush);
-}
-
-void SurfaceGDI::FillRectangle(PRectangle rc, ColourDesired back) {
-	// Using ExtTextOut rather than a FillRect ensures that no dithering occurs.
-	// There is no need to allocate a brush either.
-	const RECT rcw = RectFromPRectangle(rc);
-	::SetBkColor(hdc, back.AsInteger());
-	::ExtTextOut(hdc, rcw.left, rcw.top, ETO_OPAQUE, &rcw, TEXT(""), 0, nullptr);
 }
 
 void SurfaceGDI::FillRectangle(PRectangle rc, Fill fill) {
@@ -804,16 +733,6 @@ void SurfaceGDI::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	const RECT rcw = RectFromPRectangle(rc);
 	::FillRect(hdc, &rcw, br);
 	::DeleteObject(br);
-}
-
-void SurfaceGDI::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	PenColour(fore);
-	BrushColour(back);
-	const RECT rcw = RectFromPRectangle(rc);
-	::RoundRect(hdc,
-		rcw.left + 1, rcw.top,
-		rcw.right - 1, rcw.bottom,
-		8, 8);
 }
 
 void SurfaceGDI::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
@@ -960,55 +879,6 @@ constexpr BLENDFUNCTION mergeAlpha = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 
 }
 
-void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
-	const RECT rcw = RectFromPRectangle(rc);
-	const SIZE size = SizeOfRect(rcw);
-
-	if (size.cx > 0) {
-
-		DIBSection section(hdc, size);
-
-		if (section) {
-
-			// Ensure not distorted too much by corners when small
-			const LONG corner = std::min<LONG>(cornerSize, (std::min(size.cx, size.cy) / 2) - 2);
-
-			constexpr DWORD valEmpty = dwordFromBGRA(0,0,0,0);
-			const DWORD valFill = dwordMultiplied(fill, alphaFill);
-			const DWORD valOutline = dwordMultiplied(outline, alphaOutline);
-
-			// Draw a framed rectangle
-			for (int y=0; y<size.cy; y++) {
-				for (int x=0; x<size.cx; x++) {
-					if ((x==0) || (x==size.cx-1) || (y == 0) || (y == size.cy -1)) {
-						section.SetPixel(x, y, valOutline);
-					} else {
-						section.SetPixel(x, y, valFill);
-					}
-				}
-			}
-
-			// Make the corners transparent
-			for (LONG c=0; c<corner; c++) {
-				for (LONG x=0; x<c+1; x++) {
-					section.SetSymmetric(x, c - x, valEmpty);
-				}
-			}
-
-			// Draw the corner frame pieces
-			for (LONG x=1; x<corner; x++) {
-				section.SetSymmetric(x, corner - x, valOutline);
-			}
-
-			AlphaBlend(hdc, rcw.left, rcw.top, size.cx, size.cy, section.DC(), 0, 0, size.cx, size.cy, mergeAlpha);
-		}
-	} else {
-		BrushColour(outline);
-		FrameRect(hdc, &rcw, brush);
-	}
-}
-
 void SurfaceGDI::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
 	// TODO: Implement strokeWidth
 	const RECT rcw = RectFromPRectangle(rc);
@@ -1111,13 +981,6 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 				0, 0, width, height, mergeAlpha);
 		}
 	}
-}
-
-void SurfaceGDI::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	PenColour(fore);
-	BrushColour(back);
-	const RECT rcw = RectFromPRectangle(rc);
-	::Ellipse(hdc, rcw.left, rcw.top, rcw.right, rcw.bottom);
 }
 
 void SurfaceGDI::Ellipse(PRectangle rc, FillStroke fillStroke) {
@@ -1371,18 +1234,6 @@ void SurfaceGDI::FlushCachedState() {
 void SurfaceGDI::FlushDrawing() {
 }
 
-void SurfaceGDI::SetUnicodeMode(bool unicodeMode_) {
-	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
-}
-
-void SurfaceGDI::SetDBCSMode(int codePage_) {
-	// No action on window as automatically handled by system.
-	mode.codePage = codePage_;
-}
-
-void SurfaceGDI::SetBidiR2L(bool) {
-}
-
 #if defined(USE_D2D)
 
 namespace {
@@ -1420,8 +1271,6 @@ class BlobInline;
 
 class SurfaceD2D : public Surface {
 	SurfaceMode mode;
-	int x = 0;
-	int y = 0;
 
 	int codePageText = 0;
 
@@ -1456,7 +1305,6 @@ public:
 	void SetScale(WindowID wid) noexcept;
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
-	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 	std::unique_ptr<Surface> AllocatePixMap(int width, int height) override;
 
 	void SetMode(SurfaceMode mode_) override;
@@ -1465,34 +1313,23 @@ public:
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 
-	void PenColour(ColourDesired fore) override;
-	void D2DPenColour(ColourDesired fore, int alpha=255);
 	void D2DPenColourAlpha(ColourAlpha fore) noexcept;
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
-	void MoveTo(int x_, int y_) override;
-	void LineTo(int x_, int y_) override;
 	void LineDraw(Point start, Point end, Stroke stroke) override;
 	ID2D1PathGeometry *Geometry(const Point *pts, size_t npts, D2D1_FIGURE_BEGIN figureBegin) noexcept;
 	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
-	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
-	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
-	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
 	void FillRectangleAligned(PRectangle rc, Fill fill) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
-	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void RoundedRectangle(PRectangle rc, FillStroke fillStroke) override;
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-		ColourDesired outline, int alphaOutline, int flags) override;
 	void AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) override;
 	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
-	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
@@ -1523,31 +1360,9 @@ public:
 	void PopClip() override;
 	void FlushCachedState() override;
 	void FlushDrawing() override;
-
-	void SetUnicodeMode(bool unicodeMode_) override;
-	void SetDBCSMode(int codePage_) override;
-	void SetBidiR2L(bool bidiR2L_) override;
 };
 
-SurfaceD2D::SurfaceD2D() noexcept :
-	x(0), y(0) {
-
-	codePageText = 0;
-
-	pRenderTarget = nullptr;
-	pBitmapRenderTarget = nullptr;
-	ownRenderTarget = false;
-	clipsActive = 0;
-
-	// From selected font
-	pTextFormat = nullptr;
-	yAscent = 2;
-	yDescent = 1;
-	yInternalLeading = 0;
-
-	pBrush = nullptr;
-
-	logPixelsY = USER_DEFAULT_SCREEN_DPI;
+SurfaceD2D::SurfaceD2D() noexcept {
 }
 
 SurfaceD2D::SurfaceD2D(ID2D1RenderTarget *pRenderTargetCompatible, int width, int height, SurfaceMode mode_, int logPixelsY_) noexcept {
@@ -1622,30 +1437,6 @@ void SurfaceD2D::Init(SurfaceID sid, WindowID wid) {
 	pRenderTarget = static_cast<ID2D1RenderTarget *>(sid);
 }
 
-void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID wid) {
-	Release();
-	SetScale(wid);
-	SurfaceD2D *psurfOther = dynamic_cast<SurfaceD2D *>(surface_);
-	// Should only ever be called with a SurfaceD2D, not a SurfaceGDI
-	PLATFORM_ASSERT(psurfOther);
-	const D2D1_SIZE_F desiredSize = D2D1::SizeF(static_cast<float>(width), static_cast<float>(height));
-	D2D1_PIXEL_FORMAT desiredFormat;
-#ifdef __MINGW32__
-	desiredFormat.format = DXGI_FORMAT_UNKNOWN;
-#else
-	desiredFormat = psurfOther->pRenderTarget->GetPixelFormat();
-#endif
-	desiredFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
-	const HRESULT hr = psurfOther->pRenderTarget->CreateCompatibleRenderTarget(
-		&desiredSize, nullptr, &desiredFormat, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, &pBitmapRenderTarget);
-	if (SUCCEEDED(hr)) {
-		pRenderTarget = pBitmapRenderTarget;
-		pRenderTarget->BeginDraw();
-		ownRenderTarget = true;
-	}
-	mode = psurfOther->mode;
-}
-
 std::unique_ptr<Surface> SurfaceD2D::AllocatePixMap(int width, int height) {
 	return std::make_unique<SurfaceD2D>(pRenderTarget, width, height, mode, logPixelsY);
 }
@@ -1657,14 +1448,6 @@ void SurfaceD2D::SetMode(SurfaceMode mode_) {
 HRESULT SurfaceD2D::GetBitmap(ID2D1Bitmap **ppBitmap) {
 	PLATFORM_ASSERT(pBitmapRenderTarget);
 	return pBitmapRenderTarget->GetBitmap(ppBitmap);
-}
-
-void SurfaceD2D::PenColour(ColourDesired fore) {
-	D2DPenColour(fore);
-}
-
-void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
-	D2DPenColourAlpha(ColourAlpha(fore, alpha));
 }
 
 void SurfaceD2D::D2DPenColourAlpha(ColourAlpha fore) noexcept {
@@ -1716,51 +1499,6 @@ int SurfaceD2D::PixelDivisions() {
 
 int SurfaceD2D::DeviceHeightFont(int points) {
 	return ::MulDiv(points, LogPixelsY(), 72);
-}
-
-void SurfaceD2D::MoveTo(int x_, int y_) {
-	x = x_;
-	y = y_;
-}
-
-static constexpr int Delta(int difference) noexcept {
-	if (difference < 0)
-		return -1;
-	else if (difference > 0)
-		return 1;
-	else
-		return 0;
-}
-
-void SurfaceD2D::LineTo(int x_, int y_) {
-	if (pRenderTarget) {
-		const int xDiff = x_ - x;
-		const int xDelta = Delta(xDiff);
-		const int yDiff = y_ - y;
-		const int yDelta = Delta(yDiff);
-		if ((xDiff == 0) || (yDiff == 0)) {
-			// Horizontal or vertical lines can be more precisely drawn as a filled rectangle
-			const int xEnd = x_ - xDelta;
-			const int left = std::min(x, xEnd);
-			const int width = std::abs(x - xEnd) + 1;
-			const int yEnd = y_ - yDelta;
-			const int top = std::min(y, yEnd);
-			const int height = std::abs(y - yEnd) + 1;
-			const D2D1_RECT_F rectangle1 = D2D1::RectF(static_cast<float>(left), static_cast<float>(top),
-				static_cast<float>(left+width), static_cast<float>(top+height));
-			pRenderTarget->FillRectangle(&rectangle1, pBrush);
-		} else if ((std::abs(xDiff) == std::abs(yDiff))) {
-			// 45 degree slope
-			pRenderTarget->DrawLine(D2D1::Point2F(x + 0.5f, y + 0.5f),
-				D2D1::Point2F(x_ + 0.5f - xDelta, y_ + 0.5f - yDelta), pBrush);
-		} else {
-			// Line has a different slope so difficult to avoid last pixel
-			pRenderTarget->DrawLine(D2D1::Point2F(x + 0.5f, y + 0.5f),
-				D2D1::Point2F(x_ + 0.5f, y_ + 0.5f), pBrush);
-		}
-		x = x_;
-		y = y_;
-	}
 }
 
 void SurfaceD2D::LineDraw(Point start, Point end, Stroke stroke) {
@@ -1841,35 +1579,6 @@ void SurfaceD2D::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 	ReleaseUnknown(geometry);
 }
 
-void SurfaceD2D::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) {
-	PLATFORM_ASSERT(pRenderTarget && (npts > 2));
-	if (pRenderTarget) {
-		ID2D1PathGeometry *geometry = nullptr;
-		HRESULT hr = pD2DFactory->CreatePathGeometry(&geometry);
-		PLATFORM_ASSERT(geometry);
-		if (SUCCEEDED(hr) && geometry) {
-			ID2D1GeometrySink *sink = nullptr;
-			hr = geometry->Open(&sink);
-			PLATFORM_ASSERT(sink);
-			if (SUCCEEDED(hr) && sink) {
-				sink->BeginFigure(D2D1::Point2F(pts[0].x + 0.5f, pts[0].y + 0.5f), D2D1_FIGURE_BEGIN_FILLED);
-				for (size_t i=1; i<npts; i++) {
-					sink->AddLine(D2D1::Point2F(pts[i].x + 0.5f, pts[i].y + 0.5f));
-				}
-				sink->EndFigure(D2D1_FIGURE_END_CLOSED);
-				sink->Close();
-				ReleaseUnknown(sink);
-
-				D2DPenColour(back);
-				pRenderTarget->FillGeometry(geometry,pBrush);
-				D2DPenColour(fore);
-				pRenderTarget->DrawGeometry(geometry,pBrush);
-			}
-			ReleaseUnknown(geometry);
-		}
-	}
-}
-
 void SurfaceD2D::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
 	PLATFORM_ASSERT(pRenderTarget && (npts > 2));
 	if (pRenderTarget) {
@@ -1882,16 +1591,6 @@ void SurfaceD2D::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
 			pRenderTarget->DrawGeometry(geometry, pBrush, fillStroke.stroke.width);
 			ReleaseUnknown(geometry);
 		}
-	}
-}
-
-void SurfaceD2D::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	if (pRenderTarget) {
-		const D2D1_RECT_F rectangle1 = D2D1::RectF(std::round(rc.left) + 0.5f, rc.top+0.5f, std::round(rc.right) - 0.5f, rc.bottom-0.5f);
-		D2DPenColour(back);
-		pRenderTarget->FillRectangle(&rectangle1, pBrush);
-		D2DPenColour(fore);
-		pRenderTarget->DrawRectangle(&rectangle1, pBrush);
 	}
 }
 
@@ -1916,14 +1615,6 @@ void SurfaceD2D::RectangleFrame(PRectangle rc, Stroke stroke) {
 			rc.right - halfStroke, rc.bottom - halfStroke);
 		D2DPenColourAlpha(stroke.colour);
 		pRenderTarget->DrawRectangle(&rectangle1, pBrush, stroke.width);
-	}
-}
-
-void SurfaceD2D::FillRectangle(PRectangle rc, ColourDesired back) {
-	if (pRenderTarget) {
-		D2DPenColour(back);
-		const D2D1_RECT_F rectangle1 = D2D1::RectF(std::round(rc.left), rc.top, std::round(rc.right), rc.bottom);
-		pRenderTarget->FillRectangle(&rectangle1, pBrush);
 	}
 }
 
@@ -1961,22 +1652,6 @@ void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	}
 }
 
-void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	if (pRenderTarget) {
-		D2D1_ROUNDED_RECT roundedRectFill = {
-			D2D1::RectF(rc.left+1.0f, rc.top+1.0f, rc.right-1.0f, rc.bottom-1.0f),
-			4, 4};
-		D2DPenColour(back);
-		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
-
-		D2D1_ROUNDED_RECT roundedRect = {
-			D2D1::RectF(rc.left + 0.5f, rc.top+0.5f, rc.right - 0.5f, rc.bottom-0.5f),
-			4, 4};
-		D2DPenColour(fore);
-		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
-	}
-}
-
 void SurfaceD2D::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
 	if (pRenderTarget) {
 		D2D1_ROUNDED_RECT roundedRectFill = {
@@ -1990,35 +1665,6 @@ void SurfaceD2D::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
 			4, 4};
 		D2DPenColourAlpha(fillStroke.stroke.colour);
 		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.width);
-	}
-}
-
-void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
-	if (pRenderTarget) {
-		if (cornerSize == 0) {
-			// When corner size is zero, draw square rectangle to prevent blurry pixels at corners
-			const D2D1_RECT_F rectFill = D2D1::RectF(std::round(rc.left) + 1.0f, rc.top + 1.0f, std::round(rc.right) - 1.0f, rc.bottom - 1.0f);
-			D2DPenColour(fill, alphaFill);
-			pRenderTarget->FillRectangle(rectFill, pBrush);
-
-			const D2D1_RECT_F rectOutline = D2D1::RectF(std::round(rc.left) + 0.5f, rc.top + 0.5f, std::round(rc.right) - 0.5f, rc.bottom - 0.5f);
-			D2DPenColour(outline, alphaOutline);
-			pRenderTarget->DrawRectangle(rectOutline, pBrush);
-		} else {
-			const float cornerSizeF = static_cast<float>(cornerSize);
-			D2D1_ROUNDED_RECT roundedRectFill = {
-				D2D1::RectF(std::round(rc.left) + 1.0f, rc.top + 1.0f, std::round(rc.right) - 1.0f, rc.bottom - 1.0f),
-				cornerSizeF - 1.0f, cornerSizeF - 1.0f };
-			D2DPenColour(fill, alphaFill);
-			pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
-
-			D2D1_ROUNDED_RECT roundedRect = {
-				D2D1::RectF(std::round(rc.left) + 0.5f, rc.top + 0.5f, std::round(rc.right) - 0.5f, rc.bottom - 0.5f),
-				cornerSizeF, cornerSizeF};
-			D2DPenColour(outline, alphaOutline);
-			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
-		}
 	}
 }
 
@@ -2110,20 +1756,6 @@ void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 			pRenderTarget->DrawBitmap(bitmap, rcDestination);
 			ReleaseUnknown(bitmap);
 		}
-	}
-}
-
-void SurfaceD2D::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
-	if (pRenderTarget) {
-		const FLOAT radius = rc.Width() / 2.0f;
-		D2D1_ELLIPSE ellipse = {
-			D2D1::Point2F((rc.left + rc.right) / 2.0f, (rc.top + rc.bottom) / 2.0f),
-			radius,radius};
-
-		PenColour(back);
-		pRenderTarget->FillEllipse(ellipse, pBrush);
-		PenColour(fore);
-		pRenderTarget->DrawEllipse(ellipse, pBrush);
 	}
 }
 
@@ -2974,18 +2606,6 @@ void SurfaceD2D::FlushDrawing() {
 	if (pRenderTarget) {
 		pRenderTarget->Flush();
 	}
-}
-
-void SurfaceD2D::SetUnicodeMode(bool unicodeMode_) {
-	mode.codePage = unicodeMode_ ? SC_CP_UTF8 : 0;
-}
-
-void SurfaceD2D::SetDBCSMode(int codePage_) {
-	// No action on window as automatically handled by system.
-	mode.codePage = codePage_;
-}
-
-void SurfaceD2D::SetBidiR2L(bool) {
 }
 
 #endif
