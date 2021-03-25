@@ -1454,7 +1454,7 @@ std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *screen
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				 ColourDesired fore, ColourDesired back) {
+				 ColourAlpha fore, ColourAlpha back) {
 	FillRectangle(rc, back);
 	DrawTextTransparent(rc, font_, ybase, text, fore);
 }
@@ -1462,7 +1462,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION yb
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				  ColourDesired fore, ColourDesired back) {
+				  ColourAlpha fore, ColourAlpha back) {
 	CGContextSaveGState(gc);
 	CGContextClipToRect(gc, PRectangleToCGRect(rc));
 	DrawTextNoClip(rc, font_, ybase, text, fore, back);
@@ -1527,14 +1527,17 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet) {
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				      ColourDesired fore) {
+				      ColourAlpha fore) {
 	QuartzTextStyle *style = TextStyleFromFont(font_);
 	if (!style) {
 		return;
 	}
 	CFStringEncoding encoding = EncodingFromCharacterSet(UnicodeMode(), style->getCharacterSet());
-	ColourDesired colour(fore.AsInteger());
-	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
+
+	CGColorRef color = CGColorCreateGenericRGB(fore.GetRedComponent(),
+						   fore.GetGreenComponent(),
+						   fore.GetBlueComponent(),
+						   fore.GetAlphaComponent());
 
 	style->setCTStyleColour(color);
 
@@ -1623,32 +1626,35 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				 ColourDesired fore, ColourDesired back) {
+				 ColourAlpha fore, ColourAlpha back) {
 	FillRectangle(rc, back);
-	DrawTextTransparent(rc, font_, ybase, text, fore);
+	DrawTextTransparentUTF8(rc, font_, ybase, text, fore);
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				  ColourDesired fore, ColourDesired back) {
+				  ColourAlpha fore, ColourAlpha back) {
 	CGContextSaveGState(gc);
 	CGContextClipToRect(gc, PRectangleToCGRect(rc));
-	DrawTextNoClip(rc, font_, ybase, text, fore, back);
+	DrawTextNoClipUTF8(rc, font_, ybase, text, fore, back);
 	CGContextRestoreGState(gc);
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				      ColourDesired fore) {
+				      ColourAlpha fore) {
 	QuartzTextStyle *style = TextStyleFromFont(font_);
 	if (!style) {
 		return;
 	}
 	const CFStringEncoding encoding = kCFStringEncodingUTF8;
-	ColourDesired colour(fore.AsInteger());
-	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
+
+	CGColorRef color = CGColorCreateGenericRGB(fore.GetRedComponent(),
+						   fore.GetGreenComponent(),
+						   fore.GetBlueComponent(),
+						   fore.GetAlphaComponent());
 
 	style->setCTStyleColour(color);
 

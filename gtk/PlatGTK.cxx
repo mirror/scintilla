@@ -193,17 +193,17 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore);
-	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore);
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
 
-	void DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore);
-	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore);
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
 
@@ -949,7 +949,7 @@ size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t len) n
 }
 
 void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-			       ColourDesired fore) {
+			       ColourAlpha fore) {
 	PenColour(fore);
 	if (context) {
 		const XYPOSITION xText = rc.left;
@@ -975,20 +975,20 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybas
 }
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				 ColourDesired fore, ColourDesired back) {
+				 ColourAlpha fore, ColourAlpha back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				  ColourDesired fore, ColourDesired back) {
+				  ColourAlpha fore, ColourAlpha back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				      ColourDesired fore) {
+				      ColourAlpha fore) {
 	// Avoid drawing spaces in transparent mode
 	for (size_t i=0; i<text.length(); i++) {
 		if (text[i] != ' ') {
@@ -1165,7 +1165,7 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 }
 
 void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore) {
+	ColourAlpha fore) {
 	PenColour(fore);
 	if (context) {
 		const XYPOSITION xText = rc.left;
@@ -1181,20 +1181,20 @@ void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION 
 }
 
 void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
+	ColourAlpha fore, ColourAlpha back) {
 	FillRectangle(rc, back);
 	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
+	ColourAlpha fore, ColourAlpha back) {
 	FillRectangle(rc, back);
 	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
 }
 
 void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore) {
+	ColourAlpha fore) {
 	// Avoid drawing spaces in transparent mode
 	for (size_t i = 0; i < text.length(); i++) {
 		if (text[i] != ' ') {

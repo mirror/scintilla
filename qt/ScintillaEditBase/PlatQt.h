@@ -102,6 +102,7 @@ public:
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
+	void PenColour(ColourAlpha fore);
 	void PenColourWidth(ColourAlpha fore, XYPOSITION strokeWidth);
 	int LogPixelsY() override;
 	int PixelDivisions() override;
@@ -139,21 +140,21 @@ public:
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
 	void DrawTextNoClip(PRectangle rc, const Font *font, XYPOSITION ybase,
-		std::string_view text, ColourDesired fore, ColourDesired back) override;
+		std::string_view text, ColourAlpha fore, ColourAlpha back) override;
 	void DrawTextClipped(PRectangle rc, const Font *font, XYPOSITION ybase,
-		std::string_view text, ColourDesired fore, ColourDesired back) override;
+		std::string_view text, ColourAlpha fore, ColourAlpha back) override;
 	void DrawTextTransparent(PRectangle rc, const Font *font, XYPOSITION ybase,
-		std::string_view text, ColourDesired fore) override;
+		std::string_view text, ColourAlpha fore) override;
 	void MeasureWidths(const Font *font, std::string_view text,
 		XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font, std::string_view text) override;
 
 	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase,
-		std::string_view text, ColourDesired fore, ColourDesired back) override;
+		std::string_view text, ColourAlpha fore, ColourAlpha back) override;
 	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase,
-		std::string_view text, ColourDesired fore, ColourDesired back) override;
+		std::string_view text, ColourAlpha fore, ColourAlpha back) override;
 	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase,
-		std::string_view text, ColourDesired fore) override;
+		std::string_view text, ColourAlpha fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text,
 		XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;

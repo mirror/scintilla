@@ -249,6 +249,13 @@ void SurfaceImpl::PenColour(ColourDesired fore)
 	GetPainter()->setPen(penOutline);
 }
 
+void SurfaceImpl::PenColour(ColourAlpha fore)
+{
+	QPen penOutline(QColorFromColourAlpha(fore));
+	penOutline.setCapStyle(Qt::FlatCap);
+	GetPainter()->setPen(penOutline);
+}
+
 void SurfaceImpl::PenColourWidth(ColourAlpha fore, XYPOSITION strokeWidth) {
 	QPen penOutline(QColorFromColourAlpha(fore));
 	penOutline.setCapStyle(Qt::FlatCap);
@@ -639,13 +646,13 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc,
 				 const Font *font,
                                  XYPOSITION ybase,
 				 std::string_view text,
-                                 ColourDesired fore,
-                                 ColourDesired back)
+                                 ColourAlpha fore,
+                                 ColourAlpha back)
 {
 	SetFont(font);
 	PenColour(fore);
 
-	GetPainter()->setBackground(QColorFromCA(back));
+	GetPainter()->setBackground(QColorFromColourAlpha(back));
 	GetPainter()->setBackgroundMode(Qt::OpaqueMode);
 	QString su = UnicodeFromText(codec, text);
 	GetPainter()->drawText(QPointF(rc.left, ybase), su);
@@ -655,8 +662,8 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc,
 				  const Font *font,
                                   XYPOSITION ybase,
 				  std::string_view text,
-                                  ColourDesired fore,
-                                  ColourDesired back)
+                                  ColourAlpha fore,
+                                  ColourAlpha back)
 {
 	SetClip(rc);
 	DrawTextNoClip(rc, font, ybase, text, fore, back);
@@ -667,7 +674,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc,
 				      const Font *font,
                                       XYPOSITION ybase,
 				      std::string_view text,
-        ColourDesired fore)
+        ColourAlpha fore)
 {
 	SetFont(font);
 	PenColour(fore);
@@ -751,13 +758,13 @@ void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc,
 				 const Font *font,
 				 XYPOSITION ybase,
 				 std::string_view text,
-				 ColourDesired fore,
-				 ColourDesired back)
+				 ColourAlpha fore,
+				 ColourAlpha back)
 {
 	SetFont(font);
 	PenColour(fore);
 
-	GetPainter()->setBackground(QColorFromCA(back));
+	GetPainter()->setBackground(QColorFromColourAlpha(back));
 	GetPainter()->setBackgroundMode(Qt::OpaqueMode);
 	QString su = QString::fromUtf8(text.data(), static_cast<int>(text.length()));
 	GetPainter()->drawText(QPointF(rc.left, ybase), su);
@@ -767,8 +774,8 @@ void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc,
 				  const Font *font,
 				  XYPOSITION ybase,
 				  std::string_view text,
-				  ColourDesired fore,
-				  ColourDesired back)
+				  ColourAlpha fore,
+				  ColourAlpha back)
 {
 	SetClip(rc);
 	DrawTextNoClip(rc, font, ybase, text, fore, back);
@@ -779,7 +786,7 @@ void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc,
 				      const Font *font,
 				      XYPOSITION ybase,
 				      std::string_view text,
-	ColourDesired fore)
+	ColourAlpha fore)
 {
 	SetFont(font);
 	PenColour(fore);

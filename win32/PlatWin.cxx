@@ -516,16 +516,16 @@ public:
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
 	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
 
 	void DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
 
@@ -760,7 +760,7 @@ void SurfaceGDI::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired 
 }
 
 void SurfaceGDI::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
-	FillRectangle(rc, fillStroke.stroke.colour);
+	RectangleFrame(rc, fillStroke.stroke);
 	FillRectangle(rc.Inset(fillStroke.stroke.width), fillStroke.fill.colour);
 }
 
@@ -1161,25 +1161,25 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 }
 
 void SurfaceGDI::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
-	::SetTextColor(hdc, fore.AsInteger());
-	::SetBkColor(hdc, back.AsInteger());
+	ColourAlpha fore, ColourAlpha back) {
+	::SetTextColor(hdc, fore.GetColour().AsInteger());
+	::SetBkColor(hdc, back.GetColour().AsInteger());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
-	::SetTextColor(hdc, fore.AsInteger());
-	::SetBkColor(hdc, back.AsInteger());
+	ColourAlpha fore, ColourAlpha back) {
+	::SetTextColor(hdc, fore.GetColour().AsInteger());
+	::SetBkColor(hdc, back.GetColour().AsInteger());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
 }
 
 void SurfaceGDI::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore) {
+	ColourAlpha fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
-			::SetTextColor(hdc, fore.AsInteger());
+			::SetTextColor(hdc, fore.GetColour().AsInteger());
 			::SetBkMode(hdc, TRANSPARENT);
 			DrawTextCommon(rc, font_, ybase, text, 0);
 			::SetBkMode(hdc, OPAQUE);
@@ -1253,25 +1253,25 @@ void SurfaceGDI::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION
 }
 
 void SurfaceGDI::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
-	::SetTextColor(hdc, fore.AsInteger());
-	::SetBkColor(hdc, back.AsInteger());
+	ColourAlpha fore, ColourAlpha back) {
+	::SetTextColor(hdc, fore.GetColour().AsInteger());
+	::SetBkColor(hdc, back.GetColour().AsInteger());
 	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
-	::SetTextColor(hdc, fore.AsInteger());
-	::SetBkColor(hdc, back.AsInteger());
+	ColourAlpha fore, ColourAlpha back) {
+	::SetTextColor(hdc, fore.GetColour().AsInteger());
+	::SetBkColor(hdc, back.GetColour().AsInteger());
 	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
 }
 
 void SurfaceGDI::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore) {
+	ColourAlpha fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
-			::SetTextColor(hdc, fore.AsInteger());
+			::SetTextColor(hdc, fore.GetColour().AsInteger());
 			::SetBkMode(hdc, TRANSPARENT);
 			DrawTextCommonUTF8(rc, font_, ybase, text, 0);
 			::SetBkMode(hdc, OPAQUE);
@@ -1497,17 +1497,17 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, int codePageDraw, UINT fuOptions);
+
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
 
-	void DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
 
@@ -2646,11 +2646,11 @@ std::unique_ptr<IScreenLineLayout> SurfaceD2D::Layout(const IScreenLine *screenL
 	return std::make_unique<ScreenLineLayout>(screenLine);
 }
 
-void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
+void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, int codePageDraw, UINT fuOptions) {
 	SetFont(font_);
 
 	// Use Unicode calls
-	const TextWide tbuf(text, codePageText);
+	const TextWide tbuf(text, codePageDraw);
 	if (pRenderTarget && pTextFormat && pBrush) {
 		if (fuOptions & ETO_CLIPPED) {
 			const D2D1_RECT_F rcClip = RectangleFromPRectangle(rc);
@@ -2674,31 +2674,31 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 }
 
 void SurfaceD2D::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
+	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
-		D2DPenColour(fore);
-		DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE);
+		D2DPenColourAlpha(fore);
+		DrawTextCommon(rc, font_, ybase, text, codePageText, ETO_OPAQUE);
 	}
 }
 
 void SurfaceD2D::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
+	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
-		D2DPenColour(fore);
-		DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
+		D2DPenColourAlpha(fore);
+		DrawTextCommon(rc, font_, ybase, text, codePageText, ETO_OPAQUE | ETO_CLIPPED);
 	}
 }
 
 void SurfaceD2D::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore) {
+	ColourAlpha fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
 			if (pRenderTarget) {
-				D2DPenColour(fore);
-				DrawTextCommon(rc, font_, ybase, text, 0);
+				D2DPenColourAlpha(fore);
+				DrawTextCommon(rc, font_, ybase, text, codePageText, 0);
 			}
 			return;
 		}
@@ -2804,59 +2804,32 @@ XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
 	return width;
 }
 
-void SurfaceD2D::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
-	SetFont(font_);
-
-	// Use Unicode calls
-	const TextWide tbuf(text, SC_CP_UTF8);
-	if (pRenderTarget && pTextFormat && pBrush) {
-		if (fuOptions & ETO_CLIPPED) {
-			D2D1_RECT_F rcClip = { rc.left, rc.top, rc.right, rc.bottom };
-			pRenderTarget->PushAxisAlignedClip(rcClip, D2D1_ANTIALIAS_MODE_ALIASED);
-		}
-
-		// Explicitly creating a text layout appears a little faster
-		IDWriteTextLayout *pTextLayout = nullptr;
-		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat,
-			rc.Width(), rc.Height(), &pTextLayout);
-		if (SUCCEEDED(hr)) {
-			D2D1_POINT_2F origin = {rc.left, ybase-yAscent};
-			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, d2dDrawTextOptions);
-			ReleaseUnknown(pTextLayout);
-		}
-
-		if (fuOptions & ETO_CLIPPED) {
-			pRenderTarget->PopAxisAlignedClip();
-		}
-	}
-}
-
 void SurfaceD2D::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
+	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
-		D2DPenColour(fore);
-		DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE);
+		D2DPenColourAlpha(fore);
+		DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, ETO_OPAQUE);
 	}
 }
 
 void SurfaceD2D::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore, ColourDesired back) {
+	ColourAlpha fore, ColourAlpha back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
-		D2DPenColour(fore);
-		DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
+		D2DPenColourAlpha(fore);
+		DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, ETO_OPAQUE | ETO_CLIPPED);
 	}
 }
 
 void SurfaceD2D::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourDesired fore) {
+	ColourAlpha fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
 			if (pRenderTarget) {
-				D2DPenColour(fore);
-				DrawTextCommonUTF8(rc, font_, ybase, text, 0);
+				D2DPenColourAlpha(fore);
+				DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, 0);
 			}
 			return;
 		}
