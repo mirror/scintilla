@@ -6948,7 +6948,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <br />
      <a class="message" href="#SCI_MULTIEDGEADDLINE">SCI_MULTIEDGEADDLINE(position column, colour edgeColour)</a><br />
      <a class="message" href="#SCI_MULTIEDGECLEARALL">SCI_MULTIEDGECLEARALL</a><br />
-     <a class="message" href="#SCI_GETMULTIEDGECOLUMN">SCI_GETMULTIEDGECOLUMN(int which)</a>
+     <a class="message" href="#SCI_GETMULTIEDGECOLUMN">SCI_GETMULTIEDGECOLUMN(int which) &rarr; position</a>
      <br />
     </code>
 
@@ -7027,7 +7027,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p><b id="SCI_MULTIEDGEADDLINE">SCI_MULTIEDGEADDLINE(position column,
     <a class="jump" href="#colour">colour</a> edgeColour)</b><br />
      <b id="SCI_MULTIEDGECLEARALL">SCI_MULTIEDGECLEARALL</b><br />
-     <b id="SCI_GETMULTIEDGECOLUMN">SCI_GETMULTIEDGECOLUMN(int which)</b><br />
+     <b id="SCI_GETMULTIEDGECOLUMN">SCI_GETMULTIEDGECOLUMN(int which) &rarr; position</b><br />
      <code>SCI_MULTIEDGEADDLINE</code> adds a new vertical edge to the view. The edge will be
     displayed at the given column number. The resulting edge position depends on the metric
     of a space character in <code>STYLE_DEFAULT</code>. All the edges can be cleared with
