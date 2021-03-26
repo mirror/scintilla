@@ -2884,7 +2884,7 @@ val SC_SUPPORTS_TRANSLUCENT_STROKE=3
 val SC_SUPPORTS_PIXEL_MODIFICATION=4
 
 # Get whether a feature is supported
-get int SupportsFeature=2750(Supports feature,)
+get bool SupportsFeature=2750(Supports feature,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
