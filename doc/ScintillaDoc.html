@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 22 March 2021 NH</p>
+    <p>Last edited 27 March 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -4657,6 +4657,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_INDICSETFORE">SCI_INDICSETFORE(int indicator, colour
     fore)</a><br />
      <a class="message" href="#SCI_INDICGETFORE">SCI_INDICGETFORE(int indicator) &rarr; colour</a><br />
+     <a class="message" href="#SCI_INDICSETSTROKEWIDTH">SCI_INDICSETSTROKEWIDTH(int indicator, int hundredths)</a><br />
+     <a class="message" href="#SCI_INDICGETSTROKEWIDTH">SCI_INDICGETSTROKEWIDTH(int indicator) &rarr; int</a><br />
      <a class="message" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA(int indicator, alpha alpha)</a><br />
      <a class="message" href="#SCI_INDICGETALPHA">SCI_INDICGETALPHA(int indicator) &rarr; int</a><br />
      <a class="message" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA(int indicator, alpha alpha)</a><br />
@@ -4925,6 +4927,25 @@ struct Sci_TextToFind {
      <code>SCI_INDICSETFORE(0, 0x007f00);</code> (dark green)<br />
      <code>SCI_INDICSETFORE(1, 0xff0000);</code> (light blue)<br />
      <code>SCI_INDICSETFORE(2, 0x0000ff);</code> (light red)</p>
+
+     <a class="message" href="#SCI_INDICSETSTROKEWIDTH">SCI_INDICSETSTROKEWIDTH(int indicator, int hundredths)</a><br />
+     <a class="message" href="#SCI_INDICGETSTROKEWIDTH">SCI_INDICGETSTROKEWIDTH(int indicator) &rarr; int</a><br />
+    <p><b id="SCI_INDICSETSTROKEWIDTH">SCI_INDICSETSTROKEWIDTH(int indicator, int hundredths)</b><br />
+     <b id="SCI_INDICGETSTROKEWIDTH">SCI_INDICGETSTROKEWIDTH(int indicator) &rarr; int</b><br />
+     These two messages set and get the stroke width used to draw an indicator in hundredths of a pixel.
+     The default value is 100 indicating a width of one pixel.
+     Some indicator styles do not support setting stroke width, generally where it makes no sense (<code>INDIC_POINT</code>) or
+     wasn't simple (<code>INDIC_SQUIGGLEPIXMAP</code>).
+     The indicators supporting stroke width are:
+     <code>INDIC_PLAIN</code>, <code>INDIC_SQUIGGLE</code>, <code>INDIC_TT</code>, <code>INDIC_DIAGONAL</code>,
+     <code>INDIC_STRIKE</code>, <code>INDIC_BOX</code>, <code>INDIC_ROUNDBOX</code>, <code>INDIC_STRAIGHTBOX</code>,
+     <code>INDIC_FULLBOX</code>, <code>INDIC_DASH</code>, <code>INDIC_DOTS</code>, <code>INDIC_SQUIGGLELOW</code>.
+     </p>
+     <p>Fractional pixel widths are possible such as 50 for half a pixel wide. 
+     On many systems a half pixel value will appear as a fainter line but it allows drawing very thin lines on systems with multiple physical pixels
+     per logical pixel.
+     Half (logical) pixel lines are available on macOS with 'retina' displays,
+     see <a class="seealso" href="#SCI_SUPPORTSFEATURE">SC_SUPPORTS_PIXEL_DIVISIONS</a>.</p>
 
     <p><b id="SCI_INDICSETALPHA">SCI_INDICSETALPHA(int indicator, <a class="jump" href="#alpha">alpha</a> alpha)</b><br />
      <b id="SCI_INDICGETALPHA">SCI_INDICGETALPHA(int indicator) &rarr; int</b><br />

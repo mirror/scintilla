@@ -813,6 +813,12 @@ set void IndicSetFlags=2684(int indicator, IndicFlag flags)
 # Retrieve the attributes of an indicator.
 get IndicFlag IndicGetFlags=2685(int indicator,)
 
+# Set the stroke width of an indicator in hundredths of a pixel.
+set void IndicSetStrokeWidth=2751(int indicator, int hundredths)
+
+# Retrieve the stroke width of an indicator.
+get int IndicGetStrokeWidth=2752(int indicator,)
+
 # Set the foreground colour of all whitespace and whether to use this setting.
 fun void SetWhitespaceFore=2084(bool useSetting, colour fore)
 

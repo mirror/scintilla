@@ -36,7 +36,6 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 
 	const int pixelDivisions = surface->PixelDivisions();
 
-	const XYPOSITION strokeWidth = 1.0f;
 	const XYPOSITION halfWidth = strokeWidth / 2.0f;
 
 	const PRectangle rcAligned(PixelAlignOutside(rc, pixelDivisions));

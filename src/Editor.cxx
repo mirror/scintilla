@@ -7518,6 +7518,19 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_INDICGETOUTLINEALPHA:
 		return (wParam <= INDICATOR_MAX) ? vs.indicators[wParam].outlineAlpha : 0;
 
+	case SCI_INDICSETSTROKEWIDTH:
+		if (wParam <= INDICATOR_MAX && lParam >= 0 && lParam <= 1000) {
+			vs.indicators[wParam].strokeWidth = lParam / 100.0f;
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_INDICGETSTROKEWIDTH:
+		if (wParam <= INDICATOR_MAX) {
+			return std::lround(vs.indicators[wParam].strokeWidth * 100);
+		}
+		break;
+
 	case SCI_SETINDICATORCURRENT:
 		pdoc->DecorationSetCurrentIndicator(static_cast<int>(wParam));
 		break;
