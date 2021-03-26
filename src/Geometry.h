@@ -219,7 +219,7 @@ public:
 	}
 
 	constexpr ColourAlpha(ColourDesired cd) noexcept :
-		ColourDesired(cd.AsInteger() | (0xff << 24)) {
+		ColourDesired(cd.AsInteger() | (0xffu << 24)) {
 	}
 
 	constexpr ColourDesired GetColour() const noexcept {
