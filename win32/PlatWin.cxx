@@ -211,6 +211,10 @@ void LoadDpiForWindow() noexcept {
 
 HINSTANCE hinstPlatformRes {};
 
+const int SupportsGDI[] = {
+	SC_SUPPORTS_PIXEL_MODIFICATION,
+};
+
 constexpr BYTE Win32MapFontQuality(int extraFontFlag) noexcept {
 	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
 
@@ -582,7 +586,11 @@ void SurfaceGDI::Release() noexcept {
 	Clear();
 }
 
-int SurfaceGDI::Supports(int /* feature */) noexcept {
+int SurfaceGDI::Supports(int feature) noexcept {
+	for (const int f : SupportsGDI) {
+		if (f == feature)
+			return 1;
+	}
 	return 0;
 }
 
@@ -1255,6 +1263,7 @@ const int SupportsD2D[] = {
 	SC_SUPPORTS_LINE_DRAWS_FINAL,
 	SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH,
 	SC_SUPPORTS_TRANSLUCENT_STROKE,
+	SC_SUPPORTS_PIXEL_MODIFICATION,
 };
 
 constexpr D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {

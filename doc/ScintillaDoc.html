@@ -4059,23 +4059,33 @@ struct Sci_TextToFind {
       <tbody>
         <tr>
           <td><code>SC_SUPPORTS_LINE_DRAWS_FINAL</code></td>
+          <td>0</td>
           <td>Whether drawing a line draws its final position. Only false on Win32 GDI.</td>
         </tr>
 
         <tr>
           <td><code>SC_SUPPORTS_PIXEL_DIVISIONS</code></td>
+          <td>1</td>
           <td>Are logical pixels larger than physical pixels? Currently only true for macOS Cocoa with 'retina' displays.
           When true, creating pixmaps at twice the resolution can produce clearer output with less blur.</td>
         </tr>
 
         <tr>
           <td><code>SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH</code></td>
+          <td>2</td>
           <td>Can lines be drawn with fractional widths like 1.5 or 0.5 pixels?</td>
         </tr>
 
         <tr>
           <td><code>SC_SUPPORTS_TRANSLUCENT_STROKE</code></td>
-          <td>Can translucent lines, polygons, and ellipses, be drawn?</td>
+          <td>3</td>
+          <td>Can translucent lines, polygons, ellipses, and text be drawn?</td>
+        </tr>
+
+        <tr>
+          <td><code>SC_SUPPORTS_PIXEL_MODIFICATION</code></td>
+          <td>4</td>
+          <td>Can individual pixels be modified? This is false for character cell platforms like curses.</td>
         </tr>
 
       </tbody>
