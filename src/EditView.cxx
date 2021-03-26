@@ -340,7 +340,7 @@ constexpr XYPOSITION epsilon = 0.0001f;	// A small nudge to avoid floating point
 * This only affects ASCII characters and is provided for languages with case-insensitive
 * ASCII keywords where the user wishes to view keywords in a preferred case.
 */
-inline char CaseForce(Style::CaseForce caseForce, char chDoc, char chPrevious) {
+inline char CaseForce(Style::CaseForce caseForce, char chDoc, char chPrevious) noexcept {
 	switch (caseForce) {
 	case Style::CaseForce::mixed:
 		return chDoc;
@@ -1305,7 +1305,7 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	rcSegment.right = rcSegment.left + static_cast<XYPOSITION>(widthEOLAnnotationText);
 
 	const ColourOptional background = vsDraw.Background(model.pdoc->GetMark(line), model.caret.active, ll->containsCaret);
-	ColourDesired textFore = vsDraw.styles[style].fore;
+	const ColourDesired textFore = vsDraw.styles[style].fore;
 	const ColourDesired textBack = TextBackground(model, vsDraw, ll, background, false,
 											false, static_cast<int>(style), -1);
 

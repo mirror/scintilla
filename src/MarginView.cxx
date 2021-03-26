@@ -121,7 +121,7 @@ void MarginView::DropGraphics() noexcept {
 
 void MarginView::RefreshPixMaps(Surface *surfaceWindow, const ViewStyle &vsDraw) {
 	if (!pixmapSelPattern) {
-		const int patternSize = 8;
+		constexpr int patternSize = 8;
 		pixmapSelPattern = surfaceWindow->AllocatePixMap(patternSize, patternSize);
 		pixmapSelPatternOffset1 = surfaceWindow->AllocatePixMap(patternSize, patternSize);
 		// This complex procedure is to reproduce the checkerboard dithered pattern used by windows
@@ -356,7 +356,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 
 				marks &= vs.ms[margin].mask;
 
-				PRectangle rcMarker(
+				const PRectangle rcMarker(
 					rcSelMargin.left,
 					static_cast<XYPOSITION>(yposScreen),
 					rcSelMargin.right,

@@ -493,7 +493,7 @@ static unsigned int KeyFromString(const char *charBytes, size_t len) noexcept {
 }
 
 SpecialRepresentations::SpecialRepresentations() {
-	const short none = 0;
+	constexpr short none = 0;
 	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
 }
 
@@ -540,7 +540,7 @@ bool SpecialRepresentations::Contains(const char *charBytes, size_t len) const {
 
 void SpecialRepresentations::Clear() {
 	mapReprs.clear();
-	const short none = 0;
+	constexpr short none = 0;
 	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
 }
 
