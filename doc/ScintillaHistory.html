@@ -596,6 +596,12 @@
 	<li>
 	Add colouralpha type to Scintilla.iface for APIs that set both colour and transparency together as an RGBA value.
 	</li>
+	<li>
+	Change graphics coordinates from float (32-bit) to double (64-bit).
+	Fixes uneven line heights in large documents on Cocoa.
+	Increases memory use.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2224/">Bug #2224</a>.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scite500.zip">Release 5.0.0</a>

@@ -96,7 +96,7 @@ constexpr const char *localeNameDefault = "en-us";
 
 struct FontParameters {
 	const char *faceName;
-	float size;
+	XYPOSITION size;
 	int weight;
 	bool italic;
 	int extraFontFlag;
@@ -106,7 +106,7 @@ struct FontParameters {
 
 	constexpr FontParameters(
 		const char *faceName_,
-		float size_=10,
+		XYPOSITION size_=10,
 		int weight_=400,
 		bool italic_=false,
 		int extraFontFlag_=0,

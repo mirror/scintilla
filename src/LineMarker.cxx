@@ -147,7 +147,7 @@ void DrawTail(Surface *surface, XYPOSITION leftLine, XYPOSITION rightTail, XYPOS
 void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, FoldPart part) const {
 	// Assume: edges of rcWhole are integers.
 	// Code can only really handle integer strokeWidth.
-	constexpr float strokeWidth = 1.0f;
+	constexpr XYPOSITION strokeWidth = 1.0f;
 
 	ColourDesired colourHead = back;
 	ColourDesired colourBody = back;

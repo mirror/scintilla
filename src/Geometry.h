@@ -10,7 +10,7 @@
 
 namespace Scintilla {
 
-typedef float XYPOSITION;
+typedef double XYPOSITION;
 typedef double XYACCUMULATOR;
 
 // Test if an enum class value has the bit flag(s) of test set.
@@ -257,6 +257,9 @@ public:
 	constexpr Stroke(ColourAlpha colour_, XYPOSITION width_=1.0f) noexcept : 
 		colour(colour_), width(width_) {
 	}
+	constexpr float WidthF() {
+		return static_cast<float>(width);
+	}
 };
 
 /**
@@ -293,9 +296,9 @@ public:
 */
 class ColourStop {
 public:
-	float position;
+	XYPOSITION position;
 	ColourAlpha colour;
-	constexpr ColourStop(float position_, ColourAlpha colour_) noexcept :
+	constexpr ColourStop(XYPOSITION position_, ColourAlpha colour_) noexcept :
 		position(position_), colour(colour_) {
 	}
 };

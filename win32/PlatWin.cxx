@@ -252,7 +252,7 @@ struct FontWin : public Font {
 	virtual HFONT HFont() const noexcept = 0;
 };
 
-void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
+void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, XYPOSITION size, int weight, bool italic, int extraFontFlag) {
 	lf = LOGFONTW();
 	// The negative is to allow for leading
 	lf.lfHeight = -(std::abs(std::lround(size)));
@@ -303,7 +303,7 @@ struct FontDirectWrite : public FontWin {
 		characterSet(fp.characterSet) {
 		const std::wstring wsFace = WStringFromUTF8(fp.faceName);
 		const std::wstring wsLocale = WStringFromUTF8(fp.localeName);
-		const FLOAT fHeight = fp.size;
+		const FLOAT fHeight = static_cast<FLOAT>(fp.size);
 		const DWRITE_FONT_STYLE style = fp.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wsFace.c_str(), nullptr,
 			static_cast<DWRITE_FONT_WEIGHT>(fp.weight),
@@ -844,11 +844,11 @@ void DIBSection::SetSymmetric(LONG x, LONG y, DWORD value) noexcept {
 	SetPixel(xSymmetric, ySymmetric, value);
 }
 
-constexpr unsigned int Proportional(unsigned char a, unsigned char b, float t) noexcept {
+constexpr unsigned int Proportional(unsigned char a, unsigned char b, XYPOSITION t) noexcept {
 	return static_cast<unsigned int>(a + t * (b - a));
 }
 
-ColourAlpha Proportional(ColourAlpha a, ColourAlpha b, float t) noexcept {
+ColourAlpha Proportional(ColourAlpha a, ColourAlpha b, XYPOSITION t) noexcept {
 	return ColourAlpha(
 		Proportional(a.GetRed(), b.GetRed(), t),
 		Proportional(a.GetGreen(), b.GetGreen(), t),
@@ -856,13 +856,13 @@ ColourAlpha Proportional(ColourAlpha a, ColourAlpha b, float t) noexcept {
 		Proportional(a.GetAlpha(), b.GetAlpha(), t));
 }
 
-ColourAlpha GradientValue(const std::vector<ColourStop> &stops, float proportion) noexcept {
+ColourAlpha GradientValue(const std::vector<ColourStop> &stops, XYPOSITION proportion) noexcept {
 	for (size_t stop = 0; stop < stops.size() - 1; stop++) {
 		// Loop through each pair of stops
-		const float positionStart = stops[stop].position;
-		const float positionEnd = stops[stop + 1].position;
+		const XYPOSITION positionStart = stops[stop].position;
+		const XYPOSITION positionEnd = stops[stop + 1].position;
 		if ((proportion >= positionStart) && (proportion <= positionEnd)) {
-			const float proportionInPair = (proportion - positionStart) /
+			const XYPOSITION proportionInPair = (proportion - positionStart) /
 				(positionEnd - positionStart);
 			return Proportional(stops[stop].colour, stops[stop + 1].colour, proportionInPair);
 		}
@@ -940,7 +940,7 @@ void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 		if (options == GradientOptions::topToBottom) {
 			for (LONG y = 0; y < size.cy; y++) {
 				// Find y/height proportional colour
-				const float proportion = y / (rc.Height() - 1.0f);
+				const XYPOSITION proportion = y / (rc.Height() - 1.0f);
 				const ColourAlpha mixed = GradientValue(stops, proportion);
 				const DWORD valFill = dwordMultiplied(mixed);
 				for (LONG x = 0; x < size.cx; x++) {
@@ -950,7 +950,7 @@ void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 		} else {
 			for (LONG x = 0; x < size.cx; x++) {
 				// Find x/width proportional colour
-				const float proportion = x / (rc.Width() - 1.0f);
+				const XYPOSITION proportion = x / (rc.Width() - 1.0f);
 				const ColourAlpha mixed = GradientValue(stops, proportion);
 				const DWORD valFill = dwordMultiplied(mixed);
 				for (LONG y = 0; y < size.cy; y++) {
@@ -1239,7 +1239,16 @@ void SurfaceGDI::FlushDrawing() {
 namespace {
 
 constexpr D2D1_RECT_F RectangleFromPRectangle(PRectangle rc) noexcept {
-	return { rc.left, rc.top, rc.right, rc.bottom };
+	return {
+		static_cast<FLOAT>(rc.left),
+		static_cast<FLOAT>(rc.top),
+		static_cast<FLOAT>(rc.right),
+		static_cast<FLOAT>(rc.bottom)
+	};
+}
+
+constexpr D2D1_POINT_2F DPointFromPoint(Point point) noexcept {
+	return { static_cast<FLOAT>(point.x), static_cast<FLOAT>(point.y) };
 }
 
 const int SupportsD2D[] = {
@@ -1519,8 +1528,8 @@ void SurfaceD2D::LineDraw(Point start, Point end, Stroke stroke) {
 		strokeProps, nullptr, 0, &pStrokeStyle);
 	if (SUCCEEDED(hr)) {
 		pRenderTarget->DrawLine(
-			D2D1::Point2F(start.x, start.y),
-			D2D1::Point2F(end.x, end.y), pBrush, stroke.width, pStrokeStyle);
+			DPointFromPoint(start),
+			DPointFromPoint(end), pBrush, stroke.WidthF(), pStrokeStyle);
 	}
 
 	ReleaseUnknown(pStrokeStyle);
@@ -1533,9 +1542,9 @@ ID2D1PathGeometry *SurfaceD2D::Geometry(const Point *pts, size_t npts, D2D1_FIGU
 		ID2D1GeometrySink *sink = nullptr;
 		hr = geometry->Open(&sink);
 		if (SUCCEEDED(hr) && sink) {
-			sink->BeginFigure(D2D1::Point2F(pts[0].x, pts[0].y), figureBegin);
+			sink->BeginFigure(DPointFromPoint(pts[0]), figureBegin);
 			for (size_t i = 1; i < npts; i++) {
-				sink->AddLine(D2D1::Point2F(pts[i].x, pts[i].y));
+				sink->AddLine(DPointFromPoint(pts[i]));
 			}
 			sink->EndFigure((figureBegin == D2D1_FIGURE_BEGIN_FILLED) ?
 				D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
@@ -1573,7 +1582,7 @@ void SurfaceD2D::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 	const HRESULT hr = pD2DFactory->CreateStrokeStyle(
 		strokeProps, nullptr, 0, &pStrokeStyle);
 	if (SUCCEEDED(hr)) {
-		pRenderTarget->DrawGeometry(geometry, pBrush, stroke.width, pStrokeStyle);
+		pRenderTarget->DrawGeometry(geometry, pBrush, stroke.WidthF(), pStrokeStyle);
 	}
 	ReleaseUnknown(pStrokeStyle);
 	ReleaseUnknown(geometry);
@@ -1588,7 +1597,7 @@ void SurfaceD2D::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
 			D2DPenColourAlpha(fillStroke.fill.colour);
 			pRenderTarget->FillGeometry(geometry, pBrush);
 			D2DPenColourAlpha(fillStroke.stroke.colour);
-			pRenderTarget->DrawGeometry(geometry, pBrush, fillStroke.stroke.width);
+			pRenderTarget->DrawGeometry(geometry, pBrush, fillStroke.stroke.WidthF());
 			ReleaseUnknown(geometry);
 		}
 	}
@@ -1598,23 +1607,22 @@ void SurfaceD2D::RectangleDraw(PRectangle rc, FillStroke fillStroke) {
 	if (!pRenderTarget)
 		return;
 	const D2D1_RECT_F rect = RectangleFromPRectangle(rc);
-	const D2D1_RECT_F rectFill = RectangleInset(rect, fillStroke.stroke.width);
-	const float halfStroke = fillStroke.stroke.width / 2.0f;
+	const D2D1_RECT_F rectFill = RectangleInset(rect, fillStroke.stroke.WidthF());
+	const float halfStroke = fillStroke.stroke.WidthF() / 2.0f;
 	const D2D1_RECT_F rectOutline = RectangleInset(rect, halfStroke);
 
 	D2DPenColourAlpha(fillStroke.fill.colour);
 	pRenderTarget->FillRectangle(&rectFill, pBrush);
 	D2DPenColourAlpha(fillStroke.stroke.colour);
-	pRenderTarget->DrawRectangle(&rectOutline, pBrush, fillStroke.stroke.width);
+	pRenderTarget->DrawRectangle(&rectOutline, pBrush, fillStroke.stroke.WidthF());
 }
 
 void SurfaceD2D::RectangleFrame(PRectangle rc, Stroke stroke) {
 	if (pRenderTarget) {
 		const XYPOSITION halfStroke = stroke.width / 2.0f;
-		const D2D1_RECT_F rectangle1 = D2D1::RectF(rc.left + halfStroke, rc.top + halfStroke,
-			rc.right - halfStroke, rc.bottom - halfStroke);
+		const D2D1_RECT_F rectangle1 = RectangleFromPRectangle(rc.Inset(halfStroke));
 		D2DPenColourAlpha(stroke.colour);
-		pRenderTarget->DrawRectangle(&rectangle1, pBrush, stroke.width);
+		pRenderTarget->DrawRectangle(&rectangle1, pBrush, stroke.WidthF());
 	}
 }
 
@@ -1645,7 +1653,7 @@ void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 		ReleaseUnknown(pBitmap);
 		if (SUCCEEDED(hr) && pBitmapBrush) {
 			pRenderTarget->FillRectangle(
-				D2D1::RectF(rc.left, rc.top, rc.right, rc.bottom),
+				RectangleFromPRectangle(rc),
 				pBitmapBrush);
 			ReleaseUnknown(pBitmapBrush);
 		}
@@ -1655,23 +1663,23 @@ void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 void SurfaceD2D::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
 	if (pRenderTarget) {
 		D2D1_ROUNDED_RECT roundedRectFill = {
-			D2D1::RectF(rc.left+1.0f, rc.top+1.0f, rc.right-1.0f, rc.bottom-1.0f),
+			RectangleFromPRectangle(rc.Inset(1.0)),
 			4, 4};
 		D2DPenColourAlpha(fillStroke.fill.colour);
 		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
 
 		D2D1_ROUNDED_RECT roundedRect = {
-			D2D1::RectF(rc.left + 0.5f, rc.top+0.5f, rc.right - 0.5f, rc.bottom-0.5f),
+			RectangleFromPRectangle(rc.Inset(0.5)),
 			4, 4};
 		D2DPenColourAlpha(fillStroke.stroke.colour);
-		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.width);
+		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.WidthF());
 	}
 }
 
 void SurfaceD2D::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
 	const D2D1_RECT_F rect = RectangleFromPRectangle(rc);
-	const D2D1_RECT_F rectFill = RectangleInset(rect, fillStroke.stroke.width);
-	const float halfStroke = fillStroke.stroke.width / 2.0f;
+	const D2D1_RECT_F rectFill = RectangleInset(rect, fillStroke.stroke.WidthF());
+	const float halfStroke = fillStroke.stroke.WidthF() / 2.0f;
 	const D2D1_RECT_F rectOutline = RectangleInset(rect, halfStroke);
 	if (pRenderTarget) {
 		if (cornerSize == 0) {
@@ -1680,7 +1688,7 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke
 			pRenderTarget->FillRectangle(rectFill, pBrush);
 
 			D2DPenColourAlpha(fillStroke.stroke.colour);
-			pRenderTarget->DrawRectangle(rectOutline, pBrush, fillStroke.stroke.width);
+			pRenderTarget->DrawRectangle(rectOutline, pBrush, fillStroke.stroke.WidthF());
 		} else {
 			const float cornerSizeF = static_cast<float>(cornerSize);
 			D2D1_ROUNDED_RECT roundedRectFill = {
@@ -1691,7 +1699,7 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke
 			D2D1_ROUNDED_RECT roundedRect = {
 				rectOutline, cornerSizeF, cornerSizeF};
 			D2DPenColourAlpha(fillStroke.stroke.colour);
-			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.width);
+			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.WidthF());
 		}
 	}
 }
@@ -1699,21 +1707,21 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke
 void SurfaceD2D::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
 	if (pRenderTarget) {
 		D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES lgbp {
-			D2D1::Point2F(rc.left, rc.top), {}
+			DPointFromPoint(Point(rc.left, rc.top)), {}
 		};
 		switch (options) {
 		case GradientOptions::leftToRight:
-			lgbp.endPoint = D2D1::Point2F(rc.right, rc.top);
+			lgbp.endPoint = DPointFromPoint(Point(rc.right, rc.top));
 			break;
 		case GradientOptions::topToBottom:
 		default:
-			lgbp.endPoint = D2D1::Point2F(rc.left, rc.bottom);
+			lgbp.endPoint = DPointFromPoint(Point(rc.left, rc.bottom));
 			break;
 		}
 
 		std::vector<D2D1_GRADIENT_STOP> gradientStops;
 		for (const ColourStop &stop : stops) {
-			gradientStops.push_back({ stop.position, ColorFromColourAlpha(stop.colour) });
+			gradientStops.push_back({ static_cast<FLOAT>(stop.position), ColorFromColourAlpha(stop.colour) });
 		}
 		ID2D1GradientStopCollection *pGradientStops = nullptr;
 		HRESULT hr = pRenderTarget->CreateGradientStopCollection(
@@ -1725,7 +1733,8 @@ void SurfaceD2D::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 		hr = pRenderTarget->CreateLinearGradientBrush(
 			lgbp, pGradientStops, &pBrushLinear);
 		if (SUCCEEDED(hr) && pBrushLinear) {
-			const D2D1_RECT_F rectangle = D2D1::RectF(std::round(rc.left), rc.top, std::round(rc.right), rc.bottom);
+			const D2D1_RECT_F rectangle = RectangleFromPRectangle(PRectangle(
+				std::round(rc.left), rc.top, std::round(rc.right), rc.bottom));
 			pRenderTarget->FillRectangle(&rectangle, pBrushLinear);
 			ReleaseUnknown(pBrushLinear);
 		}
@@ -1762,19 +1771,19 @@ void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 void SurfaceD2D::Ellipse(PRectangle rc, FillStroke fillStroke) {
 	if (!pRenderTarget)
 		return;
-	const D2D1_POINT_2F centre = D2D1::Point2F((rc.left + rc.right) / 2.0f, (rc.top + rc.bottom) / 2.0f);
+	const D2D1_POINT_2F centre = DPointFromPoint(rc.Centre());
 
-	const FLOAT radiusFill = rc.Width() / 2.0f - fillStroke.stroke.width;
+	const FLOAT radiusFill = static_cast<FLOAT>(rc.Width() / 2.0f - fillStroke.stroke.width);
 	const D2D1_ELLIPSE ellipseFill = { centre, radiusFill, radiusFill };
 
 	D2DPenColourAlpha(fillStroke.fill.colour);
 	pRenderTarget->FillEllipse(ellipseFill, pBrush);
 
-	const FLOAT radiusOutline = rc.Width() / 2.0f - fillStroke.stroke.width / 2.0f;
+	const FLOAT radiusOutline = static_cast<FLOAT>(rc.Width() / 2.0f - fillStroke.stroke.width / 2.0f);
 	const D2D1_ELLIPSE ellipseOutline = { centre, radiusOutline, radiusOutline };
 
 	D2DPenColourAlpha(fillStroke.stroke.colour);
-	pRenderTarget->DrawEllipse(ellipseOutline, pBrush, fillStroke.stroke.width);
+	pRenderTarget->DrawEllipse(ellipseOutline, pBrush, fillStroke.stroke.WidthF());
 }
 
 void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
@@ -1785,12 +1794,12 @@ void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 		RectangleDraw(rc, fillStroke);
 		return;
 	}
-	const float radius = rc.Height() / 2.0f;
-	const float radiusFill = radius - fillStroke.stroke.width;
-	const XYPOSITION halfStroke = fillStroke.stroke.width / 2.0f;
+	const FLOAT radius = static_cast<FLOAT>(rc.Height() / 2.0);
+	const FLOAT radiusFill = radius - fillStroke.stroke.WidthF();
+	const FLOAT halfStroke = fillStroke.stroke.WidthF() / 2.0f;
 	if (ends == Surface::Ends::semiCircles) {
-		const D2D1_RECT_F rect = { rc.left, rc.top, rc.right, rc.bottom };
-		D2D1_ROUNDED_RECT roundedRectFill = { RectangleInset(rect, fillStroke.stroke.width),
+		const D2D1_RECT_F rect = RectangleFromPRectangle(rc);
+		D2D1_ROUNDED_RECT roundedRectFill = { RectangleInset(rect, fillStroke.stroke.WidthF()),
 			radiusFill, radiusFill };
 		D2DPenColourAlpha(fillStroke.fill.colour);
 		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
@@ -1798,7 +1807,7 @@ void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 		D2D1_ROUNDED_RECT roundedRect = { RectangleInset(rect, halfStroke),
 			radius, radius };
 		D2DPenColourAlpha(fillStroke.stroke.colour);
-		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.width);
+		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.WidthF());
 	} else {
 		const Ends leftSide = static_cast<Ends>(static_cast<int>(ends) & 0xf);
 		const Ends rightSide = static_cast<Ends>(static_cast<int>(ends) & 0xf0);
@@ -1814,19 +1823,19 @@ void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 		if (SUCCEEDED(hrSink) && pSink) {
 			switch (leftSide) {
 				case Ends::leftFlat:
-					pSink->BeginFigure(D2D1::Point2F(rc.left + halfStroke, rc.top + halfStroke), D2D1_FIGURE_BEGIN_FILLED);
-					pSink->AddLine(D2D1::Point2F(rc.left + halfStroke, rc.bottom - halfStroke));
+					pSink->BeginFigure(DPointFromPoint(Point(rc.left + halfStroke, rc.top + halfStroke)), D2D1_FIGURE_BEGIN_FILLED);
+					pSink->AddLine(DPointFromPoint(Point(rc.left + halfStroke, rc.bottom - halfStroke)));
 					break;
 				case Ends::leftAngle:
-					pSink->BeginFigure(D2D1::Point2F(rcInner.left + halfStroke, rc.top + halfStroke), D2D1_FIGURE_BEGIN_FILLED);
-					pSink->AddLine(D2D1::Point2F(rc.left + halfStroke, rc.Centre().y));
-					pSink->AddLine(D2D1::Point2F(rcInner.left + halfStroke, rc.bottom - halfStroke));
+					pSink->BeginFigure(DPointFromPoint(Point(rcInner.left + halfStroke, rc.top + halfStroke)), D2D1_FIGURE_BEGIN_FILLED);
+					pSink->AddLine(DPointFromPoint(Point(rc.left + halfStroke, rc.Centre().y)));
+					pSink->AddLine(DPointFromPoint(Point(rcInner.left + halfStroke, rc.bottom - halfStroke)));
 					break;
 				case Ends::semiCircles:
 				default: {
-						pSink->BeginFigure(D2D1::Point2F(rcInner.left + halfStroke, rc.top + halfStroke), D2D1_FIGURE_BEGIN_FILLED);
+						pSink->BeginFigure(DPointFromPoint(Point(rcInner.left + halfStroke, rc.top + halfStroke)), D2D1_FIGURE_BEGIN_FILLED);
 						D2D1_ARC_SEGMENT segment{};
-						segment.point = D2D1::Point2F(rcInner.left + halfStroke, rc.bottom - halfStroke);
+						segment.point = DPointFromPoint(Point(rcInner.left + halfStroke, rc.bottom - halfStroke));
 						segment.size = D2D1::SizeF(radiusFill, radiusFill);
 						segment.rotationAngle = 0.0f;
 						segment.sweepDirection = D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
@@ -1838,19 +1847,19 @@ void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 
 			switch (rightSide) {
 			case Ends::rightFlat:
-				pSink->AddLine(D2D1::Point2F(rc.right - halfStroke, rc.bottom - halfStroke));
-				pSink->AddLine(D2D1::Point2F(rc.right - halfStroke, rc.top + halfStroke));
+				pSink->AddLine(DPointFromPoint(Point(rc.right - halfStroke, rc.bottom - halfStroke)));
+				pSink->AddLine(DPointFromPoint(Point(rc.right - halfStroke, rc.top + halfStroke)));
 				break;
 			case Ends::rightAngle:
-				pSink->AddLine(D2D1::Point2F(rcInner.right - halfStroke, rc.bottom - halfStroke));
-				pSink->AddLine(D2D1::Point2F(rc.right - halfStroke, rc.Centre().y));
-				pSink->AddLine(D2D1::Point2F(rcInner.right - halfStroke, rc.top + halfStroke));
+				pSink->AddLine(DPointFromPoint(Point(rcInner.right - halfStroke, rc.bottom - halfStroke)));
+				pSink->AddLine(DPointFromPoint(Point(rc.right - halfStroke, rc.Centre().y)));
+				pSink->AddLine(DPointFromPoint(Point(rcInner.right - halfStroke, rc.top + halfStroke)));
 				break;
 			case Ends::semiCircles:
 			default: {
-					pSink->AddLine(D2D1::Point2F(rcInner.right - halfStroke, rc.bottom - halfStroke));
+					pSink->AddLine(DPointFromPoint(Point(rcInner.right - halfStroke, rc.bottom - halfStroke)));
 					D2D1_ARC_SEGMENT segment{};
-					segment.point = D2D1::Point2F(rcInner.right - halfStroke, rc.top + halfStroke);
+					segment.point = DPointFromPoint(Point(rcInner.right - halfStroke, rc.top + halfStroke));
 					segment.size = D2D1::SizeF(radiusFill, radiusFill);
 					segment.rotationAngle = 0.0f;
 					segment.sweepDirection = D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
@@ -1868,7 +1877,7 @@ void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 		D2DPenColourAlpha(fillStroke.fill.colour);
 		pRenderTarget->FillGeometry(pathGeometry, pBrush);
 		D2DPenColourAlpha(fillStroke.stroke.colour);
-		pRenderTarget->DrawGeometry(pathGeometry, pBrush, fillStroke.stroke.width);
+		pRenderTarget->DrawGeometry(pathGeometry, pBrush, fillStroke.stroke.WidthF());
 		ReleaseUnknown(pathGeometry);
 	}
 }
@@ -1879,7 +1888,8 @@ void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	const HRESULT hr = surfOther.GetBitmap(&pBitmap);
 	if (SUCCEEDED(hr) && pBitmap) {
 		const D2D1_RECT_F rcDestination = RectangleFromPRectangle(rc);
-		D2D1_RECT_F rcSource = {from.x, from.y, from.x + rc.Width(), from.y + rc.Height()};
+		D2D1_RECT_F rcSource = RectangleFromPRectangle(PRectangle(
+			from.x, from.y, from.x + rc.Width(), from.y + rc.Height()));
 		pRenderTarget->DrawBitmap(pBitmap, rcDestination, 1.0f,
 			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, rcSource);
 		ReleaseUnknown(pBitmap);
@@ -1966,7 +1976,7 @@ COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE BlobInline::GetMetrics(
 ) {
 	if (!metrics)
 		return E_POINTER;
-	metrics->width = width;
+	metrics->width = static_cast<FLOAT>(width);
 	metrics->height = 2;
 	metrics->baseline = 1;
 	metrics->supportsSideways = FALSE;
@@ -2038,7 +2048,7 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 
 		XYPOSITION representationWidth = screenLine->RepresentationWidth(bytePosition);
 		if ((representationWidth == 0.0f) && (screenLine->Text()[bytePosition] == '\t')) {
-			Point realPt;
+			D2D1_POINT_2F realPt {};
 			DWRITE_HIT_TEST_METRICS realCaretMetrics {};
 			textLayout->HitTestTextPosition(
 				layoutPosition,
@@ -2124,8 +2134,13 @@ ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) {
 	buffer = ReplaceRepresentation(screenLine->Text());
 
 	// Create a text layout
-	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(buffer.c_str(), static_cast<UINT32>(buffer.length()),
-		pfm->pTextFormat, screenLine->Width(), screenLine->Height(), &textLayout);
+	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(
+		buffer.c_str(),
+		static_cast<UINT32>(buffer.length()),
+		pfm->pTextFormat,
+		static_cast<FLOAT>(screenLine->Width()),
+		static_cast<FLOAT>(screenLine->Height()),
+		&textLayout);
 	if (!SUCCEEDED(hrCreate)) {
 		return;
 	}
@@ -2154,7 +2169,7 @@ size_t ScreenLineLayout::PositionFromX(XYPOSITION xDistance, bool charPosition) 
 	DWRITE_HIT_TEST_METRICS caretMetrics {};
 
 	textLayout->HitTestPoint(
-		xDistance,
+		static_cast<FLOAT>(xDistance),
 		0.0f,
 		&isTrailingHit,
 		&isInside,
@@ -2202,7 +2217,7 @@ XYPOSITION ScreenLineLayout::XFromPosition(size_t caretPosition) {
 
 	// Translate text character offset to point x,y.
 	DWRITE_HIT_TEST_METRICS caretMetrics {};
-	Point pt;
+	D2D1_POINT_2F pt {};
 
 	textLayout->HitTestTextPosition(
 		static_cast<UINT32>(position),
@@ -2293,10 +2308,15 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 
 		// Explicitly creating a text layout appears a little faster
 		IDWriteTextLayout *pTextLayout = nullptr;
-		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat,
-				rc.Width(), rc.Height(), &pTextLayout);
+		const HRESULT hr = pIDWriteFactory->CreateTextLayout(
+				tbuf.buffer,
+				tbuf.tlen,
+				pTextFormat,
+				static_cast<FLOAT>(rc.Width()),
+				static_cast<FLOAT>(rc.Height()),
+				&pTextLayout);
 		if (SUCCEEDED(hr)) {
-			D2D1_POINT_2F origin = {rc.left, ybase-yAscent};
+			D2D1_POINT_2F origin = DPointFromPoint(Point(rc.left, ybase-yAscent));
 			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, d2dDrawTextOptions);
 			ReleaseUnknown(pTextLayout);
 		}

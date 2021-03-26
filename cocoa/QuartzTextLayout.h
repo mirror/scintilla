@@ -72,7 +72,7 @@ public:
 	* @param gc The CGContext in which to draw the text.
 	* @param x The x axis position to draw the baseline in the current CGContext.
 	* @param y The y axis position to draw the baseline in the current CGContext. */
-	void draw(CGContextRef gc, float x, float y) {
+	void draw(CGContextRef gc, double x, double y) {
 		if (!mLine)
 			return;
 
