@@ -755,12 +755,12 @@ constexpr byte AlphaScaled(unsigned char component, unsigned int alpha) noexcept
 	return static_cast<byte>(component * alpha / 255);
 }
 
-constexpr DWORD dwordMultiplied(ColourDesired colour, unsigned int alpha) noexcept {
+constexpr DWORD dwordMultiplied(ColourAlpha colour) noexcept {
 	return dwordFromBGRA(
-		AlphaScaled(colour.GetBlue(), alpha),
-		AlphaScaled(colour.GetGreen(), alpha),
-		AlphaScaled(colour.GetRed(), alpha),
-		static_cast<byte>(alpha));
+		AlphaScaled(colour.GetBlue(), colour.GetAlpha()),
+		AlphaScaled(colour.GetGreen(), colour.GetAlpha()),
+		AlphaScaled(colour.GetRed(), colour.GetAlpha()),
+		colour.GetAlpha());
 }
 
 class DIBSection {
@@ -894,8 +894,8 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke
 			const LONG corner = std::min(static_cast<LONG>(cornerSize), (std::min(size.cx, size.cy) / 2) - 2);
 
 			constexpr DWORD valEmpty = dwordFromBGRA(0,0,0,0);
-			const DWORD valFill = dwordMultiplied(fillStroke.fill.colour, fillStroke.fill.colour.GetAlpha());
-			const DWORD valOutline = dwordMultiplied(fillStroke.stroke.colour, fillStroke.stroke.colour.GetAlpha());
+			const DWORD valFill = dwordMultiplied(fillStroke.fill.colour);
+			const DWORD valOutline = dwordMultiplied(fillStroke.stroke.colour);
 
 			// Draw a framed rectangle
 			for (int y=0; y<size.cy; y++) {
@@ -942,7 +942,7 @@ void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 				// Find y/height proportional colour
 				const float proportion = y / (rc.Height() - 1.0f);
 				const ColourAlpha mixed = GradientValue(stops, proportion);
-				const DWORD valFill = dwordMultiplied(mixed, mixed.GetAlpha());
+				const DWORD valFill = dwordMultiplied(mixed);
 				for (LONG x = 0; x < size.cx; x++) {
 					section.SetPixel(x, y, valFill);
 				}
@@ -952,7 +952,7 @@ void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 				// Find x/width proportional colour
 				const float proportion = x / (rc.Width() - 1.0f);
 				const ColourAlpha mixed = GradientValue(stops, proportion);
-				const DWORD valFill = dwordMultiplied(mixed, mixed.GetAlpha());
+				const DWORD valFill = dwordMultiplied(mixed);
 				for (LONG y = 0; y < size.cy; y++) {
 					section.SetPixel(x, y, valFill);
 				}
