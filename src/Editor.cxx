@@ -6946,20 +6946,44 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
+	case SCI_MARKERSETBACK:
+		if (wParam <= MARKER_MAX)
+			vs.markers[wParam].back = ColourDesired(static_cast<int>(lParam));
+		InvalidateStyleData();
+		RedrawSelMargin();
+		break;
 	case SCI_MARKERSETBACKSELECTED:
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].backSelected = ColourDesired(static_cast<int>(lParam));
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
-	case SCI_MARKERENABLEHIGHLIGHT:
-		marginView.highlightDelimiter.isEnabled = wParam == 1;
+	case SCI_MARKERSETFORETRANSLUCENT:
+		if (wParam <= MARKER_MAX)
+			vs.markers[wParam].fore = ColourAlpha(static_cast<int>(lParam));
+		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
-	case SCI_MARKERSETBACK:
+	case SCI_MARKERSETBACKTRANSLUCENT:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].back = ColourDesired(static_cast<int>(lParam));
+			vs.markers[wParam].back = ColourAlpha(static_cast<int>(lParam));
 		InvalidateStyleData();
+		RedrawSelMargin();
+		break;
+	case SCI_MARKERSETBACKSELECTEDTRANSLUCENT:
+		if (wParam <= MARKER_MAX)
+			vs.markers[wParam].backSelected = ColourAlpha(static_cast<int>(lParam));
+		InvalidateStyleData();
+		RedrawSelMargin();
+		break;
+	case SCI_MARKERSETSTROKEWIDTH:
+		if (wParam <= MARKER_MAX)
+			vs.markers[wParam].strokeWidth = lParam / 100.0f;
+		InvalidateStyleData();
+		RedrawSelMargin();
+		break;
+	case SCI_MARKERENABLEHIGHLIGHT:
+		marginView.highlightDelimiter.isEnabled = wParam == 1;
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETALPHA:

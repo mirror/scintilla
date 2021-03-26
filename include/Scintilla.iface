@@ -404,6 +404,18 @@ set void MarkerSetBack=2042(int markerNumber, colour back)
 # Set the background colour used for a particular marker number when its folding block is selected.
 set void MarkerSetBackSelected=2292(int markerNumber, colour back)
 
+# Set the foreground colour used for a particular marker number.
+set void MarkerSetForeTranslucent=2294(int markerNumber, colouralpha fore)
+
+# Set the background colour used for a particular marker number.
+set void MarkerSetBackTranslucent=2295(int markerNumber, colouralpha back)
+
+# Set the background colour used for a particular marker number when its folding block is selected.
+set void MarkerSetBackSelectedTranslucent=2296(int markerNumber, colouralpha back)
+
+# Set the width of strokes used in .01 pixels so 50  = 1/2 pixel width.
+set void MarkerSetStrokeWidth=2297(int markerNumber, int hundredths)
+
 # Enable/disable highlight for current folding block (smallest one that contains the caret)
 fun void MarkerEnableHighlight=2293(bool enabled,)
 

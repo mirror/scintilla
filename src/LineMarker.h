@@ -22,10 +22,11 @@ public:
 	enum class FoldPart { undefined, head, body, tail, headWithTail };
 
 	int markType = SC_MARK_CIRCLE;
-	ColourDesired fore = ColourDesired(0, 0, 0);
-	ColourDesired back = ColourDesired(0xff, 0xff, 0xff);
-	ColourDesired backSelected = ColourDesired(0xff, 0x00, 0x00);
+	ColourAlpha fore = ColourAlpha(0, 0, 0);
+	ColourAlpha back = ColourAlpha(0xff, 0xff, 0xff);
+	ColourAlpha backSelected = ColourAlpha(0xff, 0x00, 0x00);
 	int alpha = SC_ALPHA_NOALPHA;
+	XYPOSITION strokeWidth = 1.0f;
 	std::unique_ptr<XPM> pxpm;
 	std::unique_ptr<RGBAImage> image;
 	/** Some platforms, notably PLAT_CURSES, do not support Scintilla's native

@@ -252,6 +252,17 @@
         </tr>
 
         <tr>
+          <th align="left" id="colouralpha"><code>colouralpha</code></th>
+
+          <td>Colours are set using the RGBA format (Red, Green, Blue, Alpha).
+          This is similar to <a class="seealso" href="#colour">colour</a> but with a byte
+          of <a class="seealso" href="#colour">alpha</a> added. They are combined as:
+          red | (green &lt;&lt; 8) | (blue &lt;&lt; 16) | (alpha &lt;&lt; 24).
+          Fully opaque uses an alpha of 255. SC_ALPHA_NOALPHA is not possible for
+          colouralpha values.</td>
+        </tr>
+
+        <tr>
           <th align="left" id="alpha"><code>alpha</code></th>
 
           <td>Translucency is set using an alpha value.
@@ -4051,7 +4062,7 @@ struct Sci_TextToFind {
      For example, on Win32, Direct2D supports drawing translucent lines but GDI does not so
      <code>SCI_SUPPORTSFEATURE(SC_SUPPORTS_TRANSLUCENT_STROKE)</code>
      will return 1 for Direct2D and 0 for GDI. Its possible that translucent line drawing will be implemented in a future
-     revision to the GDI platform layer or will be implmented on particular Windows versions.
+     revision to the GDI platform layer or will be implemented on particular Windows versions.
      This call allows applications to tailor their settings: perhaps displaying a box with translucent coloured fill on Direct2D but
      a hollow box on GDI.</p>
      <p>The features that can be queried are:</p>
@@ -4321,12 +4332,15 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_MARKERDEFINERGBAIMAGE">SCI_MARKERDEFINERGBAIMAGE(int markerNumber,
     const char *pixels)</a><br />
      <a class="message" href="#SCI_MARKERSYMBOLDEFINED">SCI_MARKERSYMBOLDEFINED(int markerNumber) &rarr; int</a><br />
-     <a class="message" href="#SCI_MARKERSETFORE">SCI_MARKERSETFORE(int markerNumber, colour
-    fore)</a><br />
-     <a class="message" href="#SCI_MARKERSETBACK">SCI_MARKERSETBACK(int markerNumber, colour
-    back)</a><br />
+     <a class="message" href="#SCI_MARKERSETFORE">SCI_MARKERSETFORE(int markerNumber, colour fore)</a><br />
+     <a class="message" href="#SCI_MARKERSETFORETRANSLUCENT">SCI_MARKERSETFORETRANSLUCENT(int markerNumber, colouralpha fore)</a><br />
+     <a class="message" href="#SCI_MARKERSETBACK">SCI_MARKERSETBACK(int markerNumber, colour back)</a><br />
+     <a class="message" href="#SCI_MARKERSETBACKTRANSLUCENT">SCI_MARKERSETBACKTRANSLUCENT(int markerNumber, colouralpha back)</a><br />
     <a class="message" href="#SCI_MARKERSETBACKSELECTED">SCI_MARKERSETBACKSELECTED(int markerNumber, colour
     back)</a><br />
+    <a class="message" href="#SCI_MARKERSETBACKSELECTEDTRANSLUCENT">SCI_MARKERSETBACKSELECTEDTRANSLUCENT(int markerNumber, colouralpha
+    back)</a><br />
+    <a class="message" href="#SCI_MARKERSETSTROKEWIDTH">SCI_MARKERSETSTROKEWIDTH(int markerNumber, int hundredths)</a><br />
     <a class="message" href="#SCI_MARKERENABLEHIGHLIGHT">SCI_MARKERENABLEHIGHLIGHT(bool enabled)</a><br />
      <a class="message" href="#SCI_MARKERSETALPHA">SCI_MARKERSETALPHA(int markerNumber, alpha alpha)</a><br />
      <a class="message" href="#SCI_MARKERADD">SCI_MARKERADD(line line, int markerNumber) &rarr; int</a><br />
@@ -4540,18 +4554,30 @@ struct Sci_TextToFind {
      or <code>SC_MARK_PIXMAP</code> if defined with <code>SCI_MARKERDEFINEPIXMAP</code>
      or <code>SC_MARK_RGBAIMAGE</code> if defined with <code>SCI_MARKERDEFINERGBAIMAGE</code>.</p>
 
-    <p><b id="SCI_MARKERSETFORE">SCI_MARKERSETFORE(int markerNumber, <a class="jump" href="#colour">colour</a> fore)</b><br />
+    <p>
+     <b id="SCI_MARKERSETFORE">SCI_MARKERSETFORE(int markerNumber, <a class="jump" href="#colour">colour</a> fore)</b><br />
+     <b id="SCI_MARKERSETFORETRANSLUCENT">SCI_MARKERSETFORETRANSLUCENT(int markerNumber, <a class="jump" href="#colouralpha">colouralpha</a> fore)</b><br />
      <b id="SCI_MARKERSETBACK">SCI_MARKERSETBACK(int markerNumber, <a class="jump" href="#colour">colour</a> back)</b><br />
-     These two messages set the foreground and background colour of a marker number.<br />
+     <b id="SCI_MARKERSETBACKTRANSLUCENT">SCI_MARKERSETBACKTRANSLUCENT(int markerNumber, <a class="jump" href="#colouralpha">colouralpha</a> back)</b><br />
+     These messages set the foreground and background colour of a marker number.
+     The <code>TRANSLUCENT</code> variants can define different degrees of opacity.<br />
      <b id="SCI_MARKERSETBACKSELECTED">SCI_MARKERSETBACKSELECTED(int markerNumber, <a class="jump" href="#colour">colour</a> back)</b><br />
+     <b id="SCI_MARKERSETBACKSELECTEDTRANSLUCENT">SCI_MARKERSETBACKSELECTEDTRANSLUCENT(int markerNumber, <a class="jump" href="#colouralpha">colouralpha</a> back)</b><br />
      This message sets the highlight background colour of a marker number when its folding block is selected. The default colour is #FF0000.</p>
+
+     <p><b id="SCI_MARKERSETSTROKEWIDTH">SCI_MARKERSETSTROKEWIDTH(int markerNumber, int hundredths)</b><br />
+     This message sets the stroke width used to draw the marker in hundredths of a pixel.
+     The default value is 100 indicating a single pixel wide line.</p>
+
      <p><b id="SCI_MARKERENABLEHIGHLIGHT">SCI_MARKERENABLEHIGHLIGHT(bool enabled)</b><br />
      This message allows to enable/disable the highlight folding block when it is selected. (i.e. block that contains the caret)</p>
+
      <p><b id="SCI_MARKERSETALPHA">SCI_MARKERSETALPHA(int markerNumber,
      <a class="jump" href="#alpha">alpha</a> alpha)</b><br />
      When markers are drawn in the content area, either because there is no margin for them or
      they are of <code>SC_MARK_BACKGROUND</code> or <code>SC_MARK_UNDERLINE</code> types, they may be drawn translucently by
-     setting an alpha value.</p>
+     setting an alpha value. This is only for the content area - in margins, translucency is achieved through the <code>SCI_MARKERSET&hellip;TRANSLUCENT</code>
+     methods.</p>
 
     <p><b id="SCI_MARKERADD">SCI_MARKERADD(line line, int markerNumber) &rarr; int</b><br />
      This message adds marker number <code class="parameter">markerNumber</code> to a line. The message returns -1 if
@@ -5009,8 +5035,7 @@ struct Sci_TextToFind {
     <b id="SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE(position start, position lengthFill)</b><br />
     <b id="SCI_INDICATORCLEARRANGE">SCI_INDICATORCLEARRANGE(position start, position lengthClear)</b><br />
     These two messages fill or clear a range for the current indicator.
-    <code>SCI_INDICATORFILLRANGE</code> fills with the
-    the current value.
+    <code>SCI_INDICATORFILLRANGE</code> fills with the current value.
     </p>
 
     <p>

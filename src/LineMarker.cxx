@@ -34,6 +34,7 @@ LineMarker::LineMarker(const LineMarker &other) {
 	fore = other.fore;
 	back = other.back;
 	backSelected = other.backSelected;
+	strokeWidth = other.strokeWidth;
 	alpha = other.alpha;
 	if (other.pxpm)
 		pxpm = std::make_unique<XPM>(*other.pxpm);
@@ -53,6 +54,7 @@ LineMarker &LineMarker::operator=(const LineMarker &other) {
 		fore = other.fore;
 		back = other.back;
 		backSelected = other.backSelected;
+		strokeWidth = other.strokeWidth;
 		alpha = other.alpha;
 		if (other.pxpm)
 			pxpm = std::make_unique<XPM>(*other.pxpm);
@@ -88,7 +90,7 @@ enum class Expansion { Minus, Plus };
 enum class Shape { Square, Circle };
 
 void DrawSymbol(Surface *surface, Shape shape, Expansion expansion, PRectangle rcSymbol, XYPOSITION widthStroke,
-	ColourDesired colourFill, ColourDesired colourFrame, ColourDesired colourFrameRight, ColourDesired colourExpansion) {
+	ColourAlpha colourFill, ColourAlpha colourFrame, ColourAlpha colourFrameRight, ColourAlpha colourExpansion) {
 
 	const FillStroke fillStroke(colourFill, colourFrame, widthStroke);
 	const PRectangle rcSymbolLeft = Side(rcSymbol, Edge::left, (rcSymbol.Width() + widthStroke) / 2.0f);
@@ -127,7 +129,7 @@ void DrawSymbol(Surface *surface, Shape shape, Expansion expansion, PRectangle r
 	}
 }
 
-void DrawTail(Surface *surface, XYPOSITION leftLine, XYPOSITION rightTail, XYPOSITION centreY, XYPOSITION widthSymbolStroke, ColourDesired fill) {
+void DrawTail(Surface *surface, XYPOSITION leftLine, XYPOSITION rightTail, XYPOSITION centreY, XYPOSITION widthSymbolStroke, ColourAlpha fill) {
 	const XYPOSITION slopeLength = 2.0f + widthSymbolStroke;
 	const XYPOSITION strokeTop = centreY + slopeLength;
 	const XYPOSITION halfWidth = widthSymbolStroke / 2.0f;
@@ -147,11 +149,10 @@ void DrawTail(Surface *surface, XYPOSITION leftLine, XYPOSITION rightTail, XYPOS
 void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, FoldPart part) const {
 	// Assume: edges of rcWhole are integers.
 	// Code can only really handle integer strokeWidth.
-	constexpr XYPOSITION strokeWidth = 1.0f;
 
-	ColourDesired colourHead = back;
-	ColourDesired colourBody = back;
-	ColourDesired colourTail = back;
+	ColourAlpha colourHead = back;
+	ColourAlpha colourBody = back;
+	ColourAlpha colourTail = back;
 
 	switch (part) {
 	case FoldPart::head:
@@ -249,11 +250,11 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 		break;
 
 	case SC_MARK_BOXPLUSCONNECTED: {
-			const ColourDesired colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
+			const ColourAlpha colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
 			surface->FillRectangle(rcBelowSymbol, colourBelow);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
 
-			const ColourDesired colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Square, Expansion::Plus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}
@@ -269,7 +270,7 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 			surface->FillRectangle(rcBelowSymbol, colourHead);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
 
-			const ColourDesired colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Square, Expansion::Minus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}
@@ -281,11 +282,11 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 		break;
 
 	case SC_MARK_CIRCLEPLUSCONNECTED: {
-			const ColourDesired colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
+			const ColourAlpha colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
 			surface->FillRectangle(rcBelowSymbol, colourBelow);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
 
-			const ColourDesired colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Circle, Expansion::Plus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}
@@ -300,7 +301,7 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 	case SC_MARK_CIRCLEMINUSCONNECTED: {
 			surface->FillRectangle(rcBelowSymbol, colourHead);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
-			const ColourDesired colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Circle, Expansion::Minus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}
@@ -311,7 +312,6 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 
 void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, FoldPart part, int marginStyle) const {
 	// This is to satisfy the changed API - eventually the stroke width will be exposed to clients
-	constexpr float strokeWidth = 1.0f;
 
 	if (customDraw) {
 		customDraw(surface, rcWhole, fontForCharacter, static_cast<int>(part), marginStyle, this);
