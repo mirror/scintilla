@@ -1394,7 +1394,7 @@ public:
 	void Select(int n) override;
 	int GetSelection() override;
 	int Find(const char *prefix) override;
-	void GetValue(int n, char *value, int len) override;
+	std::string GetValue(int n) override;
 	void RegisterRGBA(int type, std::unique_ptr<RGBAImage> image);
 	void RegisterImage(int type, const char *xpm_data) override;
 	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
@@ -1961,7 +1961,7 @@ int ListBoxX::Find(const char *prefix) {
 	return -1;
 }
 
-void ListBoxX::GetValue(int n, char *value, int len) {
+std::string ListBoxX::GetValue(int n) {
 	char *text = nullptr;
 	GtkTreeIter iter {};
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
@@ -1969,12 +1969,12 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	if (valid) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &text, -1);
 	}
-	if (text && len > 0) {
-		g_strlcpy(value, text, len);
-	} else {
-		value[0] = '\0';
+	std::string value;
+	if (text) {
+		value = text;
 	}
 	g_free(text);
+	return value;
 }
 
 // g_return_if_fail causes unnecessary compiler warning in release compile.

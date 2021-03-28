@@ -1923,7 +1923,7 @@ public:
 	void Select(int n) override;
 	int GetSelection() override;
 	int Find(const char *prefix) override;
-	void GetValue(int n, char *value, int len) override;
+	std::string GetValue(int n) override;
 	void RegisterImage(int type, const char *xpm_data) override;
 	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
 	void ClearRegisteredImages() override;
@@ -2145,13 +2145,12 @@ int ListBoxImpl::Find(const char *prefix) {
 	return - 1;
 }
 
-void ListBoxImpl::GetValue(int n, char *value, int len) {
+std::string ListBoxImpl::GetValue(int n) {
 	const char *textString = ld.GetString(n);
-	if (textString == NULL) {
-		value[0] = '\0';
-		return;
+	if (textString) {
+		return textString;
 	}
-	strlcpy(value, textString, len);
+	return std::string();
 }
 
 void ListBoxImpl::RegisterImage(int type, const char *xpm_data) {

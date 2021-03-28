@@ -2967,7 +2967,7 @@ public:
 	void Select(int n) override;
 	int GetSelection() override;
 	int Find(const char *prefix) override;
-	void GetValue(int n, char *value, int len) override;
+	std::string GetValue(int n) override;
 	void RegisterImage(int type, const char *xpm_data) override;
 	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
 	void ClearRegisteredImages() override;
@@ -3122,10 +3122,9 @@ int ListBoxX::Find(const char *) {
 	return LB_ERR;
 }
 
-void ListBoxX::GetValue(int n, char *value, int len) {
+std::string ListBoxX::GetValue(int n) {
 	const ListItemData item = lti.Get(n);
-	strncpy(value, item.text, len);
-	value[len-1] = '\0';
+	return item.text;
 }
 
 void ListBoxX::RegisterImage(int type, const char *xpm_data) {

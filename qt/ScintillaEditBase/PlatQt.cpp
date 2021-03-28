@@ -953,7 +953,7 @@ public:
 	void Select(int n) override;
 	int GetSelection() override;
 	int Find(const char *prefix) override;
-	void GetValue(int n, char *value, int len) override;
+	std::string GetValue(int n) override;
 	void RegisterImage(int type, const char *xpmData) override;
 	void RegisterRGBAImage(int type, int width, int height,
 		const unsigned char *pixelsImage) override;
@@ -1128,15 +1128,13 @@ int ListBoxImpl::Find(const char *prefix)
 
 	return result;
 }
-void ListBoxImpl::GetValue(int n, char *value, int len)
+std::string ListBoxImpl::GetValue(int n)
 {
 	ListWidget *list = GetWidget();
 	QListWidgetItem *item = list->item(n);
 	QString str = item->data(Qt::DisplayRole).toString();
 	QByteArray bytes = unicodeMode ? str.toUtf8() : str.toLocal8Bit();
-
-	strncpy(value, bytes.constData(), len);
-	value[len-1] = '\0';
+	return std::string(bytes.constData());
 }
 
 void ListBoxImpl::RegisterQPixmapImage(int type, const QPixmap& pm)

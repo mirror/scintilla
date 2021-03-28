@@ -329,7 +329,7 @@ public:
 	virtual void Select(int n)=0;
 	virtual int GetSelection()=0;
 	virtual int Find(const char *prefix)=0;
-	virtual void GetValue(int n, char *value, int len)=0;
+	virtual std::string GetValue(int n)=0;
 	virtual void RegisterImage(int type, const char *xpm_data)=0;
 	virtual void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) = 0;
 	virtual void ClearRegisteredImages()=0;
