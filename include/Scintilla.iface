@@ -53,8 +53,8 @@
 ##     bool -> integer, 1=true, 0=false
 ##     position -> intptr_t position in a document
 ##     line -> intptr_t line in a document
-##     colour -> colour integer containing red, green, and blue bytes.
-##     colouralpha -> colour integer containing red, green, blue, and alpha bytes.
+##     colour -> colour integer containing red, green, and blue bytes with red as least-significant and blue as most.
+##     colouralpha -> colour integer containing red, green, blue, and alpha bytes with red as least-significant and alpha as most.
 ##     string -> pointer to const character
 ##     stringresult -> pointer to character, NULL-> return size of result
 ##     cells -> pointer to array of cells, each cell containing a style byte and character byte
@@ -664,6 +664,29 @@ set void StyleSetCharacterSet=2066(int style, CharacterSet characterSet)
 
 # Set a style to be a hotspot or not.
 set void StyleSetHotSpot=2409(int style, bool hotspot)
+
+enu Element=SC_ELEMENT_
+val SC_ELEMENT_LIST=0
+val SC_ELEMENT_LIST_BACK=1
+val SC_ELEMENT_LIST_SELECTED=2
+val SC_ELEMENT_LIST_SELECTED_BACK=3
+
+# Set the colour of an element. Translucency (alpha) may or may not be significant
+# and this may depend on the platform. The alpha byte should commonly be 0xff for opaque.
+set void SetElementColour=2753(Element element, colouralpha colourElement)
+
+# Get the colour of an element.
+get colouralpha GetElementColour=2754(Element element,)
+
+# Use the default or platform-defined colour for an element.
+fun void ResetElementColour=2755(Element element,)
+
+# Get whether an element has been set by SetElementColour.
+# When false, a platform-defined or default colour is used.
+get bool GetElementIsSet=2756(Element element,)
+
+# Get whether an element supports translucency.
+get bool GetElementAllowsTranslucent=2757(Element element,)
 
 # Set the foreground colour of the main and additional selections and whether to use this setting.
 fun void SetSelFore=2067(bool useSetting, colour fore)

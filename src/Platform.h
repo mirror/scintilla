@@ -304,6 +304,10 @@ public:
 };
 
 struct ListOptions {
+	std::optional<ColourAlpha> fore;
+	std::optional<ColourAlpha> back;
+	std::optional<ColourAlpha> foreSelected;
+	std::optional<ColourAlpha> backSelected;
 };
 
 class ListBox : public Window {

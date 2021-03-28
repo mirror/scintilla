@@ -13,6 +13,7 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <set>
 #include <optional>
 #include <algorithm>
 #include <memory>
@@ -515,6 +516,20 @@ void ViewStyle::AddMultiEdge(uptr_t wParam, sptr_t lParam) {
 				return a.column < b.column;
 			}),
 		EdgeProperties(column, lParam));
+}
+
+std::optional<ColourAlpha> ViewStyle::ElementColour(int index) const noexcept {
+	auto search = elementColours.find(index);
+	if (search != elementColours.end()) {
+		if (search->second.has_value()) {
+			return search->second;
+		}
+	}
+	return {};
+}
+
+bool ViewStyle::ElementAllowsTranslucent(int index) const noexcept {
+	return elementAllowsTranslucent.count(index) > 0;
 }
 
 bool ViewStyle::SetWrapState(int wrapState_) noexcept {

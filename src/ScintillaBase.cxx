@@ -15,6 +15,7 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <set>
 #include <optional>
 #include <algorithm>
 #include <memory>
@@ -259,6 +260,14 @@ void ScintillaBase::AutoCompleteStart(Sci::Position lenEntered, const char *list
 	}
 	ac.Start(wMain, idAutoComplete, sel.MainCaret(), PointMainCaret(),
 				lenEntered, vs.lineHeight, IsUnicodeMode(), technology);
+
+	ListOptions options{
+		vs.ElementColour(SC_ELEMENT_LIST),
+		vs.ElementColour(SC_ELEMENT_LIST_BACK),
+		vs.ElementColour(SC_ELEMENT_LIST_SELECTED),
+		vs.ElementColour(SC_ELEMENT_LIST_SELECTED_BACK)
+	};
+	ac.lb->SetOptions(options);
 
 	const PRectangle rcClient = GetClientRectangle();
 	Point pt = LocationFromPosition(sel.MainCaret() - lenEntered);

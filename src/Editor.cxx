@@ -17,6 +17,7 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <set>
 #include <forward_list>
 #include <optional>
 #include <algorithm>
@@ -7184,6 +7185,23 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		vs.ResetDefaultStyle();
 		InvalidateStyleRedraw();
 		break;
+
+	case SCI_SETELEMENTCOLOUR:
+		vs.elementColours[static_cast<int>(wParam)] = ColourAlpha(static_cast<int>(lParam));
+		break;
+
+	case SCI_GETELEMENTCOLOUR:
+		return vs.ElementColour(static_cast<int>(wParam)).value_or(ColourAlpha()).AsInteger();
+
+	case SCI_RESETELEMENTCOLOUR:
+		vs.elementColours[static_cast<int>(wParam)].reset();
+		break;
+
+	case SCI_GETELEMENTISSET:
+		return vs.ElementColour(static_cast<int>(wParam)).has_value();
+
+	case SCI_GETELEMENTALLOWSTRANSLUCENT:
+		return vs.ElementAllowsTranslucent(static_cast<int>(wParam));
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_SETSTYLEBITS:

@@ -2934,7 +2934,7 @@ class ListBoxX : public ListBox {
 	void StartResize(WPARAM);
 	LRESULT NcHitTest(WPARAM, LPARAM) const;
 	void CentreItem(int n);
-	void Paint(HDC) noexcept;
+	void Paint(HDC);
 	static LRESULT PASCAL ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 	static constexpr Point ItemInset {0, 0};	// Padding around whole item
@@ -3141,6 +3141,24 @@ void ListBoxX::ClearRegisteredImages() {
 	images.Clear();
 }
 
+namespace {
+
+int ColourOfElement(std::optional<ColourAlpha> colour, int nIndex) {
+	if (colour.has_value()) {
+		return colour.value().GetColour().AsInteger();
+	} else {
+		return ::GetSysColor(nIndex);
+	}
+}
+
+void FillRectColour(HDC hdc, const RECT *lprc, int colour) noexcept {
+	const HBRUSH brush = ::CreateSolidBrush(colour);
+	::FillRect(hdc, lprc, brush);
+	::DeleteObject(brush);
+}
+
+}
+
 void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 	if ((pDrawItem->itemAction == ODA_SELECT) || (pDrawItem->itemAction == ODA_DRAWENTIRE)) {
 		RECT rcBox = pDrawItem->rcItem;
@@ -3149,14 +3167,14 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 			RECT rcImage = pDrawItem->rcItem;
 			rcImage.right = rcBox.left;
 			// The image is not highlighted
-			::FillRect(pDrawItem->hDC, &rcImage, reinterpret_cast<HBRUSH>(COLOR_WINDOW+1));
-			::FillRect(pDrawItem->hDC, &rcBox, reinterpret_cast<HBRUSH>(COLOR_HIGHLIGHT+1));
-			::SetBkColor(pDrawItem->hDC, ::GetSysColor(COLOR_HIGHLIGHT));
-			::SetTextColor(pDrawItem->hDC, ::GetSysColor(COLOR_HIGHLIGHTTEXT));
+			FillRectColour(pDrawItem->hDC, &rcImage, ColourOfElement(options.back, COLOR_WINDOW));
+			FillRectColour(pDrawItem->hDC, &rcBox, ColourOfElement(options.backSelected, COLOR_HIGHLIGHT));
+			::SetBkColor(pDrawItem->hDC, ColourOfElement(options.backSelected, COLOR_HIGHLIGHT));
+			::SetTextColor(pDrawItem->hDC, ColourOfElement(options.foreSelected, COLOR_HIGHLIGHTTEXT));
 		} else {
-			::FillRect(pDrawItem->hDC, &pDrawItem->rcItem, reinterpret_cast<HBRUSH>(COLOR_WINDOW+1));
-			::SetBkColor(pDrawItem->hDC, ::GetSysColor(COLOR_WINDOW));
-			::SetTextColor(pDrawItem->hDC, ::GetSysColor(COLOR_WINDOWTEXT));
+			FillRectColour(pDrawItem->hDC, &pDrawItem->rcItem, ColourOfElement(options.back, COLOR_WINDOW));
+			::SetBkColor(pDrawItem->hDC, ColourOfElement(options.back, COLOR_WINDOW));
+			::SetTextColor(pDrawItem->hDC, ColourOfElement(options.fore, COLOR_WINDOWTEXT));
 		}
 
 		const ListItemData item = lti.Get(pDrawItem->itemID);
@@ -3503,7 +3521,7 @@ void ListBoxX::CentreItem(int n) {
 }
 
 // Performs a double-buffered paint operation to avoid flicker
-void ListBoxX::Paint(HDC hDC) noexcept {
+void ListBoxX::Paint(HDC hDC) {
 	const POINT extent = GetClientExtent();
 	HBITMAP hBitmap = ::CreateCompatibleBitmap(hDC, extent.x, extent.y);
 	HDC bitmapDC = ::CreateCompatibleDC(hDC);
@@ -3512,7 +3530,7 @@ void ListBoxX::Paint(HDC hDC) noexcept {
 	// unpainted area when at the end of a non-integrally sized list with a
 	// vertical scroll bar
 	const RECT rc = { 0, 0, extent.x, extent.y };
-	::FillRect(bitmapDC, &rc, reinterpret_cast<HBRUSH>(COLOR_WINDOW+1));
+	FillRectColour(bitmapDC, &rc, ColourOfElement(options.back, COLOR_WINDOWTEXT));
 	// Paint the entire client area and vertical scrollbar
 	::SendMessage(lb, WM_PRINT, reinterpret_cast<WPARAM>(bitmapDC), PRF_CLIENT|PRF_NONCLIENT);
 	::BitBlt(hDC, 0, 0, extent.x, extent.y, bitmapDC, 0, 0, SRCCOPY);
