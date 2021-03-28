@@ -81,7 +81,7 @@ GtkWidget *PWidget(WindowID wid) noexcept {
 	return static_cast<GtkWidget *>(wid);
 }
 
-enum encodingType { singleByte, UTF8, dbcs };
+enum class EncodingType { singleByte, utf8, dbcs };
 
 // Holds a PangoFontDescription*.
 class FontHandle : public Font {
@@ -136,7 +136,7 @@ namespace Scintilla {
 // SurfaceID is a cairo_t*
 class SurfaceImpl : public Surface {
 	SurfaceMode mode;
-	encodingType et= singleByte;
+	EncodingType et= EncodingType::singleByte;
 	cairo_t *context = nullptr;
 	cairo_surface_t *psurf = nullptr;
 	bool inited = false;
@@ -145,8 +145,9 @@ class SurfaceImpl : public Surface {
 	PangoLayout *layout = nullptr;
 	Converter conv;
 	int characterSet = -1;
+	void PenColourAlpha(ColourAlpha fore) noexcept;
 	void SetConverter(int characterSet_);
-	void CairoRectangle(PRectangle rc);
+	void CairoRectangle(PRectangle rc) noexcept;
 public:
 	SurfaceImpl() noexcept;
 	SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode mode_) noexcept;
@@ -167,8 +168,6 @@ public:
 	void Release() noexcept override;
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
-	void PenColour(ColourDesired fore);
-	void PenColourAlpha(ColourAlpha fore);
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
@@ -276,6 +275,16 @@ const char *CharacterSetID(int characterSet) noexcept {
 	}
 }
 
+void SurfaceImpl::PenColourAlpha(ColourAlpha fore) noexcept {
+	if (context) {
+		cairo_set_source_rgba(context,
+			fore.GetRedComponent(),
+			fore.GetGreenComponent(),
+			fore.GetBlueComponent(),
+			fore.GetAlphaComponent());
+	}
+}
+
 void SurfaceImpl::SetConverter(int characterSet_) {
 	if (characterSet != characterSet_) {
 		characterSet = characterSet_;
@@ -283,7 +292,7 @@ void SurfaceImpl::SetConverter(int characterSet_) {
 	}
 }
 
-void SurfaceImpl::CairoRectangle(PRectangle rc) {
+void SurfaceImpl::CairoRectangle(PRectangle rc) noexcept {
 	cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
 }
 
@@ -316,7 +325,7 @@ SurfaceImpl::~SurfaceImpl() {
 }
 
 void SurfaceImpl::Clear() noexcept {
-	et = singleByte;
+	et = EncodingType::singleByte;
 	if (createdGC) {
 		createdGC = false;
 		cairo_destroy(context);
@@ -396,11 +405,11 @@ std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height) {
 void SurfaceImpl::SetMode(SurfaceMode mode_) {
 	mode = mode_;
 	if (mode.codePage == SC_CP_UTF8) {
-		et = UTF8;
+		et = EncodingType::utf8;
 	} else if (mode.codePage) {
-		et = dbcs;
+		et = EncodingType::dbcs;
 	} else {
-		et = singleByte;
+		et = EncodingType::singleByte;
 	}
 }
 
@@ -410,25 +419,6 @@ int SurfaceImpl::Supports(int feature) noexcept {
 			return 1;
 	}
 	return 0;
-}
-
-void SurfaceImpl::PenColour(ColourDesired fore) {
-	if (context) {
-		cairo_set_source_rgb(context,
-			fore.GetRed() / 255.0,
-			fore.GetGreen() / 255.0,
-			fore.GetBlue() / 255.0);
-	}
-}
-
-void SurfaceImpl::PenColourAlpha(ColourAlpha fore) {
-	if (context) {
-		cairo_set_source_rgba(context,
-			fore.GetRed() / 255.0,
-			fore.GetGreen() / 255.0,
-			fore.GetBlue() / 255.0,
-			fore.GetAlpha() / 255.0);
-	}
 }
 
 int SurfaceImpl::LogPixelsY() {
@@ -774,12 +764,12 @@ size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t len) n
 
 void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 			       ColourAlpha fore) {
-	PenColour(fore);
 	if (context) {
+		PenColourAlpha(fore);
 		const XYPOSITION xText = rc.left;
 		if (PFont(font_)->pfd) {
 			std::string utfForm;
-			if (et == UTF8) {
+			if (et == EncodingType::utf8) {
 				pango_layout_set_text(layout, text.data(), text.length());
 			} else {
 				SetConverter(PFont(font_)->characterSet);
@@ -865,7 +855,7 @@ public:
 void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	if (PFont(font_)->pfd) {
 		pango_layout_set_font_description(layout, PFont(font_)->pfd);
-		if (et == UTF8) {
+		if (et == EncodingType::utf8) {
 			// Simple and direct as UTF-8 is native Pango encoding
 			int i = 0;
 			pango_layout_set_text(layout, text.data(), text.length());
@@ -885,7 +875,7 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 			PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
 		} else {
 			int positionsCalculated = 0;
-			if (et == dbcs) {
+			if (et == EncodingType::dbcs) {
 				SetConverter(PFont(font_)->characterSet);
 				std::string utfForm = UTF8FromIconv(conv, text);
 				if (!utfForm.empty()) {
@@ -970,7 +960,7 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 	if (PFont(font_)->pfd) {
 		std::string utfForm;
 		pango_layout_set_font_description(layout, PFont(font_)->pfd);
-		if (et == UTF8) {
+		if (et == EncodingType::utf8) {
 			pango_layout_set_text(layout, text.data(), text.length());
 		} else {
 			SetConverter(PFont(font_)->characterSet);
@@ -990,8 +980,8 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 
 void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore) {
-	PenColour(fore);
 	if (context) {
+		PenColourAlpha(fore);
 		const XYPOSITION xText = rc.left;
 		if (PFont(font_)->pfd) {
 			pango_layout_set_text(layout, text.data(), text.length());
@@ -1166,7 +1156,7 @@ PRectangle Window::GetPosition() const {
 }
 
 void Window::SetPosition(PRectangle rc) {
-	GtkAllocation alloc;
+	GtkAllocation alloc {};
 	alloc.x = static_cast<int>(rc.left);
 	alloc.y = static_cast<int>(rc.top);
 	alloc.width = static_cast<int>(rc.Width());
