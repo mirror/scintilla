@@ -1288,7 +1288,45 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 
 	PRectangle rcSegment = rcLine;
 	const Font *fontText = vsDraw.styles[style].font.get();
-	const int widthEOLAnnotationText = static_cast<int>(surface->WidthText(fontText, eolAnnotationText));
+
+	const Surface::Ends ends = static_cast<Surface::Ends>(vsDraw.eolAnnotationVisible & 0xff);
+	const Surface::Ends leftSide = static_cast<Surface::Ends>(static_cast<int>(ends) & 0xf);
+	const Surface::Ends rightSide = static_cast<Surface::Ends>(static_cast<int>(ends) & 0xf0);
+
+	XYPOSITION leftBoxSpace = 0;
+	XYPOSITION rightBoxSpace = 0;
+	if (vsDraw.eolAnnotationVisible >= EOLANNOTATION_BOXED) {
+		leftBoxSpace = 1;
+		rightBoxSpace = 1;
+		if (vsDraw.eolAnnotationVisible != EOLANNOTATION_BOXED) {
+			switch (leftSide) {
+			case Surface::Ends::leftFlat:
+				leftBoxSpace = 1;
+				break;
+			case Surface::Ends::leftAngle:
+				leftBoxSpace = rcLine.Height() / 2.0;
+				break;
+			case Surface::Ends::semiCircles:
+			default:
+				leftBoxSpace = rcLine.Height() / 3.0;
+			   break;
+			}
+			switch (rightSide) {
+			case Surface::Ends::rightFlat:
+				rightBoxSpace = 1;
+				break;
+			case Surface::Ends::rightAngle:
+				rightBoxSpace = rcLine.Height() / 2.0;
+				break;
+			case Surface::Ends::semiCircles:
+			default:
+				rightBoxSpace = rcLine.Height() / 3.0;
+			   break;
+			}
+		}
+	}
+	const int widthEOLAnnotationText = static_cast<int>(surface->WidthTextUTF8(fontText, eolAnnotationText) +
+		leftBoxSpace + rightBoxSpace);
 
 	const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 	const XYPOSITION virtualSpace = model.sel.VirtualSpaceFor(
@@ -1317,35 +1355,54 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	}
 
 	if (FlagSet(phase, DrawPhase::back)) {
-		surface->FillRectangleAligned(rcSegment, Fill(textBack));
-
-		// Fill Remainder of the line
+		// This fills in the whole remainder of the line even though
+		// it may be double drawing. This is to allow stadiums with
+		// curved or angled ends to have the area outside in the correct
+		// background colour.
 		PRectangle rcRemainder = rcSegment;
-		rcRemainder.left = rcRemainder.right;
-		if (rcRemainder.left < rcLine.left)
-			rcRemainder.left = rcLine.left;
 		rcRemainder.right = rcLine.right;
 		FillLineRemainder(surface, model, vsDraw, ll, line, rcRemainder, subLine);
 	}
 
+	PRectangle rcText = rcSegment;
+	rcText.left += leftBoxSpace;
+	rcText.right -= rightBoxSpace;
+
+	// For single phase drawing, draw the text then any box over it
 	if (FlagSet(phase, DrawPhase::text)) {
-		if (phasesDraw != PhasesDraw::one) {
-			surface->DrawTextTransparent(rcSegment, fontText,
-			rcSegment.top + vsDraw.maxAscent, eolAnnotationText,
-			textFore);
-		} else {
-			surface->DrawTextNoClip(rcSegment, fontText,
-			rcSegment.top + vsDraw.maxAscent, eolAnnotationText,
+		if (phasesDraw == PhasesDraw::one) {
+			surface->DrawTextNoClipUTF8(rcText, fontText,
+			rcText.top + vsDraw.maxAscent, eolAnnotationText,
 			textFore, textBack);
 		}
 	}
 
+	// Draw any box or stadium shape
 	if (FlagSet(phase, DrawPhase::indicatorsFore)) {
-		if (vsDraw.eolAnnotationVisible == EOLANNOTATION_BOXED ) {
+		if (vsDraw.eolAnnotationVisible >= EOLANNOTATION_BOXED) {
 			PRectangle rcBox = rcSegment;
 			rcBox.left = std::round(rcSegment.left);
 			rcBox.right = std::round(rcSegment.right);
-			surface->RectangleFrame(rcBox, Stroke(textFore));
+			if (vsDraw.eolAnnotationVisible == EOLANNOTATION_BOXED) {
+				surface->RectangleFrame(rcBox, Stroke(textFore));
+			} else {
+				if (phasesDraw == PhasesDraw::one) {
+					// Draw an outline around the text
+					surface->Stadium(rcBox, FillStroke(ColourAlpha(textBack, 0), ColourAlpha(textFore), 1.0), ends);
+				} else {
+					// Draw with a fill to fill the edges of the shape.
+					surface->Stadium(rcBox, FillStroke(ColourAlpha(textBack), ColourAlpha(textFore), 1.0), ends);
+				}
+			}
+		}
+	}
+
+	// For multi-phase drawing draw the text last as transparent over any box 
+	if (FlagSet(phase, DrawPhase::text)) {
+		if (phasesDraw != PhasesDraw::one) {
+			surface->DrawTextTransparentUTF8(rcText, fontText,
+				rcText.top + vsDraw.maxAscent, eolAnnotationText,
+				textFore);
 		}
 	}
 }

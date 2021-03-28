@@ -3835,7 +3835,7 @@ struct Sci_TextToFind {
         <tr>
           <th align="left"><code>EOLANNOTATION_HIDDEN</code></th>
 
-          <td>0</td>
+          <td>0x0</td>
 
           <td>End of Line Annotations are not displayed.</td>
         </tr>
@@ -3843,7 +3843,7 @@ struct Sci_TextToFind {
         <tr>
           <th align="left"><code>EOLANNOTATION_STANDARD</code></th>
 
-          <td>1</td>
+          <td>0x1</td>
 
           <td>End of Line Annotations are drawn left justified with no adornment.</td>
         </tr>
@@ -3851,9 +3851,81 @@ struct Sci_TextToFind {
         <tr>
           <th align="left"><code>EOLANNOTATION_BOXED</code></th>
 
-          <td>2</td>
+          <td>0x2</td>
 
           <td>End of Line Annotations are indented to match the text and are surrounded by a box.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_STADIUM</code></th>
+
+          <td>0x100</td>
+
+          <td>Surround with a &#x25D6;stadium&#x25D7; - a rectangle with rounded ends.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_FLAT_CIRCLE</code></th>
+
+          <td>0x101</td>
+
+          <td>Surround with a |shape&#x25D7; with flat left end and curved right end.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_ANGLE_CIRCLE</code></th>
+
+          <td>0x102</td>
+
+          <td>Surround with a &#x25C4;shape&#x25D7; with angled left end and curved right end.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_CIRCLE_FLAT</code></th>
+
+          <td>0x110</td>
+
+          <td>Surround with a &#x25D6;shape| with curved left end and flat right end.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_FLATS</code></th>
+
+          <td>0x111</td>
+
+          <td>Surround with a |shape| with flat ends.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_ANGLE_FLAT</code></th>
+
+          <td>0x112</td>
+
+          <td>Surround with a &#x25C4;shape| with angled left end and flat right end.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_CIRCLE_ANGLE</code></th>
+
+          <td>0x120</td>
+
+          <td>Surround with a &#x25D6;shape&#x25B6; with curved left end and angled right end.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_FLAT_ANGLE</code></th>
+
+          <td>0x121</td>
+
+          <td>Surround with a |shape&#x25B6; with flat left end and angled right end.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>EOLANNOTATION_ANGLES</code></th>
+
+          <td>0x122</td>
+
+          <td>Surround with a &#x25C4;shape&#x25B6; with angles on each end.</td>
         </tr>
 
       </tbody>
