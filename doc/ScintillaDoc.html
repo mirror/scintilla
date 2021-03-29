@@ -3810,9 +3810,7 @@ struct Sci_TextToFind {
      The text argument is always in UTF-8, not the document encoding.
      To clear end of line annotations call <code>SCI_EOLANNOTATIONSETTEXT</code> with a NULL pointer.
      The whole of the text EOLANNOTATION on a line may be displayed in a particular style with
-     <code>SCI_EOLANNOTATIONSETSTYLE</code> or each character may be individually styled with
-     of the corresponding text byte similar to <code>SCI_SETSTYLINGEX</code>. The text must be set first as it
-     specifies how long the end of line annotation is so how many bytes of styling to read.
+     <code>SCI_EOLANNOTATIONSETSTYLE</code>.
      Setting an end of line annotation will cause a
      <a class="message" href="#SC_MOD_CHANGEEOLANNOTATION"><code>SC_MOD_CHANGEEOLANNOTATION</code></a>
      notification to be sent.
@@ -3932,14 +3930,17 @@ struct Sci_TextToFind {
       </tbody>
     </table>
 
+    <p>Different shapes available for EOL annotations.
+    Only one shape can currently be used for the whole document - this illustration was produced by trickery.</p>
+    <p><img src="StadiumVariants.png" alt="Different shapes available for EOL annotations" /></p>
+
     <p>
      <b id="SCI_EOLANNOTATIONSETSTYLEOFFSET">SCI_EOLANNOTATIONSETSTYLEOFFSET(int style)</b><br />
      <b id="SCI_EOLANNOTATIONGETSTYLEOFFSET">SCI_EOLANNOTATIONGETSTYLEOFFSET &rarr; int</b><br />
     End of Line Annotation styles may be completely separated from standard text styles by setting a style offset. For example,
     <code>SCI_EOLANNOTATIONSETSTYLEOFFSET(512)</code> would allow the end of line  annotation styles to be numbered from
     512 up to 767 so they do not overlap styles set by lexers (or margins if margins offset is 256).
-    Each style number set with <code>SCI_EOLANNOTATIONSETSTYLE</code>
-    or <code>SCI_EOLANNOTATIONSETSTYLES</code> has the offset added before looking up the style.
+    Each style number set with <code>SCI_EOLANNOTATIONSETSTYLE</code> has the offset added before looking up the style.
     </p>
     <p>
     Always call <a class="seealso" href="#SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES</a>
