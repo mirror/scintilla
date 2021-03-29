@@ -15,6 +15,7 @@
 #include <map>
 #include <optional>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 
 #include "Debugging.h"
@@ -310,6 +311,15 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 	}
 }
 
+void LineMarker::AlignedPolygon(Surface *surface, const Point *pts, size_t npts) const {
+	const XYPOSITION move = strokeWidth / 2.0;
+	std::vector<Point> points;
+	std::transform(pts, pts + npts, std::back_inserter(points), [=](Point pt)->Point {
+		return Point(pt.x + move, pt.y + move);
+	});
+	surface->Polygon(points.data(), std::size(points), FillStroke(back, fore, strokeWidth));
+}
+
 void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, FoldPart part, int marginStyle) const {
 	// This is to satisfy the changed API - eventually the stroke width will be exposed to clients
 
@@ -379,7 +389,7 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 				Point(centreX - dimOn4, centreY + dimOn2),
 				Point(centreX + dimOn2 - dimOn4, centreY),
 			};
-			surface->Polygon(pts, std::size(pts), FillStroke(back, fore, strokeWidth));
+			AlignedPolygon(surface, pts, std::size(pts));
 		}
 		break;
 
@@ -389,7 +399,7 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 				Point(centreX + dimOn2, centreY - dimOn4),
 				Point(centreX, centreY + dimOn2 - dimOn4),
 			};
-			surface->Polygon(pts, std::size(pts), FillStroke(back, fore, strokeWidth));
+			AlignedPolygon(surface, pts, std::size(pts));
 		}
 		break;
 
@@ -408,7 +418,7 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 				Point(centreX - 1, centreY + 1),
 				Point(centreX - armSize, centreY + 1),
 			};
-			surface->Polygon(pts, std::size(pts), FillStroke(back, fore, strokeWidth));
+			AlignedPolygon(surface, pts, std::size(pts));
 		}
 		break;
 
@@ -419,7 +429,7 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 				Point(centreX + armSize, centreY + 1),
 				Point(centreX - armSize, centreY + 1),
 			};
-			surface->Polygon(pts, std::size(pts), FillStroke(back, fore, strokeWidth));
+			AlignedPolygon(surface, pts, std::size(pts));
 		}
 		break;
 
@@ -477,7 +487,7 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 				Point(centreX, centreY + dimOn4),
 				Point(centreX, centreY + dimOn2),
 			};
-			surface->Polygon(pts, std::size(pts), FillStroke(back, fore, strokeWidth));
+			AlignedPolygon(surface, pts, std::size(pts));
 		}
 		break;
 
@@ -496,12 +506,12 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 			const XYPOSITION halfHeight = std::floor(minDim / 3);
 			Point pts[] = {
 				Point(rcWhole.left, centreY - halfHeight),
-				Point(rcWhole.right - 3, centreY - halfHeight),
-				Point(rcWhole.right - 3 - halfHeight, centreY),
-				Point(rcWhole.right - 3, centreY + halfHeight),
+				Point(rcWhole.right - strokeWidth - 2, centreY - halfHeight),
+				Point(rcWhole.right - strokeWidth - 2 - halfHeight, centreY),
+				Point(rcWhole.right - strokeWidth - 2, centreY + halfHeight),
 				Point(rcWhole.left, centreY + halfHeight),
 			};
-			surface->Polygon(pts, std::size(pts), FillStroke(back, fore, strokeWidth));
+			AlignedPolygon(surface, pts, std::size(pts));
 		}
 		break;
 
@@ -514,7 +524,7 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 				Point(centreX, centreY + dimOn2 - halfWidth),
 				Point(centreX - halfWidth, centreY + dimOn2),
 			};
-			surface->Polygon(pts, std::size(pts), FillStroke(back, fore, strokeWidth));
+			AlignedPolygon(surface, pts, std::size(pts));
 		}
 		break;
 

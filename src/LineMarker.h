@@ -45,6 +45,7 @@ public:
 	void SetXPM(const char *textForm);
 	void SetXPM(const char *const *linesForm);
 	void SetRGBAImage(Point sizeRGBAImage, float scale, const unsigned char *pixelsRGBAImage);
+	void AlignedPolygon(Surface *surface, const Point *pts, size_t npts) const;
 	void Draw(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, FoldPart part, int marginStyle) const;
 	void DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, FoldPart part) const;
 };
