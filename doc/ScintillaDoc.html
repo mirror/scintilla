@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 27 March 2021 NH</p>
+    <p>Last edited 29 March 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -3807,6 +3807,7 @@ struct Sci_TextToFind {
      <b id="SCI_EOLANNOTATIONGETSTYLE">SCI_EOLANNOTATIONGETSTYLE(line line) &rarr; int</b><br />
      <b id="SCI_EOLANNOTATIONCLEARALL">SCI_EOLANNOTATIONCLEARALL</b><br />
      A different string may be set for each line with <code>SCI_EOLANNOTATIONSETTEXT</code>.
+     The text argument is always in UTF-8, not the document encoding.
      To clear end of line annotations call <code>SCI_EOLANNOTATIONSETTEXT</code> with a NULL pointer.
      The whole of the text EOLANNOTATION on a line may be displayed in a particular style with
      <code>SCI_EOLANNOTATIONSETSTYLE</code> or each character may be individually styled with
