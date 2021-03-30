@@ -26,6 +26,7 @@
 
 #include "XPM.h"
 #include "LineMarker.h"
+#include "UniConversion.h"
 
 using namespace Scintilla;
 
@@ -530,12 +531,13 @@ void LineMarker::Draw(Surface *surface, const PRectangle &rcWhole, const Font *f
 
 	default:
 		if (markType >= SC_MARK_CHARACTER) {
-			std::string character(1, static_cast<char>(markType - SC_MARK_CHARACTER));
-			const XYPOSITION width = surface->WidthText(fontForCharacter, character);
+			char character[UTF8MaxBytes + 1];
+			UTF8FromUTF32Character(markType - SC_MARK_CHARACTER, character);
+			const XYPOSITION width = surface->WidthTextUTF8(fontForCharacter, character);
 			PRectangle rcText = rc;
 			rcText.left += (rc.Width() - width) / 2;
-			rcText.right = rc.left + width;
-			surface->DrawTextClipped(rcText, fontForCharacter, rcText.bottom - 2,
+			rcText.right = rcText.left + width;
+			surface->DrawTextNoClipUTF8(rcText, fontForCharacter, rcText.bottom - 2,
 						 character, fore, back);
 		} else {
 			// treat as SC_MARK_FULLRECT

@@ -4477,10 +4477,10 @@ struct Sci_TextToFind {
     <code>SC_MARK_TCORNER</code>,
     <code>SC_MARK_TCORNERCURVE</code>, and
     <code>SC_MARK_VLINE</code>.</p>
-    Characters can be used as markers by adding the ASCII value of the character to
-    <code>SC_MARK_CHARACTER</code> (10000). For example, to use 'A' (ASCII code 65) as marker
-    number 1 use:<br />
-    <code>SCI_MARKERDEFINE(1, SC_MARK_CHARACTER+65)</code>. <br />
+    Characters can be used as markers by adding the Unicode code point of the character to
+    <code>SC_MARK_CHARACTER</code> (10000). For example, to use '&#9637;' SQUARE WITH VERTICAL FILL
+    (Unicode code point 9637) as marker number 1 use:<br />
+    <code>SCI_MARKERDEFINE(1, SC_MARK_CHARACTER+9637)</code>. <br />
 
     <p>The marker numbers <code>SC_MARKNUM_FOLDER</code> and <code>SC_MARKNUM_FOLDEROPEN</code> are
     used for showing that a fold is present and open or closed. Any symbols may be assigned for

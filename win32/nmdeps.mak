@@ -280,7 +280,8 @@ $(DIR_O)/LineMarker.obj: \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/XPM.h \
-	../src/LineMarker.h
+	../src/LineMarker.h \
+	../src/UniConversion.h
 $(DIR_O)/MarginView.obj: \
 	../src/MarginView.cxx \
 	../src/Debugging.h \
