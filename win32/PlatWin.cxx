@@ -2598,7 +2598,7 @@ XYPOSITION SurfaceD2D::AverageCharWidth(const Font *font_) {
 	if (pIDWriteFactory && pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = nullptr;
-		const WCHAR wszAllAlpha[] = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		static const WCHAR wszAllAlpha[] = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		const size_t lenAllAlpha = wcslen(wszAllAlpha);
 		const HRESULT hr = pIDWriteFactory->CreateTextLayout(wszAllAlpha, static_cast<UINT32>(lenAllAlpha),
 			pTextFormat, 1000.0, 1000.0, &pTextLayout);
