@@ -271,10 +271,10 @@ static const char *ControlCharacterString(unsigned char ch) noexcept {
 	}
 }
 
-static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const ViewStyle &vsDraw,
-	ColourAlpha textFore, XYPOSITION widthStroke) {
+static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid,
+	const ViewStyle &vsDraw, Stroke stroke) {
 
-	const XYPOSITION halfWidth = widthStroke / 2.0f;
+	const XYPOSITION halfWidth = stroke.width / 2.0;
 
 	const XYPOSITION leftStroke = std::round(std::min(rcTab.left + 2, rcTab.right - 1)) + halfWidth;
 	const XYPOSITION rightStroke = std::max(leftStroke, std::round(rcTab.right) - 1.0f - halfWidth);
@@ -282,8 +282,7 @@ static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const Vie
 	const Point arrowPoint(rightStroke, yMidAligned);
 	if (rightStroke > leftStroke) {
 		// When not enough room, don't draw the arrow shaft
-		surface->LineDraw(Point(leftStroke, yMidAligned), arrowPoint,
-			Stroke(textFore, widthStroke));
+		surface->LineDraw(Point(leftStroke, yMidAligned), arrowPoint, stroke);
 	}
 
 	// Draw the arrow head if needed
@@ -299,7 +298,7 @@ static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const Vie
 			arrowPoint,
 			Point(xhead, yMidAligned + ydiff)
 		};
-		surface->PolyLine(ptsHead, std::size(ptsHead), Stroke(textFore, widthStroke));
+		surface->PolyLine(ptsHead, std::size(ptsHead), stroke);
 	}
 }
 
@@ -1981,9 +1980,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
 							const int segmentTop = static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2);
 							if (!customDrawTabArrow)
-								DrawTabArrow(surface, rcTab, segmentTop, vsDraw, textFore, 1.0f);
+								DrawTabArrow(surface, rcTab, segmentTop, vsDraw, Stroke(textFore, 1.0f));
 							else
-								customDrawTabArrow(surface, rcTab, segmentTop);
+								customDrawTabArrow(surface, rcTab, segmentTop, vsDraw, Stroke(textFore, 1.0f));
 						}
 					}
 				} else {
