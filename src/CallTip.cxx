@@ -250,7 +250,7 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 	offsetMain = insetX;    // initial alignment assuming no arrows
 	PaintContents(surfaceWindow, true);
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !PLAT_CURSES
 	// OSX doesn't put borders on "help tags"
 	// Draw a raised border around the edges of the window
 	constexpr XYPOSITION border = 1.0f;
@@ -292,7 +292,9 @@ PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, co
 	rectDown = PRectangle(0,0,0,0);
 	offsetMain = insetX;            // changed to right edge of any arrows
 	lineHeight = static_cast<int>(std::lround(surfaceMeasure->Height(font.get())));
+#if !PLAT_CURSES
 	widthArrow = lineHeight * 9 / 10;
+#endif
 	const int width = PaintContents(surfaceMeasure.get(), false) + insetX;
 
 	// The returned
