@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 29 March 2021 NH</p>
+    <p>Last edited 3 April 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -284,19 +284,13 @@
 
     <h2>Lexilla</h2>
 
-    <p>For Scintilla 5.0, lexers will be split off into a separate Lexilla library.
-    Scintilla will be responsible for the GUI and calling lexers with Lexilla providing the lexers.
-    To allow work towards this with Scintilla 4.x, the first stage is to allow building Lexilla but
-    also include the lexers in Scintilla.</p>
+    <p>For Scintilla 5.0, lexers have been split off into a separate <a href="Lexilla.html">Lexilla</a> library.
+    Scintilla is responsible for the GUI and calling lexers with Lexilla providing the lexers.</p>
 
     <p>Lexilla is built as both a shared library and static library and applications may choose to
     link to one or the other.</p>
 
-    <p>To build Lexilla, in the lexilla/src directory, run make (for gcc or clang)<br />
-    <code>make</code><br />
-    or nmake for MSVC<br />
-    <code>nmake -f lexilla.mak</code><br />
-    </p>
+    <p>See the <a href="LexillaDoc.html">Lexilla documentation</a> for instructions on building and using Lexilla.</p>
 
     <p>Lexilla follows the external lexer protocol so can be loaded by applications that support this.
     As the protocol only supports object lexers, an additional function <code>CreateLexer(const char *name)</code>
@@ -304,20 +298,10 @@
     </p>
    
     <p>Lexer libraries that provide the same functions as Lexilla may provide lexers for use by Scintilla,
-    augmenting or replacing those provided by Lexilla.
-    To allow initialisation of lexer libraries, a <code>SetLibraryProperty(const char *key, const char *value)</code>
-    may optionally be implemented. For example, a lexer library that uses XML based lexer definitions may
-    be provided with a directory to search for such definitions.
-    Lexer libraries should ignore any properties that they do not understand.
-    The set of properties supported by a lexer library is specified as a '\n' separated list of property names by
-    an optional <code>const char *GetLibraryPropertyNames()</code> function.
-    </p>
+    augmenting or replacing those provided by Lexilla.</p>
 
     <p>A lexer created by Lexilla may be used in Scintilla by calling
     <a class="seealso" href="#SCI_SETILEXER">SCI_SETILEXER</a>.</p>
-
-    <p>Lexilla and its contained lexers can be tested with the TestLexers program in lexilla/test.
-    Read lexilla/test/README for information on building and using TestLexers.</p>
 
     <h2 id="MessageCategories">Contents</h2>
 
@@ -7211,19 +7195,13 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <h2 id="Lexer">Lexer</h2>
 
-    <p>If you define the symbol <code>SCI_LEXER</code> when building Scintilla, (this is sometimes
-    called the SciLexer version of Scintilla), lexing support for a wide range of programming
-    languages is included and the messages in this section are supported. If you want to set
-    styling and fold points for an unsupported language you can either do this in the container or
-    better still, write your own lexer following the pattern of one of the existing ones.</p>
+    <p>
+    To style files in different languages, different 'lexers' are used.
+    These are objects that are called by Scintilla with a range of text and some context information and which
+    then set styles and folding information for that range.
+    Lexers for Scintilla are now provided by the <a href="Lexilla.html">Lexilla</a> project.
+    Before 5.0, lexers were built into most versions of Scintilla.</p>
 
-    <p>If the symbol <code>SCI_EMPTYCATALOGUE</code> is defined when building
-    Scintilla, then no lexers are made available but other lexing support code may be present.</p>
-
-    <p>Scintilla also supports external lexers. These are DLLs (on Windows), .dylib modules (on macOS),
-    or .so modules (on GTK/Linux) that export three
-    functions: <code>GetLexerCount</code>, <code>GetLexerName</code>, and
-    <code>GetLexerFactory</code>. See <code>ExternalLexer.cxx</code> for more information.</p>
      <a class="message" href="#SCI_GETLEXER">SCI_GETLEXER &rarr; int</a><br />
      <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language) &rarr; int</a><br />
      <a class="message" href="#SCI_SETILEXER">SCI_SETILEXER(&lt;unused&gt;, pointer ilexer)</a><br />
@@ -7440,7 +7418,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <h2 id="LexerObjects">Lexer Objects</h2>
 
-    <p>Lexers are programmed as objects that implement the ILexer4 interface and that interact
+    <p>Lexers are programmed as objects that implement the ILexer5 interface and that interact
     with the document they are lexing through the IDocument interface.
     Previously lexers were defined by providing lexing and folding functions but creating an object
     to handle the interaction of a lexer with a document allows the lexer to store state information that
@@ -7515,7 +7493,9 @@ optimisation could be to remember where a setting first affects the document and
 </p>
 
 <p><code>Version</code> returns an enumerated value specifying which version of the interface is implemented:
-<code>lvRelease4</code> for <code>ILexer4</code>. Prior to Scintilla 4.0 different values were possible.</p>
+<code>lvRelease5</code> for <code>ILexer5</code> and <code>lvRelease4</code> for <code>ILexer4</code>.
+<code>ILexer5</code> must be provided for Scintilla version 5.0 or later.
+</p>
 
 <p><code>Release</code> is called to destroy the lexer object.</p>
 
@@ -7613,14 +7593,10 @@ The <code class="parameter">pWidth</code> argument can be NULL if the caller doe
 bytes in the character.
 </p>
 
-<p>The <code>ILexer4</code> and <code>IDocument</code>  interfaces may be
-expanded in the future with extended versions (<code>ILexer5</code>...).
+<p>The <code>ILexer5</code> and <code>IDocument</code>  interfaces may be
+expanded in the future with extended versions (<code>ILexer6</code>...).
  The <code>Version</code> method indicates which interface is
 implemented and thus which methods may be called.</p>
-
-<p>Scintilla 4 changed the definition of <code>IDocument</code> by merging the previously separate
-<code>IDocumentWithLineEnd</code> interface and
-removing the mask parameter to <code>StartStyling</code>.</p>
 
     <h2 id="Notifications">Notifications</h2>
 
