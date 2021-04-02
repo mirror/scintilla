@@ -266,6 +266,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 	super.frame = frame;
 
 	mOwner.backend->Resize();
+
+	[super prepareContentInRect: [self visibleRect]];
 }
 
 //--------------------------------------------------------------------------------------------------
