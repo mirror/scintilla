@@ -137,6 +137,7 @@ namespace Scintilla {
 class SurfaceImpl : public Surface {
 	SurfaceMode mode;
 	EncodingType et= EncodingType::singleByte;
+	WindowID widSave = nullptr;
 	cairo_t *context = nullptr;
 	cairo_surface_t *psurf = nullptr;
 	bool inited = false;
@@ -150,7 +151,7 @@ class SurfaceImpl : public Surface {
 	void CairoRectangle(PRectangle rc) noexcept;
 public:
 	SurfaceImpl() noexcept;
-	SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode mode_) noexcept;
+	SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode mode_, WindowID wid) noexcept;
 	// Deleted so SurfaceImpl objects can not be copied.
 	SurfaceImpl(const SurfaceImpl&) = delete;
 	SurfaceImpl(SurfaceImpl&&) = delete;
@@ -299,14 +300,14 @@ void SurfaceImpl::CairoRectangle(PRectangle rc) noexcept {
 SurfaceImpl::SurfaceImpl() noexcept {
 }
 
-SurfaceImpl::SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode mode_) noexcept {
+SurfaceImpl::SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode mode_, WindowID wid) noexcept {
 	if (height > 0 && width > 0) {
 		cairo_surface_t *psurfContext = cairo_get_target(context_);
 		psurf = cairo_surface_create_similar(
 			psurfContext,
 			CAIRO_CONTENT_COLOR_ALPHA, width, height);
 		context = cairo_create(psurf);
-		pcontext = pango_cairo_create_context(context);
+		pcontext = gtk_widget_create_pango_context(PWidget(wid));
 		PLATFORM_ASSERT(pcontext);
 		layout = pango_layout_new(pcontext);
 		PLATFORM_ASSERT(layout);
@@ -371,6 +372,7 @@ bool SurfaceImpl::Initialised() {
 }
 
 void SurfaceImpl::Init(WindowID wid) {
+	widSave = wid;
 	Release();
 	PLATFORM_ASSERT(wid);
 	// if we are only created from a window ID, we can't perform drawing
@@ -385,6 +387,7 @@ void SurfaceImpl::Init(WindowID wid) {
 }
 
 void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
+	widSave = wid;
 	PLATFORM_ASSERT(sid);
 	Release();
 	PLATFORM_ASSERT(wid);
@@ -399,7 +402,8 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
 }
 
 std::unique_ptr<Surface> SurfaceImpl::AllocatePixMap(int width, int height) {
-	return std::make_unique<SurfaceImpl>(context, width, height, mode);
+	// widSave must be alive now so safe for creating a PangoContext
+	return std::make_unique<SurfaceImpl>(context, width, height, mode, widSave);
 }
 
 void SurfaceImpl::SetMode(SurfaceMode mode_) {
