@@ -144,6 +144,24 @@ static GtkWidget *PWidget(const Window &w) noexcept {
 	return static_cast<GtkWidget *>(w.GetID());
 }
 
+FontOptions::FontOptions(GtkWidget *widget) noexcept {
+	PangoContext *pcontext = gtk_widget_create_pango_context(widget);
+	PLATFORM_ASSERT(pcontext);
+	const cairo_font_options_t *options = pango_cairo_context_get_font_options(pcontext);
+	// options is owned by the PangoContext so must not be freed.
+	PLATFORM_ASSERT(options);
+	antialias = cairo_font_options_get_antialias(options);
+	order = cairo_font_options_get_subpixel_order(options);
+	hint = cairo_font_options_get_hint_style(options);
+	g_object_unref(pcontext);
+}
+
+bool FontOptions::operator==(const FontOptions &other) const noexcept {
+	return antialias == other.antialias &&
+		order == other.order &&
+		hint == other.hint;
+}
+
 ScintillaGTK *ScintillaGTK::FromWidget(GtkWidget *widget) noexcept {
 	ScintillaObject *scio = SCINTILLA(widget);
 	return static_cast<ScintillaGTK *>(scio->pscin);
@@ -661,6 +679,8 @@ void ScintillaGTK::Init() {
 	vs.indicators[SC_INDICATOR_INPUT] = Indicator(INDIC_DOTS, ColourDesired(0, 0, 0xff));
 	vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(INDIC_COMPOSITIONTHICK, ColourDesired(0, 0, 0xff));
 	vs.indicators[SC_INDICATOR_TARGET] = Indicator(INDIC_STRAIGHTBOX, ColourDesired(0, 0, 0xff));
+
+	fontOptionsPrevious = FontOptions(PWidget(wText));
 }
 
 void ScintillaGTK::Finalise() {
@@ -2573,10 +2593,21 @@ void ScintillaGTK::Destroy(GObject *object) {
 	}
 }
 
+void ScintillaGTK::CheckForFontOptionChange() {
+	FontOptions fontOptionsNow(PWidget(wText));
+	if (!(fontOptionsNow == fontOptionsPrevious)) {
+		// Clear position caches
+		InvalidateStyleData();
+	}
+	fontOptionsPrevious = fontOptionsNow;
+}
+
 #if GTK_CHECK_VERSION(3,0,0)
 
 gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 	try {
+		CheckForFontOptionChange();
+
 		paintState = PaintState::painting;
 		repaintFullWindow = false;
 
@@ -2675,6 +2706,8 @@ gboolean ScintillaGTK::DrawMain(GtkWidget *widget, cairo_t *cr) {
 
 gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *ose) {
 	try {
+		CheckForFontOptionChange();
+
 		paintState = PaintState::painting;
 
 		rcPaint = PRectangle::FromInts(

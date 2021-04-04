@@ -12,6 +12,15 @@ class ScintillaGTKAccessible;
 
 #define OBJECT_CLASS GObjectClass
 
+struct FontOptions {
+	cairo_antialias_t antialias {};
+	cairo_subpixel_order_t order {};
+	cairo_hint_style_t hint {};
+	FontOptions() noexcept = default;
+	explicit FontOptions(GtkWidget *widget) noexcept;
+	bool operator==(const FontOptions &other) const noexcept;
+};
+
 class ScintillaGTK : public ScintillaBase {
 	friend class ScintillaGTKAccessible;
 
@@ -69,6 +78,7 @@ class ScintillaGTK : public ScintillaBase {
 	bool repaintFullWindow;
 
 	guint styleIdleID;
+	FontOptions fontOptionsPrevious;
 	int accessibilityEnabled;
 	AtkObject *accessible;
 
@@ -174,6 +184,7 @@ private:
 	static void GetPreferredHeight(GtkWidget *widget, gint *minimalHeight, gint *naturalHeight);
 #endif
 	static void SizeAllocate(GtkWidget *widget, GtkAllocation *allocation);
+	void CheckForFontOptionChange();
 #if GTK_CHECK_VERSION(3,0,0)
 	gboolean DrawTextThis(cairo_t *cr);
 	static gboolean DrawText(GtkWidget *widget, cairo_t *cr, ScintillaGTK *sciThis);
