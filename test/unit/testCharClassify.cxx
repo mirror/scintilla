@@ -27,13 +27,13 @@ protected:
 		pcc.reset(new CharClassify());
 		for (int ch = 0; ch < 256; ch++) {
 			if (ch == '\r' || ch == '\n')
-				charClass[ch] = CharClassify::ccNewLine;
+				charClass[ch] = CharacterClass::newLine;
 			else if (ch < 0x20 || ch == ' ')
-				charClass[ch] = CharClassify::ccSpace;
+				charClass[ch] = CharacterClass::space;
 			else if (ch >= 0x80 || isalnum(ch) || ch == '_')
-				charClass[ch] = CharClassify::ccWord;
+				charClass[ch] = CharacterClass::word;
 			else
-				charClass[ch] = CharClassify::ccPunctuation;
+				charClass[ch] = CharacterClass::punctuation;
 		}
 	}
 
@@ -41,15 +41,15 @@ protected:
 	}
 
 	std::unique_ptr<CharClassify> pcc;
-	CharClassify::cc charClass[256];
+	CharacterClass charClass[256];
 
-	static const char* GetClassName(CharClassify::cc charClass) {
+	static const char* GetClassName(CharacterClass charClass) {
 		switch(charClass) {
-			#define CASE(c) case CharClassify::c: return #c
-			CASE(ccSpace);
-			CASE(ccNewLine);
-			CASE(ccWord);
-			CASE(ccPunctuation);
+			#define CASE(c) case CharacterClass::c: return #c
+			CASE(space);
+			CASE(newLine);
+			CASE(word);
+			CASE(punctuation);
 			#undef CASE
 			default:
 				return "<unknown>";
@@ -71,7 +71,7 @@ TEST_CASE_METHOD(CharClassifyTest, "Defaults") {
 TEST_CASE_METHOD(CharClassifyTest, "Custom") {
 	unsigned char buf[2] = {0, 0};
 	for (int i = 0; i < 256; i++) {
-		CharClassify::cc thisClass = CharClassify::cc(i % 4);
+		CharacterClass thisClass = CharacterClass(i % 4);
 		buf[0] = i;
 		pcc->SetCharClasses(buf, thisClass);
 		charClass[i] = thisClass;
@@ -89,13 +89,13 @@ TEST_CASE_METHOD(CharClassifyTest, "Custom") {
 TEST_CASE_METHOD(CharClassifyTest, "CharsOfClass") {
 	unsigned char buf[2] = {0, 0};
 	for (int i = 1; i < 256; i++) {
-		CharClassify::cc thisClass = CharClassify::cc(i % 4);
+		CharacterClass thisClass = CharacterClass(i % 4);
 		buf[0] = i;
 		pcc->SetCharClasses(buf, thisClass);
 		charClass[i] = thisClass;
 	}
 	for (int classVal = 0; classVal < 4; ++classVal) {
-		CharClassify::cc thisClass = CharClassify::cc(classVal % 4);
+		CharacterClass thisClass = CharacterClass(classVal % 4);
 		int size = pcc->GetCharsOfClass(thisClass, NULL);
 		std::vector<unsigned char> buffer(size+1);
 		pcc->GetCharsOfClass(thisClass, &buffer[0]);
