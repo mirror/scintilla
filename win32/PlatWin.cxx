@@ -279,7 +279,7 @@ struct FontGDI : public FontWin {
 	FontGDI(FontGDI &&) = delete;
 	FontGDI &operator=(const FontGDI &) = delete;
 	FontGDI &operator=(FontGDI &&) = delete;
-	~FontGDI() {
+	~FontGDI() noexcept override {
 		if (hfont)
 			::DeleteObject(hfont);
 	}
@@ -344,7 +344,7 @@ struct FontDirectWrite : public FontWin {
 	FontDirectWrite(FontDirectWrite &&) = delete;
 	FontDirectWrite &operator=(const FontDirectWrite &) = delete;
 	FontDirectWrite &operator=(FontDirectWrite &&) = delete;
-	~FontDirectWrite() {
+	~FontDirectWrite() noexcept override {
 		ReleaseUnknown(pTextFormat);
 	}
 	HFONT HFont() const noexcept override {
@@ -393,7 +393,7 @@ public:
 	VarBuffer &operator=(const VarBuffer &) = delete;
 	VarBuffer &operator=(VarBuffer &&) = delete;
 
-	~VarBuffer() {
+	~VarBuffer() noexcept {
 		if (buffer != bufferStandard) {
 			delete []buffer;
 			buffer = nullptr;
@@ -1318,7 +1318,7 @@ public:
 	SurfaceD2D(SurfaceD2D &&) = delete;
 	SurfaceD2D &operator=(const SurfaceD2D &) = delete;
 	SurfaceD2D &operator=(SurfaceD2D &&) = delete;
-	~SurfaceD2D() override;
+	~SurfaceD2D() noexcept override;
 
 	void SetScale(WindowID wid) noexcept;
 	void Init(WindowID wid) override;
@@ -1403,7 +1403,7 @@ SurfaceD2D::SurfaceD2D(ID2D1RenderTarget *pRenderTargetCompatible, int width, in
 	logPixelsY = logPixelsY_;
 }
 
-SurfaceD2D::~SurfaceD2D() {
+SurfaceD2D::~SurfaceD2D() noexcept {
 	Clear();
 }
 
@@ -1936,8 +1936,7 @@ public:
 	BlobInline(BlobInline &&) = default;
 	BlobInline &operator=(const BlobInline &) = default;
 	BlobInline &operator=(BlobInline &&) = default;
-	virtual ~BlobInline() {
-	}
+	virtual ~BlobInline() noexcept = default;
 };
 
 /// Implement IUnknown
@@ -2031,7 +2030,7 @@ public:
 	ScreenLineLayout(ScreenLineLayout &&) = delete;
 	ScreenLineLayout &operator=(const ScreenLineLayout &) = delete;
 	ScreenLineLayout &operator=(ScreenLineLayout &&) = delete;
-	~ScreenLineLayout() override;
+	~ScreenLineLayout() noexcept override;
 	size_t PositionFromX(XYPOSITION xDistance, bool charPosition) override;
 	XYPOSITION XFromPosition(size_t caretPosition) override;
 	std::vector<Interval> FindRangeIntervals(size_t start, size_t end) override;
@@ -2158,7 +2157,7 @@ ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) {
 	FillTextLayoutFormats(screenLine, textLayout, blobs);
 }
 
-ScreenLineLayout::~ScreenLineLayout() {
+ScreenLineLayout::~ScreenLineLayout() noexcept {
 	ReleaseUnknown(textLayout);
 }
 
@@ -2650,7 +2649,7 @@ std::unique_ptr<Surface> Surface::Allocate(int technology) {
 #endif
 }
 
-Window::~Window() {
+Window::~Window() noexcept {
 }
 
 void Window::Destroy() noexcept {
@@ -2891,7 +2890,7 @@ const TCHAR ListBoxX_ClassName[] = TEXT("ListBoxX");
 ListBox::ListBox() noexcept {
 }
 
-ListBox::~ListBox() {
+ListBox::~ListBox() noexcept {
 }
 
 class ListBoxX : public ListBox {
@@ -2942,13 +2941,17 @@ class ListBoxX : public ListBox {
 	static constexpr Point ImageInset {1, 0};	// Padding around image
 
 public:
-	ListBoxX() : lineHeight(10), fontCopy{}, technology(0), lb{}, unicodeMode(false),
+	ListBoxX() noexcept : lineHeight(10), fontCopy{}, technology(0), lb{}, unicodeMode(false),
 		desiredVisibleRows(9), maxItemCharacters(0), aveCharWidth(8),
 		parent(nullptr), ctrlID(0), dpi(USER_DEFAULT_SCREEN_DPI),
 		delegate(nullptr),
 		widestItem(nullptr), maxCharWidth(1), resizeHit(0), wheelDelta(0) {
 	}
-	~ListBoxX() override {
+	ListBoxX(const ListBoxX &) = delete;
+	ListBoxX(ListBoxX &&) = delete;
+	ListBoxX &operator=(const ListBoxX &) = delete;
+	ListBoxX &operator=(ListBoxX &&) = delete;
+	~ListBoxX() noexcept override {
 		if (fontCopy) {
 			::DeleteObject(fontCopy);
 			fontCopy = 0;

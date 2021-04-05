@@ -129,13 +129,13 @@ struct FontParameters {
 
 class Font {
 public:
-	Font() noexcept=default;
+	Font() noexcept = default;
 	// Deleted so Font objects can not be copied
 	Font(const Font &) = delete;
 	Font(Font &&) = delete;
 	Font &operator=(const Font &) = delete;
 	Font &operator=(Font &&) = delete;
-	virtual ~Font()=default;
+	virtual ~Font() noexcept = default;
 
 	static std::shared_ptr<Font> Allocate(const FontParameters &fp);
 };
@@ -156,7 +156,7 @@ public:
 
 class IScreenLineLayout {
 public:
-	virtual ~IScreenLineLayout() = default;
+	virtual ~IScreenLineLayout() noexcept = default;
 	virtual size_t PositionFromX(XYPOSITION xDistance, bool charPosition) = 0;
 	virtual XYPOSITION XFromPosition(size_t caretPosition) = 0;
 	virtual std::vector<Interval> FindRangeIntervals(size_t start, size_t end) = 0;
@@ -183,7 +183,7 @@ public:
 	Surface(Surface &&) = delete;
 	Surface &operator=(const Surface &) = delete;
 	Surface &operator=(Surface &&) = delete;
-	virtual ~Surface() {}
+	virtual ~Surface() noexcept = default;
 	static std::unique_ptr<Surface> Allocate(int technology);
 
 	virtual void Init(WindowID wid)=0;
@@ -268,7 +268,7 @@ public:
 	}
 	Window &operator=(const Window &) = delete;
 	Window &operator=(Window &&) = delete;
-	virtual ~Window();
+	virtual ~Window() noexcept;
 	WindowID GetID() const noexcept { return wid; }
 	bool Created() const noexcept { return wid != nullptr; }
 	void Destroy() noexcept;
@@ -313,7 +313,7 @@ struct ListOptions {
 class ListBox : public Window {
 public:
 	ListBox() noexcept;
-	~ListBox() override;
+	virtual ~ListBox() noexcept override;
 	static std::unique_ptr<ListBox> Allocate();
 
 	virtual void SetFont(const Font *font)=0;
