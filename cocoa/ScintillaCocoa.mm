@@ -631,7 +631,7 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, CaseMapping case
 	if (IsUnicodeMode()) {
 		std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
 		size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
-						     (caseMapping == CaseMapping::upper) ? CaseConversionUpper : CaseConversionLower);
+						     (caseMapping == CaseMapping::upper) ? CaseConversion::upper : CaseConversion::lower);
 		retMapped.resize(lenMapped);
 		return retMapped;
 	}
