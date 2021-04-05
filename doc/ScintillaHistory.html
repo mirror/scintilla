@@ -628,6 +628,11 @@
 	On Cocoa, fix drawing in revealed area after enlarging window.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2238/">Bug #2238</a>.
 	</li>
+	<li>
+	On GTK, changes in system font settings (such as from Tweak) are detected and position
+	caches are invalidated since different font display options, such as antialiasing, change
+	character shape and thus positions.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scite500.zip">Release 5.0.0</a>
