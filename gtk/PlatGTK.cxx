@@ -1124,7 +1124,7 @@ std::unique_ptr<Surface> Surface::Allocate(int) {
 	return std::make_unique<SurfaceImpl>();
 }
 
-Window::~Window() {}
+Window::~Window() noexcept {}
 
 void Window::Destroy() noexcept {
 	if (wid) {
@@ -1326,7 +1326,7 @@ static void list_image_free(gpointer, gpointer value, gpointer) noexcept {
 ListBox::ListBox() noexcept {
 }
 
-ListBox::~ListBox() {
+ListBox::~ListBox() noexcept {
 }
 
 enum {
@@ -1368,7 +1368,7 @@ public:
 	ListBoxX(ListBoxX&&) = delete;
 	ListBoxX&operator=(const ListBoxX&) = delete;
 	ListBoxX&operator=(ListBoxX&&) = delete;
-	~ListBoxX() override {
+	~ListBoxX() noexcept override {
 		if (pixhash) {
 			g_hash_table_foreach((GHashTable *) pixhash, list_image_free, nullptr);
 			g_hash_table_destroy((GHashTable *) pixhash);

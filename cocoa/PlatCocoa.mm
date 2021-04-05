@@ -1517,7 +1517,7 @@ std::unique_ptr<Surface> Surface::Allocate(int) {
 // be either an NSWindow or NSView and the code will check the type
 // before performing an action.
 
-Window::~Window() {
+Window::~Window() noexcept {
 }
 
 // Window::Destroy needs to see definition of ListBoxImpl so is located after ListBoxImpl
@@ -2211,7 +2211,7 @@ void ListBoxImpl::SelectionChange() {
 ListBox::ListBox() noexcept {
 }
 
-ListBox::~ListBox() {
+ListBox::~ListBox() noexcept {
 }
 
 std::unique_ptr<ListBox> ListBox::Allocate() {

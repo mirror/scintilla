@@ -808,7 +808,7 @@ QRect ScreenRectangleForPoint(QPoint posGlobal)
 
 }
 
-Window::~Window() {}
+Window::~Window() noexcept {}
 
 void Window::Destroy() noexcept
 {
@@ -936,8 +936,8 @@ private:
 
 class ListBoxImpl : public ListBox {
 public:
-	ListBoxImpl();
-	~ListBoxImpl();
+	ListBoxImpl() noexcept;
+	~ListBoxImpl() noexcept override = default;
 
 	void SetFont(const Font *font) override;
 	void Create(Window &parent, int ctrlID, Point location,
@@ -969,11 +969,9 @@ private:
 	int visibleRows;
 	QMap<int,QPixmap> images;
 };
-ListBoxImpl::ListBoxImpl()
+ListBoxImpl::ListBoxImpl() noexcept
 : unicodeMode(false), visibleRows(5)
 {}
-
-ListBoxImpl::~ListBoxImpl() {}
 
 void ListBoxImpl::Create(Window &parent,
                          int /*ctrlID*/,
@@ -1211,7 +1209,7 @@ ListWidget *ListBoxImpl::GetWidget() const noexcept
 }
 
 ListBox::ListBox() noexcept {}
-ListBox::~ListBox() {}
+ListBox::~ListBox() noexcept {}
 
 std::unique_ptr<ListBox> ListBox::Allocate()
 {
