@@ -6459,15 +6459,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->MarkerNumberFromLine(static_cast<Sci::Line>(wParam), static_cast<int>(lParam));
 
 	case SCI_GETVIEWWS:
-		return vs.viewWhitespace;
+		return static_cast<sptr_t>(vs.viewWhitespace);
 
 	case SCI_SETVIEWWS:
-		vs.viewWhitespace = static_cast<WhiteSpaceVisibility>(wParam);
+		vs.viewWhitespace = static_cast<WhiteSpace>(wParam);
 		Redraw();
 		break;
 
 	case SCI_GETTABDRAWMODE:
-		return vs.tabDrawMode;
+		return static_cast<sptr_t>(vs.tabDrawMode);
 
 	case SCI_SETTABDRAWMODE:
 		vs.tabDrawMode = static_cast<TabDrawMode>(wParam);
@@ -6864,7 +6864,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETINDENTATIONGUIDES:
-		return vs.viewIndentationGuides;
+		return static_cast<sptr_t>(vs.viewIndentationGuides);
 
 	case SCI_SETHIGHLIGHTGUIDE:
 		if ((highlightGuideColumn != static_cast<int>(wParam)) || (wParam > 0)) {

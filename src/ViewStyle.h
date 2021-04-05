@@ -40,11 +40,11 @@ public:
 	void Realise(Surface &surface, int zoomLevel, int technology, const FontSpecification &fs);
 };
 
-enum IndentView {ivNone, ivReal, ivLookForward, ivLookBoth};
+enum class IndentView {none, real, lookForward, lookBoth};
 
-enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterIndent=2, wsVisibleOnlyInIndent=3};
+enum class WhiteSpace {invisible=0, visibleAlways=1, visibleAfterIndent=2, visibleOnlyInIndent=3};
 
-enum TabDrawMode {tdLongArrow=0, tdStrikeOut=1};
+enum class TabDrawMode {longArrow=0, strikeOut=1};
 
 typedef std::map<FontSpecification, std::unique_ptr<FontRealised>> FontMap;
 
@@ -123,7 +123,7 @@ public:
 	bool marginInside;	///< true: margin included in text view, false: separate views
 	int textStart;	///< Starting x position of text within the view
 	int zoomLevel;
-	WhiteSpaceVisibility viewWhitespace;
+	WhiteSpace viewWhitespace;
 	TabDrawMode tabDrawMode;
 	int whitespaceSize;
 	IndentView viewIndentationGuides;
