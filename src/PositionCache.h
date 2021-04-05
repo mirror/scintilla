@@ -149,7 +149,15 @@ struct ScreenLine : public IScreenLine {
 /**
  */
 class LineLayoutCache {
-	int level;
+public:
+	enum class Cache {
+		none = SC_CACHE_NONE,
+		caret = SC_CACHE_CARET,
+		page = SC_CACHE_PAGE,
+		document = SC_CACHE_DOCUMENT
+	};
+private:
+	Cache level;
 	std::vector<std::unique_ptr<LineLayout>>cache;
 	bool allInvalidated;
 	int styleClock;
@@ -165,15 +173,9 @@ public:
 	void operator=(LineLayoutCache &&) = delete;
 	virtual ~LineLayoutCache();
 	void Deallocate() noexcept;
-	enum {
-		llcNone=SC_CACHE_NONE,
-		llcCaret=SC_CACHE_CARET,
-		llcPage=SC_CACHE_PAGE,
-		llcDocument=SC_CACHE_DOCUMENT
-	};
 	void Invalidate(LineLayout::ValidLevel validity_) noexcept;
-	void SetLevel(int level_) noexcept;
-	int GetLevel() const noexcept { return level; }
+	void SetLevel(Cache level_) noexcept;
+	Cache GetLevel() const noexcept { return level; }
 	LineLayout *Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
 		Sci::Line linesOnScreen, Sci::Line linesInDoc);
 	void Dispose(LineLayout *ll) noexcept;

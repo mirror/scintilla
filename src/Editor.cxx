@@ -6754,11 +6754,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.wrapIndentMode;
 
 	case SCI_SETLAYOUTCACHE:
-		view.llc.SetLevel(static_cast<int>(wParam));
+		view.llc.SetLevel(static_cast<LineLayoutCache::Cache>(wParam));
 		break;
 
 	case SCI_GETLAYOUTCACHE:
-		return view.llc.GetLevel();
+		return static_cast<sptr_t>(view.llc.GetLevel());
 
 	case SCI_SETPOSITIONCACHE:
 		view.posCache.SetSize(wParam);

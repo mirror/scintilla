@@ -357,7 +357,7 @@ XYPOSITION ScreenLine::TabPositionAfter(XYPOSITION xPosition) const {
 }
 
 LineLayoutCache::LineLayoutCache() :
-	level(0),
+	level(Cache::none),
 	allInvalidated(false), styleClock(-1), useCount(0) {
 	Allocate(0);
 }
@@ -375,11 +375,11 @@ void LineLayoutCache::Allocate(size_t length_) {
 void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc) {
 	PLATFORM_ASSERT(useCount == 0);
 	size_t lengthForLevel = 0;
-	if (level == llcCaret) {
+	if (level == Cache::caret) {
 		lengthForLevel = 1;
-	} else if (level == llcPage) {
+	} else if (level == Cache::page) {
 		lengthForLevel = linesOnScreen + 1;
-	} else if (level == llcDocument) {
+	} else if (level == Cache::document) {
 		lengthForLevel = linesInDoc;
 	}
 	if (lengthForLevel > cache.size()) {
@@ -414,9 +414,9 @@ void LineLayoutCache::Invalidate(LineLayout::ValidLevel validity_) noexcept {
 	}
 }
 
-void LineLayoutCache::SetLevel(int level_) noexcept {
+void LineLayoutCache::SetLevel(Cache level_) noexcept {
 	allInvalidated = false;
-	if ((level_ != -1) && (level != level_)) {
+	if ((static_cast<int>(level_) != -1) && (level != level_)) {
 		level = level_;
 		Deallocate();
 	}
@@ -432,15 +432,15 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 	allInvalidated = false;
 	Sci::Position pos = -1;
 	LineLayout *ret = nullptr;
-	if (level == llcCaret) {
+	if (level == Cache::caret) {
 		pos = 0;
-	} else if (level == llcPage) {
+	} else if (level == Cache::page) {
 		if (lineNumber == lineCaret) {
 			pos = 0;
 		} else if (cache.size() > 1) {
 			pos = 1 + (lineNumber % (cache.size() - 1));
 		}
-	} else if (level == llcDocument) {
+	} else if (level == Cache::document) {
 		pos = lineNumber;
 	}
 	if (pos >= 0) {

@@ -179,7 +179,7 @@ EditView::EditView() {
 	additionalCaretsBlink = true;
 	additionalCaretsVisible = true;
 	imeCaretBlockOverride = false;
-	llc.SetLevel(LineLayoutCache::llcCaret);
+	llc.SetLevel(LineLayoutCache::Cache::caret);
 	posCache.SetSize(0x400);
 	tabArrowHeight = 4;
 	customDrawTabArrow = nullptr;
