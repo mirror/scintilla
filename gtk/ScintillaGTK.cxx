@@ -89,25 +89,14 @@
 #define SC_INDICATOR_CONVERTED INDICATOR_IME+2
 #define SC_INDICATOR_UNKNOWN INDICATOR_IME_MAX
 
-static GdkWindow *WindowFromWidget(GtkWidget *w) noexcept {
-	return gtk_widget_get_window(w);
-}
-
-#ifdef _MSC_VER
-// Constant conditional expressions are because of GTK+ headers
-#pragma warning(disable: 4127)
-// Ignore unreferenced local functions in GTK+ headers
-#pragma warning(disable: 4505)
-#endif
-
 using namespace Scintilla;
 
-static GdkWindow *PWindow(const Window &w) noexcept {
-	GtkWidget *widget = static_cast<GtkWidget *>(w.GetID());
-	return gtk_widget_get_window(widget);
-}
-
+// From PlatGTK.cxx
 extern std::string UTF8FromLatin1(std::string_view text);
+extern void Platform_Initialise();
+extern void Platform_Finalise();
+
+namespace {
 
 enum {
 	COMMAND_SIGNAL,
@@ -115,7 +104,7 @@ enum {
 	LAST_SIGNAL
 };
 
-static gint scintilla_signals[LAST_SIGNAL] = { 0 };
+gint scintilla_signals[LAST_SIGNAL] = { 0 };
 
 enum {
 	TARGET_STRING,
@@ -125,23 +114,66 @@ enum {
 	TARGET_URI
 };
 
-static const GtkTargetEntry clipboardCopyTargets[] = {
+const GtkTargetEntry clipboardCopyTargets[] = {
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-static constexpr gint nClipboardCopyTargets = std::size(clipboardCopyTargets);
+constexpr gint nClipboardCopyTargets = std::size(clipboardCopyTargets);
 
-static const GtkTargetEntry clipboardPasteTargets[] = {
+const GtkTargetEntry clipboardPasteTargets[] = {
 	{ (gchar *) "text/uri-list", 0, TARGET_URI },
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-static constexpr gint nClipboardPasteTargets = std::size(clipboardPasteTargets);
+constexpr gint nClipboardPasteTargets = std::size(clipboardPasteTargets);
 
-static const GdkDragAction actionCopyOrMove = static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE);
+const GdkDragAction actionCopyOrMove = static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
-static GtkWidget *PWidget(const Window &w) noexcept {
+GdkWindow *WindowFromWidget(GtkWidget *w) noexcept {
+	return gtk_widget_get_window(w);
+}
+
+GtkWidget *PWidget(const Window &w) noexcept {
 	return static_cast<GtkWidget *>(w.GetID());
+}
+
+GdkWindow *PWindow(const Window &w) noexcept {
+	GtkWidget *widget = static_cast<GtkWidget *>(w.GetID());
+	return gtk_widget_get_window(widget);
+}
+
+void UnRefCursor(GdkCursor *cursor) noexcept {
+#if GTK_CHECK_VERSION(3,0,0)
+	g_object_unref(cursor);
+#else
+	gdk_cursor_unref(cursor);
+#endif
+}
+
+void MapWidget(GtkWidget *widget) noexcept {
+	if (widget &&
+		gtk_widget_get_visible(GTK_WIDGET(widget)) &&
+		!IS_WIDGET_MAPPED(widget)) {
+		gtk_widget_map(widget);
+	}
+}
+
+const guchar *DataOfGSD(GtkSelectionData *sd) noexcept {
+	return gtk_selection_data_get_data(sd);
+}
+
+gint LengthOfGSD(GtkSelectionData *sd) noexcept {
+	return gtk_selection_data_get_length(sd);
+}
+
+GdkAtom TypeOfGSD(GtkSelectionData *sd) noexcept {
+	return gtk_selection_data_get_data_type(sd);
+}
+
+GdkAtom SelectionOfGSD(GtkSelectionData *sd) noexcept {
+	return gtk_selection_data_get_selection(sd);
+}
+
 }
 
 FontOptions::FontOptions(GtkWidget *widget) noexcept {
@@ -225,18 +257,10 @@ ScintillaGTK::~ScintillaGTK() {
 	wPreedit.Destroy();
 }
 
-static void UnRefCursor(GdkCursor *cursor) noexcept {
-#if GTK_CHECK_VERSION(3,0,0)
-	g_object_unref(cursor);
-#else
-	gdk_cursor_unref(cursor);
-#endif
-}
-
 void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	//Platform::DebugPrintf("ScintillaGTK::realize this\n");
 	gtk_widget_set_realized(widget, TRUE);
-	GdkWindowAttr attrs;
+	GdkWindowAttr attrs {};
 	attrs.window_type = GDK_WINDOW_CHILD;
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);
@@ -353,14 +377,6 @@ void ScintillaGTK::UnRealize(GtkWidget *widget) {
 	sciThis->UnRealizeThis(widget);
 }
 
-static void MapWidget(GtkWidget *widget) noexcept {
-	if (widget &&
-			gtk_widget_get_visible(GTK_WIDGET(widget)) &&
-			!IS_WIDGET_MAPPED(widget)) {
-		gtk_widget_map(widget);
-	}
-}
-
 void ScintillaGTK::MapThis() {
 	try {
 		//Platform::DebugPrintf("ScintillaGTK::map this\n");
@@ -417,7 +433,7 @@ void ScintillaGTK::ForAll(GtkCallback callback, gpointer callback_data) {
 }
 
 void ScintillaGTK::MainForAll(GtkContainer *container, gboolean include_internals, GtkCallback callback, gpointer callback_data) {
-	ScintillaGTK *sciThis = FromWidget((GtkWidget *)container);
+	ScintillaGTK *sciThis = FromWidget(GTK_WIDGET(container));
 
 	if (callback && include_internals) {
 		sciThis->ForAll(callback, callback_data);
@@ -755,7 +771,7 @@ std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 			if (!silent) {
 				if (len == 1)
 					fprintf(stderr, "iconv %s->%s failed for %0x '%s'\n",
-						charSetSource, charSetDest, (unsigned char)(*s), s);
+						charSetSource, charSetDest, static_cast<unsigned char>(*s), s);
 				else
 					fprintf(stderr, "iconv %s->%s failed for %s\n",
 						charSetSource, charSetDest, s);
@@ -975,8 +991,10 @@ bool ScintillaGTK::HaveMouseCapture() {
 
 #if GTK_CHECK_VERSION(3,0,0)
 
+namespace {
+
 // Is crcTest completely in crcContainer?
-static bool CRectContains(const cairo_rectangle_t &crcContainer, const cairo_rectangle_t &crcTest) {
+bool CRectContains(const cairo_rectangle_t &crcContainer, const cairo_rectangle_t &crcTest) {
 	return
 		(crcTest.x >= crcContainer.x) && ((crcTest.x + crcTest.width) <= (crcContainer.x + crcContainer.width)) &&
 		(crcTest.y >= crcContainer.y) && ((crcTest.y + crcTest.height) <= (crcContainer.y + crcContainer.height));
@@ -984,12 +1002,14 @@ static bool CRectContains(const cairo_rectangle_t &crcContainer, const cairo_rec
 
 // Is crcTest completely in crcListContainer?
 // May incorrectly return false if complex shape
-static bool CRectListContains(const cairo_rectangle_list_t *crcListContainer, const cairo_rectangle_t &crcTest) {
+bool CRectListContains(const cairo_rectangle_list_t *crcListContainer, const cairo_rectangle_t &crcTest) {
 	for (int r=0; r<crcListContainer->num_rectangles; r++) {
 		if (CRectContains(crcListContainer->rectangles[r], crcTest))
 			return true;
 	}
 	return false;
+}
+
 }
 
 #endif
@@ -1162,7 +1182,7 @@ const char *ScintillaGTK::CharacterSetID() const {
 class CaseFolderDBCS : public CaseFolderTable {
 	const char *charSet;
 public:
-	explicit CaseFolderDBCS(const char *charSet_) : charSet(charSet_) {
+	explicit CaseFolderDBCS(const char *charSet_) noexcept : charSet(charSet_) {
 		StandardASCII();
 	}
 	size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) override {
@@ -1232,7 +1252,7 @@ namespace {
 
 struct CaseMapper {
 	gchar *mapped;	// Must be freed with g_free
-	CaseMapper(const std::string &sUTF8, bool toUpperCase) {
+	CaseMapper(const std::string &sUTF8, bool toUpperCase) noexcept {
 		if (toUpperCase) {
 			mapped = g_utf8_strup(sUTF8.c_str(), sUTF8.length());
 		} else {
@@ -1244,7 +1264,7 @@ struct CaseMapper {
 	CaseMapper(CaseMapper&&) = delete;
 	CaseMapper&operator=(const CaseMapper&) = delete;
 	CaseMapper&operator=(CaseMapper&&) = delete;
-	~CaseMapper() {
+	~CaseMapper() noexcept {
 		g_free(mapped);
 	}
 };
@@ -1321,7 +1341,7 @@ public:
 		sci(sci_) {
 	}
 
-	static void ClipboardReceived(GtkClipboard *clipboard, GtkSelectionData *selection_data, gpointer data) {
+	static void ClipboardReceived(GtkClipboard *clipboard, GtkSelectionData *selection_data, gpointer data) noexcept {
 		SelectionReceiver *self = static_cast<SelectionReceiver *>(data);
 		if (self->sci) {
 			self->sci->ReceivedClipboard(clipboard, selection_data);
@@ -1419,11 +1439,6 @@ void ScintillaGTK::ClaimSelection() {
 bool ScintillaGTK::IsStringAtom(GdkAtom type) {
 	return (type == GDK_TARGET_STRING) || (type == atomUTF8) || (type == atomUTF8Mime);
 }
-
-static const guchar *DataOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_data(sd); }
-static gint LengthOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_length(sd); }
-static GdkAtom TypeOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_data_type(sd); }
-static GdkAtom SelectionOfGSD(GtkSelectionData *sd) noexcept { return gtk_selection_data_get_selection(sd); }
 
 // Detect rectangular text, convert line ends to current mode, convert from or to UTF-8
 void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText) {
@@ -2031,8 +2046,10 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 	return FALSE;
 }
 
+namespace {
+
 // Map the keypad keys to their equivalent functions
-static int KeyTranslate(int keyIn) noexcept {
+int KeyTranslate(int keyIn) noexcept {
 	switch (keyIn) {
 #if GTK_CHECK_VERSION(3,0,0)
 	case GDK_KEY_ISO_Left_Tab:
@@ -2174,6 +2191,8 @@ static int KeyTranslate(int keyIn) noexcept {
 	}
 }
 
+}
+
 gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 	try {
 		//fprintf(stderr, "SC-key: %d %x [%s]\n",
@@ -2272,7 +2291,7 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *) {
 		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
 		pango_layout_set_attributes(layout, pes.attrs);
 
-		cairo_t *context = gdk_cairo_create(reinterpret_cast<GdkDrawable *>(WindowFromWidget(widget)));
+		cairo_t *context = gdk_cairo_create(WindowFromWidget(widget));
 		cairo_move_to(context, 0, 0);
 		pango_cairo_show_layout(context, layout);
 		cairo_destroy(context);
@@ -2320,7 +2339,9 @@ void ScintillaGTK::DrawImeIndicator(int indicator, int len) {
 	}
 }
 
-static std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str) {
+namespace {
+
+std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str) {
 	// Map input style to scintilla ime indicator.
 	// Attrs position points between UTF-8 bytes.
 	// Indicator index to be returned is character based though.
@@ -2369,6 +2390,8 @@ static std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str
 		pango_attr_iterator_destroy(itercolor);
 	}
 	return indicator;
+}
+
 }
 
 void ScintillaGTK::SetCandidateWindowPos() {
@@ -2594,7 +2617,7 @@ void ScintillaGTK::Destroy(GObject *object) {
 }
 
 void ScintillaGTK::CheckForFontOptionChange() {
-	FontOptions fontOptionsNow(PWidget(wText));
+	const FontOptions fontOptionsNow(PWidget(wText));
 	if (!(fontOptionsNow == fontOptionsPrevious)) {
 		// Clear position caches
 		InvalidateStyleData();
@@ -3068,9 +3091,6 @@ gintptr scintilla_object_send_message(ScintillaObject *sci, unsigned int iMessag
 static void scintilla_class_init(ScintillaClass *klass);
 static void scintilla_init(ScintillaObject *sci);
 
-extern void Platform_Initialise();
-extern void Platform_Finalise();
-
 /* legacy name for scintilla_object_get_type */
 GType scintilla_get_type() {
 	static GType scintilla_type = 0;
@@ -3166,7 +3186,7 @@ static void scintilla_class_init(ScintillaClass *klass) {
 		GtkWidgetClass *widget_class = (GtkWidgetClass *) klass;
 		GtkContainerClass *container_class = (GtkContainerClass *) klass;
 
-		const GSignalFlags sigflags = GSignalFlags(G_SIGNAL_ACTION | G_SIGNAL_RUN_LAST);
+		const GSignalFlags sigflags = static_cast<GSignalFlags>(G_SIGNAL_ACTION | G_SIGNAL_RUN_LAST);
 		scintilla_signals[COMMAND_SIGNAL] = g_signal_new(
 				"command",
 				G_TYPE_FROM_CLASS(object_class),
