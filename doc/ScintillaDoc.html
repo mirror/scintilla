@@ -18,6 +18,7 @@
 	A:visited { color: blue; }
 	A:hover { text-decoration: underline ! important; }
 	A.message { text-decoration: none; font-weight: bold; font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
+	A.element { text-decoration: none; font-weight: bold; font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
 	A.seealso { text-decoration: none; font-weight: bold; font-family: Menlo,Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
 	A.toc { text-decoration: none; }
 	A.jump { text-decoration: none; }
@@ -119,7 +120,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 3 April 2021 NH</p>
+    <p>Last edited 9 April 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -358,110 +359,114 @@
 
           <td>&cir; <a class="toc" href="#StyleDefinition">Style definition</a></td>
 
-          <td>&cir; <a class="toc" href="#CaretAndSelectionStyles">Caret, selection, and hotspot styles</a></td>
+          <td>&cir; <a class="toc" href="#ElementColours">Element colours</a></td>
 
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#CaretAndSelectionStyles">Caret, selection, and hotspot styles</a></td>
+
           <td>&cir; <a class="toc" href="#CharacterRepresentations">Character representations</a></td>
 
           <td>&cir; <a class="toc" href="#Margins">Margins</a></td>
 
-          <td>&cir; <a class="toc" href="#Annotations">Annotations</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#Annotations">Annotations</a></td>
+
           <td>&cir; <a class="toc" href="#OtherSettings">Other settings</a></td>
 
           <td>&cir; <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
 
-          <td>&cir; <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
-          Guides</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
+          Guides</a></td>
+
           <td>&cir; <a class="toc" href="#Markers">Markers</a></td>
 
           <td>&cir; <a class="toc" href="#Indicators">Indicators</a></td>
 
-          <td>&cir; <a class="toc" href="#Autocompletion">Autocompletion</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#Autocompletion">Autocompletion</a></td>
+
           <td>&cir; <a class="toc" href="#UserLists">User lists</a></td>
 
           <td>&cir; <a class="toc" href="#CallTips">Call tips</a></td>
 
-          <td>&cir; <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
+
           <td>&cir; <a class="toc" href="#KeyBindings">Key bindings</a></td>
 
           <td>&cir; <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
 
-          <td>&cir; <a class="toc" href="#MacroRecording">Macro recording</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#MacroRecording">Macro recording</a></td>
+
           <td>&cir; <a class="toc" href="#Printing">Printing</a></td>
 
           <td>&cir; <a class="toc" href="#DirectAccess">Direct access</a></td>
 
-          <td>&cir; <a class="toc" href="#MultipleViews">Multiple views</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#MultipleViews">Multiple views</a></td>
+
           <td>&cir; <a class="toc" href="#BackgroundLoadSave">Background loading and saving</a></td>
 
           <td>&cir; <a class="toc" href="#Folding">Folding</a></td>
 
-          <td>&cir; <a class="toc" href="#LineWrapping">Line wrapping</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#LineWrapping">Line wrapping</a></td>
+
           <td>&cir; <a class="toc" href="#Zooming">Zooming</a></td>
 
           <td>&cir; <a class="toc" href="#LongLines">Long lines</a></td>
 
-          <td>&cir; <a class="toc" href="#Accessibility">Accessibility</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#Accessibility">Accessibility</a></td>
+
           <td>&cir; <a class="toc" href="#Lexer">Lexer</a></td>
 
           <td>&cir; <a class="toc" href="#LexerObjects">Lexer objects</a></td>
 
-          <td>&cir; <a class="toc" href="#Notifications">Notifications</a></td>
-
         </tr>
 
         <tr>
+          <td>&cir; <a class="toc" href="#Notifications">Notifications</a></td>
+
           <td>&cir; <a class="toc" href="#Images">Images</a></td>
 
           <td>&cir; <a class="toc" href="#GTK">GTK</a></td>
 
+        </tr>
+
+        <tr>
           <td>&cir; <a class="toc" href="#ProvisionalMessages"><span class="provisional">Provisional messages</span></a></td>
 
-        </tr>
-        <tr>
           <td>&cir; <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
 
           <td>&cir; <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
 
+        </tr>
+
+        <tr>
           <td>&cir; <a class="toc" href="#RemovedFeatures">Removed features</a></td>
 
-        </tr>
-        <tr>
           <td>&cir; <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
 
           <td>&cir; <a class="toc" href="#EndOfLineAnnotations">End of Line Annotations</a></td>
@@ -3207,6 +3212,92 @@ struct Sci_TextToFind {
     may change and an underline appear to indicate that these areas are sensitive to clicking.
     This may be used to allow hyperlinks to other documents.</p>
 
+    <h2 id="ElementColours">Element colours</h2>
+
+    <p>The colours of some visual elements can be changed with these methods.
+    The available elements often have a defined default colour, sometimes from the system but also from Scintilla.
+    There may be a range of colours and setting an element colour overrides these colours.</p>
+
+    <code>
+    <a class="message" href="#SCI_SETELEMENTCOLOUR">SCI_SETELEMENTCOLOUR(int element, colouralpha colourElement)</a><br />
+    <a class="message" href="#SCI_GETELEMENTCOLOUR">SCI_GETELEMENTCOLOUR(int element) &rarr; colouralpha</a><br />
+    <a class="message" href="#SCI_RESETELEMENTCOLOUR">SCI_RESETELEMENTCOLOUR(int element)</a><br />
+    <a class="message" href="#SCI_GETELEMENTISSET">SCI_GETELEMENTISSET(int element) &rarr; bool</a><br />
+    <a class="message" href="#SCI_GETELEMENTALLOWSTRANSLUCENT">SCI_GETELEMENTALLOWSTRANSLUCENT(int element) &rarr; bool</a><br />
+    </code>
+
+    <p>
+    <b id="SCI_SETELEMENTCOLOUR">SCI_SETELEMENTCOLOUR(int element, <a class="jump" href="#colouralpha">colouralpha</a> colourElement)</b><br />
+    <b id="SCI_GETELEMENTCOLOUR">SCI_GETELEMENTCOLOUR(int element) &rarr; colouralpha</b><br />
+     This changes the colour of the indicated visual element overriding any current colour.
+     If the element supports translucency, then the alpha portion of the value is used.
+     An opaque alpha value (0xff) should always be included when an opaque colour is desired as the value 0
+     is completely transparent and thus invisible.
+     </p>
+
+    <p>
+    <b id="SCI_RESETELEMENTCOLOUR">SCI_RESETELEMENTCOLOUR(int element)</b><br />
+     This removes the element colour returning to the default colour or set of colours.
+     </p>
+
+    <p>
+    <b id="SCI_GETELEMENTISSET">SCI_GETELEMENTISSET(int element) &rarr; bool</b><br />
+     Returns true when an element colour has been set. When false indicates that a default colour or set of colours is displayed.
+     </p>
+
+    <p>
+    <b id="SCI_GETELEMENTALLOWSTRANSLUCENT">SCI_GETELEMENTALLOWSTRANSLUCENT(int element) &rarr; bool</b><br />
+     Returns true when the element currently allows translucent drawing when an alpha component is included.
+     This may change based on circumstances - different platforms or graphics technologies may implement translucency
+     and newer versions of Scintilla may implement translucency for elements that did not previously support it. 
+     </p>
+     
+     <table class="standard" summary="Elements">
+      <thead align="left">
+        <tr>
+          <th><code>SC_ELEMENT_</code>*</th>
+
+          <th>Value</th>
+
+          <th>Translucent?</th>
+
+          <th>Platforms</th>
+
+          <th>Description</th>
+        </tr>
+      </thead>
+       <tbody valign="top">
+         <tr>
+           <th align="left"><code>SC_ELEMENT_LIST</code></th>
+           <td>0</td>
+           <td>Opaque</td>
+           <td>Win32</td>
+           <td>Text colour in autocompletion lists</td>
+         </tr>
+         <tr>
+           <th align="left"><code>SC_ELEMENT_LIST_BACK</code></th>
+           <td>1</td>
+           <td>Opaque</td>
+           <td>Win32</td>
+           <td>Background colour of autocompletion lists</td>
+         </tr>
+         <tr>
+           <th align="left"><code>SC_ELEMENT_LIST_SELECTED</code></th>
+           <td>2</td>
+           <td>Opaque</td>
+           <td>Win32</td>
+           <td>Text colour of selected item in autocompletion lists</td>
+         </tr>
+         <tr>
+           <th align="left"><code>SC_ELEMENT_LIST_SELECTED_BACK</code></th>
+           <td>3</td>
+           <td>Opaque</td>
+           <td>Win32</td>
+           <td>Background colour of selected item in autocompletion lists</td>
+         </tr>
+       </tbody>
+     </table>
+
     <h2 id="CaretAndSelectionStyles">Caret, selection, and hotspot styles</h2>
 
     <p>The selection is shown by changing the foreground and/or background colours. If one of these
@@ -5209,6 +5300,10 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_AUTOCGETMAXHEIGHT">SCI_AUTOCGETMAXHEIGHT &rarr; int</a><br />
      <a class="message" href="#SCI_AUTOCSETMAXWIDTH">SCI_AUTOCSETMAXWIDTH(int characterCount)</a><br />
      <a class="message" href="#SCI_AUTOCGETMAXWIDTH">SCI_AUTOCGETMAXWIDTH &rarr; int</a><br />
+     <a class="element" href="#SC_ELEMENT_LIST">SC_ELEMENT_LIST : colouralpha</a><br />
+     <a class="element" href="#SC_ELEMENT_LIST_BACK">SC_ELEMENT_LIST_BACK : colouralpha</a><br />
+     <a class="element" href="#SC_ELEMENT_LIST_SELECTED">SC_ELEMENT_LIST_SELECTED : colouralpha</a><br />
+     <a class="element" href="#SC_ELEMENT_LIST_SELECTED_BACK">SC_ELEMENT_LIST_SELECTED_BACK : colouralpha</a><br />
     </code>
 
     <p><b id="SCI_AUTOCSHOW">SCI_AUTOCSHOW(position lengthEntered, const char *itemList)</b><br />
@@ -5376,6 +5471,15 @@ struct Sci_TextToFind {
       Get or set the maximum width of an autocompletion list expressed as the number of characters in the longest item that will be totally visible.
       If zero (the default) then the list's width is calculated to fit the item with the most characters. Any items that cannot be fully displayed within
       the available width are indicated by the presence of ellipsis.
+     </p>
+
+    <p>
+     <b id="SC_ELEMENT_LIST">SC_ELEMENT_LIST : colouralpha</b><br />
+     <b id="SC_ELEMENT_LIST_BACK">SC_ELEMENT_LIST_BACK : colouralpha</b><br />
+     <b id="SC_ELEMENT_LIST_SELECTED">SC_ELEMENT_LIST_SELECTED : colouralpha</b><br />
+     <b id="SC_ELEMENT_LIST_SELECTED_BACK">SC_ELEMENT_LIST_SELECTED_BACK : colouralpha</b><br />
+     The colours used for autocompletion lists may be customized on Win32 using
+     <a class="message" href="#SCI_SETELEMENTCOLOUR"><code>SCI_SETELEMENTCOLOUR</code></a>.
      </p>
 
     <h2 id="UserLists">User lists</h2>
