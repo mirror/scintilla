@@ -365,7 +365,7 @@ struct FontDirectWrite : public FontWin {
 
 std::shared_ptr<Font> Font::Allocate(const FontParameters &fp) {
 #if defined(USE_D2D)
-	if (fp.technology == SCWIN_TECH_DIRECTWRITE) {
+	if (fp.technology != SCWIN_TECH_GDI) {
 		return std::make_shared<FontDirectWrite>(fp);
 	}
 #endif
