@@ -181,10 +181,12 @@ FontOptions::FontOptions(GtkWidget *widget) noexcept {
 	PLATFORM_ASSERT(pcontext);
 	const cairo_font_options_t *options = pango_cairo_context_get_font_options(pcontext);
 	// options is owned by the PangoContext so must not be freed.
-	PLATFORM_ASSERT(options);
-	antialias = cairo_font_options_get_antialias(options);
-	order = cairo_font_options_get_subpixel_order(options);
-	hint = cairo_font_options_get_hint_style(options);
+	if (options) {
+		// options is NULL on Win32
+		antialias = cairo_font_options_get_antialias(options);
+		order = cairo_font_options_get_subpixel_order(options);
+		hint = cairo_font_options_get_hint_style(options);
+	}
 	g_object_unref(pcontext);
 }
 
