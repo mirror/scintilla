@@ -118,14 +118,14 @@ const GtkTargetEntry clipboardCopyTargets[] = {
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-constexpr gint nClipboardCopyTargets = std::size(clipboardCopyTargets);
+constexpr gint nClipboardCopyTargets = static_cast<gint>(std::size(clipboardCopyTargets));
 
 const GtkTargetEntry clipboardPasteTargets[] = {
 	{ (gchar *) "text/uri-list", 0, TARGET_URI },
 	{ (gchar *) "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	{ (gchar *) "STRING", 0, TARGET_STRING },
 };
-constexpr gint nClipboardPasteTargets = std::size(clipboardPasteTargets);
+constexpr gint nClipboardPasteTargets = static_cast<gint>(std::size(clipboardPasteTargets));
 
 const GdkDragAction actionCopyOrMove = static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
@@ -457,7 +457,7 @@ public:
 	explicit PreEditString(GtkIMContext *im_context) noexcept {
 		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
 		validUTF8 = g_utf8_validate(str, strlen(str), nullptr);
-		uniStr = g_utf8_to_ucs4_fast(str, strlen(str), &uniStrLen);
+		uniStr = g_utf8_to_ucs4_fast(str, static_cast<glong>(strlen(str)), &uniStrLen);
 		pscript = g_unichar_get_script(uniStr[0]);
 	}
 	// Deleted so PreEditString objects can not be copied.
@@ -730,7 +730,8 @@ void ScintillaGTK::DisplayCursor(Window::Cursor c) {
 
 bool ScintillaGTK::DragThreshold(Point ptStart, Point ptNow) {
 	return gtk_drag_check_threshold(GTK_WIDGET(PWidget(wMain)),
-					ptStart.x, ptStart.y, ptNow.x, ptNow.y);
+		static_cast<gint>(ptStart.x), static_cast<gint>(ptStart.y),
+		static_cast<gint>(ptNow.x), static_cast<gint>(ptNow.y));
 }
 
 void ScintillaGTK::StartDrag() {
@@ -895,7 +896,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					       CharPtrFromSPtr(lParam));
 
 		case SCI_SETRECTANGULARSELECTIONMODIFIER:
-			rectangularSelectionModifier = wParam;
+			rectangularSelectionModifier = static_cast<int>(wParam);
 			break;
 
 		case SCI_GETRECTANGULARSELECTIONMODIFIER:
@@ -916,7 +917,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return accessibilityEnabled;
 
 		case SCI_SETACCESSIBILITY:
-			accessibilityEnabled = wParam;
+			accessibilityEnabled = static_cast<int>(wParam);
 			if (accessible) {
 				ScintillaGTKAccessible *sciAccessible = ScintillaGTKAccessible::FromAccessible(accessible);
 				if (sciAccessible) {
@@ -1073,8 +1074,8 @@ void ScintillaGTK::ScrollText(Sci::Line linesToMove) {
 #else
 	GtkWidget *wi = PWidget(wText);
 	if (IS_WIDGET_REALIZED(wi)) {
-		const int diff = vs.lineHeight * -linesToMove;
-		gdk_window_scroll(WindowFromWidget(wi), 0, -diff);
+		const Sci::Line diff = vs.lineHeight * -linesToMove;
+		gdk_window_scroll(WindowFromWidget(wi), 0, static_cast<gint>(-diff));
 		gdk_window_process_updates(WindowFromWidget(wi), FALSE);
 	}
 #endif
@@ -1082,7 +1083,7 @@ void ScintillaGTK::ScrollText(Sci::Line linesToMove) {
 
 void ScintillaGTK::SetVerticalScrollPos() {
 	DwellEnd(true);
-	gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmentv), topLine);
+	gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmentv), static_cast<gdouble>(topLine));
 }
 
 void ScintillaGTK::SetHorizontalScrollPos() {
@@ -1092,13 +1093,13 @@ void ScintillaGTK::SetHorizontalScrollPos() {
 
 bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 	bool modified = false;
-	const int pageScroll = LinesToScroll();
+	const int pageScroll = static_cast<int>(LinesToScroll());
 
 	if (gtk_adjustment_get_upper(adjustmentv) != (nMax + 1) ||
 			gtk_adjustment_get_page_size(adjustmentv) != nPage ||
 			gtk_adjustment_get_page_increment(adjustmentv) != pageScroll) {
-		gtk_adjustment_set_upper(adjustmentv, nMax + 1);
-		gtk_adjustment_set_page_size(adjustmentv, nPage);
+		gtk_adjustment_set_upper(adjustmentv, nMax + 1.0);
+		gtk_adjustment_set_page_size(adjustmentv, static_cast<gdouble>(nPage));
 		gtk_adjustment_set_page_increment(adjustmentv, pageScroll);
 #if !GTK_CHECK_VERSION(3,18,0)
 		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmentv));
@@ -1112,7 +1113,7 @@ bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 		horizEndPreferred = 0;
 	const unsigned int pageWidth = static_cast<unsigned int>(rcText.Width());
 	const unsigned int pageIncrement = pageWidth / 3;
-	const unsigned int charWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
+	const unsigned int charWidth = static_cast<unsigned int>(vs.styles[STYLE_DEFAULT].aveCharWidth);
 	if (gtk_adjustment_get_upper(adjustmenth) != horizEndPreferred ||
 			gtk_adjustment_get_page_size(adjustmenth) != pageWidth ||
 			gtk_adjustment_get_page_increment(adjustmenth) != pageIncrement ||
@@ -1610,7 +1611,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	// The #if is here because on Windows cfColumnSelect clip entry is used
 	// instead as standard indicator of rectangularness (so no need to kludge)
 	const char *textData = text->Data();
-	int len = text->Length();
+	gint len = static_cast<gint>(text->Length());
 #if PLAT_GTK_WIN32 == 0
 	if (text->rectangular)
 		len++;
@@ -1866,13 +1867,13 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			if (ctrl)
 				SetAdjustmentValue(adjustmenth, xOffset - 6);
 			else
-				SetAdjustmentValue(adjustmentv, topLine - 3);
+				SetAdjustmentValue(adjustmentv, static_cast<int>(topLine) - 3);
 		} else if (event->button == 5) {
 			// Wheel scrolling down (only GTK 1.x does it this way)
 			if (ctrl)
 				SetAdjustmentValue(adjustmenth, xOffset + 6);
 			else
-				SetAdjustmentValue(adjustmentv, topLine + 3);
+				SetAdjustmentValue(adjustmentv, static_cast<int>(topLine) + 3);
 		}
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
@@ -2353,11 +2354,12 @@ std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str) {
 	PangoAttrIterator *iterunderline = pango_attr_list_get_iterator(attrs);
 	if (iterunderline) {
 		do {
-			PangoAttribute  *attrunderline = pango_attr_iterator_get(iterunderline, PANGO_ATTR_UNDERLINE);
+			const PangoAttribute  *attrunderline = pango_attr_iterator_get(iterunderline, PANGO_ATTR_UNDERLINE);
 			if (attrunderline) {
 				const glong start = g_utf8_strlen(u8Str, attrunderline->start_index);
 				const glong end = g_utf8_strlen(u8Str, attrunderline->end_index);
-				const PangoUnderline uline = (PangoUnderline)((PangoAttrInt *)attrunderline)->value;
+				const int ulinevalue = reinterpret_cast<const PangoAttrInt *>(attrunderline)->value;
+				const PangoUnderline uline = static_cast<PangoUnderline>(ulinevalue);
 				for (glong i=start; i < end; ++i) {
 					switch (uline) {
 					case PANGO_UNDERLINE_NONE:
@@ -2419,7 +2421,7 @@ void ScintillaGTK::CommitThis(char *commitStr) {
 		const char *charSetSource = CharacterSetID();
 
 		glong uniStrLen = 0;
-		gunichar *uniStr = g_utf8_to_ucs4_fast(commitStr, strlen(commitStr), &uniStrLen);
+		gunichar *uniStr = g_utf8_to_ucs4_fast(commitStr, static_cast<glong>(strlen(commitStr)), &uniStrLen);
 		for (glong i = 0; i < uniStrLen; i++) {
 			gchar u8Char[UTF8MaxBytes+2] = {0};
 			const gint u8CharLen = g_unichar_to_utf8(uniStr[i], u8Char);
@@ -2539,7 +2541,7 @@ void ScintillaGTK::PreeditChangedWindowedThis() {
 			if (pt.y < 0)
 				pt.y = 0;
 
-			gtk_window_move(GTK_WINDOW(PWidget(wPreedit)), x + pt.x, y + pt.y);
+			gtk_window_move(GTK_WINDOW(PWidget(wPreedit)), x + static_cast<gint>(pt.x), y + static_cast<gint>(pt.y));
 			gtk_window_resize(GTK_WINDOW(PWidget(wPreedit)), w, h);
 			gtk_widget_show(PWidget(wPreedit));
 			gtk_widget_queue_draw_area(PWidget(wPreeditDraw), 0, 0, w, h);
@@ -3243,7 +3245,7 @@ GtkWidget *scintilla_object_new() {
 
 void scintilla_set_id(ScintillaObject *sci, uptr_t id) {
 	ScintillaGTK *psci = static_cast<ScintillaGTK *>(sci->pscin);
-	psci->ctrlID = id;
+	psci->ctrlID = static_cast<int>(id);
 }
 
 void scintilla_release_resources(void) {
