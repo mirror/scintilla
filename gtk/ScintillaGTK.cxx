@@ -2237,7 +2237,7 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		//fprintf(stderr, "SK-key: %d %x %x\n",event->keyval, event->state, consumed);
 		if (event->keyval == 0xffffff && event->length > 0) {
 			ClearSelection();
-			const int lengthInserted = pdoc->InsertString(CurrentPosition(), event->string, strlen(event->string));
+			const Sci::Position lengthInserted = pdoc->InsertString(CurrentPosition(), event->string, strlen(event->string));
 			if (lengthInserted > 0) {
 				MovePositionTo(CurrentPosition() + lengthInserted);
 			}
@@ -2317,7 +2317,7 @@ bool ScintillaGTK::KoreanIME() {
 	return lastNonCommonScript == G_UNICODE_SCRIPT_HANGUL;
 }
 
-void ScintillaGTK::MoveImeCarets(int pos) {
+void ScintillaGTK::MoveImeCarets(Sci::Position pos) {
 	// Move carets relatively by bytes
 	for (size_t r=0; r<sel.Count(); r++) {
 		const Sci::Position positionInsert = sel.Range(r).Start().Position();
@@ -2326,7 +2326,7 @@ void ScintillaGTK::MoveImeCarets(int pos) {
 	}
 }
 
-void ScintillaGTK::DrawImeIndicator(int indicator, int len) {
+void ScintillaGTK::DrawImeIndicator(int indicator, Sci::Position len) {
 	// Emulate the visual style of IME characters with indicators.
 	// Draw an indicator on the character before caret by the character bytes of len
 	// so it should be called after InsertCharacter().
@@ -2496,7 +2496,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 		// Move caret to ime cursor position.
 		const int imeEndToImeCaretU32 = preeditStr.cursor_pos - preeditStr.uniStrLen;
-		const int imeCaretPosDoc = pdoc->GetRelativePosition(CurrentPosition(), imeEndToImeCaretU32);
+		const Sci::Position imeCaretPosDoc = pdoc->GetRelativePosition(CurrentPosition(), imeEndToImeCaretU32);
 
 		MoveImeCarets(- CurrentPosition() + imeCaretPosDoc);
 

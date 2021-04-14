@@ -225,8 +225,8 @@ private:
 	void PreeditChangedInlineThis();
 	void PreeditChangedWindowedThis();
 	static void PreeditChanged(GtkIMContext *context, ScintillaGTK *sciThis);
-	void MoveImeCarets(int pos);
-	void DrawImeIndicator(int indicator, int len);
+	void MoveImeCarets(Sci::Position pos);
+	void DrawImeIndicator(int indicator, Sci::Position len);
 	void SetCandidateWindowPos();
 
 	static void StyleSetText(GtkWidget *widget, GtkStyle *previous, void *);
