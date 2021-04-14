@@ -2371,6 +2371,7 @@ std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str) {
 					case PANGO_UNDERLINE_DOUBLE:
 					case PANGO_UNDERLINE_LOW:
 					case PANGO_UNDERLINE_ERROR:
+					default:
 						break;
 					}
 				}
