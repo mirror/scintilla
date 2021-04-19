@@ -1354,7 +1354,7 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, int codePageDraw, UINT fuOptions);
+	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, int codePageOverride, UINT fuOptions);
 
 	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
 	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
@@ -2303,10 +2303,11 @@ std::unique_ptr<IScreenLineLayout> SurfaceD2D::Layout(const IScreenLine *screenL
 	return std::make_unique<ScreenLineLayout>(screenLine);
 }
 
-void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, int codePageDraw, UINT fuOptions) {
+void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, int codePageOverride, UINT fuOptions) {
 	SetFont(font_);
 
 	// Use Unicode calls
+	const int codePageDraw = codePageOverride ? codePageOverride : codePageText;
 	const TextWide tbuf(text, codePageDraw);
 	if (pRenderTarget && pTextFormat && pBrush) {
 		if (fuOptions & ETO_CLIPPED) {
@@ -2340,7 +2341,7 @@ void SurfaceD2D::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION yba
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
-		DrawTextCommon(rc, font_, ybase, text, codePageText, ETO_OPAQUE);
+		DrawTextCommon(rc, font_, ybase, text, 0, ETO_OPAQUE);
 	}
 }
 
@@ -2349,7 +2350,7 @@ void SurfaceD2D::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION yb
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
-		DrawTextCommon(rc, font_, ybase, text, codePageText, ETO_OPAQUE | ETO_CLIPPED);
+		DrawTextCommon(rc, font_, ybase, text, 0, ETO_OPAQUE | ETO_CLIPPED);
 	}
 }
 
@@ -2360,7 +2361,7 @@ void SurfaceD2D::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITIO
 		if (ch != ' ') {
 			if (pRenderTarget) {
 				D2DPenColourAlpha(fore);
-				DrawTextCommon(rc, font_, ybase, text, codePageText, 0);
+				DrawTextCommon(rc, font_, ybase, text, 0, 0);
 			}
 			return;
 		}
