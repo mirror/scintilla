@@ -1986,6 +1986,11 @@ void ListBoxImpl::Create(Window & /*parent*/, int /*ctrlID*/, Scintilla::Point p
 	table.target = ds;
 	table.doubleAction = @selector(doubleClick:);
 	table.selectionHighlightStyle = NSTableViewSelectionHighlightStyleSourceList;
+
+	if (@available(macOS 11.0, *)) {
+		[table setStyle: NSTableViewStylePlain];
+	}
+
 	wid = (__bridge_retained WindowID)winLB;
 }
 
@@ -2016,8 +2021,13 @@ PRectangle ListBoxImpl::GetDesiredRect() {
 	PRectangle rcDesired;
 	rcDesired = GetPosition();
 
-	// There appears to be an extra pixel above and below the row contents
-	CGFloat itemHeight = table.rowHeight + 2;
+	CGFloat itemHeight;
+	if (@available(macOS 11.0, *)) {
+		itemHeight = table.rowHeight;
+	} else {
+		// There appears to be an extra pixel above and below the row contents
+		itemHeight = table.rowHeight + 2;
+	}
 
 	int rows = Length();
 	if ((rows == 0) || (rows > desiredVisibleRows))
@@ -2026,13 +2036,6 @@ PRectangle ListBoxImpl::GetDesiredRect() {
 	rcDesired.bottom = rcDesired.top + static_cast<XYPOSITION>(itemHeight * rows);
 	rcDesired.right = rcDesired.left + maxItemWidth + aveCharWidth;
 	rcDesired.right += 4; // Ensures no truncation of text
-
-	if (@available(macOS 11, *)) {
-		// macOS 11 requires some extra space possibly due to the rounded highlight.
-		// There may be a better way to discover how much space is required
-		// but an extra 22 pixels fixes it for almost all tested cases.
-		rcDesired.right += 22;
-	}
 
 	if (Length() > rows) {
 		[scroller setHasVerticalScroller: YES];
