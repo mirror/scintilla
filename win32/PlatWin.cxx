@@ -313,6 +313,13 @@ struct FontDirectWrite : public FontWin {
 			static_cast<DWRITE_FONT_WEIGHT>(fp.weight),
 			style,
 			DWRITE_FONT_STRETCH_NORMAL, fHeight, wsLocale.c_str(), &pTextFormat);
+		if (hr == E_INVALIDARG) {
+			// Possibly a bad locale name like "/" so try "en-us".
+			hr = pIDWriteFactory->CreateTextFormat(wsFace.c_str(), nullptr,
+				static_cast<DWRITE_FONT_WEIGHT>(fp.weight),
+				style,
+				DWRITE_FONT_STRETCH_NORMAL, fHeight, L"en-us", &pTextFormat);
+		}
 		if (SUCCEEDED(hr)) {
 			pTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 
