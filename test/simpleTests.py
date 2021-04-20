@@ -1916,6 +1916,13 @@ class TestStyleAttributes(unittest.TestCase):
 		self.ed.SetDefaultFoldDisplayText(0, b"...")
 		self.assertEquals(self.ed.GetDefaultFoldDisplayText(), b"...")
 
+	def testFontLocale(self):
+		initialLocale = "en-us".encode("UTF-8")
+		testLocale = "zh-Hans".encode("UTF-8")
+		self.assertEquals(self.ed.GetFontLocale(), initialLocale)
+		self.ed.FontLocale = testLocale
+		self.assertEquals(self.ed.GetFontLocale(), testLocale)
+
 class TestIndices(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame

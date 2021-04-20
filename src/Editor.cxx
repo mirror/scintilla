@@ -7199,6 +7199,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETELEMENTALLOWSTRANSLUCENT:
 		return vs.ElementAllowsTranslucent(static_cast<int>(wParam));
 
+	case SCI_SETFONTLOCALE:
+		if (lParam) {
+			vs.SetFontLocaleName(CharPtrFromSPtr(lParam));
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_GETFONTLOCALE:
+		return StringResult(lParam, vs.localeName.c_str());
+
 #ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_SETSTYLEBITS:
 		vs.EnsureStyle(0xff);
