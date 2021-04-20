@@ -2400,7 +2400,7 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 		return;
 	}
 	// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
-	FLOAT position = 0.0f;
+	XYPOSITION position = 0.0;
 	int ti=0;
 	for (unsigned int ci=0; ci<count; ci++) {
 		for (unsigned int inCluster=0; inCluster<clusterMetrics[ci].length; inCluster++) {
@@ -2411,9 +2411,8 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 	PLATFORM_ASSERT(ti == tbuf.tlen);
 	if (mode.codePage == SC_CP_UTF8) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
-		int ui=0;
-		size_t i=0;
-		while (ui<tbuf.tlen) {
+		size_t i = 0;
+		for (int ui = 0; ui < tbuf.tlen; ui++) {
 			const unsigned char uch = text[i];
 			const unsigned int byteCount = UTF8BytesOfLead[uch];
 			if (byteCount == 4) {	// Non-BMP
@@ -2422,11 +2421,8 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<text.length()) && (ui<tbuf.tlen); bytePos++) {
 				positions[i++] = poses.buffer[ui];
 			}
-			ui++;
 		}
-		XYPOSITION lastPos = 0.0f;
-		if (i > 0)
-			lastPos = positions[i-1];
+		const XYPOSITION lastPos = (i > 0) ? positions[i - 1] : 0.0;
 		while (i<text.length()) {
 			positions[i++] = lastPos;
 		}
@@ -2531,7 +2527,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 		return;
 	}
 	// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
-	FLOAT position = 0.0f;
+	XYPOSITION position = 0.0;
 	int ti = 0;
 	for (unsigned int ci = 0; ci < count; ci++) {
 		for (unsigned int inCluster = 0; inCluster < clusterMetrics[ci].length; inCluster++) {
@@ -2541,22 +2537,19 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 	}
 	PLATFORM_ASSERT(ti == tbuf.tlen);
 	// Map the widths given for UTF-16 characters back onto the UTF-8 input string
-	int ui = 0;
 	size_t i = 0;
-	while (ui < tbuf.tlen) {
+	for (int ui = 0; ui < tbuf.tlen; ui++) {
 		const unsigned char uch = text[i];
 		const unsigned int byteCount = UTF8BytesOfLead[uch];
 		if (byteCount == 4) {	// Non-BMP
 			ui++;
+			PLATFORM_ASSERT(ui < ti);
 		}
 		for (unsigned int bytePos=0; (bytePos<byteCount) && (i<text.length()); bytePos++) {
 			positions[i++] = poses.buffer[ui];
 		}
-		ui++;
 	}
-	XYPOSITION lastPos = 0.0f;
-	if (i > 0)
-		lastPos = positions[i - 1];
+	const XYPOSITION lastPos = (i > 0) ? positions[i - 1] : 0.0;
 	while (i < text.length()) {
 		positions[i++] = lastPos;
 	}
