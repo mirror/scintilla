@@ -28,6 +28,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QPainter>
+#include <QPainterPath>
 #include <QMenu>
 #include <QAction>
 #include <QTime>
