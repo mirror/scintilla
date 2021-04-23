@@ -147,9 +147,29 @@ void ScintillaEditBase::paintEvent(QPaintEvent *event)
 	sqt->PartialPaint(PRectFromQRect(event->rect()));
 }
 
+namespace {
+
+bool isWheelEventHorizontal(QWheelEvent *event) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+	return event->angleDelta().y() == 0;
+#else
+	return event->orientation() == Qt::Horizontal;
+#endif
+}
+
+int wheelEventYDelta(QWheelEvent *event) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+	return event->angleDelta().y();
+#else
+	return event->delta();
+#endif
+}
+
+}
+
 void ScintillaEditBase::wheelEvent(QWheelEvent *event)
 {
-	if (event->orientation() == Qt::Horizontal) {
+	if (isWheelEventHorizontal(event)) {
 		if (horizontalScrollBarPolicy() == Qt::ScrollBarAlwaysOff)
 			event->ignore();
 		else
@@ -158,7 +178,7 @@ void ScintillaEditBase::wheelEvent(QWheelEvent *event)
 		if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
 			// Zoom! We play with the font sizes in the styles.
 			// Number of steps/line is ignored, we just care if sizing up or down
-			if (event->delta() > 0) {
+			if (wheelEventYDelta(event) > 0) {
 				sqt->KeyCommand(SCI_ZOOMIN);
 			} else {
 				sqt->KeyCommand(SCI_ZOOMOUT);
@@ -291,7 +311,7 @@ void ScintillaEditBase::mousePressEvent(QMouseEvent *event)
 
 	emit buttonPressed(event);
 
-	if (event->button() == Qt::MidButton &&
+	if (event->button() == Qt::MiddleButton &&
 	    QApplication::clipboard()->supportsSelection()) {
 		SelectionPosition selPos = sqt->SPositionFromLocation(
 					pos, false, false, sqt->UserVirtualSpace());
@@ -609,6 +629,18 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 	int line = send(SCI_LINEFROMPOSITION, pos);
 
 	switch (query) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+		// Qt 5 renamed ImMicroFocus to ImCursorRectangle then deprecated
+		// ImMicroFocus. Its the same value (2) and same description.
+		case Qt::ImCursorRectangle:
+		{
+			int startPos = (preeditPos >= 0) ? preeditPos : pos;
+			Point pt = sqt->LocationFromPosition(startPos);
+			int width = send(SCI_GETCARETWIDTH);
+			int height = send(SCI_TEXTHEIGHT, line);
+			return QRect(pt.x, pt.y, width, height);
+		}
+#else
 		case Qt::ImMicroFocus:
 		{
 			int startPos = (preeditPos >= 0) ? preeditPos : pos;
@@ -617,6 +649,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 			int height = send(SCI_TEXTHEIGHT, line);
 			return QRect(pt.x, pt.y, width, height);
 		}
+#endif
 
 		case Qt::ImFont:
 		{
