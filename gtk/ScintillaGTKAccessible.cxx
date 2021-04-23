@@ -1008,7 +1008,7 @@ static gpointer scintilla_object_accessible_parent_class = nullptr;
 
 // @p parent_type is only required on GTK 3.2 to 3.6, and only on the first call
 static GType scintilla_object_accessible_get_type(GType parent_type G_GNUC_UNUSED) {
-	static volatile gsize type_id_result = 0;
+	static gsize type_id_result = 0;
 
 	if (g_once_init_enter(&type_id_result)) {
 		GTypeInfo tinfo = {
@@ -1099,7 +1099,7 @@ AtkObject *ScintillaGTKAccessible::WidgetGetAccessibleImpl(GtkWidget *widget, At
 #if HAVE_GTK_A11Y_H // just instantiate the accessible
 	*cache = scintilla_object_accessible_new(0, G_OBJECT(widget));
 #elif HAVE_GTK_FACTORY // register in the factory and let GTK instantiate
-	static volatile gsize registered = 0;
+	static gsize registered = 0;
 
 	if (g_once_init_enter(&registered)) {
 		// Figure out whether accessibility is enabled by looking at the type of the accessible
