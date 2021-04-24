@@ -357,8 +357,8 @@ public:
  */
 namespace Platform {
 
-ColourDesired Chrome();
-ColourDesired ChromeHighlight();
+ColourAlpha Chrome();
+ColourAlpha ChromeHighlight();
 const char *DefaultFont();
 int DefaultFontSize();
 unsigned int DoubleClickTime();

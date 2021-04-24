@@ -2104,12 +2104,12 @@ void Menu::Show(Point pt, const Window &w) {
 #endif
 }
 
-ColourDesired Platform::Chrome() {
-	return ColourDesired(0xe0, 0xe0, 0xe0);
+ColourAlpha Platform::Chrome() {
+	return ColourAlpha(0xe0, 0xe0, 0xe0);
 }
 
-ColourDesired Platform::ChromeHighlight() {
-	return ColourDesired(0xff, 0xff, 0xff);
+ColourAlpha Platform::ChromeHighlight() {
+	return ColourAlpha(0xff, 0xff, 0xff);
 }
 
 const char *Platform::DefaultFont() {

@@ -1284,16 +1284,16 @@ void Menu::Show(Point pt, const Window & /*w*/)
 
 //----------------------------------------------------------------------
 
-ColourDesired Platform::Chrome()
+ColourAlpha Platform::Chrome()
 {
 	QColor c(Qt::gray);
-	return ColourDesired(c.red(), c.green(), c.blue());
+	return ColourAlpha(c.red(), c.green(), c.blue());
 }
 
-ColourDesired Platform::ChromeHighlight()
+ColourAlpha Platform::ChromeHighlight()
 {
 	QColor c(Qt::lightGray);
-	return ColourDesired(c.red(), c.green(), c.blue());
+	return ColourAlpha(c.red(), c.green(), c.blue());
 }
 
 const char *Platform::DefaultFont()

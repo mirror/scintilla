@@ -44,8 +44,8 @@ struct FontMeasurements {
  */
 class Style : public FontSpecification, public FontMeasurements {
 public:
-	ColourDesired fore;
-	ColourDesired back;
+	ColourAlpha fore;
+	ColourAlpha back;
 	bool eolFilled;
 	bool underline;
 	enum class CaseForce {mixed, upper, lower, camel};
@@ -62,7 +62,7 @@ public:
 	~Style();
 	Style &operator=(const Style &source) noexcept;
 	Style &operator=(Style &&) = delete;
-	void Clear(ColourDesired fore_, ColourDesired back_,
+	void Clear(ColourAlpha fore_, ColourAlpha back_,
 	           int size_,
 	           const char *fontName_, int characterSet_,
 	           int weight_, bool italic_, bool eolFilled_,

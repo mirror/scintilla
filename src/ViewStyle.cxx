@@ -198,9 +198,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 	// There are no image markers by default, so no need for calling CalcLargestMarkerHeight()
 	largestMarkerHeight = 0;
 
-	indicators[0] = Indicator(INDIC_SQUIGGLE, ColourDesired(0, 0x7f, 0));
-	indicators[1] = Indicator(INDIC_TT, ColourDesired(0, 0, 0xff));
-	indicators[2] = Indicator(INDIC_PLAIN, ColourDesired(0xff, 0, 0));
+	indicators[0] = Indicator(INDIC_SQUIGGLE, ColourAlpha(0, 0x7f, 0));
+	indicators[1] = Indicator(INDIC_TT, ColourAlpha(0, 0, 0xff));
+	indicators[2] = Indicator(INDIC_PLAIN, ColourAlpha(0xff, 0, 0));
 
 	technology = SC_TECHNOLOGY_DEFAULT;
 	indicatorsDynamic = false;
@@ -213,40 +213,40 @@ void ViewStyle::Init(size_t stylesSize_) {
 	spaceWidth = 8;
 	tabWidth = spaceWidth * 8;
 
-	selColours.fore = ColourOptional(ColourDesired(0xff, 0, 0));
-	selColours.back = ColourOptional(ColourDesired(0xc0, 0xc0, 0xc0), true);
-	selAdditionalForeground = ColourDesired(0xff, 0, 0);
-	selAdditionalBackground = ColourDesired(0xd7, 0xd7, 0xd7);
-	selBackground2 = ColourDesired(0xb0, 0xb0, 0xb0);
+	selColours.fore.reset();
+	selColours.back = ColourAlpha(0xc0, 0xc0, 0xc0);
+	selAdditionalForeground = ColourAlpha(0xff, 0, 0);
+	selAdditionalBackground = ColourAlpha(0xd7, 0xd7, 0xd7);
+	selBackground2 = ColourAlpha(0xb0, 0xb0, 0xb0);
 	selAlpha = SC_ALPHA_NOALPHA;
 	selAdditionalAlpha = SC_ALPHA_NOALPHA;
 	selEOLFilled = false;
 
-	foldmarginColour = ColourOptional(ColourDesired(0xff, 0, 0));
-	foldmarginHighlightColour = ColourOptional(ColourDesired(0xc0, 0xc0, 0xc0));
+	foldmarginColour.reset();
+	foldmarginHighlightColour.reset();
 
-	whitespaceColours.fore = ColourOptional();
-	whitespaceColours.back = ColourOptional(ColourDesired(0xff, 0xff, 0xff));
+	whitespaceColours.fore.reset();
+	whitespaceColours.back.reset();
 	controlCharSymbol = 0;	/* Draw the control characters */
 	controlCharWidth = 0;
 	selbar = Platform::Chrome();
 	selbarlight = Platform::ChromeHighlight();
-	styles[STYLE_LINENUMBER].fore = ColourDesired(0, 0, 0);
+	styles[STYLE_LINENUMBER].fore = ColourAlpha(0, 0, 0);
 	styles[STYLE_LINENUMBER].back = Platform::Chrome();
-	caretcolour = ColourDesired(0, 0, 0);
-	additionalCaretColour = ColourDesired(0x7f, 0x7f, 0x7f);
+	caretcolour = ColourAlpha(0, 0, 0);
+	additionalCaretColour = ColourAlpha(0x7f, 0x7f, 0x7f);
 	caretLineFrame = 0;
 	showCaretLineBackground = false;
 	alwaysShowCaretLineBackground = false;
-	caretLineBackground = ColourDesired(0xff, 0xff, 0);
+	caretLineBackground = ColourAlpha(0xff, 0xff, 0);
 	caretLineAlpha = SC_ALPHA_NOALPHA;
 	caretStyle = CARETSTYLE_LINE;
 	caretWidth = 1;
 	someStylesProtected = false;
 	someStylesForceCase = false;
 
-	hotspotColours.fore = ColourOptional(ColourDesired(0, 0, 0xff));
-	hotspotColours.back = ColourOptional(ColourDesired(0xff, 0xff, 0xff));
+	hotspotColours.fore.reset();
+	hotspotColours.back.reset();
 	hotspotUnderline = true;
 	hotspotSingleLine = true;
 
@@ -279,7 +279,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	braceBadLightIndicator = 0;
 
 	edgeState = EDGE_NONE;
-	theEdge = EdgeProperties(0, ColourDesired(0xc0, 0xc0, 0xc0));
+	theEdge = EdgeProperties(0, ColourAlpha(0xc0, 0xc0, 0xc0));
 
 	marginNumberPadding = 3;
 	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
@@ -381,8 +381,8 @@ void ViewStyle::EnsureStyle(size_t index) {
 }
 
 void ViewStyle::ResetDefaultStyle() {
-	styles[STYLE_DEFAULT].Clear(ColourDesired(0,0,0),
-	        ColourDesired(0xff,0xff,0xff),
+	styles[STYLE_DEFAULT].Clear(ColourAlpha(0,0,0),
+	        ColourAlpha(0xff,0xff,0xff),
 	        Platform::DefaultFontSize() * SC_FONT_SIZE_MULTIPLIER, fontNames.Save(Platform::DefaultFont()),
 	        SC_CHARSET_DEFAULT,
 	        SC_WEIGHT_NORMAL, false, false, false, Style::CaseForce::mixed, true, true, false);
@@ -398,8 +398,8 @@ void ViewStyle::ClearStyles() {
 	styles[STYLE_LINENUMBER].back = Platform::Chrome();
 
 	// Set call tip fore/back to match the values previously set for call tips
-	styles[STYLE_CALLTIP].back = ColourDesired(0xff, 0xff, 0xff);
-	styles[STYLE_CALLTIP].fore = ColourDesired(0x80, 0x80, 0x80);
+	styles[STYLE_CALLTIP].back = ColourAlpha(0xff, 0xff, 0xff);
+	styles[STYLE_CALLTIP].fore = ColourAlpha(0x80, 0x80, 0x80);
 }
 
 void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {
@@ -464,29 +464,29 @@ bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) cons
 // display itself (as long as it's not an SC_MARK_EMPTY marker).  These are checked in order
 // with the earlier taking precedence.  When multiple markers cause background override,
 // the colour for the highest numbered one is used.
-ColourOptional ViewStyle::Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const noexcept {
-	ColourOptional background;
+std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const {
+	std::optional<ColourAlpha> background;
 	if (!caretLineFrame && (caretActive || alwaysShowCaretLineBackground) && showCaretLineBackground &&
 		(caretLineAlpha == SC_ALPHA_NOALPHA) && lineContainsCaret) {
-		background = ColourOptional(caretLineBackground, true);
+		background = caretLineBackground;
 	}
-	if (!background.isSet && marksOfLine) {
+	if (!background && marksOfLine) {
 		int marks = marksOfLine;
 		for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 			if ((marks & 1) && (markers[markBit].markType == SC_MARK_BACKGROUND) &&
 				(markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
-				background = ColourOptional(markers[markBit].back, true);
+				background = markers[markBit].back;
 			}
 			marks >>= 1;
 		}
 	}
-	if (!background.isSet && maskInLine) {
+	if (!background && maskInLine) {
 		int marksMasked = marksOfLine & maskInLine;
 		if (marksMasked) {
 			for (int markBit = 0; (markBit < 32) && marksMasked; markBit++) {
 				if ((marksMasked & 1) &&
 					(markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
-					background = ColourOptional(markers[markBit].back, true);
+					background = markers[markBit].back;
 				}
 				marksMasked >>= 1;
 			}
@@ -496,12 +496,12 @@ ColourOptional ViewStyle::Background(int marksOfLine, bool caretActive, bool lin
 }
 
 bool ViewStyle::SelectionBackgroundDrawn() const noexcept {
-	return selColours.back.isSet &&
+	return selColours.back &&
 		((selAlpha == SC_ALPHA_NOALPHA) || (selAdditionalAlpha == SC_ALPHA_NOALPHA));
 }
 
 bool ViewStyle::WhitespaceBackgroundDrawn() const noexcept {
-	return (viewWhitespace != WhiteSpace::invisible) && (whitespaceColours.back.isSet);
+	return (viewWhitespace != WhiteSpace::invisible) && (whitespaceColours.back);
 }
 
 bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
@@ -510,11 +510,8 @@ bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
 		viewWhitespace == WhiteSpace::visibleAlways;
 }
 
-ColourDesired ViewStyle::WrapColour() const noexcept {
-	if (whitespaceColours.fore.isSet)
-		return whitespaceColours.fore;
-	else
-		return styles[STYLE_DEFAULT].fore;
+ColourAlpha ViewStyle::WrapColour() const noexcept {
+	return whitespaceColours.fore.value_or(styles[STYLE_DEFAULT].fore);
 }
 
 // Insert new edge in sorted order.

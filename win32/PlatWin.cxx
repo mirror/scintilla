@@ -638,7 +638,7 @@ void SurfaceGDI::PenColour(ColourAlpha fore, XYPOSITION widthStroke) noexcept {
 		penOld = {};
 	}
 	const DWORD penWidth = std::lround(widthStroke);
-	const COLORREF penColour = fore.GetColour().AsInteger();
+	const COLORREF penColour = fore.OpaqueRGB();
 	if (widthStroke > 1) {
 		const LOGBRUSH brushParameters{ BS_SOLID, penColour, 0 };
 		pen = ::ExtCreatePen(PS_GEOMETRIC | PS_ENDCAP_ROUND | PS_JOIN_MITER,
@@ -659,7 +659,7 @@ void SurfaceGDI::BrushColour(ColourAlpha back) noexcept {
 		brush = {};
 		brushOld = {};
 	}
-	brush = ::CreateSolidBrush(back.GetColour().AsInteger());
+	brush = ::CreateSolidBrush(back.OpaqueRGB());
 	brushOld = SelectBrush(hdc, brush);
 }
 
@@ -704,8 +704,8 @@ void SurfaceGDI::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 }
 
 void SurfaceGDI::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
-	PenColour(fillStroke.stroke.colour.GetColour(), fillStroke.stroke.width);
-	BrushColour(fillStroke.fill.colour.GetColour());
+	PenColour(fillStroke.stroke.colour.Opaque(), fillStroke.stroke.width);
+	BrushColour(fillStroke.fill.colour.Opaque());
 	std::vector<POINT> outline;
 	std::transform(pts, pts + npts, std::back_inserter(outline), POINTFromPoint);
 	::Polygon(hdc, outline.data(), static_cast<int>(npts));
@@ -727,7 +727,7 @@ void SurfaceGDI::FillRectangle(PRectangle rc, Fill fill) {
 		// Using ExtTextOut rather than a FillRect ensures that no dithering occurs.
 		// There is no need to allocate a brush either.
 		const RECT rcw = RectFromPRectangle(rc);
-		::SetBkColor(hdc, fill.colour.GetColour().AsInteger());
+		::SetBkColor(hdc, fill.colour.OpaqueRGB());
 		::ExtTextOut(hdc, rcw.left, rcw.top, ETO_OPAQUE, &rcw, TEXT(""), 0, nullptr);
 	} else {
 		AlphaRectangle(rc, 0, FillStroke(fill.colour));
@@ -1040,15 +1040,15 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 
 void SurfaceGDI::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
-	::SetTextColor(hdc, fore.GetColour().AsInteger());
-	::SetBkColor(hdc, back.GetColour().AsInteger());
+	::SetTextColor(hdc, fore.OpaqueRGB());
+	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
-	::SetTextColor(hdc, fore.GetColour().AsInteger());
-	::SetBkColor(hdc, back.GetColour().AsInteger());
+	::SetTextColor(hdc, fore.OpaqueRGB());
+	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
 }
 
@@ -1057,7 +1057,7 @@ void SurfaceGDI::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITIO
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
-			::SetTextColor(hdc, fore.GetColour().AsInteger());
+			::SetTextColor(hdc, fore.OpaqueRGB());
 			::SetBkMode(hdc, TRANSPARENT);
 			DrawTextCommon(rc, font_, ybase, text, 0);
 			::SetBkMode(hdc, OPAQUE);
@@ -1132,15 +1132,15 @@ void SurfaceGDI::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION
 
 void SurfaceGDI::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
-	::SetTextColor(hdc, fore.GetColour().AsInteger());
-	::SetBkColor(hdc, back.GetColour().AsInteger());
+	::SetTextColor(hdc, fore.OpaqueRGB());
+	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
 	ColourAlpha fore, ColourAlpha back) {
-	::SetTextColor(hdc, fore.GetColour().AsInteger());
-	::SetBkColor(hdc, back.GetColour().AsInteger());
+	::SetTextColor(hdc, fore.OpaqueRGB());
+	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
 }
 
@@ -1149,7 +1149,7 @@ void SurfaceGDI::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOS
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
-			::SetTextColor(hdc, fore.GetColour().AsInteger());
+			::SetTextColor(hdc, fore.OpaqueRGB());
 			::SetBkMode(hdc, TRANSPARENT);
 			DrawTextCommonUTF8(rc, font_, ybase, text, 0);
 			::SetBkMode(hdc, OPAQUE);
@@ -3148,7 +3148,7 @@ namespace {
 
 int ColourOfElement(std::optional<ColourAlpha> colour, int nIndex) {
 	if (colour.has_value()) {
-		return colour.value().GetColour().AsInteger();
+		return colour.value().OpaqueRGB();
 	} else {
 		return ::GetSysColor(nIndex);
 	}
@@ -3799,12 +3799,12 @@ void Menu::Show(Point pt, const Window &w) {
 	Destroy();
 }
 
-ColourDesired Platform::Chrome() {
-	return ColourDesired(::GetSysColor(COLOR_3DFACE));
+ColourAlpha Platform::Chrome() {
+	return ColourAlpha::FromRGB(::GetSysColor(COLOR_3DFACE));
 }
 
-ColourDesired Platform::ChromeHighlight() {
-	return ColourDesired(::GetSysColor(COLOR_3DHIGHLIGHT));
+ColourAlpha Platform::ChromeHighlight() {
+	return ColourAlpha::FromRGB(::GetSysColor(COLOR_3DHIGHLIGHT));
 }
 
 const char *Platform::DefaultFont() {

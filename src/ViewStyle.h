@@ -15,7 +15,7 @@ namespace Scintilla {
 class MarginStyle {
 public:
 	int style;
-	ColourDesired back;
+	ColourAlpha back;
 	int width;
 	int mask;
 	bool sensitive;
@@ -50,28 +50,27 @@ typedef std::map<FontSpecification, std::unique_ptr<FontRealised>> FontMap;
 
 enum class WrapMode { none, word, character, whitespace };
 
-class ColourOptional : public ColourDesired {
-public:
-	bool isSet;
-	ColourOptional(ColourDesired colour_=ColourDesired(0,0,0), bool isSet_=false) noexcept : ColourDesired(colour_), isSet(isSet_) {
+inline std::optional<ColourAlpha> OptionalColour(uptr_t wParam, sptr_t lParam) {
+	if (wParam) {
+		return ColourAlpha::FromRGB(static_cast<int>(lParam));
+	} else {
+		return {};
 	}
-	ColourOptional(uptr_t wParam, sptr_t lParam) noexcept : ColourDesired(static_cast<int>(lParam)), isSet(wParam != 0) {
-	}
-};
+}
 
 struct ForeBackColours {
-	ColourOptional fore;
-	ColourOptional back;
+	std::optional<ColourAlpha> fore;
+	std::optional<ColourAlpha> back;
 };
 
 struct EdgeProperties {
-	int column;
-	ColourDesired colour;
-	EdgeProperties(int column_ = 0, ColourDesired colour_ = ColourDesired(0)) noexcept :
+	int column = 0;
+	ColourAlpha colour;
+	EdgeProperties(int column_ = 0, ColourAlpha colour_ = ColourAlpha::FromRGB(0)) noexcept :
 		column(column_), colour(colour_) {
 	}
 	EdgeProperties(uptr_t wParam, sptr_t lParam) noexcept :
-		column(static_cast<int>(wParam)), colour(static_cast<int>(lParam)) {
+		column(static_cast<int>(wParam)), colour(ColourAlpha::FromRGB(static_cast<int>(lParam))) {
 	}
 };
 
@@ -97,19 +96,19 @@ public:
 	XYPOSITION spaceWidth;
 	XYPOSITION tabWidth;
 	ForeBackColours selColours;
-	ColourDesired selAdditionalForeground;
-	ColourDesired selAdditionalBackground;
-	ColourDesired selBackground2;
+	ColourAlpha selAdditionalForeground;
+	ColourAlpha selAdditionalBackground;
+	ColourAlpha selBackground2;
 	int selAlpha;
 	int selAdditionalAlpha;
 	bool selEOLFilled;
 	ForeBackColours whitespaceColours;
 	int controlCharSymbol;
 	XYPOSITION controlCharWidth;
-	ColourDesired selbar;
-	ColourDesired selbarlight;
-	ColourOptional foldmarginColour;
-	ColourOptional foldmarginHighlightColour;
+	ColourAlpha selbar;
+	ColourAlpha selbarlight;
+	std::optional<ColourAlpha> foldmarginColour;
+	std::optional<ColourAlpha> foldmarginHighlightColour;
 	ForeBackColours hotspotColours;
 	bool hotspotUnderline;
 	bool hotspotSingleLine;
@@ -128,12 +127,12 @@ public:
 	int whitespaceSize;
 	IndentView viewIndentationGuides;
 	bool viewEOL;
-	ColourDesired caretcolour;
-	ColourDesired additionalCaretColour;
+	ColourAlpha caretcolour;
+	ColourAlpha additionalCaretColour;
 	int caretLineFrame;
 	bool showCaretLineBackground;
 	bool alwaysShowCaretLineBackground;
-	ColourDesired caretLineBackground;
+	ColourAlpha caretLineBackground;
 	int caretLineAlpha;
 	int caretStyle;
 	int caretWidth;
@@ -194,10 +193,10 @@ public:
 	void CalcLargestMarkerHeight() noexcept;
 	int GetFrameWidth() const noexcept;
 	bool IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const noexcept;
-	ColourOptional Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const noexcept;
+	std::optional<ColourAlpha> Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
 	bool SelectionBackgroundDrawn() const noexcept;
 	bool WhitespaceBackgroundDrawn() const noexcept;
-	ColourDesired WrapColour() const noexcept;
+	ColourAlpha WrapColour() const noexcept;
 
 	void AddMultiEdge(uptr_t wParam, sptr_t lParam);
 

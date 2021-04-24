@@ -741,7 +741,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	// For now, assume that copy can only be called on PixMap surfaces. Shows up black.
 	CGImageRef image = patternSurface.CreateImage();
 	if (image == NULL) {
-		FillRectangle(rc, ColourDesired(0));
+		FillRectangle(rc, ColourAlpha::FromRGB(0));
 		return;
 	}
 
@@ -1147,7 +1147,7 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
 	CGImageRef image = source.CreateImage();
 	// If we could not get an image reference, fill the rectangle black
 	if (image == NULL) {
-		FillRectangle(rc, ColourDesired(0));
+		FillRectangle(rc, ColourAlpha::FromRGB(0));
 		return;
 	}
 
@@ -2287,14 +2287,14 @@ void Menu::Show(Point, const Window &) {
 
 //----------------- Platform -----------------------------------------------------------------------
 
-ColourDesired Platform::Chrome() {
-	return ColourDesired(0xE0, 0xE0, 0xE0);
+ColourAlpha Platform::Chrome() {
+	return ColourAlpha(0xE0, 0xE0, 0xE0);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-ColourDesired Platform::ChromeHighlight() {
-	return ColourDesired(0xFF, 0xFF, 0xFF);
+ColourAlpha Platform::ChromeHighlight() {
+	return ColourAlpha(0xFF, 0xFF, 0xFF);
 }
 
 //--------------------------------------------------------------------------------------------------
