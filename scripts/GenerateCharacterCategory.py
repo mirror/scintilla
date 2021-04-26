@@ -4,15 +4,15 @@
 # Requires Python 3.3 or later
 # Should not be run with old versions of Python.
 
-import codecs, os, platform, sys, unicodedata
+import pathlib, platform, sys, unicodedata
 
 from FileGenerator import Regenerate
 
 def findCategories(filename):
-    with codecs.open(filename, "r", "UTF-8") as infile:
+    with filename.open(encoding="UTF-8") as infile:
         lines = [x.strip() for x in infile.readlines() if "\tcc" in x]
     values = "".join(lines).replace(" ","").split(",")
-    print(values)
+    print("Categrories:", values)
     return [v[2:] for v in values]
 
 def updateCharacterCategory(filename):
@@ -42,6 +42,11 @@ def updateCharacterCategory(filename):
 
     Regenerate(filename, "//", values)
 
-categories = findCategories("../lexlib/CharacterCategory.h")
 
-updateCharacterCategory("../lexlib/CharacterCategory.cxx")
+scintillaDirectory = pathlib.Path(__file__).resolve().parent.parent
+
+categories = findCategories(scintillaDirectory / "src" / "CharacterCategory.h")
+
+updateCharacterCategory(scintillaDirectory / "src" / "CharacterCategory.cxx")
+
+updateCharacterCategory(scintillaDirectory.parent / "lexilla" / "lexlib" / "CharacterCategory.cxx")
