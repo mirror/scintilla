@@ -1476,7 +1476,7 @@ void Editor::UpdateSystemCaret() {
 }
 
 bool Editor::Wrapping() const noexcept {
-	return vs.wrapState != WrapMode::none;
+	return vs.wrap.state != WrapMode::none;
 }
 
 void Editor::NeedWrapping(Sci::Line docLineStart, Sci::Line docLineEnd) {
@@ -6708,7 +6708,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETWRAPMODE:
-		return static_cast<sptr_t>(vs.wrapState);
+		return static_cast<sptr_t>(vs.wrap.state);
 
 	case SCI_SETWRAPVISUALFLAGS:
 		if (vs.SetWrapVisualFlags(static_cast<int>(wParam))) {
@@ -6718,7 +6718,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETWRAPVISUALFLAGS:
-		return vs.wrapVisualFlags;
+		return vs.wrap.visualFlags;
 
 	case SCI_SETWRAPVISUALFLAGSLOCATION:
 		if (vs.SetWrapVisualFlagsLocation(static_cast<int>(wParam))) {
@@ -6727,7 +6727,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETWRAPVISUALFLAGSLOCATION:
-		return vs.wrapVisualFlagsLocation;
+		return vs.wrap.visualFlagsLocation;
 
 	case SCI_SETWRAPSTARTINDENT:
 		if (vs.SetWrapVisualStartIndent(static_cast<int>(wParam))) {
@@ -6737,7 +6737,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETWRAPSTARTINDENT:
-		return vs.wrapVisualStartIndent;
+		return vs.wrap.visualStartIndent;
 
 	case SCI_SETWRAPINDENTMODE:
 		if (vs.SetWrapIndentMode(static_cast<int>(wParam))) {
@@ -6747,7 +6747,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETWRAPINDENTMODE:
-		return vs.wrapIndentMode;
+		return vs.wrap.indentMode;
 
 	case SCI_SETLAYOUTCACHE:
 		view.llc.SetLevel(static_cast<LineLayoutCache::Cache>(wParam));
@@ -7228,34 +7228,34 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->GetMaxLineState();
 
 	case SCI_GETCARETLINEVISIBLE:
-		return vs.showCaretLineBackground;
+		return vs.caretLine.show;
 	case SCI_SETCARETLINEVISIBLE:
-		vs.showCaretLineBackground = wParam != 0;
+		vs.caretLine.show = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 	case SCI_GETCARETLINEVISIBLEALWAYS:
-		return vs.alwaysShowCaretLineBackground;
+		return vs.caretLine.alwaysShow;
 	case SCI_SETCARETLINEVISIBLEALWAYS:
-		vs.alwaysShowCaretLineBackground = wParam != 0;
+		vs.caretLine.alwaysShow = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCARETLINEFRAME:
-		return vs.caretLineFrame;
+		return vs.caretLine.frame;
 	case SCI_SETCARETLINEFRAME:
-		vs.caretLineFrame = static_cast<int>(wParam);
+		vs.caretLine.frame = static_cast<int>(wParam);
 		InvalidateStyleRedraw();
 		break;
 	case SCI_GETCARETLINEBACK:
-		return vs.caretLineBackground.OpaqueRGB();
+		return vs.caretLine.background.OpaqueRGB();
 	case SCI_SETCARETLINEBACK:
-		vs.caretLineBackground = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.caretLine.background = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 	case SCI_GETCARETLINEBACKALPHA:
-		return vs.caretLineAlpha;
+		return vs.caretLine.alpha;
 	case SCI_SETCARETLINEBACKALPHA:
-		vs.caretLineAlpha = static_cast<int>(wParam);
+		vs.caretLine.alpha = static_cast<int>(wParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -7404,31 +7404,31 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return LinesOnScreen();
 
 	case SCI_SETSELFORE:
-		vs.selColours.fore = OptionalColour(wParam, lParam);
-		vs.selAdditionalForeground = ColourAlpha::FromRGB(static_cast<int>(lParam));
+		vs.selection.colours.fore = OptionalColour(wParam, lParam);
+		vs.selection.additionalForeground = ColourAlpha::FromRGB(static_cast<int>(lParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELBACK:
-		vs.selColours.back = OptionalColour(wParam, lParam);
-		vs.selAdditionalBackground = ColourAlpha::FromRGB(static_cast<int>(lParam));
+		vs.selection.colours.back = OptionalColour(wParam, lParam);
+		vs.selection.additionalBackground = ColourAlpha::FromRGB(static_cast<int>(lParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELALPHA:
-		vs.selAlpha = static_cast<int>(wParam);
-		vs.selAdditionalAlpha = static_cast<int>(wParam);
+		vs.selection.alpha = static_cast<int>(wParam);
+		vs.selection.additionalAlpha = static_cast<int>(wParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETSELALPHA:
-		return vs.selAlpha;
+		return vs.selection.alpha;
 
 	case SCI_GETSELEOLFILLED:
-		return vs.selEOLFilled;
+		return vs.selection.eolFilled;
 
 	case SCI_SETSELEOLFILLED:
-		vs.selEOLFilled = wParam != 0;
+		vs.selection.eolFilled = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 
@@ -7443,32 +7443,32 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETCARETFORE:
-		vs.caretcolour = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.caret.colour = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCARETFORE:
-		return vs.caretcolour.OpaqueRGB();
+		return vs.caret.colour.OpaqueRGB();
 
 	case SCI_SETCARETSTYLE:
 		if (wParam <= (CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK | CARETSTYLE_BLOCK_AFTER))
-			vs.caretStyle = static_cast<int>(wParam);
+			vs.caret.style = static_cast<int>(wParam);
 		else
 			/* Default to the line caret */
-			vs.caretStyle = CARETSTYLE_LINE;
+			vs.caret.style = CARETSTYLE_LINE;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCARETSTYLE:
-		return vs.caretStyle;
+		return vs.caret.style;
 
 	case SCI_SETCARETWIDTH:
-		vs.caretWidth = std::clamp(static_cast<int>(wParam), 0, 20);
+		vs.caret.width = std::clamp(static_cast<int>(wParam), 0, 20);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCARETWIDTH:
-		return vs.caretWidth;
+		return vs.caret.width;
 
 	case SCI_ASSIGNCMDKEY:
 		kmap.AssignCmdKey(LowShortFromWParam(wParam),
@@ -8405,30 +8405,30 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return virtualSpaceOptions;
 
 	case SCI_SETADDITIONALSELFORE:
-		vs.selAdditionalForeground = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.selection.additionalForeground = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETADDITIONALSELBACK:
-		vs.selAdditionalBackground = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.selection.additionalBackground = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETADDITIONALSELALPHA:
-		vs.selAdditionalAlpha = static_cast<int>(wParam);
+		vs.selection.additionalAlpha = static_cast<int>(wParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETADDITIONALSELALPHA:
-		return vs.selAdditionalAlpha;
+		return vs.selection.additionalAlpha;
 
 	case SCI_SETADDITIONALCARETFORE:
-		vs.additionalCaretColour = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.caret.additionalColour = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETADDITIONALCARETFORE:
-		return vs.additionalCaretColour.OpaqueRGB();
+		return vs.caret.additionalColour.OpaqueRGB();
 
 	case SCI_ROTATESELECTION:
 		sel.RotateMain();

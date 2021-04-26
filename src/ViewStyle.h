@@ -63,6 +63,59 @@ struct ForeBackColours {
 	std::optional<ColourAlpha> back;
 };
 
+struct SelectionAppearance {
+	// Colours of main selection
+	ForeBackColours colours;
+	// Colours of additional (non-main) selections
+	ColourAlpha additionalForeground;
+	ColourAlpha additionalBackground;
+	// Background colour on X when not primary selection
+	ColourAlpha background2;
+	// Translucency. SC_ALPHA_NOALPHA: draw selection background beneath text
+	int alpha;
+	// Translucency of additional selections
+	int additionalAlpha;
+	// Draw selection past line end characters up to right border
+	bool eolFilled;
+};
+
+struct CaretLineAppearance {
+	// Colour of caret line
+	ColourAlpha background;
+	// Whether to show the caret line
+	bool show;
+	// Also show when non-focused
+	bool alwaysShow;
+	// Translucency.  SC_ALPHA_NOALPHA: draw selection background beneath text
+	int alpha;
+	// Non-0: draw a rectangle around line instead of filling line. Value is pixel width of frame
+	int frame;
+};
+
+struct CaretAppearance {
+	// Colour of caret
+	ColourAlpha colour;
+	// Colour of additional (non-main) carets
+	ColourAlpha additionalColour;
+	// Line, block, over-strike bar ... 
+	int style;
+	// Width in pixels
+	int width;
+};
+
+struct WrapAppearance {
+	// No wrapping, word, character, whitespace appearance
+	WrapMode state;
+	// Show indication of wrap at line end, line start, or in margin
+	int visualFlags;
+	// Show indication near margin or near text
+	int visualFlagsLocation;
+	// How much indentation to show wrapping
+	int visualStartIndent;
+	// SC_WRAPINDENT_FIXED, _SAME, _INDENT, _DEEPINDENT
+	int indentMode;
+};
+
 struct EdgeProperties {
 	int column = 0;
 	ColourAlpha colour;
@@ -95,13 +148,9 @@ public:
 	XYPOSITION aveCharWidth;
 	XYPOSITION spaceWidth;
 	XYPOSITION tabWidth;
-	ForeBackColours selColours;
-	ColourAlpha selAdditionalForeground;
-	ColourAlpha selAdditionalBackground;
-	ColourAlpha selBackground2;
-	int selAlpha;
-	int selAdditionalAlpha;
-	bool selEOLFilled;
+
+	SelectionAppearance selection;
+
 	ForeBackColours whitespaceColours;
 	int controlCharSymbol;
 	XYPOSITION controlCharWidth;
@@ -126,15 +175,11 @@ public:
 	int whitespaceSize;
 	IndentView viewIndentationGuides;
 	bool viewEOL;
-	ColourAlpha caretcolour;
-	ColourAlpha additionalCaretColour;
-	int caretLineFrame;
-	bool showCaretLineBackground;
-	bool alwaysShowCaretLineBackground;
-	ColourAlpha caretLineBackground;
-	int caretLineAlpha;
-	int caretStyle;
-	int caretWidth;
+
+	CaretAppearance caret;
+
+	CaretLineAppearance caretLine;
+
 	bool someStylesProtected;
 	bool someStylesForceCase;
 	int extraFontFlag;
@@ -159,12 +204,7 @@ public:
 	std::map<int, std::optional<ColourAlpha>> elementColours;
 	std::set<int> elementAllowsTranslucent;
 
-	// Wrapping support
-	WrapMode wrapState;
-	int wrapVisualFlags;
-	int wrapVisualFlagsLocation;
-	int wrapVisualStartIndent;
-	int wrapIndentMode; // SC_WRAPINDENT_FIXED, _SAME, _INDENT
+	WrapAppearance wrap;
 
 	std::string localeName;
 

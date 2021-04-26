@@ -3398,7 +3398,7 @@ bool ScintillaWin::Unregister() noexcept {
 
 bool ScintillaWin::HasCaretSizeChanged() const noexcept {
 	if (
-		( (0 != vs.caretWidth) && (sysCaretWidth != vs.caretWidth) )
+		( (0 != vs.caret.width) && (sysCaretWidth != vs.caret.width) )
 		|| ((0 != vs.lineHeight) && (sysCaretHeight != vs.lineHeight))
 		) {
 		return true;
@@ -3407,7 +3407,7 @@ bool ScintillaWin::HasCaretSizeChanged() const noexcept {
 }
 
 BOOL ScintillaWin::CreateSystemCaret() {
-	sysCaretWidth = vs.caretWidth;
+	sysCaretWidth = vs.caret.width;
 	if (0 == sysCaretWidth) {
 		sysCaretWidth = 1;
 	}

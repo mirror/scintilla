@@ -83,13 +83,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 	indicatorsDynamic = source.indicatorsDynamic;
 	indicatorsSetFore = source.indicatorsSetFore;
 
-	selColours = source.selColours;
-	selAdditionalForeground = source.selAdditionalForeground;
-	selAdditionalBackground = source.selAdditionalBackground;
-	selBackground2 = source.selBackground2;
-	selAlpha = source.selAlpha;
-	selAdditionalAlpha = source.selAdditionalAlpha;
-	selEOLFilled = source.selEOLFilled;
+	selection = source.selection;
 
 	foldmarginColour = source.foldmarginColour;
 	foldmarginHighlightColour = source.foldmarginHighlightColour;
@@ -102,15 +96,8 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 	controlCharWidth = source.controlCharWidth;
 	selbar = source.selbar;
 	selbarlight = source.selbarlight;
-	caretcolour = source.caretcolour;
-	additionalCaretColour = source.additionalCaretColour;
-	caretLineFrame = source.caretLineFrame;
-	showCaretLineBackground = source.showCaretLineBackground;
-	alwaysShowCaretLineBackground = source.alwaysShowCaretLineBackground;
-	caretLineBackground = source.caretLineBackground;
-	caretLineAlpha = source.caretLineAlpha;
-	caretStyle = source.caretStyle;
-	caretWidth = source.caretWidth;
+	caret = source.caret;
+	caretLine = source.caretLine;
 	someStylesProtected = false;
 	someStylesForceCase = false;
 	leftMarginWidth = source.leftMarginWidth;
@@ -148,11 +135,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 	ctrlCharPadding = source.ctrlCharPadding;
 	lastSegItalicsOffset = source.lastSegItalicsOffset;
 
-	wrapState = source.wrapState;
-	wrapVisualFlags = source.wrapVisualFlags;
-	wrapVisualFlagsLocation = source.wrapVisualFlagsLocation;
-	wrapVisualStartIndent = source.wrapVisualStartIndent;
-	wrapIndentMode = source.wrapIndentMode;
+	wrap = source.wrap;
 
 	localeName = source.localeName;
 }
@@ -212,14 +195,14 @@ void ViewStyle::Init(size_t stylesSize_) {
 	spaceWidth = 8;
 	tabWidth = spaceWidth * 8;
 
-	selColours.fore.reset();
-	selColours.back = ColourAlpha(0xc0, 0xc0, 0xc0);
-	selAdditionalForeground = ColourAlpha(0xff, 0, 0);
-	selAdditionalBackground = ColourAlpha(0xd7, 0xd7, 0xd7);
-	selBackground2 = ColourAlpha(0xb0, 0xb0, 0xb0);
-	selAlpha = SC_ALPHA_NOALPHA;
-	selAdditionalAlpha = SC_ALPHA_NOALPHA;
-	selEOLFilled = false;
+	selection.colours.fore.reset();
+	selection.colours.back = ColourAlpha(0xc0, 0xc0, 0xc0);
+	selection.additionalForeground = ColourAlpha(0xff, 0, 0);
+	selection.additionalBackground = ColourAlpha(0xd7, 0xd7, 0xd7);
+	selection.background2 = ColourAlpha(0xb0, 0xb0, 0xb0);
+	selection.alpha = SC_ALPHA_NOALPHA;
+	selection.additionalAlpha = SC_ALPHA_NOALPHA;
+	selection.eolFilled = false;
 
 	foldmarginColour.reset();
 	foldmarginHighlightColour.reset();
@@ -232,15 +215,18 @@ void ViewStyle::Init(size_t stylesSize_) {
 	selbarlight = Platform::ChromeHighlight();
 	styles[STYLE_LINENUMBER].fore = ColourAlpha(0, 0, 0);
 	styles[STYLE_LINENUMBER].back = Platform::Chrome();
-	caretcolour = ColourAlpha(0, 0, 0);
-	additionalCaretColour = ColourAlpha(0x7f, 0x7f, 0x7f);
-	caretLineFrame = 0;
-	showCaretLineBackground = false;
-	alwaysShowCaretLineBackground = false;
-	caretLineBackground = ColourAlpha(0xff, 0xff, 0);
-	caretLineAlpha = SC_ALPHA_NOALPHA;
-	caretStyle = CARETSTYLE_LINE;
-	caretWidth = 1;
+
+	caret.colour = ColourAlpha(0, 0, 0);
+	caret.additionalColour = ColourAlpha(0x7f, 0x7f, 0x7f);
+	caret.style = CARETSTYLE_LINE;
+	caret.width = 1;
+
+	caretLine.background = ColourAlpha(0xff, 0xff, 0);
+	caretLine.show = false;
+	caretLine.alwaysShow = false;
+	caretLine.alpha = SC_ALPHA_NOALPHA;
+	caretLine.frame = 0;
+
 	someStylesProtected = false;
 	someStylesForceCase = false;
 
@@ -283,11 +269,11 @@ void ViewStyle::Init(size_t stylesSize_) {
 	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
 	lastSegItalicsOffset = 2;
 
-	wrapState = WrapMode::none;
-	wrapVisualFlags = 0;
-	wrapVisualFlagsLocation = 0;
-	wrapVisualStartIndent = 0;
-	wrapIndentMode = SC_WRAPINDENT_FIXED;
+	wrap.state = WrapMode::none;
+	wrap.visualFlags = 0;
+	wrap.visualFlagsLocation = 0;
+	wrap.visualStartIndent = 0;
+	wrap.indentMode = SC_WRAPINDENT_FIXED;
 
 	localeName = localeNameDefault;
 }
@@ -448,12 +434,12 @@ void ViewStyle::CalcLargestMarkerHeight() noexcept {
 }
 
 int ViewStyle::GetFrameWidth() const noexcept {
-	return std::clamp(caretLineFrame, 1, lineHeight / 3);
+	return std::clamp(caretLine.frame, 1, lineHeight / 3);
 }
 
 bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const noexcept {
-	return caretLineFrame && (caretActive || alwaysShowCaretLineBackground) && showCaretLineBackground &&
-		(caretLineAlpha == SC_ALPHA_NOALPHA) && lineContainsCaret;
+	return caretLine.frame && (caretActive || caretLine.alwaysShow) && caretLine.show &&
+		(caretLine.alpha == SC_ALPHA_NOALPHA) && lineContainsCaret;
 }
 
 // See if something overrides the line background colour:  Either if caret is on the line
@@ -464,9 +450,9 @@ bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) cons
 // the colour for the highest numbered one is used.
 std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const {
 	std::optional<ColourAlpha> background;
-	if (!caretLineFrame && (caretActive || alwaysShowCaretLineBackground) && showCaretLineBackground &&
-		(caretLineAlpha == SC_ALPHA_NOALPHA) && lineContainsCaret) {
-		background = caretLineBackground;
+	if (!caretLine.frame && (caretActive || caretLine.alwaysShow) && caretLine.show &&
+		(caretLine.alpha == SC_ALPHA_NOALPHA) && lineContainsCaret) {
+		background = caretLine.background;
 	}
 	if (!background && marksOfLine) {
 		int marks = marksOfLine;
@@ -494,8 +480,8 @@ std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActi
 }
 
 bool ViewStyle::SelectionBackgroundDrawn() const noexcept {
-	return selColours.back &&
-		((selAlpha == SC_ALPHA_NOALPHA) || (selAdditionalAlpha == SC_ALPHA_NOALPHA));
+	return selection.colours.back &&
+		((selection.alpha == SC_ALPHA_NOALPHA) || (selection.additionalAlpha == SC_ALPHA_NOALPHA));
 }
 
 bool ViewStyle::WhitespaceBackgroundDrawn() const noexcept {
@@ -553,59 +539,59 @@ bool ViewStyle::SetWrapState(int wrapState_) noexcept {
 		wrapStateWanted = WrapMode::none;
 		break;
 	}
-	const bool changed = wrapState != wrapStateWanted;
-	wrapState = wrapStateWanted;
+	const bool changed = wrap.state != wrapStateWanted;
+	wrap.state = wrapStateWanted;
 	return changed;
 }
 
 bool ViewStyle::SetWrapVisualFlags(int wrapVisualFlags_) noexcept {
-	const bool changed = wrapVisualFlags != wrapVisualFlags_;
-	wrapVisualFlags = wrapVisualFlags_;
+	const bool changed = wrap.visualFlags != wrapVisualFlags_;
+	wrap.visualFlags = wrapVisualFlags_;
 	return changed;
 }
 
 bool ViewStyle::SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_) noexcept {
-	const bool changed = wrapVisualFlagsLocation != wrapVisualFlagsLocation_;
-	wrapVisualFlagsLocation = wrapVisualFlagsLocation_;
+	const bool changed = wrap.visualFlagsLocation != wrapVisualFlagsLocation_;
+	wrap.visualFlagsLocation = wrapVisualFlagsLocation_;
 	return changed;
 }
 
 bool ViewStyle::SetWrapVisualStartIndent(int wrapVisualStartIndent_) noexcept {
-	const bool changed = wrapVisualStartIndent != wrapVisualStartIndent_;
-	wrapVisualStartIndent = wrapVisualStartIndent_;
+	const bool changed = wrap.visualStartIndent != wrapVisualStartIndent_;
+	wrap.visualStartIndent = wrapVisualStartIndent_;
 	return changed;
 }
 
 bool ViewStyle::SetWrapIndentMode(int wrapIndentMode_) noexcept {
-	const bool changed = wrapIndentMode != wrapIndentMode_;
-	wrapIndentMode = wrapIndentMode_;
+	const bool changed = wrap.indentMode != wrapIndentMode_;
+	wrap.indentMode = wrapIndentMode_;
 	return changed;
 }
 
 bool ViewStyle::IsBlockCaretStyle() const noexcept {
-	return ((caretStyle & CARETSTYLE_INS_MASK) == CARETSTYLE_BLOCK) ||
-		(caretStyle & CARETSTYLE_OVERSTRIKE_BLOCK) != 0;
+	return ((caret.style & CARETSTYLE_INS_MASK) == CARETSTYLE_BLOCK) ||
+		(caret.style & CARETSTYLE_OVERSTRIKE_BLOCK) != 0;
 }
 
 bool ViewStyle::IsCaretVisible() const noexcept {
-	return caretWidth > 0 && caretStyle != CARETSTYLE_INVISIBLE;
+	return caret.width > 0 && caret.style != CARETSTYLE_INVISIBLE;
 }
 
 bool ViewStyle::DrawCaretInsideSelection(bool inOverstrike, bool imeCaretBlockOverride) const noexcept {
-	if (caretStyle & CARETSTYLE_BLOCK_AFTER)
+	if (caret.style & CARETSTYLE_BLOCK_AFTER)
 		return false;
-	return ((caretStyle & CARETSTYLE_INS_MASK) == CARETSTYLE_BLOCK) ||
-		(inOverstrike && (caretStyle & CARETSTYLE_OVERSTRIKE_BLOCK) != 0) ||
+	return ((caret.style & CARETSTYLE_INS_MASK) == CARETSTYLE_BLOCK) ||
+		(inOverstrike && (caret.style & CARETSTYLE_OVERSTRIKE_BLOCK) != 0) ||
 		imeCaretBlockOverride;
 }
 
 ViewStyle::CaretShape ViewStyle::CaretShapeForMode(bool inOverstrike) const noexcept {
 	if (inOverstrike) {
-		return (caretStyle & CARETSTYLE_OVERSTRIKE_BLOCK) ? CaretShape::block : CaretShape::bar;
+		return (caret.style & CARETSTYLE_OVERSTRIKE_BLOCK) ? CaretShape::block : CaretShape::bar;
 	}
 
-	const int caret = caretStyle & CARETSTYLE_INS_MASK;
-	return (caret <= CARETSTYLE_BLOCK) ? static_cast<CaretShape>(caret) : CaretShape::line;
+	const int caretStyle = caret.style & CARETSTYLE_INS_MASK;
+	return (caretStyle <= CARETSTYLE_BLOCK) ? static_cast<CaretShape>(caretStyle) : CaretShape::line;
 }
 
 void ViewStyle::AllocStyles(size_t sizeNew) {
