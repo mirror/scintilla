@@ -143,11 +143,11 @@ void MarginView::RefreshPixMaps(Surface *surfaceWindow, const ViewStyle &vsDraw)
 
 		if (vsDraw.foldmarginColour) {
 			// override default fold margin colour
-			colourFMFill = vsDraw.foldmarginColour.value();
+			colourFMFill = *vsDraw.foldmarginColour;
 		}
 		if (vsDraw.foldmarginHighlightColour) {
 			// override default fold margin highlight colour
-			colourFMStripes = vsDraw.foldmarginHighlightColour.value();
+			colourFMStripes = *vsDraw.foldmarginHighlightColour;
 		}
 
 		pixmapSelPattern->FillRectangle(rcPattern, colourFMFill);

@@ -822,7 +822,7 @@ Sci::Position EditView::StartEndDisplayLine(Surface *surface, const EditModel &m
 
 static ColourAlpha SelectionBackground(const ViewStyle &vsDraw, bool main, bool primarySelection) noexcept {
 	return main ?
-		(primarySelection ? vsDraw.selection.colours.back.value() : vsDraw.selection.background2) :
+		(primarySelection ? *vsDraw.selection.colours.back : vsDraw.selection.background2) :
 		vsDraw.selection.additionalBackground;
 }
 
@@ -842,10 +842,10 @@ static ColourAlpha TextBackground(const EditModel &model, const ViewStyle &vsDra
 			(i < ll->numCharsBeforeEOL))
 			return vsDraw.theEdge.colour;
 		if (inHotspot && vsDraw.hotspotColours.back)
-			return vsDraw.hotspotColours.back.value();
+			return *vsDraw.hotspotColours.back;
 	}
 	if (background && (styleMain != STYLE_BRACELIGHT) && (styleMain != STYLE_BRACEBAD)) {
-		return background.value();
+		return *background;
 	} else {
 		return vsDraw.styles[styleMain].back;
 	}
@@ -941,7 +941,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 	if (virtualSpace > 0.0f) {
 		rcSegment.left = xEol + xStart;
 		rcSegment.right = xEol + xStart + virtualSpace;
-		surface->FillRectangleAligned(rcSegment, Fill(background ? background.value() : vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
+		surface->FillRectangleAligned(rcSegment, Fill(background ? *background : vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
 		if (!hideSelection && ((vsDraw.selection.alpha == SC_ALPHA_NOALPHA) || (vsDraw.selection.additionalAlpha == SC_ALPHA_NOALPHA))) {
 			const SelectionSegment virtualSpaceRange(SelectionPosition(model.pdoc->LineEnd(line)),
 				SelectionPosition(model.pdoc->LineEnd(line),
@@ -999,7 +999,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			}
 			ColourAlpha textFore = vsDraw.styles[styleMain].fore;
 			if (eolInSelection && vsDraw.selection.colours.fore) {
-				textFore = (eolInSelection == 1) ? vsDraw.selection.colours.fore.value() : vsDraw.selection.additionalForeground;
+				textFore = (eolInSelection == 1) ? *vsDraw.selection.colours.fore : vsDraw.selection.additionalForeground;
 			}
 			if (eolInSelection && vsDraw.selection.colours.back && (line < model.pdoc->LinesTotal() - 1)) {
 				if (alpha == SC_ALPHA_NOALPHA) {
@@ -1025,7 +1025,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		surface->FillRectangleAligned(rcSegment, Fill(SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection)));
 	} else {
 		if (background) {
-			surface->FillRectangleAligned(rcSegment, Fill(background.value()));
+			surface->FillRectangleAligned(rcSegment, Fill(*background));
 		} else if (line < model.pdoc->LinesTotal() - 1) {
 			surface->FillRectangleAligned(rcSegment, Fill(vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
 		} else if (vsDraw.styles[ll->styles[ll->numCharsInLine]].eolFilled) {
@@ -1218,7 +1218,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	const std::optional<ColourAlpha> background = vsDraw.Background(model.pdoc->GetMark(line), model.caret.active, ll->containsCaret);
 	ColourAlpha textFore = vsDraw.styles[STYLE_FOLDDISPLAYTEXT].fore;
 	if (eolInSelection && (vsDraw.selection.colours.fore)) {
-		textFore = (eolInSelection == 1) ? vsDraw.selection.colours.fore.value() : vsDraw.selection.additionalForeground;
+		textFore = (eolInSelection == 1) ? *vsDraw.selection.colours.fore : vsDraw.selection.additionalForeground;
 	}
 	const ColourAlpha textBack = TextBackground(model, vsDraw, ll, background, eolInSelection,
 											false, STYLE_FOLDDISPLAYTEXT, -1);
@@ -1640,7 +1640,7 @@ static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, c
 	int xStart, PRectangle rcLine, std::optional<ColourAlpha> background, DrawWrapMarkerFn customDrawWrapMarker,
 	bool caretActive) {
 	// default bgnd here..
-	surface->FillRectangleAligned(rcLine, Fill(background ? background.value() :
+	surface->FillRectangleAligned(rcLine, Fill(background ? *background :
 		vsDraw.styles[STYLE_DEFAULT].back));
 
 	if (vsDraw.IsLineFrameOpaque(caretActive, ll->containsCaret)) {
@@ -1712,7 +1712,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 				if (ll->chars[i] == '\t') {
 					// Tab display
 					if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
-						textBack = vsDraw.whitespaceColours.back.value();
+						textBack = *vsDraw.whitespaceColours.back;
 				} else {
 					// Blob display
 					inIndentation = false;
@@ -1730,7 +1730,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 									rcSegment.top,
 									ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
 									rcSegment.bottom);
-								surface->FillRectangleAligned(rcSpace, Fill(vsDraw.whitespaceColours.back.value()));
+								surface->FillRectangleAligned(rcSpace, Fill(*vsDraw.whitespaceColours.back));
 							}
 						} else {
 							inIndentation = false;
@@ -1920,7 +1920,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			const bool inHotspot = (ll->hotspot.Valid()) && ll->hotspot.ContainsCharacter(iDoc);
 			if (inHotspot) {
 				if (vsDraw.hotspotColours.fore)
-					textFore = vsDraw.hotspotColours.fore.value();
+					textFore = *vsDraw.hotspotColours.fore;
 			}
 			if (vsDraw.indicatorsSetFore) {
 				// At least one indicator sets the text colour so see if it applies to this segment
@@ -1951,7 +1951,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			}
 			const int inSelection = hideSelection ? 0 : model.sel.CharacterInSelection(iDoc);
 			if (inSelection && (vsDraw.selection.colours.fore)) {
-				textFore = (inSelection == 1) ? vsDraw.selection.colours.fore.value() : vsDraw.selection.additionalForeground;
+				textFore = (inSelection == 1) ? *vsDraw.selection.colours.fore : vsDraw.selection.additionalForeground;
 			}
 			ColourAlpha textBack = TextBackground(model, vsDraw, ll, background, inSelection, inHotspot, styleMain, i);
 			if (ts.representation) {
@@ -1959,7 +1959,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					// Tab display
 					if (phasesDraw == PhasesDraw::one) {
 						if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
-							textBack = vsDraw.whitespaceColours.back.value();
+							textBack = *vsDraw.whitespaceColours.back;
 						surface->FillRectangleAligned(rcSegment, Fill(textBack));
 					}
 					if (inIndentation && vsDraw.viewIndentationGuides == IndentView::real) {
@@ -1976,7 +1976,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					if (vsDraw.viewWhitespace != WhiteSpace::invisible) {
 						if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 							if (vsDraw.whitespaceColours.fore)
-								textFore = vsDraw.whitespaceColours.fore.value();
+								textFore = *vsDraw.whitespaceColours.fore;
 							const PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
 							const int segmentTop = static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2);
@@ -2020,11 +2020,11 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						if (ll->chars[cpos + ts.start] == ' ') {
 							if (vsDraw.viewWhitespace != WhiteSpace::invisible) {
 								if (vsDraw.whitespaceColours.fore)
-									textFore = vsDraw.whitespaceColours.fore.value();
+									textFore = *vsDraw.whitespaceColours.fore;
 								if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 									const XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
 									if ((phasesDraw == PhasesDraw::one) && drawWhitespaceBackground) {
-										textBack = vsDraw.whitespaceColours.back.value();
+										textBack = *vsDraw.whitespaceColours.back;
 										const PRectangle rcSpace(
 											ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
 											rcSegment.top,
@@ -2062,7 +2062,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 				rcUL.bottom = rcUL.top + 1;
 				if (vsDraw.hotspotColours.fore)
-					surface->FillRectangleAligned(rcUL, Fill(vsDraw.hotspotColours.fore.value()));
+					surface->FillRectangleAligned(rcUL, Fill(*vsDraw.hotspotColours.fore));
 				else
 					surface->FillRectangleAligned(rcUL, Fill(textFore));
 			} else if (vsDraw.styles[styleMain].underline) {
@@ -2452,7 +2452,7 @@ void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const
 			surface->FillRectangleAligned(rcArea, Fill(SelectionBackground(vsDraw, eolInSelection == 1, model.primarySelection)));
 		} else {
 			if (background) {
-				surface->FillRectangleAligned(rcArea, Fill(background.value()));
+				surface->FillRectangleAligned(rcArea, Fill(*background));
 			} else if (vsDraw.styles[ll->styles[ll->numCharsInLine]].eolFilled) {
 				surface->FillRectangleAligned(rcArea, Fill(vsDraw.styles[ll->styles[ll->numCharsInLine]].back));
 			} else {
