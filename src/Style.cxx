@@ -35,7 +35,7 @@ bool FontSpecification::operator<(const FontSpecification &other) const noexcept
 	if (weight != other.weight)
 		return weight < other.weight;
 	if (italic != other.italic)
-		return italic == false;
+		return !italic;
 	if (size != other.size)
 		return size < other.size;
 	if (characterSet != other.characterSet)
@@ -83,8 +83,7 @@ Style::Style(const Style &source) noexcept : FontSpecification(), FontMeasuremen
 	hotspot = source.hotspot;
 }
 
-Style::~Style() {
-}
+Style::~Style() = default;
 
 Style &Style::operator=(const Style &source) noexcept {
 	if (this == &source)

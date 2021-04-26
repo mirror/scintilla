@@ -102,7 +102,7 @@ Timer::Timer() noexcept :
 		ticking(false), ticksToWait(0), tickerID{} {}
 
 Idler::Idler() noexcept :
-		state(false), idlerID(0) {}
+		state(false), idlerID(nullptr) {}
 
 static constexpr bool IsAllSpacesOrTabs(std::string_view sv) noexcept {
 	for (const char ch : sv) {
@@ -188,7 +188,7 @@ Editor::Editor() : durationWrapOneLine(0.00001, 0.000001, 0.0001) {
 	modEventMask = SC_MODEVENTMASKALL;
 	commandEvents = true;
 
-	pdoc->AddWatcher(this, 0);
+	pdoc->AddWatcher(this, nullptr);
 
 	recordingMacro = false;
 	foldAutomatic = 0;
@@ -199,7 +199,7 @@ Editor::Editor() : durationWrapOneLine(0.00001, 0.000001, 0.0001) {
 }
 
 Editor::~Editor() {
-	pdoc->RemoveWatcher(this, 0);
+	pdoc->RemoveWatcher(this, nullptr);
 	DropGraphics();
 }
 
@@ -3959,7 +3959,7 @@ int Editor::KeyDefault(int, int) {
 
 int Editor::KeyDownWithModifiers(int key, int modifiers, bool *consumed) {
 	DwellEnd(false);
-	const int msg = kmap.Find(key, modifiers);
+	const unsigned int msg = kmap.Find(key, modifiers);
 	if (msg) {
 		if (consumed)
 			*consumed = true;
@@ -5273,7 +5273,7 @@ void Editor::SetAnnotationHeights(Sci::Line start, Sci::Line end) {
 
 void Editor::SetDocPointer(Document *document) {
 	//Platform::DebugPrintf("** %x setdoc to %x\n", pdoc, document);
-	pdoc->RemoveWatcher(this, 0);
+	pdoc->RemoveWatcher(this, nullptr);
 	pdoc->Release();
 	if (!document) {
 		pdoc = new Document(SC_DOCUMENTOPTION_DEFAULT);
@@ -5306,7 +5306,7 @@ void Editor::SetDocPointer(Document *document) {
 
 	view.ClearAllTabstops();
 
-	pdoc->AddWatcher(this, 0);
+	pdoc->AddWatcher(this, nullptr);
 	SetScrollBars();
 	Redraw();
 }

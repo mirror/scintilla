@@ -239,8 +239,8 @@ public:
 
 	void AddMultiEdge(uptr_t wParam, sptr_t lParam);
 
-	std::optional<ColourAlpha> ElementColour(int index) const noexcept;
-	bool ElementAllowsTranslucent(int index) const noexcept;
+	std::optional<ColourAlpha> ElementColour(int index) const;
+	bool ElementAllowsTranslucent(int index) const;
 
 	bool SetWrapState(int wrapState_) noexcept;
 	bool SetWrapVisualFlags(int wrapVisualFlags_) noexcept;

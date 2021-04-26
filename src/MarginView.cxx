@@ -216,7 +216,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 				surface->FillRectangle(rcSelMargin, vs.styles[STYLE_LINENUMBER].back);
 			}
 
-			const int lineStartPaint = static_cast<int>(rcMargin.top + ptOrigin.y) / vs.lineHeight;
+			const Sci::Line lineStartPaint = static_cast<Sci::Line>(rcMargin.top + ptOrigin.y) / vs.lineHeight;
 			Sci::Line visibleLine = model.TopLineOfMain() + lineStartPaint;
 			Sci::Position yposScreen = lineStartPaint * vs.lineHeight - static_cast<Sci::Position>(ptOrigin.y);
 			// Work out whether the top line is whitespace located after a

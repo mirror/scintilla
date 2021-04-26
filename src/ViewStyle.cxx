@@ -40,8 +40,7 @@ MarginStyle::MarginStyle(int style_, int width_, int mask_) noexcept :
 
 FontRealised::FontRealised() noexcept = default;
 
-FontRealised::~FontRealised() {
-}
+FontRealised::~FontRealised() = default;
 
 void FontRealised::Realise(Surface &surface, int zoomLevel, int technology, const FontSpecification &fs, const char *localeName) {
 	PLATFORM_ASSERT(fs.fontName);
@@ -166,6 +165,8 @@ void ViewStyle::CalculateMarginWidthAndMask() noexcept {
 		case SC_MARK_UNDERLINE:
 			maskInLine &= ~maskBit;
 			maskDrawInText |= maskDefinedMarkers & maskBit;
+			break;
+		default:	// Other marker types do not affect the masks
 			break;
 		}
 	}
@@ -296,13 +297,13 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	}
 
 	// Ask platform to allocate each unique font.
-	for (std::pair<const FontSpecification, std::unique_ptr<FontRealised>> &font : fonts) {
+	for (const std::pair<const FontSpecification, std::unique_ptr<FontRealised>> &font : fonts) {
 		font.second->Realise(surface, zoomLevel, technology, font.first, localeName.c_str());
 	}
 
 	// Set the platform font handle and measurements for each style.
 	for (Style &style : styles) {
-		FontRealised *fr = Find(style);
+		const FontRealised *fr = Find(style);
 		style.Copy(fr->font, *fr);
 	}
 
@@ -429,6 +430,8 @@ void ViewStyle::CalcLargestMarkerHeight() noexcept {
 			if (marker.image && marker.image->GetHeight() > largestMarkerHeight)
 				largestMarkerHeight = marker.image->GetHeight();
 			break;
+		default:	// Only images have their own natural heights
+			break;
 		}
 	}
 }
@@ -509,7 +512,7 @@ void ViewStyle::AddMultiEdge(uptr_t wParam, sptr_t lParam) {
 		EdgeProperties(column, lParam));
 }
 
-std::optional<ColourAlpha> ViewStyle::ElementColour(int index) const noexcept {
+std::optional<ColourAlpha> ViewStyle::ElementColour(int index) const {
 	auto search = elementColours.find(index);
 	if (search != elementColours.end()) {
 		if (search->second.has_value()) {
@@ -519,7 +522,7 @@ std::optional<ColourAlpha> ViewStyle::ElementColour(int index) const noexcept {
 	return {};
 }
 
-bool ViewStyle::ElementAllowsTranslucent(int index) const noexcept {
+bool ViewStyle::ElementAllowsTranslucent(int index) const {
 	return elementAllowsTranslucent.count(index) > 0;
 }
 
@@ -627,10 +630,10 @@ FontRealised *ViewStyle::Find(const FontSpecification &fs) {
 }
 
 void ViewStyle::FindMaxAscentDescent() {
-	for (FontMap::const_iterator it = fonts.cbegin(); it != fonts.cend(); ++it) {
-		if (maxAscent < it->second->ascent)
-			maxAscent = it->second->ascent;
-		if (maxDescent < it->second->descent)
-			maxDescent = it->second->descent;
+	for (const auto &font : fonts) {
+		if (maxAscent < font.second->ascent)
+			maxAscent = font.second->ascent;
+		if (maxDescent < font.second->descent)
+			maxDescent = font.second->descent;
 	}
 }

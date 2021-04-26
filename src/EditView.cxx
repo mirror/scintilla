@@ -186,8 +186,7 @@ EditView::EditView() {
 	customDrawWrapMarker = nullptr;
 }
 
-EditView::~EditView() {
-}
+EditView::~EditView() = default;
 
 bool EditView::SetTwoPhaseDraw(bool twoPhaseDraw) noexcept {
 	const PhasesDraw phasesDrawNew = twoPhaseDraw ? PhasesDraw::two : PhasesDraw::one;
@@ -376,7 +375,7 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 		return;
 
 	PLATFORM_ASSERT(line < model.pdoc->LinesTotal());
-	PLATFORM_ASSERT(ll->chars != NULL);
+	PLATFORM_ASSERT(ll->chars);
 	const Sci::Position posLineStart = model.pdoc->LineStart(line);
 	Sci::Position posLineEnd = model.pdoc->LineStart(line + 1);
 	// If the line is very long, limit the treatment to a length that should fit in the viewport
@@ -524,6 +523,8 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 				break;
 			case SC_WRAPINDENT_DEEPINDENT:
 				wrapAddIndent = model.pdoc->IndentSize() * 2 * vstyle.spaceWidth;
+				break;
+			default:	// No additional indent for SC_WRAPINDENT_FIXED
 				break;
 			}
 			ll->wrapIndent = wrapAddIndent;
@@ -1979,7 +1980,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								textFore = *vsDraw.whitespaceColours.fore;
 							const PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
-							const int segmentTop = static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2);
+							const int segmentTop = static_cast<int>(rcSegment.top) + vsDraw.lineHeight / 2;
 							if (!customDrawTabArrow)
 								DrawTabArrow(surface, rcTab, segmentTop, vsDraw, Stroke(textFore, 1.0f));
 							else
