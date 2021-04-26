@@ -72,6 +72,7 @@ EditModel::EditModel() : braces{} {
 	foldFlags = 0;
 	foldDisplayTextStyle = SC_FOLDDISPLAYTEXT_HIDDEN;
 	hotspot = Range(Sci::invalidPosition);
+	hotspotSingleLine = true;
 	hoverIndicatorPos = Sci::invalidPosition;
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	pdoc = new Document(SC_DOCUMENTOPTION_DEFAULT);

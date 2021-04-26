@@ -4760,8 +4760,8 @@ void Editor::SetHotSpotRange(const Point *pt) {
 		// range can encompass more than the run range and then
 		// the underline will not be drawn properly.
 		Range hsNew;
-		hsNew.start = pdoc->ExtendStyleRange(pos, -1, vs.hotspotSingleLine);
-		hsNew.end = pdoc->ExtendStyleRange(pos, 1, vs.hotspotSingleLine);
+		hsNew.start = pdoc->ExtendStyleRange(pos, -1, hotspotSingleLine);
+		hsNew.end = pdoc->ExtendStyleRange(pos, 1, hotspotSingleLine);
 
 		// Only invalidate the range if the hotspot range has changed...
 		if (!(hsNew == hotspot)) {
@@ -8046,12 +8046,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.hotspotUnderline ? 1 : 0;
 
 	case SCI_SETHOTSPOTSINGLELINE:
-		vs.hotspotSingleLine = wParam != 0;
+		hotspotSingleLine = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETHOTSPOTSINGLELINE:
-		return vs.hotspotSingleLine ? 1 : 0;
+		return hotspotSingleLine ? 1 : 0;
 
 	case SCI_SETPASTECONVERTENDINGS:
 		convertPastes = wParam != 0;

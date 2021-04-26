@@ -46,6 +46,7 @@ public:
 	std::unique_ptr<IContractionState> pcs;
 	// Hotspot support
 	Range hotspot;
+	bool hotspotSingleLine;
 	Sci::Position hoverIndicatorPos;
 
 	// Wrapping support

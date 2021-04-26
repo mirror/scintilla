@@ -111,7 +111,6 @@ public:
 	std::optional<ColourAlpha> foldmarginHighlightColour;
 	ForeBackColours hotspotColours;
 	bool hotspotUnderline;
-	bool hotspotSingleLine;
 	/// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
 	int leftMarginWidth;	///< Spacing margin on left of text
 	int rightMarginWidth;	///< Spacing margin on right of text

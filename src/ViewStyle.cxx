@@ -96,7 +96,6 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 
 	hotspotColours = source.hotspotColours;
 	hotspotUnderline = source.hotspotUnderline;
-	hotspotSingleLine = source.hotspotSingleLine;
 
 	whitespaceColours = source.whitespaceColours;
 	controlCharSymbol = source.controlCharSymbol;
@@ -248,7 +247,6 @@ void ViewStyle::Init(size_t stylesSize_) {
 	hotspotColours.fore.reset();
 	hotspotColours.back.reset();
 	hotspotUnderline = true;
-	hotspotSingleLine = true;
 
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
