@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Script to generate CharacterCategory.cxx from Python's Unicode data
+# Script to generate scintilla/src/CharacterCategoryMap.cxx and lexilla/lexlib/CharacterCategory.cxx
+# from Python's Unicode data
 # Should be run rarely when a Python with a new version of Unicode data is available.
 # Requires Python 3.3 or later
 # Should not be run with old versions of Python.
@@ -45,8 +46,8 @@ def updateCharacterCategory(filename):
 
 scintillaDirectory = pathlib.Path(__file__).resolve().parent.parent
 
-categories = findCategories(scintillaDirectory / "src" / "CharacterCategory.h")
+categories = findCategories(scintillaDirectory / "src" / "CharacterCategoryMap.h")
 
-updateCharacterCategory(scintillaDirectory / "src" / "CharacterCategory.cxx")
+updateCharacterCategory(scintillaDirectory / "src" / "CharacterCategoryMap.cxx")
 
 updateCharacterCategory(scintillaDirectory.parent / "lexilla" / "lexlib" / "CharacterCategory.cxx")

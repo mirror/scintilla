@@ -42,8 +42,8 @@ SOURCES += \
     ../../src/DBCS.cxx \
     ../../src/ContractionState.cxx \
     ../../src/CharClassify.cxx \
-    ../../src/CharacterSet.cxx \
-    ../../src/CharacterCategory.cxx \
+    ../../src/CharacterType.cxx \
+    ../../src/CharacterCategoryMap.cxx \
     ../../src/CellBuffer.cxx \
     ../../src/CaseFolder.cxx \
     ../../src/CaseConvert.cxx \
@@ -77,8 +77,8 @@ HEADERS  += \
     ../../src/Decoration.h \
     ../../src/ContractionState.h \
     ../../src/CharClassify.h \
-    ../../src/CharacterSet.h \
-    ../../src/CharacterCategory.h \
+    ../../src/CharacterType.h \
+    ../../src/CharacterCategoryMap.h \
     ../../src/CellBuffer.h \
     ../../src/CaseFolder.h \
     ../../src/CaseConvert.h \

@@ -101,11 +101,9 @@
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
 
-// lexlib
-#include "CharacterSet.h"
-#include "CharacterCategory.h"
-
 // src
+#include "CharacterType.h"
+#include "CharacterCategoryMap.h"
 #include "Position.h"
 #include "UniqueString.h"
 #include "SplitVector.h"

@@ -33,8 +33,8 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "CharacterSet.h"
-#include "CharacterCategory.h"
+#include "CharacterType.h"
+#include "CharacterCategoryMap.h"
 #include "Position.h"
 #include "UniqueString.h"
 #include "SplitVector.h"

@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 
-#include "CharacterSet.h"
+#include "CharacterType.h"
 #include "CharClassify.h"
 
 using namespace Scintilla;

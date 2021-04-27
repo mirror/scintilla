@@ -24,7 +24,7 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
-#include "CharacterSet.h"
+#include "CharacterType.h"
 #include "Position.h"
 #include "AutoComplete.h"
 

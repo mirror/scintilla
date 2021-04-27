@@ -29,7 +29,7 @@ $(DIR_O)/ScintillaWin.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterCategory.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -68,7 +68,7 @@ $(DIR_O)/AutoComplete.obj: \
 	../src/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
-	../src/CharacterSet.h \
+	../src/CharacterType.h \
 	../src/Position.h \
 	../src/AutoComplete.h
 $(DIR_O)/CallTip.obj: \
@@ -98,15 +98,15 @@ $(DIR_O)/CellBuffer.obj: \
 	../src/Partitioning.h \
 	../src/CellBuffer.h \
 	../src/UniConversion.h
-$(DIR_O)/CharacterCategory.obj: \
-	../src/CharacterCategory.cxx \
-	../src/CharacterCategory.h
-$(DIR_O)/CharacterSet.obj: \
-	../src/CharacterSet.cxx \
-	../src/CharacterSet.h
+$(DIR_O)/CharacterCategoryMap.obj: \
+	../src/CharacterCategoryMap.cxx \
+	../src/CharacterCategoryMap.h
+$(DIR_O)/CharacterType.obj: \
+	../src/CharacterType.cxx \
+	../src/CharacterType.h
 $(DIR_O)/CharClassify.obj: \
 	../src/CharClassify.cxx \
-	../src/CharacterSet.h \
+	../src/CharacterType.h \
 	../src/CharClassify.h
 $(DIR_O)/ContractionState.obj: \
 	../src/ContractionState.cxx \
@@ -138,8 +138,8 @@ $(DIR_O)/Document.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterSet.h \
-	../src/CharacterCategory.h \
+	../src/CharacterType.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -162,7 +162,7 @@ $(DIR_O)/EditModel.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterCategory.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -192,8 +192,8 @@ $(DIR_O)/Editor.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterSet.h \
-	../src/CharacterCategory.h \
+	../src/CharacterType.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -228,8 +228,8 @@ $(DIR_O)/EditView.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterSet.h \
-	../src/CharacterCategory.h \
+	../src/CharacterType.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -291,7 +291,7 @@ $(DIR_O)/MarginView.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterCategory.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -335,7 +335,7 @@ $(DIR_O)/PositionCache.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterCategory.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -378,7 +378,7 @@ $(DIR_O)/ScintillaBase.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterCategory.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \
@@ -413,7 +413,7 @@ $(DIR_O)/ScintillaBaseL.obj: \
 	../include/Sci_Position.h \
 	../include/ILexer.h \
 	../include/Scintilla.h \
-	../src/CharacterCategory.h \
+	../src/CharacterCategoryMap.h \
 	../src/Position.h \
 	../src/UniqueString.h \
 	../src/SplitVector.h \

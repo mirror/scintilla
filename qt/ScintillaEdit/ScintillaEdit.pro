@@ -44,8 +44,8 @@ SOURCES += \
     ../../src/DBCS.cxx \
     ../../src/ContractionState.cxx \
     ../../src/CharClassify.cxx \
-    ../../src/CharacterSet.cxx \
-    ../../src/CharacterCategory.cxx \
+    ../../src/CharacterType.cxx \
+    ../../src/CharacterCategoryMap.cxx \
     ../../src/CellBuffer.cxx \
     ../../src/CaseFolder.cxx \
     ../../src/CaseConvert.cxx \

@@ -91,10 +91,10 @@
 		286F8EE0260448C300EC8D60 /* Geometry.h in Headers */ = {isa = PBXBuildFile; fileRef = 286F8EDD260448C300EC8D60 /* Geometry.h */; };
 		287F3C6A246F90240040E76F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 287F3C69246F90240040E76F /* Cocoa.framework */; };
 		287F3C6C246F90300040E76F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 287F3C6B246F90300040E76F /* QuartzCore.framework */; };
-		28EA9CAE255894B4007710C4 /* CharacterCategory.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28EA9CAA255894B4007710C4 /* CharacterCategory.cxx */; };
-		28EA9CAF255894B4007710C4 /* CharacterSet.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28EA9CAB255894B4007710C4 /* CharacterSet.cxx */; };
-		28EA9CB0255894B4007710C4 /* CharacterCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 28EA9CAC255894B4007710C4 /* CharacterCategory.h */; };
-		28EA9CB1255894B4007710C4 /* CharacterSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 28EA9CAD255894B4007710C4 /* CharacterSet.h */; };
+		28EA9CAE255894B4007710C4 /* CharacterCategoryMap.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28EA9CAA255894B4007710C4 /* CharacterCategoryMap.cxx */; };
+		28EA9CAF255894B4007710C4 /* CharacterType.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28EA9CAB255894B4007710C4 /* CharacterType.cxx */; };
+		28EA9CB0255894B4007710C4 /* CharacterCategoryMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 28EA9CAC255894B4007710C4 /* CharacterCategoryMap.h */; };
+		28EA9CB1255894B4007710C4 /* CharacterType.h in Headers */ = {isa = PBXBuildFile; fileRef = 28EA9CAD255894B4007710C4 /* CharacterType.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -185,10 +185,10 @@
 		287F3C69246F90240040E76F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		287F3C6B246F90300040E76F /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		287F3E0F246F9AE50040E76F /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = SOURCE_ROOT; };
-		28EA9CAA255894B4007710C4 /* CharacterCategory.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CharacterCategory.cxx; path = ../../src/CharacterCategory.cxx; sourceTree = "<group>"; };
-		28EA9CAB255894B4007710C4 /* CharacterSet.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CharacterSet.cxx; path = ../../src/CharacterSet.cxx; sourceTree = "<group>"; };
-		28EA9CAC255894B4007710C4 /* CharacterCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharacterCategory.h; path = ../../src/CharacterCategory.h; sourceTree = "<group>"; };
-		28EA9CAD255894B4007710C4 /* CharacterSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharacterSet.h; path = ../../src/CharacterSet.h; sourceTree = "<group>"; };
+		28EA9CAA255894B4007710C4 /* CharacterCategoryMap.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CharacterCategoryMap.cxx; path = ../../src/CharacterCategoryMap.cxx; sourceTree = "<group>"; };
+		28EA9CAB255894B4007710C4 /* CharacterType.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CharacterType.cxx; path = ../../src/CharacterType.cxx; sourceTree = "<group>"; };
+		28EA9CAC255894B4007710C4 /* CharacterCategoryMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharacterCategoryMap.h; path = ../../src/CharacterCategoryMap.h; sourceTree = "<group>"; };
+		28EA9CAD255894B4007710C4 /* CharacterType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharacterType.h; path = ../../src/CharacterType.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -236,10 +236,10 @@
 				2829372524E2D58700C84BA2 /* CaseFolder.h */,
 				2829372624E2D58700C84BA2 /* CellBuffer.cxx */,
 				2829371924E2D58600C84BA2 /* CellBuffer.h */,
-				28EA9CAA255894B4007710C4 /* CharacterCategory.cxx */,
-				28EA9CAC255894B4007710C4 /* CharacterCategory.h */,
-				28EA9CAB255894B4007710C4 /* CharacterSet.cxx */,
-				28EA9CAD255894B4007710C4 /* CharacterSet.h */,
+				28EA9CAA255894B4007710C4 /* CharacterCategoryMap.cxx */,
+				28EA9CAC255894B4007710C4 /* CharacterCategoryMap.h */,
+				28EA9CAB255894B4007710C4 /* CharacterType.cxx */,
+				28EA9CAD255894B4007710C4 /* CharacterType.h */,
 				2829371524E2D58600C84BA2 /* CharClassify.cxx */,
 				282936FE24E2D58400C84BA2 /* CharClassify.h */,
 				2829370E24E2D58500C84BA2 /* ContractionState.cxx */,
@@ -362,7 +362,7 @@
 				2829373F24E2D58800C84BA2 /* UniConversion.h in Headers */,
 				2829373D24E2D58800C84BA2 /* PerLine.h in Headers */,
 				2829373724E2D58800C84BA2 /* RunStyles.h in Headers */,
-				28EA9CB0255894B4007710C4 /* CharacterCategory.h in Headers */,
+				28EA9CB0255894B4007710C4 /* CharacterCategoryMap.h in Headers */,
 				282936E624E2D55D00C84BA2 /* InfoBar.h in Headers */,
 				2829375E24E2D58800C84BA2 /* LineMarker.h in Headers */,
 				2829376824E2D58800C84BA2 /* CaseFolder.h in Headers */,
@@ -378,7 +378,7 @@
 				2829374A24E2D58800C84BA2 /* ContractionState.h in Headers */,
 				2829376024E2D58800C84BA2 /* XPM.h in Headers */,
 				2829372F24E2D58800C84BA2 /* ElapsedPeriod.h in Headers */,
-				28EA9CB1255894B4007710C4 /* CharacterSet.h in Headers */,
+				28EA9CB1255894B4007710C4 /* CharacterType.h in Headers */,
 				2829373A24E2D58800C84BA2 /* MarginView.h in Headers */,
 				286F8E6525F84F7400EC8D60 /* ILoader.h in Headers */,
 				282936EA24E2D55D00C84BA2 /* ScintillaView.h in Headers */,
@@ -488,7 +488,7 @@
 				2829373324E2D58800C84BA2 /* LineMarker.cxx in Sources */,
 				2829374E24E2D58800C84BA2 /* KeyMap.cxx in Sources */,
 				2829376D24E2D58800C84BA2 /* RunStyles.cxx in Sources */,
-				28EA9CAF255894B4007710C4 /* CharacterSet.cxx in Sources */,
+				28EA9CAF255894B4007710C4 /* CharacterType.cxx in Sources */,
 				2829376B24E2D58800C84BA2 /* Editor.cxx in Sources */,
 				2829373C24E2D58800C84BA2 /* CaseFolder.cxx in Sources */,
 				2829374824E2D58800C84BA2 /* RESearch.cxx in Sources */,
@@ -497,7 +497,7 @@
 				2829374724E2D58800C84BA2 /* Style.cxx in Sources */,
 				2829375A24E2D58800C84BA2 /* ViewStyle.cxx in Sources */,
 				282936E024E2D55D00C84BA2 /* InfoBar.mm in Sources */,
-				28EA9CAE255894B4007710C4 /* CharacterCategory.cxx in Sources */,
+				28EA9CAE255894B4007710C4 /* CharacterCategoryMap.cxx in Sources */,
 				2829374024E2D58800C84BA2 /* XPM.cxx in Sources */,
 				2829374B24E2D58800C84BA2 /* Decoration.cxx in Sources */,
 				286F8EDF260448C300EC8D60 /* Geometry.cxx in Sources */,
