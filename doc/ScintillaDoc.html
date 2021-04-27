@@ -120,7 +120,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 20 April 2021 NH</p>
+    <p>Last edited 27 April 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -1884,7 +1884,7 @@ struct Sci_TextToFind {
      <code>SCI_SETADDITIONALSELBACK</code> calls have no
      effect until <a class="message" href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>
      and <a class="message" href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a> are
-     called with useSelection*Colour value set to true. Subsequent calls to
+     called with <code class="parameter">useSetting</code> value set to true. Subsequent calls to
      <a class="message" href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>,
      and <a class="message" href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a> will
      overwrite the values set by <code>SCI_SETADDITIONALSEL*</code> functions.</p>
@@ -3358,7 +3358,7 @@ struct Sci_TextToFind {
     <p><b id="SCI_SETSELFORE">SCI_SETSELFORE(bool useSetting, <a class="jump" href="#colour">colour</a> fore)</b><br />
      <b id="SCI_SETSELBACK">SCI_SETSELBACK(bool useSetting, <a class="jump" href="#colour">colour</a> back)</b><br />
      You can choose to override the default selection colouring with these two messages. The colour
-    you provide is used if you set <code class="parameter">useSelection*Colour</code> to <code>true</code>. If it is
+    you provide is used if you set <code class="parameter">useSetting</code> to <code>true</code>. If it is
     set to <code>false</code>, the default styled colouring is used and the
     <code class="parameter">fore</code> or <code class="parameter">back</code>
     argument has no effect.</p>
