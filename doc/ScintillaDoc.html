@@ -6371,7 +6371,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SC_DOCUMENTOPTION_STYLES_NONE</code> (0x1) stops allocation of memory to style characters
     which saves significant memory, often 40% with the whole document treated as being style 0.
     Lexers may still produce visual styling by using indicators.
-    <span class="provisional"><code>SC_DOCUMENTOPTION_TEXT_LARGE</code> (0x100) accomodates documents larger than 2 GigaBytes
+    <span><code>SC_DOCUMENTOPTION_TEXT_LARGE</code> (0x100) accomodates documents larger than 2 GigaBytes
     in 64-bit executables.</span>
     </p>
 
@@ -6380,12 +6380,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     Its often more efficient to set the null lexer <code>NULL</code> so no lexer is run.
     </p>
 
-    <p class="provisional">The <code>SC_DOCUMENTOPTION_TEXT_LARGE</code> option is experimental and has not been
-    thoroughly tested. Lexers may fail or hang when lexing past 2GB or 4GB.
-    Applications using this option should be tested to ensure the option works in their circumstances and each lexer
-    included should also be tested with documents larger than 4GB.
-    For many applications lexing documents larger than 4GB will be too sluggish so <code>SC_DOCUMENTOPTION_STYLES_NONE</code>
-    and the null lexer <code>NULL</code> can be used. Another approach is to turn on idle styling with
+    <p>For many applications lexing documents larger than 4GB will be too sluggish so
+    <code>SC_DOCUMENTOPTION_STYLES_NONE</code>
+    and the null lexer <code>"null"</code> can be used. Another approach is to turn on idle styling with
     <a class="seealso" href="#SCI_SETIDLESTYLING"><code>SCI_SETIDLESTYLING</code></a>.
     </p>
 
@@ -6413,7 +6410,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
         </tr>
 
         <tr>
-          <td align="left" class="provisional">SC_DOCUMENTOPTION_TEXT_LARGE</td>
+          <td align="left">SC_DOCUMENTOPTION_TEXT_LARGE</td>
           <td align="left">0x100</td>
           <td align="left">Allow document to be larger than 2 GB.</td>
         </tr>
