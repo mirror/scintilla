@@ -30,7 +30,6 @@ class ScintillaGTK : public ScintillaBase {
 	Window scrollbarh;
 	GtkAdjustment *adjustmentv;
 	GtkAdjustment *adjustmenth;
-	Window wSelection;
 	int verticalScrollBarWidth;
 	int horizontalScrollBarHeight;
 
@@ -51,6 +50,7 @@ class ScintillaGTK : public ScintillaBase {
 	static inline GdkAtom atomUriList {};
 	static inline GdkAtom atomDROPFILES_DND {};
 	GdkAtom atomSought;
+	size_t inClearSelection = 0;
 
 #if PLAT_GTK_WIN32
 	CLIPFORMAT cfColumnSelect;
@@ -160,9 +160,13 @@ private:
 	static void ClipboardGetSelection(GtkClipboard *clip, GtkSelectionData *selection_data, guint info, void *data);
 	static void ClipboardClearSelection(GtkClipboard *clip, void *data);
 
+	void ClearPrimarySelection();
+	void PrimaryGetSelectionThis(GtkClipboard *clip, GtkSelectionData *selection_data, guint info);
+	static void PrimaryGetSelection(GtkClipboard *clip, GtkSelectionData *selection_data, guint info, gpointer pSci);
+	void PrimaryClearSelectionThis(GtkClipboard *clip);
+	static void PrimaryClearSelection(GtkClipboard *clip, gpointer pSci);
+
 	void UnclaimSelection(GdkEventSelection *selection_event);
-	static void PrimarySelection(GtkWidget *widget, GtkSelectionData *selection_data, guint info, guint time_stamp, ScintillaGTK *sciThis);
-	static gboolean PrimaryClear(GtkWidget *widget, GdkEventSelection *event, ScintillaGTK *sciThis);
 	void Resize(int width, int height);
 
 	// Callback functions
