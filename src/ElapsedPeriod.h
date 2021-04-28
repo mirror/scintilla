@@ -12,15 +12,15 @@ namespace Scintilla {
 
 // Simplified access to high precision timing.
 class ElapsedPeriod {
-	std::chrono::high_resolution_clock::time_point tp;
+	using ElapsedClock = std::chrono::steady_clock;
+	ElapsedClock::time_point tp;
 public:
 	/// Capture the moment
-	ElapsedPeriod() noexcept : tp(std::chrono::high_resolution_clock::now()) {
+	ElapsedPeriod() noexcept : tp(ElapsedClock::now()) {
 	}
 	/// Return duration as floating point seconds
 	double Duration(bool reset=false) noexcept {
-		const std::chrono::high_resolution_clock::time_point tpNow =
-			std::chrono::high_resolution_clock::now();
+		const ElapsedClock::time_point tpNow = ElapsedClock::now();
 		const std::chrono::duration<double> stylingDuration =
 			std::chrono::duration_cast<std::chrono::duration<double>>(tpNow - tp);
 		if (reset) {
