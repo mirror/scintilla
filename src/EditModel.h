@@ -70,6 +70,7 @@ public:
 	void SetDefaultFoldDisplayText(const char *text);
 	const char *GetDefaultFoldDisplayText() const noexcept;
 	const char *GetFoldDisplayText(Sci::Line lineDoc) const noexcept;
+	InSelection LineEndInSelection(Sci::Line lineDoc) const;
 };
 
 }

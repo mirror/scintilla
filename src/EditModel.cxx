@@ -110,3 +110,8 @@ const char *EditModel::GetFoldDisplayText(Sci::Line lineDoc) const noexcept {
 	const char *text = pcs->GetFoldDisplayText(lineDoc);
 	return text ? text : defaultFoldDisplayText.get();
 }
+
+InSelection EditModel::LineEndInSelection(Sci::Line lineDoc) const {
+	const Sci::Position posAfterLineEnd = pdoc->LineStart(lineDoc + 1);
+	return sel.InSelectionForEOL(posAfterLineEnd);
+}
