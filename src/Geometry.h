@@ -179,8 +179,12 @@ public:
 		return ColourAlpha(co_ | (0xffu << 24));
 	}
 
-	constexpr ColourAlpha Opaque() const noexcept {
+	constexpr ColourAlpha WithoutAlpha() const noexcept {
 		return ColourAlpha(co & 0xffffff);
+	}
+
+	constexpr ColourAlpha Opaque() const noexcept {
+		return ColourAlpha(co | (0xffu << 24));
 	}
 
 	constexpr int OpaqueRGB() const noexcept {
