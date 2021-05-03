@@ -243,10 +243,10 @@ class Stroke {
 public:
 	ColourAlpha colour;
 	XYPOSITION width;
-	constexpr Stroke(ColourAlpha colour_, XYPOSITION width_=1.0f) noexcept : 
+	constexpr Stroke(ColourAlpha colour_, XYPOSITION width_=1.0) noexcept : 
 		colour(colour_), width(width_) {
 	}
-	constexpr float WidthF() {
+	constexpr float WidthF() const noexcept {
 		return static_cast<float>(width);
 	}
 };
@@ -269,10 +269,10 @@ class FillStroke {
 public:
 	Fill fill;
 	Stroke stroke;
-	constexpr FillStroke(ColourAlpha colourFill_, ColourAlpha colourStroke_, XYPOSITION widthStroke_=1.0f) noexcept : 
+	constexpr FillStroke(ColourAlpha colourFill_, ColourAlpha colourStroke_, XYPOSITION widthStroke_=1.0) noexcept : 
 		fill(colourFill_), stroke(colourStroke_, widthStroke_) {
 	}
-	constexpr FillStroke(ColourAlpha colourBoth, XYPOSITION widthStroke_=1.0f) noexcept : 
+	constexpr FillStroke(ColourAlpha colourBoth, XYPOSITION widthStroke_=1.0) noexcept : 
 		fill(colourBoth), stroke(colourBoth, widthStroke_) {
 	}
 };
