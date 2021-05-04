@@ -33,6 +33,7 @@ public:
 	Sci::Position braces[2];
 	int bracesMatchStyle;
 	int highlightGuideColumn;
+	bool hasFocus;
 	Selection sel;
 	bool primarySelection;
 

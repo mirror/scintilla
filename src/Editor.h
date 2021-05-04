@@ -188,7 +188,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int cursorMode;
 
-	bool hasFocus;
 	bool mouseDownCaptures;
 	bool mouseWheelCaptures;
 

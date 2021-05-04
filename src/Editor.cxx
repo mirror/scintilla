@@ -122,7 +122,6 @@ Editor::Editor() : durationWrapOneLine(0.00001, 0.000001, 0.0001) {
 
 	cursorMode = SC_CURSORNORMAL;
 
-	hasFocus = false;
 	errorStatus = 0;
 	mouseDownCaptures = true;
 	mouseWheelCaptures = true;
@@ -5072,7 +5071,11 @@ void Editor::FineTickerCancel(TickReason) {
 }
 
 void Editor::SetFocusState(bool focusState) {
+	const bool changing = hasFocus != focusState;
 	hasFocus = focusState;
+	if (changing) {
+		Redraw();
+	}
 	NotifyFocus(hasFocus);
 	if (!hasFocus) {
 		CancelModes();

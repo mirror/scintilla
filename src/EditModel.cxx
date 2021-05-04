@@ -66,6 +66,7 @@ EditModel::EditModel() : braces{} {
 	braces[1] = Sci::invalidPosition;
 	bracesMatchStyle = STYLE_BRACEBAD;
 	highlightGuideColumn = 0;
+	hasFocus = false;
 	primarySelection = true;
 	imeInteraction = IMEInteraction::windowed;
 	bidirectional = Bidirectional::bidiDisabled;
