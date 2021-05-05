@@ -887,11 +887,11 @@ void CellBuffer::ResetLineEnds() {
 	// Reinitialize line data -- too much work to preserve
 	plv->Init();
 
-	const Sci::Position position = 0;
+	constexpr Sci::Position position = 0;
 	const Sci::Position length = Length();
+	plv->InsertText(0, length);
 	Sci::Line lineInsert = 1;
-	const bool atLineStart = true;
-	plv->InsertText(lineInsert-1, length);
+	constexpr bool atLineStart = true;
 	unsigned char chBeforePrev = 0;
 	unsigned char chPrev = 0;
 	for (Sci::Position i = 0; i < length; i++) {
