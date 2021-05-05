@@ -823,20 +823,32 @@ Sci::Position EditView::StartEndDisplayLine(Surface *surface, const EditModel &m
 
 namespace {
 
-ColourAlpha SelectionBackground(const ViewStyle &vsDraw, InSelection inSelection, bool primarySelection) noexcept {
-	if (!inSelection)
-		return ColourAlpha(0, 0, 0, 0);	// Not selected -> transparent
+constexpr ColourAlpha bugColour = ColourAlpha(0xff, 0, 0xff, 0xf0);
+
+ColourAlpha SelectionBackground(const EditModel &model, const ViewStyle &vsDraw, InSelection inSelection) noexcept {
+	if (inSelection == InSelection::inNone)
+		return bugColour;	// Not selected is a bug
 
 	if (!vsDraw.selection.colours.back)
-		return ColourAlpha(0, 0, 0, 0);	// Not set -> transparent
+		return bugColour;	// Not set -> bug
 
-	if (!primarySelection)
+	if (!model.primarySelection)
 		return vsDraw.selection.background2;	// Secondary selection
 
-	if (inSelection == 1)
+	if (inSelection == InSelection::inMain)
 		return *vsDraw.selection.colours.back;	// Main selection
 
 	return vsDraw.selection.additionalBackground;	// Additional selection
+}
+
+std::optional<ColourAlpha> SelectionForeground(const ViewStyle &vsDraw, InSelection inSelection) noexcept {
+	if (inSelection == InSelection::inNone)
+		return {};
+	if (inSelection == InSelection::inMain)
+		return vsDraw.selection.colours.fore;
+	if (!vsDraw.selection.colours.fore)	// Main not set means don't use additional either
+		return {};
+	return vsDraw.selection.additionalForeground;
 }
 
 }
@@ -845,9 +857,9 @@ static ColourAlpha TextBackground(const EditModel &model, const ViewStyle &vsDra
 	std::optional<ColourAlpha> background, InSelection inSelection, bool inHotspot, int styleMain, Sci::Position i) noexcept {
 	if (inSelection && vsDraw.selection.colours.back) {
 		if ((inSelection == InSelection::inMain) && (vsDraw.selection.alpha == SC_ALPHA_NOALPHA)) {
-			return SelectionBackground(vsDraw, inSelection, model.primarySelection);
+			return SelectionBackground(model, vsDraw, inSelection);
 		} else if ((inSelection == InSelection::inAdditional) && (vsDraw.selection.additionalAlpha == SC_ALPHA_NOALPHA)) {
-			return SelectionBackground(vsDraw, inSelection, model.primarySelection);
+			return SelectionBackground(model, vsDraw, inSelection);
 		}
 	}
 	if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
@@ -971,7 +983,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 							static_cast<XYPOSITION>(subLineStart)+portion.end.VirtualSpace() * spaceWidth;
 						rcSegment.left = (rcSegment.left > rcLine.left) ? rcSegment.left : rcLine.left;
 						rcSegment.right = (rcSegment.right < rcLine.right) ? rcSegment.right : rcLine.right;
-						surface->FillRectangleAligned(rcSegment, Fill(SelectionBackground(vsDraw, model.sel.RangeType(r), model.primarySelection)));
+						surface->FillRectangleAligned(rcSegment, Fill(SelectionBackground(model, vsDraw, model.sel.RangeType(r))));
 					}
 				}
 			}
@@ -985,7 +997,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		alpha = (eolInSelection == InSelection::inMain) ? vsDraw.selection.alpha : vsDraw.selection.additionalAlpha;
 	}
 
-	const ColourAlpha selectionBack = SelectionBackground(vsDraw, eolInSelection, model.primarySelection);
+	const ColourAlpha selectionBack = SelectionBackground(model, vsDraw, eolInSelection);
 
 	// Draw the [CR], [LF], or [CR][LF] blobs if visible line ends are on
 	XYPOSITION blobsWidth = 0;
@@ -1011,10 +1023,8 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 					ctrlChar = hexits;
 				}
 			}
-			ColourAlpha textFore = vsDraw.styles[styleMain].fore;
-			if (eolInSelection && vsDraw.selection.colours.fore) {
-				textFore = (eolInSelection == InSelection::inMain) ? *vsDraw.selection.colours.fore : vsDraw.selection.additionalForeground;
-			}
+			const std::optional<ColourAlpha> selectionFore = SelectionForeground(vsDraw, eolInSelection);
+			const ColourAlpha textFore = selectionFore.value_or(vsDraw.styles[styleMain].fore);
 			if (eolInSelection && vsDraw.selection.colours.back && (line < model.pdoc->LinesTotal() - 1)) {
 				if (alpha == SC_ALPHA_NOALPHA) {
 					surface->FillRectangleAligned(rcSegment, Fill(selectionBack));
@@ -1229,10 +1239,8 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	rcSegment.right = rcSegment.left + static_cast<XYPOSITION>(widthFoldDisplayText);
 
 	const std::optional<ColourAlpha> background = vsDraw.Background(model.pdoc->GetMark(line), model.caret.active, ll->containsCaret);
-	ColourAlpha textFore = vsDraw.styles[STYLE_FOLDDISPLAYTEXT].fore;
-	if (eolInSelection && (vsDraw.selection.colours.fore)) {
-		textFore = (eolInSelection == InSelection::inMain) ? *vsDraw.selection.colours.fore : vsDraw.selection.additionalForeground;
-	}
+	const std::optional<ColourAlpha> selectionFore = SelectionForeground(vsDraw, eolInSelection);
+	const ColourAlpha textFore = selectionFore.value_or(vsDraw.styles[STYLE_FOLDDISPLAYTEXT].fore);
 	const ColourAlpha textBack = TextBackground(model, vsDraw, ll, background, eolInSelection,
 											false, STYLE_FOLDDISPLAYTEXT, -1);
 
@@ -1278,7 +1286,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 
 	if (FlagSet(phase, DrawPhase::selectionTranslucent)) {
 		if (eolInSelection && vsDraw.selection.colours.back && (line < model.pdoc->LinesTotal() - 1) && alpha != SC_ALPHA_NOALPHA) {
-			surface->FillRectangleAligned(rcSegment, ColourAlpha(SelectionBackground(vsDraw, eolInSelection, model.primarySelection), alpha));
+			surface->FillRectangleAligned(rcSegment, ColourAlpha(SelectionBackground(model, vsDraw, eolInSelection), alpha));
 		}
 	}
 }
@@ -1816,7 +1824,7 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 				const SelectionSegment portion = model.sel.Range(r).Intersect(virtualSpaceRange);
 				if (!portion.Empty()) {
 					const ColourAlpha selectionBack = ColourAlpha(
-						SelectionBackground(vsDraw, model.sel.RangeType(r), model.primarySelection), alpha);
+						SelectionBackground(model, vsDraw, model.sel.RangeType(r)), alpha);
 					const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 					if (model.BidirectionalEnabled()) {
 						const int selectionStart = static_cast<int>(portion.start.Position() - posLineStart - lineRange.start);
@@ -1912,7 +1920,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 
 	// Foreground drawing loop
 	BreakFinder bfFore(ll, &model.sel, lineRange, posLineStart, xStartVisible,
-		(((phasesDraw == PhasesDraw::one) && selBackDrawn) || vsDraw.selection.colours.fore), model.pdoc, &model.reprs, &vsDraw);
+		(((phasesDraw == PhasesDraw::one) && selBackDrawn) || vsDraw.SelectionTextDrawn()), model.pdoc, &model.reprs, &vsDraw);
 
 	while (bfFore.More()) {
 
@@ -1963,8 +1971,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				}
 			}
 			const InSelection inSelection = hideSelection ? InSelection::inNone : model.sel.CharacterInSelection(iDoc);
-			if (inSelection && (vsDraw.selection.colours.fore)) {
-				textFore = (inSelection == 1) ? *vsDraw.selection.colours.fore : vsDraw.selection.additionalForeground;
+			const std::optional<ColourAlpha> selectionFore = SelectionForeground(vsDraw, inSelection);
+			if (selectionFore) {
+				textFore = *selectionFore;
 			}
 			ColourAlpha textBack = TextBackground(model, vsDraw, ll, background, inSelection, inHotspot, styleMain, i);
 			if (ts.representation) {
@@ -2461,7 +2470,7 @@ void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const
 		const std::optional<ColourAlpha> background = vsDraw.Background(model.pdoc->GetMark(line), model.caret.active, ll->containsCaret);
 
 		if (eolInSelection && vsDraw.selection.eolFilled && vsDraw.selection.colours.back && (line < model.pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
-			surface->FillRectangleAligned(rcArea, Fill(SelectionBackground(vsDraw, eolInSelection, model.primarySelection)));
+			surface->FillRectangleAligned(rcArea, Fill(SelectionBackground(model, vsDraw, eolInSelection)));
 		} else {
 			if (background) {
 				surface->FillRectangleAligned(rcArea, Fill(*background));
@@ -2471,7 +2480,7 @@ void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const
 				surface->FillRectangleAligned(rcArea, Fill(vsDraw.styles[STYLE_DEFAULT].back));
 			}
 			if (eolInSelection && vsDraw.selection.eolFilled && vsDraw.selection.colours.back && (line < model.pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
-				surface->FillRectangleAligned(rcArea, ColourAlpha(SelectionBackground(vsDraw, eolInSelection, model.primarySelection), alpha));
+				surface->FillRectangleAligned(rcArea, ColourAlpha(SelectionBackground(model, vsDraw, eolInSelection), alpha));
 			}
 		}
 }
