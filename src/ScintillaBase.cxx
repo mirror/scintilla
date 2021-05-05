@@ -73,10 +73,6 @@ void ScintillaBase::Finalise() {
 	popup.Destroy();
 }
 
-void ScintillaBase::AddCharUTF(const char *s, unsigned int len, bool /*treatAsDBCS*/) {
-	InsertCharacter(std::string_view(s, len), CharacterSource::directInput);
-}
-
 void ScintillaBase::InsertCharacter(std::string_view sv, CharacterSource charSource) {
 	const bool isFillUp = ac.Active() && ac.IsFillUpChar(sv[0]);
 	if (!isFillUp) {

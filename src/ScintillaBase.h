@@ -52,10 +52,6 @@ protected:
 	void Initialise() override {}
 	void Finalise() override;
 
-	[[deprecated]]
-	// This method is deprecated, use InsertCharacter instead. The treatAsDBCS parameter is no longer used.
-	virtual void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false);
-
 	void InsertCharacter(std::string_view sv, CharacterSource charSource) override;
 	void Command(int cmdId);
 	void CancelModes() override;
