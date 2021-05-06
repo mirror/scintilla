@@ -68,15 +68,6 @@ def convertIFaceTypeToC(t):
 def makeParm(t, n, v):
 	return (convertIFaceTypeToC(t) + n).rstrip()
 
-def makeRet(params):
-	retType = params["ReturnType"]
-	if retType in ["void", "string", "stringresult"]:
-		retType = ""
-	if retType:
-		retType = " &rarr; " + retType
-
-	return retType
-
 def makeSig(params):
 	p1 = makeParm(params["Param1Type"], params["Param1Name"], params["Param1Value"])
 	p2 = makeParm(params["Param2Type"], params["Param2Name"], params["Param2Value"])
@@ -92,7 +83,6 @@ def makeSig(params):
 	if p1 == "" and p2 == "":
 		return retType
 
-	ret = ""
 	if p1 == "":
 		p1 = "&lt;unused&gt;"
 	joiner = ""
@@ -140,7 +130,6 @@ def checkDocumentation():
 	# Examine header sections which point to definitions
 	#<a class="message" href="#SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</a><br />
 	dirPattern = re.compile(r'<a class="message" href="#([A-Z0-9_]+)">([A-Z][A-Za-z0-9_() *&;,\n]+)</a>')
-	firstWord = re.compile(r'[A-Z0-9_]+')
 	for api, sig in re.findall(dirPattern, docs):
 		sigApi = re.split('\W+', sig)[0]
 		sigFlat = flattenSpaces(sig)
