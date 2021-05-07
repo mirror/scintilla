@@ -421,49 +421,69 @@ void LineLayoutCache::SetLevel(Cache level_) noexcept {
 
 LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
                                       Sci::Line linesOnScreen, Sci::Line linesInDoc) {
+	PLATFORM_ASSERT(useCount == 0);
 	AllocateForLevel(linesOnScreen, linesInDoc);
 	if (styleClock != styleClock_) {
 		Invalidate(LineLayout::ValidLevel::checkTextAndStyle);
 		styleClock = styleClock_;
 	}
 	allInvalidated = false;
-	Sci::Position pos = -1;
-	LineLayout *ret = nullptr;
-	if (level == Cache::caret) {
-		pos = 0;
-	} else if (level == Cache::page) {
-		if (lineNumber == lineCaret) {
-			pos = 0;
-		} else if (cache.size() > 1) {
-			pos = 1 + (lineNumber % (cache.size() - 1));
+	size_t pos = 0;
+	if (level == Cache::page) {
+		// If first entry is this line then just reuse it.
+		if (!(cache[0] && (cache[0]->lineNumber == lineNumber))) {
+			const size_t posForLine = 1 + (lineNumber % (cache.size() - 1));
+			if (lineNumber == lineCaret) {
+				// Use position 0 for caret line.
+				if (cache[0]) {
+					// Another line is currently in [0] so move it out to its normal position.
+					// Since it was recently the caret line its likely to be needed soon.
+					const size_t posNewForEntry0 = 1 + (cache[0]->lineNumber % (cache.size() - 1));
+					if (posForLine == posNewForEntry0) {
+						std::swap(cache[0], cache[posNewForEntry0]);
+					} else {
+						cache[posNewForEntry0] = std::move(cache[0]);
+					}
+				}
+				if (cache[posForLine] && (cache[posForLine]->lineNumber == lineNumber)) {
+					// Caret line is currently somewhere else so move it to [0].
+					cache[0] = std::move(cache[posForLine]);
+				}
+			} else {
+				pos = posForLine;
+			}
 		}
 	} else if (level == Cache::document) {
 		pos = lineNumber;
 	}
-	if (pos >= 0) {
-		PLATFORM_ASSERT(useCount == 0);
-		if (!cache.empty() && (pos < static_cast<int>(cache.size()))) {
-			if (cache[pos]) {
-				if ((cache[pos]->lineNumber != lineNumber) ||
-				        (cache[pos]->maxLineLength < maxChars)) {
-					cache[pos].reset();
-				}
-			}
-			if (!cache[pos]) {
-				cache[pos] = std::make_unique<LineLayout>(maxChars);
-			}
-			cache[pos]->lineNumber = lineNumber;
-			cache[pos]->inCache = true;
-			ret = cache[pos].get();
-			useCount++;
+
+	if (pos < cache.size()) {
+		if (cache[pos] &&
+			((cache[pos]->lineNumber != lineNumber) || (cache[pos]->maxLineLength < maxChars))) {
+			cache[pos].reset();
 		}
+		if (!cache[pos]) {
+			cache[pos] = std::make_unique<LineLayout>(maxChars);
+		}
+		cache[pos]->lineNumber = lineNumber;
+		cache[pos]->inCache = true;
+#ifdef CHECK_LLC_UNIQUE
+		// Expensive check that there is only one entry for any line number
+		std::vector<bool> linesInCache(linesInDoc);
+		for (const auto &entry : cache) {
+			if (entry) {
+				PLATFORM_ASSERT(!linesInCache[entry->lineNumber]);
+				linesInCache[entry->lineNumber] = true;
+			}
+		}
+#endif
+		useCount++;
+		return cache[pos].get();
 	}
 
-	if (!ret) {
-		ret = new LineLayout(maxChars);
-		ret->lineNumber = lineNumber;
-	}
-
+	// Only reach here for level == Cache::none
+	LineLayout *ret = new LineLayout(maxChars);
+	ret->lineNumber = lineNumber;
 	return ret;
 }
 
