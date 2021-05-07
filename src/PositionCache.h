@@ -164,7 +164,7 @@ private:
 	bool allInvalidated;
 	int styleClock;
 	int useCount;
-	void Allocate(size_t length_);
+	size_t EntryForLine(Sci::Line line) const noexcept;
 	void AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc);
 public:
 	LineLayoutCache();

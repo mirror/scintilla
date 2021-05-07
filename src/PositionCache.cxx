@@ -364,17 +364,22 @@ XYPOSITION ScreenLine::TabPositionAfter(XYPOSITION xPosition) const {
 LineLayoutCache::LineLayoutCache() :
 	level(Cache::none),
 	allInvalidated(false), styleClock(-1), useCount(0) {
-	Allocate(0);
 }
 
-LineLayoutCache::~LineLayoutCache() {
-	Deallocate();
-}
+LineLayoutCache::~LineLayoutCache() = default;
 
-void LineLayoutCache::Allocate(size_t length_) {
-	PLATFORM_ASSERT(cache.empty());
-	allInvalidated = false;
-	cache.resize(length_);
+size_t LineLayoutCache::EntryForLine(Sci::Line line) const noexcept {
+	switch (level) {
+	case Cache::none:
+		return 0;
+	case Cache::caret:
+		return 0;
+	case Cache::page:
+		return 1 + (line % (cache.size() - 1));
+	case Cache::document:
+		return line;
+	}
+	return 0;
 }
 
 void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc) {
@@ -387,16 +392,47 @@ void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesI
 	} else if (level == Cache::document) {
 		lengthForLevel = linesInDoc;
 	}
-	if (lengthForLevel > cache.size()) {
-		Deallocate();
-		Allocate(lengthForLevel);
-	} else {
-		if (lengthForLevel < cache.size()) {
-			for (size_t i = lengthForLevel; i < cache.size(); i++) {
-				cache[i].reset();
-			}
-		}
+
+	if (lengthForLevel != cache.size()) {
+		PLATFORM_ASSERT(useCount == 0);
+		allInvalidated = false;
 		cache.resize(lengthForLevel);
+		// Cache::none -> no entries
+		// Cache::caret -> 1 entry can take any line
+		// Cache::document -> entry per line so each line in correct entry after resize
+		if (level == Cache::page) {
+			// Cache::page -> locates lines in particular entries which may be incorrect after
+			// a resize so move them to correct entries.
+			for (size_t i = 1; i < cache.size();) {
+				size_t increment = 1;
+				if (cache[i]) {
+					const size_t posForLine = EntryForLine(cache[i]->LineNumber());
+					if (posForLine != i) {
+						if (cache[posForLine]) {
+							if (EntryForLine(cache[posForLine]->LineNumber()) == posForLine) {
+								// [posForLine] already holds line that is in correct place
+								cache[i].reset();	// This line has nowhere to go so reset it.
+							} else {
+								std::swap(cache[i], cache[posForLine]);
+								increment = 0;
+								// Don't increment as newly swapped in value may have to move
+							}
+						} else {
+							cache[posForLine] = std::move(cache[i]);
+						}
+					}
+				}
+				i += increment;
+			}
+
+#ifdef CHECK_LLC
+			for (size_t i = 1; i < cache.size(); i++) {
+				if (cache[i]) {
+					PLATFORM_ASSERT(EntryForLine(cache[i]->LineNumber()) == i);
+				}
+			}
+#endif
+		}
 	}
 	PLATFORM_ASSERT(cache.size() == lengthForLevel);
 }
@@ -423,7 +459,8 @@ void LineLayoutCache::SetLevel(Cache level_) noexcept {
 	allInvalidated = false;
 	if ((static_cast<int>(level_) != -1) && (level != level_)) {
 		level = level_;
-		Deallocate();
+		allInvalidated = false;
+		cache.clear();
 	}
 }
 
@@ -440,13 +477,13 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 	if (level == Cache::page) {
 		// If first entry is this line then just reuse it.
 		if (!(cache[0] && (cache[0]->lineNumber == lineNumber))) {
-			const size_t posForLine = 1 + (lineNumber % (cache.size() - 1));
+			const size_t posForLine = EntryForLine(lineNumber);
 			if (lineNumber == lineCaret) {
 				// Use position 0 for caret line.
 				if (cache[0]) {
 					// Another line is currently in [0] so move it out to its normal position.
 					// Since it was recently the caret line its likely to be needed soon.
-					const size_t posNewForEntry0 = 1 + (cache[0]->lineNumber % (cache.size() - 1));
+					const size_t posNewForEntry0 = EntryForLine(cache[0]->lineNumber);
 					if (posForLine == posNewForEntry0) {
 						std::swap(cache[0], cache[posNewForEntry0]);
 					} else {
@@ -473,7 +510,7 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 			cache[pos] = std::make_unique<LineLayout>(lineNumber, maxChars);
 		}
 		cache[pos]->inCache = true;
-#ifndef CHECK_LLC_UNIQUE
+#ifdef CHECK_LLC
 		// Expensive check that there is only one entry for any line number
 		std::vector<bool> linesInCache(linesInDoc);
 		for (const auto &entry : cache) {
