@@ -368,6 +368,17 @@ LineLayoutCache::LineLayoutCache() :
 
 LineLayoutCache::~LineLayoutCache() = default;
 
+namespace {
+
+constexpr size_t AlignUp(size_t value, size_t alignment) noexcept {
+	return ((value - 1) / alignment + 1) * alignment;
+}
+
+constexpr size_t alignmentLLC = 20;
+
+}
+
+
 size_t LineLayoutCache::EntryForLine(Sci::Line line) const noexcept {
 	switch (level) {
 	case Cache::none:
@@ -388,9 +399,9 @@ void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesI
 	if (level == Cache::caret) {
 		lengthForLevel = 1;
 	} else if (level == Cache::page) {
-		lengthForLevel = linesOnScreen + 1;
+		lengthForLevel = AlignUp(linesOnScreen + 1, alignmentLLC);
 	} else if (level == Cache::document) {
-		lengthForLevel = linesInDoc;
+		lengthForLevel = AlignUp(linesInDoc, alignmentLLC);
 	}
 
 	if (lengthForLevel != cache.size()) {
