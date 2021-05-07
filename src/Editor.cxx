@@ -1490,10 +1490,10 @@ void Editor::NeedWrapping(Sci::Line docLineStart, Sci::Line docLineEnd) {
 }
 
 bool Editor::WrapOneLine(Surface *surface, Sci::Line lineToWrap) {
-	AutoLineLayout ll(view.llc, view.RetrieveLineLayout(lineToWrap, *this));
+	std::shared_ptr<LineLayout> ll = view.RetrieveLineLayout(lineToWrap, *this);
 	int linesWrapped = 1;
 	if (ll) {
-		view.LayoutLine(*this, surface, vs, ll, wrapWidth);
+		view.LayoutLine(*this, surface, vs, ll.get(), wrapWidth);
 		linesWrapped = ll->lines;
 	}
 	return pcs->SetHeight(lineToWrap, linesWrapped +
@@ -1651,10 +1651,10 @@ void Editor::LinesSplit(int pixelWidth) {
 		UndoGroup ug(pdoc);
 		for (Sci::Line line = lineStart; line <= lineEnd; line++) {
 			AutoSurface surface(this);
-			AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
+			std::shared_ptr<LineLayout> ll = view.RetrieveLineLayout(line, *this);
 			if (surface && ll) {
 				const Sci::Position posLineStart = pdoc->LineStart(line);
-				view.LayoutLine(*this, surface, vs, ll, pixelWidth);
+				view.LayoutLine(*this, surface, vs, ll.get(), pixelWidth);
 				Sci::Position lengthInsertedTotal = 0;
 				for (int subLine = 1; subLine < ll->lines; subLine++) {
 					const Sci::Position lengthInserted = pdoc->InsertString(
@@ -5265,9 +5265,9 @@ void Editor::SetAnnotationHeights(Sci::Line start, Sci::Line end) {
 			int linesWrapped = 1;
 			if (Wrapping()) {
 				AutoSurface surface(this);
-				AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
+				std::shared_ptr<LineLayout> ll = view.RetrieveLineLayout(line, *this);
 				if (surface && ll) {
-					view.LayoutLine(*this, surface, vs, ll, wrapWidth);
+					view.LayoutLine(*this, surface, vs, ll.get(), wrapWidth);
 					linesWrapped = ll->lines;
 				}
 			}
@@ -5666,10 +5666,10 @@ int Editor::CodePage() const noexcept {
 
 Sci::Line Editor::WrapCount(Sci::Line line) {
 	AutoSurface surface(this);
-	AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
+	std::shared_ptr<LineLayout> ll = view.RetrieveLineLayout(line, *this);
 
 	if (surface && ll) {
-		view.LayoutLine(*this, surface, vs, ll, wrapWidth);
+		view.LayoutLine(*this, surface, vs, ll.get(), wrapWidth);
 		return ll->lines;
 	} else {
 		return 1;

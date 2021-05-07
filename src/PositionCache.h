@@ -61,7 +61,6 @@ private:
 	int lenLineStarts;
 	/// Drawing is only performed for @a maxLineLength characters on each line.
 	Sci::Line lineNumber;
-	bool inCache;
 public:
 	enum { wrapWidthInfinite = 0x7ffffff };
 
@@ -160,10 +159,9 @@ public:
 	};
 private:
 	Cache level;
-	std::vector<std::unique_ptr<LineLayout>>cache;
+	std::vector<std::shared_ptr<LineLayout>>cache;
 	bool allInvalidated;
 	int styleClock;
-	int useCount;
 	size_t EntryForLine(Sci::Line line) const noexcept;
 	void AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc);
 public:
@@ -178,9 +176,8 @@ public:
 	void Invalidate(LineLayout::ValidLevel validity_) noexcept;
 	void SetLevel(Cache level_) noexcept;
 	Cache GetLevel() const noexcept { return level; }
-	LineLayout *Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
+	std::shared_ptr<LineLayout> Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
 		Sci::Line linesOnScreen, Sci::Line linesInDoc);
-	void Dispose(LineLayout *ll) noexcept;
 };
 
 class PositionCacheEntry {

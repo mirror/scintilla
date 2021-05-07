@@ -113,7 +113,7 @@ public:
 	void DropGraphics() noexcept;
 	void RefreshPixMaps(Surface *surfaceWindow, const ViewStyle &vsDraw);
 
-	LineLayout *RetrieveLineLayout(Sci::Line lineNumber, const EditModel &model);
+	std::shared_ptr<LineLayout> RetrieveLineLayout(Sci::Line lineNumber, const EditModel &model);
 	void LayoutLine(const EditModel &model, Surface *surface, const ViewStyle &vstyle,
 		LineLayout *ll, int width = LineLayout::wrapWidthInfinite);
 
@@ -156,34 +156,6 @@ public:
 		Sci::Line line, PRectangle rcArea, int subLine) const;
 	Sci::Position FormatRange(bool draw, const Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
 		const EditModel &model, const ViewStyle &vs);
-};
-
-/**
-* Convenience class to ensure LineLayout objects are always disposed.
-*/
-class AutoLineLayout {
-	LineLayoutCache &llc;
-	LineLayout *ll;
-public:
-	AutoLineLayout(LineLayoutCache &llc_, LineLayout *ll_) noexcept : llc(llc_), ll(ll_) {}
-	AutoLineLayout(const AutoLineLayout &) = delete;
-	AutoLineLayout(AutoLineLayout &&) = delete;
-	AutoLineLayout &operator=(const AutoLineLayout &) = delete;
-	AutoLineLayout &operator=(AutoLineLayout &&) = delete;
-	~AutoLineLayout() noexcept {
-		llc.Dispose(ll);
-		ll = nullptr;
-	}
-	LineLayout *operator->() const noexcept {
-		return ll;
-	}
-	operator LineLayout *() const noexcept {
-		return ll;
-	}
-	void Set(LineLayout *ll_) noexcept {
-		llc.Dispose(ll);
-		ll = ll_;
-	}
 };
 
 }

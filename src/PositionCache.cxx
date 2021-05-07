@@ -60,7 +60,6 @@ void BidiData::Resize(size_t maxLineLength_) {
 LineLayout::LineLayout(Sci::Line lineNumber_, int maxLineLength_) :
 	lenLineStarts(0),
 	lineNumber(lineNumber_),
-	inCache(false),
 	maxLineLength(-1),
 	numCharsInLine(0),
 	numCharsBeforeEOL(0),
@@ -363,7 +362,7 @@ XYPOSITION ScreenLine::TabPositionAfter(XYPOSITION xPosition) const {
 
 LineLayoutCache::LineLayoutCache() :
 	level(Cache::none),
-	allInvalidated(false), styleClock(-1), useCount(0) {
+	allInvalidated(false), styleClock(-1) {
 }
 
 LineLayoutCache::~LineLayoutCache() = default;
@@ -394,7 +393,6 @@ size_t LineLayoutCache::EntryForLine(Sci::Line line) const noexcept {
 }
 
 void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc) {
-	PLATFORM_ASSERT(useCount == 0);
 	size_t lengthForLevel = 0;
 	if (level == Cache::caret) {
 		lengthForLevel = 1;
@@ -405,7 +403,6 @@ void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesI
 	}
 
 	if (lengthForLevel != cache.size()) {
-		PLATFORM_ASSERT(useCount == 0);
 		allInvalidated = false;
 		cache.resize(lengthForLevel);
 		// Cache::none -> no entries
@@ -449,13 +446,12 @@ void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesI
 }
 
 void LineLayoutCache::Deallocate() noexcept {
-	PLATFORM_ASSERT(useCount == 0);
 	cache.clear();
 }
 
 void LineLayoutCache::Invalidate(LineLayout::ValidLevel validity_) noexcept {
 	if (!cache.empty() && !allInvalidated) {
-		for (const std::unique_ptr<LineLayout> &ll : cache) {
+		for (const std::shared_ptr<LineLayout> &ll : cache) {
 			if (ll) {
 				ll->Invalidate(validity_);
 			}
@@ -475,9 +471,8 @@ void LineLayoutCache::SetLevel(Cache level_) noexcept {
 	}
 }
 
-LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
+std::shared_ptr<LineLayout> LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
                                       Sci::Line linesOnScreen, Sci::Line linesInDoc) {
-	PLATFORM_ASSERT(useCount == 0);
 	AllocateForLevel(linesOnScreen, linesInDoc);
 	if (styleClock != styleClock_) {
 		Invalidate(LineLayout::ValidLevel::checkTextAndStyle);
@@ -518,9 +513,8 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 			cache[pos].reset();
 		}
 		if (!cache[pos]) {
-			cache[pos] = std::make_unique<LineLayout>(lineNumber, maxChars);
+			cache[pos] = std::make_shared<LineLayout>(lineNumber, maxChars);
 		}
-		cache[pos]->inCache = true;
 #ifdef CHECK_LLC
 		// Expensive check that there is only one entry for any line number
 		std::vector<bool> linesInCache(linesInDoc);
@@ -531,23 +525,11 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 			}
 		}
 #endif
-		useCount++;
-		return cache[pos].get();
+		return cache[pos];
 	}
 
 	// Only reach here for level == Cache::none
-	return new LineLayout(lineNumber, maxChars);
-}
-
-void LineLayoutCache::Dispose(LineLayout *ll) noexcept {
-	allInvalidated = false;
-	if (ll) {
-		if (!ll->inCache) {
-			delete ll;
-		} else {
-			useCount--;
-		}
-	}
+	return std::make_shared<LineLayout>(lineNumber, maxChars);
 }
 
 // Simply pack the (maximum 4) character bytes into an int
