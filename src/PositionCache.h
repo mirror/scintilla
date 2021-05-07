@@ -88,7 +88,7 @@ public:
 	int lines;
 	XYPOSITION wrapIndent; // In pixels
 
-	explicit LineLayout(int maxLineLength_);
+	LineLayout(Sci::Line lineNumber_, int maxLineLength_);
 	// Deleted so LineLayout objects can not be copied.
 	LineLayout(const LineLayout &) = delete;
 	LineLayout(LineLayout &&) = delete;
@@ -99,6 +99,8 @@ public:
 	void EnsureBidiData();
 	void Free() noexcept;
 	void Invalidate(ValidLevel validity_) noexcept;
+	Sci::Line LineNumber() const noexcept;
+	bool CanHold(Sci::Line lineDoc, int lineLength_) const noexcept;
 	int LineStart(int line) const noexcept;
 	int LineLength(int line) const noexcept;
 	enum class Scope { visibleOnly, includeEnd };

@@ -57,9 +57,9 @@ void BidiData::Resize(size_t maxLineLength_) {
 	widthReprs.resize(maxLineLength_ + 1);
 }
 
-LineLayout::LineLayout(int maxLineLength_) :
+LineLayout::LineLayout(Sci::Line lineNumber_, int maxLineLength_) :
 	lenLineStarts(0),
-	lineNumber(-1),
+	lineNumber(lineNumber_),
 	inCache(false),
 	maxLineLength(-1),
 	numCharsInLine(0),
@@ -115,6 +115,14 @@ void LineLayout::Free() noexcept {
 void LineLayout::Invalidate(ValidLevel validity_) noexcept {
 	if (validity > validity_)
 		validity = validity_;
+}
+
+Sci::Line LineLayout::LineNumber() const noexcept {
+	return lineNumber;
+}
+
+bool LineLayout::CanHold(Sci::Line lineDoc, int lineLength_) const noexcept {
+	return (lineNumber == lineDoc) && (lineLength_ <= maxLineLength);
 }
 
 int LineLayout::LineStart(int line) const noexcept {
@@ -458,22 +466,20 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 	}
 
 	if (pos < cache.size()) {
-		if (cache[pos] &&
-			((cache[pos]->lineNumber != lineNumber) || (cache[pos]->maxLineLength < maxChars))) {
+		if (cache[pos] && !cache[pos]->CanHold(lineNumber, maxChars)) {
 			cache[pos].reset();
 		}
 		if (!cache[pos]) {
-			cache[pos] = std::make_unique<LineLayout>(maxChars);
+			cache[pos] = std::make_unique<LineLayout>(lineNumber, maxChars);
 		}
-		cache[pos]->lineNumber = lineNumber;
 		cache[pos]->inCache = true;
-#ifdef CHECK_LLC_UNIQUE
+#ifndef CHECK_LLC_UNIQUE
 		// Expensive check that there is only one entry for any line number
 		std::vector<bool> linesInCache(linesInDoc);
 		for (const auto &entry : cache) {
 			if (entry) {
-				PLATFORM_ASSERT(!linesInCache[entry->lineNumber]);
-				linesInCache[entry->lineNumber] = true;
+				PLATFORM_ASSERT(!linesInCache[entry->LineNumber()]);
+				linesInCache[entry->LineNumber()] = true;
 			}
 		}
 #endif
@@ -482,9 +488,7 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 	}
 
 	// Only reach here for level == Cache::none
-	LineLayout *ret = new LineLayout(maxChars);
-	ret->lineNumber = lineNumber;
-	return ret;
+	return new LineLayout(lineNumber, maxChars);
 }
 
 void LineLayoutCache::Dispose(LineLayout *ll) noexcept {

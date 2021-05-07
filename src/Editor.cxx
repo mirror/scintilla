@@ -1493,7 +1493,7 @@ bool Editor::WrapOneLine(Surface *surface, Sci::Line lineToWrap) {
 	AutoLineLayout ll(view.llc, view.RetrieveLineLayout(lineToWrap, *this));
 	int linesWrapped = 1;
 	if (ll) {
-		view.LayoutLine(*this, lineToWrap, surface, vs, ll, wrapWidth);
+		view.LayoutLine(*this, surface, vs, ll, wrapWidth);
 		linesWrapped = ll->lines;
 	}
 	return pcs->SetHeight(lineToWrap, linesWrapped +
@@ -1654,7 +1654,7 @@ void Editor::LinesSplit(int pixelWidth) {
 			AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
 			if (surface && ll) {
 				const Sci::Position posLineStart = pdoc->LineStart(line);
-				view.LayoutLine(*this, line, surface, vs, ll, pixelWidth);
+				view.LayoutLine(*this, surface, vs, ll, pixelWidth);
 				Sci::Position lengthInsertedTotal = 0;
 				for (int subLine = 1; subLine < ll->lines; subLine++) {
 					const Sci::Position lengthInserted = pdoc->InsertString(
@@ -5267,7 +5267,7 @@ void Editor::SetAnnotationHeights(Sci::Line start, Sci::Line end) {
 				AutoSurface surface(this);
 				AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
 				if (surface && ll) {
-					view.LayoutLine(*this, line, surface, vs, ll, wrapWidth);
+					view.LayoutLine(*this, surface, vs, ll, wrapWidth);
 					linesWrapped = ll->lines;
 				}
 			}
@@ -5669,7 +5669,7 @@ Sci::Line Editor::WrapCount(Sci::Line line) {
 	AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
 
 	if (surface && ll) {
-		view.LayoutLine(*this, line, surface, vs, ll, wrapWidth);
+		view.LayoutLine(*this, surface, vs, ll, wrapWidth);
 		return ll->lines;
 	} else {
 		return 1;
