@@ -113,7 +113,7 @@ size_t ActionDuration::ActionsInAllowedTime(double secondsAllowed) const noexcep
 
 Document::Document(int options) :
 	cb((options & SC_DOCUMENTOPTION_STYLES_NONE) == 0, (options & SC_DOCUMENTOPTION_TEXT_LARGE) != 0),
-	durationStyleOneLine(0.00001, 0.000001, 0.0001) {
+	durationStyleOneByte(0.000001, 0.0000001, 0.00001) {
 	refCount = 0;
 #ifdef _WIN32
 	eolMode = SC_EOL_CRLF;
@@ -2287,11 +2287,10 @@ void Document::EnsureStyledTo(Sci::Position pos) {
 }
 
 void Document::StyleToAdjustingLineDuration(Sci::Position pos) {
-	const Sci::Line lineFirst = SciLineFromPosition(GetEndStyled());
+	const Sci::Position stylingStart = GetEndStyled();
 	ElapsedPeriod epStyling;
 	EnsureStyledTo(pos);
-	const Sci::Line lineLast = SciLineFromPosition(GetEndStyled());
-	durationStyleOneLine.AddSample(lineLast - lineFirst, epStyling.Duration());
+	durationStyleOneByte.AddSample(pos - stylingStart, epStyling.Duration());
 }
 
 void Document::LexerChanged() {

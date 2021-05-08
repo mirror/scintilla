@@ -282,7 +282,7 @@ public:
 	bool useTabs;
 	bool tabIndents;
 	bool backspaceUnindents;
-	ActionDuration durationStyleOneLine;
+	ActionDuration durationStyleOneByte;
 
 	std::unique_ptr<IDecorationList> decorations;
 
