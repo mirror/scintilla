@@ -207,6 +207,7 @@ public:
 	ActionDuration(double duration_, double minDuration_, double maxDuration_) noexcept;
 	void AddSample(size_t numberActions, double durationOfActions) noexcept;
 	double Duration() const noexcept;
+	size_t ActionsInAllowedTime(double secondsAllowed) const noexcept;
 };
 
 /**
@@ -416,6 +417,7 @@ public:
 	Sci::Position VCHomePosition(Sci::Position position) const;
 	Sci::Position IndexLineStart(Sci::Line line, int lineCharacterIndex) const noexcept;
 	Sci::Line LineFromPositionIndex(Sci::Position pos, int lineCharacterIndex) const noexcept;
+	Sci::Line LineFromPositionAfter(Sci::Line line, Sci::Position length) const noexcept;
 
 	int SCI_METHOD SetLevel(Sci_Position line, int level) override;
 	int SCI_METHOD GetLevel(Sci_Position line) const override;

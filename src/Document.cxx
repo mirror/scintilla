@@ -107,6 +107,10 @@ double ActionDuration::Duration() const noexcept {
 	return duration;
 }
 
+size_t ActionDuration::ActionsInAllowedTime(double secondsAllowed) const noexcept {
+	return std::lround(secondsAllowed / Duration());
+}
+
 Document::Document(int options) :
 	cb((options & SC_DOCUMENTOPTION_STYLES_NONE) == 0, (options & SC_DOCUMENTOPTION_TEXT_LARGE) != 0),
 	durationStyleOneLine(0.00001, 0.000001, 0.0001) {
@@ -472,6 +476,20 @@ Sci::Position Document::IndexLineStart(Sci::Line line, int lineCharacterIndex) c
 
 Sci::Line Document::LineFromPositionIndex(Sci::Position pos, int lineCharacterIndex) const noexcept {
 	return cb.LineFromPositionIndex(pos, lineCharacterIndex);
+}
+
+Sci::Line Document::LineFromPositionAfter(Sci::Line line, Sci::Position length) const noexcept {
+	const Sci::Position posAfter = cb.LineStart(line) + length;
+	if (posAfter >= LengthNoExcept()) {
+		return LinesTotal();
+	}
+	const Sci::Line lineAfter = SciLineFromPosition(posAfter);
+	if (lineAfter > line) {
+		return lineAfter;
+	} else {
+		// Want to make some progress so return next line
+		return lineAfter + 1;
+	}
 }
 
 int SCI_METHOD Document::SetLevel(Sci_Position line, int level) {
