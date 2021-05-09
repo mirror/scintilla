@@ -772,7 +772,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * The editor is getting the foreground control (the one getting the input focus).
  */
 - (BOOL) becomeFirstResponder {
-	mOwner.backend->WndProc(SCI_SETFOCUS, 1, 0);
+	mOwner.backend->SetFirstResponder(true);
 	return YES;
 }
 
@@ -782,7 +782,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * The editor is losing the input focus.
  */
 - (BOOL) resignFirstResponder {
-	mOwner.backend->WndProc(SCI_SETFOCUS, 0, 0);
+	mOwner.backend->SetFirstResponder(false);
 	return YES;
 }
 

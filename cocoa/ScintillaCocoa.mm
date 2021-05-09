@@ -402,6 +402,8 @@ ScintillaCocoa::ScintillaCocoa(ScintillaView *sciView_, SCIContentView *viewCont
 	notifyObj = NULL;
 	notifyProc = NULL;
 	capturedMouse = false;
+	isFirstResponder = false;
+	isActive = false;
 	enteredSetScrollingSize = false;
 	scrollSpeed = 1;
 	scrollTicks = 2000;
@@ -2494,15 +2496,31 @@ void ScintillaCocoa::HandleCommand(NSInteger command) {
 
 //--------------------------------------------------------------------------------------------------
 
-void ScintillaCocoa::ActiveStateChanged(bool isActive) {
-	// If the window is being deactivated, lose the focus and turn off the ticking
-	if (!isActive) {
-		DropCaret();
-		//SetFocusState( false );
-		FineTickerCancel(TickReason::caret);
-	} else {
-		ShowCaretAtCurrentPosition();
-	}
+/**
+ * Update 'isFirstResponder' and possibly change focus state.
+ */
+void ScintillaCocoa::SetFirstResponder(bool isFirstResponder_) {
+	isFirstResponder = isFirstResponder_;
+	SetFocusActiveState();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Update 'isActive' and possibly change focus state.
+ */
+void ScintillaCocoa::ActiveStateChanged(bool isActive_) {
+	isActive = isActive_;
+	SetFocusActiveState();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Update 'hasFocus' based on first responder and active status.
+ */
+void ScintillaCocoa::SetFocusActiveState() {
+	SetFocusState(isActive && isFirstResponder);
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -97,6 +97,8 @@ private:
 	intptr_t notifyObj;
 
 	bool capturedMouse;
+	bool isFirstResponder;
+	bool isActive;
 
 	bool enteredSetScrollingSize;
 
@@ -242,7 +244,9 @@ public:
 	NSMenu *CreateContextMenu(NSEvent *event);
 	void HandleCommand(NSInteger command);
 
-	void ActiveStateChanged(bool isActive);
+	void SetFirstResponder(bool isFirstResponder_);
+	void ActiveStateChanged(bool isActive_);
+	void SetFocusActiveState();
 	void WindowWillMove();
 
 	// Find indicator
