@@ -1,4 +1,6 @@
-// Unit Tests for Scintilla internal data structures
+/** @file testUniConversion.cxx
+ ** Unit Tests for Scintilla internal data structures
+ **/
 
 #include <cstring>
 

@@ -1,4 +1,6 @@
-// Unit Tests for Scintilla internal data structures
+/** @file testCharClassify.cxx
+ ** Unit Tests for Scintilla internal data structures
+ **/
 
 #include <cstring>
 

@@ -1,4 +1,4 @@
-// ScintillaDocument.h
+// @file ScintillaDocument.h
 // Wrapper for Scintilla document object so it can be manipulated independently.
 // Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
 
@@ -88,4 +88,4 @@ signals:
     friend class ::WatcherHelper;
 };
 
-#endif // SCINTILLADOCUMENT_H
+#endif /* SCINTILLADOCUMENT_H */

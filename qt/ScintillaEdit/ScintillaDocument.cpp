@@ -1,4 +1,4 @@
-// ScintillaDocument.cpp
+// @file ScintillaDocument.cpp
 // Wrapper for Scintilla document object so it can be manipulated independently.
 // Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
 

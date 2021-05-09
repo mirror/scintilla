@@ -1,4 +1,6 @@
-// Unit Tests for Scintilla internal data structures
+/** @file testPerLine.cxx
+ ** Unit Tests for Scintilla internal data structures
+ **/
 
 #include <cstddef>
 #include <cstring>

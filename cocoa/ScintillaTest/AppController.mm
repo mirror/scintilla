@@ -1,5 +1,5 @@
 /**
- * AppController.m
+ * AppController.mm
  * ScintillaTest
  *
  * Created by Mike Lischke on 01.04.09.

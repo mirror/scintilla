@@ -6,7 +6,7 @@
 // Author: Jason Haslam
 //
 // Additions Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
-// ScintillaEditBase.cpp - Qt widget that wraps ScintillaQt and provides events and scrolling
+// @file ScintillaEditBase.cpp - Qt widget that wraps ScintillaQt and provides events and scrolling
 
 #include "ScintillaEditBase.h"
 #include "ScintillaQt.h"

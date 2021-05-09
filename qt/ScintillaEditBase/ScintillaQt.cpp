@@ -6,7 +6,7 @@
 // Author: Jason Haslam
 //
 // Additions Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
-// ScintillaQt.cpp - Qt specific subclass of ScintillaBase
+// @file ScintillaQt.cpp - Qt specific subclass of ScintillaBase
 
 #include "ScintillaQt.h"
 #include "PlatQt.h"

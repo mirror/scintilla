@@ -6,7 +6,7 @@
 // Author: Jason Haslam
 //
 // Additions Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
-// ScintillaQt.h - Qt specific subclass of ScintillaBase
+// @file ScintillaQt.h - Qt specific subclass of ScintillaBase
 
 #ifndef SCINTILLAQT_H
 #define SCINTILLAQT_H
@@ -176,4 +176,4 @@ private:
 
 }
 
-#endif // SCINTILLAQT_H
+#endif /* SCINTILLAQT_H */

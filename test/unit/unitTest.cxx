@@ -1,4 +1,6 @@
-// Unit Tests for Scintilla internal data structures
+/** @file unitTest.cxx
+ ** Unit Tests for Scintilla internal data structures
+ **/
 
 /*
     Currently tested:
