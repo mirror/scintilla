@@ -2525,6 +2525,62 @@ void ScintillaCocoa::SetFocusActiveState() {
 
 //--------------------------------------------------------------------------------------------------
 
+namespace {
+
+/**
+ * Convert from an NSColor into a ColourAlpha
+ */
+ColourAlpha ColourFromNSColor(NSColor *value) {
+	return ColourAlpha(static_cast<unsigned int>(value.redComponent * componentMaximum),
+			   static_cast<unsigned int>(value.greenComponent * componentMaximum),
+			   static_cast<unsigned int>(value.blueComponent * componentMaximum),
+			   static_cast<unsigned int>(value.alphaComponent * componentMaximum));
+}
+
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Update ViewStyle::elementBaseColours to match system preferences.
+ */
+void ScintillaCocoa::UpdateBaseElements() {
+	NSView *content = ContentView();
+	NSAppearance *saved = [NSAppearance currentAppearance];
+	[NSAppearance setCurrentAppearance:content.effectiveAppearance];
+
+	bool changed = false;
+	if (@available(macOS 10.14, *)) {
+		NSColor *textBack = [NSColor.textBackgroundColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
+		NSColor *noFocusBack = [NSColor.unemphasizedSelectedTextBackgroundColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
+		if (vs.selection.layer == Layer::base) {
+			NSColor *selBack = [NSColor.selectedTextBackgroundColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
+			// Additional selection: blend with text background to make weaker version.
+			NSColor *modified = [selBack blendedColorWithFraction:0.5 ofColor:textBack];
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_BACK, ColourFromNSColor(selBack));
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, ColourFromNSColor(modified)) || changed;
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_NO_FOCUS_BACK, ColourFromNSColor(noFocusBack)) || changed;
+		} else {
+			// Less translucent colour used in dark mode as otherwise less visible
+			const int alpha = textBack.brightnessComponent > 0.5 ? 0x40 : 0x60;
+			// Make a translucent colour that approximates selectedTextBackgroundColor
+			NSColor *accent = [NSColor.controlAccentColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
+			const ColourAlpha colourAccent = ColourFromNSColor(accent);
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_BACK, ColourAlpha(colourAccent, alpha));
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, ColourAlpha(colourAccent, alpha/2)) || changed;
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_NO_FOCUS_BACK, ColourAlpha(ColourFromNSColor(noFocusBack), alpha)) || changed;
+
+		}
+	}
+	if (changed) {
+		Redraw();
+	}
+
+	[NSAppearance setCurrentAppearance:saved];
+}
+
+//--------------------------------------------------------------------------------------------------
+
 /**
  * When the window is about to move, the calltip and autcoimpletion stay in the same spot,
  * so cancel them.

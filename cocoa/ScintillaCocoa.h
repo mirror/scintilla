@@ -247,6 +247,8 @@ public:
 	void SetFirstResponder(bool isFirstResponder_);
 	void ActiveStateChanged(bool isActive_);
 	void SetFocusActiveState();
+	void UpdateBaseElements() override;
+
 	void WindowWillMove();
 
 	// Find indicator

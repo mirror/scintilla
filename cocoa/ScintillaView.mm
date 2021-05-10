@@ -338,6 +338,17 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Gets called by the runtime when the effective appearance changes.
+ */
+- (void) viewDidChangeEffectiveAppearance {
+	if (mOwner.backend) {
+		mOwner.backend->UpdateBaseElements();
+	}
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Gets called by the runtime when the view needs repainting.
  */
 - (void) drawRect: (NSRect) rect {
@@ -1454,11 +1465,18 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 			       name: NSWindowWillMoveNotification
 			     object: self.window];
 
+		[center addObserver: self
+			   selector: @selector(defaultsDidChange:)
+			       name: NSSystemColorsDidChangeNotification
+			     object: self.window];
+
 		[scrollView.contentView setPostsBoundsChangedNotifications: YES];
 		[center addObserver: self
 			   selector: @selector(scrollerAction:)
 			       name: NSViewBoundsDidChangeNotification
 			     object: scrollView.contentView];
+
+		mBackend->UpdateBaseElements();
 	}
 	return self;
 }
@@ -1494,6 +1512,13 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 - (void) windowWillMove: (NSNotification *) note {
 #pragma unused(note)
 	mBackend->WindowWillMove();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+- (void) defaultsDidChange: (NSNotification *) note {
+#pragma unused(note)
+	mBackend->UpdateBaseElements();
 }
 
 //--------------------------------------------------------------------------------------------------
