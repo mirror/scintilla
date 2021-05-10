@@ -187,6 +187,10 @@ public:
 		return ColourAlpha(co | (0xffu << 24));
 	}
 
+	constexpr int AsInteger() const noexcept {
+		return co;
+	}
+
 	constexpr int OpaqueRGB() const noexcept {
 		return co & 0xffffff;
 	}

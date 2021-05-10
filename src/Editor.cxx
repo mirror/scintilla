@@ -7200,7 +7200,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETELEMENTCOLOUR:
-		return vs.ElementColour(static_cast<int>(wParam)).value_or(ColourAlpha()).OpaqueRGB();
+		return vs.ElementColour(static_cast<int>(wParam)).value_or(ColourAlpha()).AsInteger();
 
 	case SCI_RESETELEMENTCOLOUR:
 		vs.ResetElement(static_cast<int>(wParam));

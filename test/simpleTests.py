@@ -1923,6 +1923,39 @@ class TestStyleAttributes(unittest.TestCase):
 		self.ed.FontLocale = testLocale
 		self.assertEquals(self.ed.GetFontLocale(), testLocale)
 
+class TestElements(unittest.TestCase):
+	""" These tests are just to ensure that the calls set and retrieve values.
+	They do not check the visual appearance of the style attributes.
+	"""
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		self.testColourAlpha = 0x18171615
+
+	def tearDown(self):
+		pass
+
+	def testIsSet(self):
+		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST), 0)
+
+	def testAllowsTranslucent(self):
+		self.assertEquals(self.ed.GetElementAllowsTranslucent(self.ed.SC_ELEMENT_LIST), 0)
+		self.assertEquals(self.ed.GetElementAllowsTranslucent(self.ed.SC_ELEMENT_SELECTION_TEXT), 1)
+
+	def testChanging(self):
+		self.ed.SetElementColour(self.ed.SC_ELEMENT_LIST_BACK, self.testColourAlpha)
+		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_LIST_BACK), self.testColourAlpha)
+		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST_BACK), 1)
+
+	def testReset(self):
+		self.ed.SetElementColour(self.ed.SC_ELEMENT_LIST_BACK, self.testColourAlpha)
+		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_LIST_BACK), self.testColourAlpha)
+		self.ed.ResetElementColour(self.ed.SC_ELEMENT_LIST_BACK)
+		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_LIST_BACK), 0)
+		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST_BACK), 0)
+
 class TestIndices(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame

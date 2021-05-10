@@ -206,6 +206,17 @@ void ViewStyle::Init(size_t stylesSize_) {
 	elementBaseColours[SC_ELEMENT_SELECTION_ADDITIONAL_BACK] = ColourAlpha(0xd7, 0xd7, 0xd7, 0xff);
 	elementBaseColours[SC_ELEMENT_SELECTION_SECONDARY_BACK] = ColourAlpha(0xb0, 0xb0, 0xb0, 0xff);
 	elementBaseColours[SC_ELEMENT_SELECTION_NO_FOCUS_BACK] = ColourAlpha(0x80, 0x80, 0x80, 0x3f);
+	elementAllowsTranslucent.insert({
+		SC_ELEMENT_SELECTION_TEXT,
+		SC_ELEMENT_SELECTION_BACK,
+		SC_ELEMENT_SELECTION_ADDITIONAL_TEXT,
+		SC_ELEMENT_SELECTION_ADDITIONAL_BACK,
+		SC_ELEMENT_SELECTION_SECONDARY_TEXT,
+		SC_ELEMENT_SELECTION_SECONDARY_BACK,
+		SC_ELEMENT_SELECTION_NO_FOCUS_TEXT,
+		SC_ELEMENT_SELECTION_BACK,
+		SC_ELEMENT_SELECTION_NO_FOCUS_BACK,
+	});
 	selection.layer = Layer::base;
 	selection.eolFilled = false;
 
@@ -224,6 +235,11 @@ void ViewStyle::Init(size_t stylesSize_) {
 	elementBaseColours[SC_ELEMENT_CARET] = ColourAlpha(0, 0, 0);
 	elementBaseColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourAlpha(0x7f, 0x7f, 0x7f);
 	elementBaseColours[SC_ELEMENT_CARET_SECONDARY] = ColourAlpha(0, 0, 0, 0x40);
+	elementAllowsTranslucent.insert({
+		SC_ELEMENT_CARET,
+		SC_ELEMENT_CARET_ADDITIONAL,
+		SC_ELEMENT_CARET_SECONDARY,
+	});
 	caret.style = CARETSTYLE_LINE;
 	caret.width = 1;
 
