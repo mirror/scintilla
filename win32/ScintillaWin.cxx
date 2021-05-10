@@ -419,6 +419,7 @@ class ScintillaWin :
 	void SetMouseCapture(bool on) override;
 	bool HaveMouseCapture() override;
 	void SetTrackMouseLeaveEvent(bool on) noexcept;
+	void UpdateBaseElements() override;
 	bool PaintContains(PRectangle rc) override;
 	void ScrollText(Sci::Line linesToMove) override;
 	void NotifyCaretMove() override;
@@ -1875,6 +1876,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_CREATE:
 			ctrlID = ::GetDlgCtrlID(HwndFromWindow(wMain));
+			UpdateBaseElements();
 			// Get Intellimouse scroll line parameters
 			GetIntelliMouseParameters();
 			::RegisterDragDrop(MainHWND(), reinterpret_cast<IDropTarget *>(&dt));
@@ -1952,6 +1954,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_SETTINGCHANGE:
 			//Platform::DebugPrintf("Setting Changed\n");
+			UpdateBaseElements();
 			InvalidateStyleData();
 			// Get Intellimouse scroll line parameters
 			GetIntelliMouseParameters();
@@ -1966,6 +1969,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_SYSCOLORCHANGE:
 			//Platform::DebugPrintf("Setting Changed\n");
+			UpdateBaseElements();
 			InvalidateStyleData();
 			break;
 
@@ -2169,6 +2173,23 @@ void ScintillaWin::SetTrackMouseLeaveEvent(bool on) noexcept {
 		TrackMouseEvent(&tme);
 	}
 	trackedMouseLeave = on;
+}
+
+void ScintillaWin::UpdateBaseElements() {
+	struct ElementToIndex { int element; int nIndex; };
+	ElementToIndex eti[] = {
+		{ SC_ELEMENT_LIST, COLOR_WINDOWTEXT },
+		{ SC_ELEMENT_LIST_BACK, COLOR_WINDOW },
+		{ SC_ELEMENT_LIST_SELECTED, COLOR_HIGHLIGHTTEXT },
+		{ SC_ELEMENT_LIST_SELECTED_BACK, COLOR_HIGHLIGHT },
+	};
+	bool changed = false;
+	for (const ElementToIndex &ei : eti) {
+		changed = vs.SetElementBase(ei.element, ColourAlpha::FromRGB(::GetSysColor(ei.nIndex))) || changed;
+	}
+	if (changed) {
+		Redraw();
+	}
 }
 
 bool ScintillaWin::PaintContains(PRectangle rc) {
