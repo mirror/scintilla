@@ -120,7 +120,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 28 April 2021 NH</p>
+    <p>Last edited 10 May 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -894,7 +894,7 @@ struct Sci_TextRange {
             If the regular expression is invalid then -1 is returned and status is set to
             <code>SC_STATUS_WARN_REGEX</code>.
             The ECMAScript flag is set on the regex object and UTF-8 documents will exhibit Unicode-compliant
-            behaviour. For MSVC, where wchar_t is 16-bits, the reular expression ".." will match a single
+            behaviour. For MSVC, where wchar_t is 16-bits, the regular expression ".." will match a single
             astral-plane character. There may be other differences between compilers.
             Must also have <code>SCFIND_REGEXP</code> set.</td>
         </tr>
@@ -4105,7 +4105,7 @@ struct Sci_TextToFind {
      unless buffered drawing is on or the platform is naturally buffered.
      The default is for drawing to be two phase.</p>
      <p>Multiple phase drawing (<code>SC_PHASES_MULTIPLE</code>)
-     draws the whole area multiple times, once for each feature, building up the
+     draws the whole area multiple times, once for each feature, building up
      the appearance in layers or phases. The coloured backgrounds for all lines are
      drawn before any text and then all the text is drawn in transparent mode over this
      combined background without clipping text to the line boundaries. This allows
@@ -6370,12 +6370,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SC_DOCUMENTOPTION_STYLES_NONE</code> (0x1) stops allocation of memory to style characters
     which saves significant memory, often 40% with the whole document treated as being style 0.
     Lexers may still produce visual styling by using indicators.
-    <span><code>SC_DOCUMENTOPTION_TEXT_LARGE</code> (0x100) accomodates documents larger than 2 GigaBytes
+    <span><code>SC_DOCUMENTOPTION_TEXT_LARGE</code> (0x100) accommodates documents larger than 2 GigaBytes
     in 64-bit executables.</span>
     </p>
 
     <p>With <code>SC_DOCUMENTOPTION_STYLES_NONE</code>, lexers are still active and may display
-    indicators. Some may produce folding information althoough most require lexical styles to correctly determine folding.
+    indicators. Some may produce folding information although most require lexical styles to correctly determine folding.
     Its often more efficient to set the null lexer <code>NULL</code> so no lexer is run.
     </p>
 
@@ -8840,7 +8840,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     to determine which format: if the bytes start with "/* XPM */" then it is treated as text form,
     otherwise it is treated as lines form.</p>
 
-    <p>XPM format is supported on on all platforms.</p>
+    <p>XPM format is supported on all platforms.</p>
 
     <h2 id="GTK">GTK</h2>
     <p>On GTK, the following functions create a Scintilla widget, communicate with it and allow
