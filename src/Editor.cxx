@@ -5089,6 +5089,10 @@ void Editor::SetFocusState(bool focusState) {
 	ShowCaretAtCurrentPosition();
 }
 
+void Editor::UpdateBaseElements() {
+	// Overridden by subclasses
+}
+
 Sci::Position Editor::PositionAfterArea(PRectangle rcArea) const {
 	// The start of the document line after the display line after the area
 	// This often means that the line after a modification is restyled which helps
@@ -7199,7 +7203,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.ElementColour(static_cast<int>(wParam)).value_or(ColourAlpha()).OpaqueRGB();
 
 	case SCI_RESETELEMENTCOLOUR:
-		vs.elementColours[static_cast<int>(wParam)].reset();
+		vs.ResetElement(static_cast<int>(wParam));
 		break;
 
 	case SCI_GETELEMENTISSET:

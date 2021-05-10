@@ -523,11 +523,43 @@ std::optional<ColourAlpha> ViewStyle::ElementColour(int element) const {
 			return search->second;
 		}
 	}
+	ElementMap::const_iterator searchBase = elementBaseColours.find(element);
+	if (searchBase != elementBaseColours.end()) {
+		if (searchBase->second.has_value()) {
+			return searchBase->second;
+		}
+	}
 	return {};
 }
 
 bool ViewStyle::ElementAllowsTranslucent(int element) const {
 	return elementAllowsTranslucent.count(element) > 0;
+}
+
+void ViewStyle::ResetElement(int element) {
+	elementColours.erase(element);
+}
+
+bool ViewStyle::ElementIsSet(int element) const {
+	ElementMap::const_iterator search = elementColours.find(element);
+	if (search != elementColours.end()) {
+		return search->second.has_value();
+	}
+	return false;
+}
+
+bool ViewStyle::SetElementBase(int element, ColourAlpha colour) {
+	bool different = false;
+	ElementMap::const_iterator search = elementBaseColours.find(element);
+	if (search == elementBaseColours.end()) {
+		different = true;
+	} else {
+		if (search->second.has_value() && !(*search->second == colour)) {
+			different = true;
+		}
+	}
+	elementBaseColours[element] = colour;
+	return different;
 }
 
 bool ViewStyle::SetWrapState(int wrapState_) noexcept {

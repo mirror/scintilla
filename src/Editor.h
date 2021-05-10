@@ -526,6 +526,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void SetMouseCapture(bool on) = 0;
 	virtual bool HaveMouseCapture() = 0;
 	void SetFocusState(bool focusState);
+	virtual void UpdateBaseElements();
 
 	Sci::Position PositionAfterArea(PRectangle rcArea) const;
 	void StyleToPositionInView(Sci::Position pos);

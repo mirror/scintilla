@@ -203,6 +203,7 @@ public:
 
 	using ElementMap = std::map<int, std::optional<ColourAlpha>>;
 	ElementMap elementColours;
+	ElementMap elementBaseColours;
 	std::set<int> elementAllowsTranslucent;
 
 	WrapAppearance wrap;
@@ -243,6 +244,9 @@ public:
 
 	std::optional<ColourAlpha> ElementColour(int element) const;
 	bool ElementAllowsTranslucent(int element) const;
+	void ResetElement(int element);
+	bool ElementIsSet(int element) const;
+	bool SetElementBase(int element, ColourAlpha colour);
 
 	bool SetWrapState(int wrapState_) noexcept;
 	bool SetWrapVisualFlags(int wrapVisualFlags_) noexcept;
