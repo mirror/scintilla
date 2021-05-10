@@ -7417,25 +7417,38 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return LinesOnScreen();
 
 	case SCI_SETSELFORE:
-		vs.selection.colours.fore = OptionalColour(wParam, lParam);
-		vs.selection.additionalForeground = ColourAlpha::FromRGB(static_cast<int>(lParam));
+		vs.elementColours[SC_ELEMENT_SELECTION_TEXT] = OptionalColour(wParam, lParam);
+		vs.elementColours[SC_ELEMENT_SELECTION_ADDITIONAL_TEXT] = OptionalColour(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELBACK:
-		vs.selection.colours.back = OptionalColour(wParam, lParam);
-		vs.selection.additionalBackground = ColourAlpha::FromRGB(static_cast<int>(lParam));
+		if (wParam) {
+			vs.SetElementRGB(SC_ELEMENT_SELECTION_BACK, static_cast<int>(lParam));
+			vs.SetElementRGB(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, static_cast<int>(lParam));
+		} else {
+			vs.ResetElement(SC_ELEMENT_SELECTION_BACK);
+			vs.ResetElement(SC_ELEMENT_SELECTION_ADDITIONAL_BACK);
+		}
 		InvalidateStyleRedraw();
 		break;
 
-	case SCI_SETSELALPHA:
-		vs.selection.alpha = static_cast<int>(wParam);
-		vs.selection.additionalAlpha = static_cast<int>(wParam);
-		InvalidateStyleRedraw();
+	case SCI_SETSELALPHA: {
+			Layer layerNew = (wParam == SC_ALPHA_NOALPHA) ? Layer::base : Layer::over;
+			if (vs.selection.layer != layerNew) {
+			    vs.selection.layer = layerNew;
+			    UpdateBaseElements();
+			}
+			vs.SetElementAlpha(SC_ELEMENT_SELECTION_BACK, static_cast<int>(wParam));
+			vs.SetElementAlpha(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, static_cast<int>(wParam));
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_GETSELALPHA:
-		return vs.selection.alpha;
+		if (vs.selection.layer == Layer::base)
+			return SC_ALPHA_NOALPHA;
+		return vs.ElementColour(SC_ELEMENT_SELECTION_BACK)->GetAlpha();
 
 	case SCI_GETSELEOLFILLED:
 		return vs.selection.eolFilled;
@@ -7455,13 +7468,24 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_SETSELECTIONLAYER:
+		if (vs.selection.layer != static_cast<Layer>(wParam)) {
+			vs.selection.layer = static_cast<Layer>(wParam);
+			UpdateBaseElements();
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_GETSELECTIONLAYER:
+		return static_cast<sptr_t>(vs.selection.layer);
+
 	case SCI_SETCARETFORE:
-		vs.caret.colour = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.elementColours[SC_ELEMENT_CARET] = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCARETFORE:
-		return vs.caret.colour.OpaqueRGB();
+		return vs.ElementColour(SC_ELEMENT_CARET)->OpaqueRGB();
 
 	case SCI_SETCARETSTYLE:
 		if (wParam <= (CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK | CARETSTYLE_BLOCK_AFTER))
@@ -8418,30 +8442,32 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return virtualSpaceOptions;
 
 	case SCI_SETADDITIONALSELFORE:
-		vs.selection.additionalForeground = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.elementColours[SC_ELEMENT_SELECTION_ADDITIONAL_TEXT] = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETADDITIONALSELBACK:
-		vs.selection.additionalBackground = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.SetElementRGB(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETADDITIONALSELALPHA:
-		vs.selection.additionalAlpha = static_cast<int>(wParam);
+		vs.SetElementAlpha(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETADDITIONALSELALPHA:
-		return vs.selection.additionalAlpha;
+		if (vs.selection.layer == Layer::base)
+			return SC_ALPHA_NOALPHA;
+		return vs.ElementColour(SC_ELEMENT_SELECTION_ADDITIONAL_BACK)->GetAlpha();
 
 	case SCI_SETADDITIONALCARETFORE:
-		vs.caret.additionalColour = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.elementColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourAlpha::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETADDITIONALCARETFORE:
-		return vs.caret.additionalColour.OpaqueRGB();
+		return vs.ElementColour(SC_ELEMENT_CARET_ADDITIONAL)->OpaqueRGB();
 
 	case SCI_ROTATESELECTION:
 		sel.RotateMain();

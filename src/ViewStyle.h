@@ -63,18 +63,11 @@ struct ForeBackColours {
 	std::optional<ColourAlpha> back;
 };
 
+enum class Layer { base=0, over=10 };
+
 struct SelectionAppearance {
-	// Colours of main selection
-	ForeBackColours colours;
-	// Colours of additional (non-main) selections
-	ColourAlpha additionalForeground;
-	ColourAlpha additionalBackground;
-	// Background colour on X when not primary selection
-	ColourAlpha background2;
-	// Translucency. SC_ALPHA_NOALPHA: draw selection background beneath text
-	int alpha;
-	// Translucency of additional selections
-	int additionalAlpha;
+	// Whether to draw on base layer or over text
+	Layer layer;
 	// Draw selection past line end characters up to right border
 	bool eolFilled;
 };
@@ -93,10 +86,6 @@ struct CaretLineAppearance {
 };
 
 struct CaretAppearance {
-	// Colour of caret
-	ColourAlpha colour;
-	// Colour of additional (non-main) carets
-	ColourAlpha additionalColour;
 	// Line, block, over-strike bar ... 
 	int style;
 	// Width in pixels
@@ -245,6 +234,8 @@ public:
 	std::optional<ColourAlpha> ElementColour(int element) const;
 	bool ElementAllowsTranslucent(int element) const;
 	void ResetElement(int element);
+	void SetElementRGB(int element, int rgb);
+	void SetElementAlpha(int element, int alpha);
 	bool ElementIsSet(int element) const;
 	bool SetElementBase(int element, ColourAlpha colour);
 

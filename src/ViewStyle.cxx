@@ -196,13 +196,17 @@ void ViewStyle::Init(size_t stylesSize_) {
 	spaceWidth = 8;
 	tabWidth = spaceWidth * 8;
 
-	selection.colours.fore.reset();
-	selection.colours.back = ColourAlpha(0xc0, 0xc0, 0xc0);
-	selection.additionalForeground = ColourAlpha(0xff, 0, 0);
-	selection.additionalBackground = ColourAlpha(0xd7, 0xd7, 0xd7);
-	selection.background2 = ColourAlpha(0xb0, 0xb0, 0xb0);
-	selection.alpha = SC_ALPHA_NOALPHA;
-	selection.additionalAlpha = SC_ALPHA_NOALPHA;
+	// Default is for no selection foregrounds
+	elementColours.erase(SC_ELEMENT_SELECTION_TEXT);
+	elementColours.erase(SC_ELEMENT_SELECTION_ADDITIONAL_TEXT);
+	elementColours.erase(SC_ELEMENT_SELECTION_SECONDARY_TEXT);
+	elementColours.erase(SC_ELEMENT_SELECTION_NO_FOCUS_TEXT);
+	// Shades of grey for selection backgrounds
+	elementBaseColours[SC_ELEMENT_SELECTION_BACK] = ColourAlpha(0xc0, 0xc0, 0xc0, 0xff);
+	elementBaseColours[SC_ELEMENT_SELECTION_ADDITIONAL_BACK] = ColourAlpha(0xd7, 0xd7, 0xd7, 0xff);
+	elementBaseColours[SC_ELEMENT_SELECTION_SECONDARY_BACK] = ColourAlpha(0xb0, 0xb0, 0xb0, 0xff);
+	elementBaseColours[SC_ELEMENT_SELECTION_NO_FOCUS_BACK] = ColourAlpha(0x80, 0x80, 0x80, 0x3f);
+	selection.layer = Layer::base;
 	selection.eolFilled = false;
 
 	foldmarginColour.reset();
@@ -217,8 +221,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 	styles[STYLE_LINENUMBER].fore = ColourAlpha(0, 0, 0);
 	styles[STYLE_LINENUMBER].back = Platform::Chrome();
 
-	caret.colour = ColourAlpha(0, 0, 0);
-	caret.additionalColour = ColourAlpha(0x7f, 0x7f, 0x7f);
+	elementBaseColours[SC_ELEMENT_CARET] = ColourAlpha(0, 0, 0);
+	elementBaseColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourAlpha(0x7f, 0x7f, 0x7f);
+	elementBaseColours[SC_ELEMENT_CARET_SECONDARY] = ColourAlpha(0, 0, 0, 0x40);
 	caret.style = CARETSTYLE_LINE;
 	caret.width = 1;
 
@@ -483,12 +488,15 @@ std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActi
 }
 
 bool ViewStyle::SelectionBackgroundDrawn() const noexcept {
-	return selection.colours.back &&
-		((selection.alpha == SC_ALPHA_NOALPHA) || (selection.additionalAlpha == SC_ALPHA_NOALPHA));
+	return selection.layer == Layer::base;
 }
 
 bool ViewStyle::SelectionTextDrawn() const {
-	return selection.colours.fore.has_value();
+	return
+		ElementIsSet(SC_ELEMENT_SELECTION_TEXT) ||
+		ElementIsSet(SC_ELEMENT_SELECTION_ADDITIONAL_TEXT) ||
+		ElementIsSet(SC_ELEMENT_SELECTION_SECONDARY_TEXT) ||
+		ElementIsSet(SC_ELEMENT_SELECTION_NO_FOCUS_TEXT);
 }
 
 bool ViewStyle::WhitespaceBackgroundDrawn() const noexcept {
@@ -538,6 +546,16 @@ bool ViewStyle::ElementAllowsTranslucent(int element) const {
 
 void ViewStyle::ResetElement(int element) {
 	elementColours.erase(element);
+}
+
+void ViewStyle::SetElementRGB(int element, int rgb) {
+	const ColourAlpha current = ElementColour(element).value_or(ColourAlpha(0, 0, 0, 0));
+	elementColours[element] = ColourAlpha(ColourAlpha(rgb), current.GetAlpha());
+}
+
+void ViewStyle::SetElementAlpha(int element, int alpha) {
+	const ColourAlpha current = ElementColour(element).value_or(ColourAlpha(0, 0, 0, 0));
+	elementColours[element] = ColourAlpha(current, std::min(alpha, 0xff));
 }
 
 bool ViewStyle::ElementIsSet(int element) const {
