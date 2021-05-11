@@ -687,6 +687,7 @@ val SC_ELEMENT_SELECTION_NO_FOCUS_BACK=17
 val SC_ELEMENT_CARET=40
 val SC_ELEMENT_CARET_ADDITIONAL=41
 val SC_ELEMENT_CARET_SECONDARY=42
+val SC_ELEMENT_CARET_LINE_BACK=50
 
 # Set the colour of an element. Translucency (alpha) may or may not be significant
 # and this may depend on the platform. The alpha byte should commonly be 0xff for opaque.
@@ -735,6 +736,12 @@ get Layer GetSelectionLayer=2762(,)
 
 # Set the layer for drawing selections: either opaquely on base layer or translucently over text
 set void SetSelectionLayer=2763(Layer layer,)
+
+# Get the layer of the background of the line containing the caret.
+get Layer GetCaretLineLayer=2764(,)
+
+# Set the layer of the background of the line containing the caret.
+set void SetCaretLineLayer=2765(Layer layer,)
 
 # Set the foreground colour of the caret.
 set void SetCaretFore=2069(colour fore,)

@@ -73,14 +73,10 @@ struct SelectionAppearance {
 };
 
 struct CaretLineAppearance {
-	// Colour of caret line
-	ColourAlpha background;
-	// Whether to show the caret line
-	bool show;
+	// Whether to draw on base layer or over text
+	Layer layer;
 	// Also show when non-focused
 	bool alwaysShow;
-	// Translucency.  SC_ALPHA_NOALPHA: draw selection background beneath text
-	int alpha;
 	// Non-0: draw a rectangle around line instead of filling line. Value is pixel width of frame
 	int frame;
 };
@@ -222,7 +218,7 @@ public:
 	bool ValidStyle(size_t styleIndex) const noexcept;
 	void CalcLargestMarkerHeight() noexcept;
 	int GetFrameWidth() const noexcept;
-	bool IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const noexcept;
+	bool IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const;
 	std::optional<ColourAlpha> Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
 	bool SelectionBackgroundDrawn() const noexcept;
 	bool SelectionTextDrawn() const;

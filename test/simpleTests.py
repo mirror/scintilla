@@ -1933,50 +1933,119 @@ class TestElements(unittest.TestCase):
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
 		self.testColourAlpha = 0x18171615
+		self.opaque = 0xff000000
+		self.dropAlpha = 0x00ffffff
 
 	def tearDown(self):
 		pass
+		
+	def ElementColour(self, element):
+		# & 0xffffffff prevents sign extension issues
+		return self.ed.GetElementColour(element) & 0xffffffff
+
+	def RestoreCaretLine(self):
+		self.ed.CaretLineLayer = 0
+		self.ed.CaretLineFrame = 0
+		self.ed.ResetElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK)
+		self.ed.CaretLineVisibleAlways = False
 
 	def testIsSet(self):
-		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_SELECTION_TEXT), 0)
+		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_SELECTION_TEXT))
 
 	def testAllowsTranslucent(self):
-		self.assertEquals(self.ed.GetElementAllowsTranslucent(self.ed.SC_ELEMENT_LIST), 0)
-		self.assertEquals(self.ed.GetElementAllowsTranslucent(self.ed.SC_ELEMENT_SELECTION_TEXT), 1)
+		self.assertFalse(self.ed.GetElementAllowsTranslucent(self.ed.SC_ELEMENT_LIST))
+		self.assertTrue(self.ed.GetElementAllowsTranslucent(self.ed.SC_ELEMENT_SELECTION_TEXT))
 
 	def testChanging(self):
 		self.ed.SetElementColour(self.ed.SC_ELEMENT_LIST_BACK, self.testColourAlpha)
-		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_LIST_BACK), self.testColourAlpha)
-		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST_BACK), 1)
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_LIST_BACK), self.testColourAlpha)
+		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST_BACK))
 
 	def testReset(self):
 		self.ed.SetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT, self.testColourAlpha)
-		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), self.testColourAlpha)
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), self.testColourAlpha)
 		self.ed.ResetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT)
-		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), 0)
-		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), 0)
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), 0)
+		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT))
 
 	def testBaseColour(self):
 		if sys.platform == "win32":
 			# SC_ELEMENT_LIST* base colours only currently implemented on Win32
-			opaque = 0xff000000
-			dropAlpha = 0x00ffffff
 			text = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST)
 			back = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST_BACK)
-			self.assertEquals(text & opaque, opaque)
-			self.assertEquals(back & opaque, opaque)
-			self.assertNotEquals(text & dropAlpha, back & dropAlpha)
+			self.assertEquals(text & self.opaque, self.opaque)
+			self.assertEquals(back & self.opaque, self.opaque)
+			self.assertNotEquals(text & self.dropAlpha, back & self.dropAlpha)
 			selText = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST_SELECTED)
 			selBack = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST_SELECTED_BACK)
-			self.assertEquals(selText & opaque, opaque)
-			self.assertEquals(selBack & opaque, opaque)
-			self.assertNotEquals(selText & dropAlpha, selBack & dropAlpha)
+			self.assertEquals(selText & self.opaque, self.opaque)
+			self.assertEquals(selBack & self.opaque, self.opaque)
+			self.assertNotEquals(selText & self.dropAlpha, selBack & self.dropAlpha)
 
 	def testSelectionLayer(self):
 		self.ed.SelectionLayer = self.ed.SC_LAYER_OVER_TEXT
 		self.assertEquals(self.ed.SelectionLayer, self.ed.SC_LAYER_OVER_TEXT)
 		self.ed.SelectionLayer = self.ed.SC_LAYER_BASE
 		self.assertEquals(self.ed.SelectionLayer, self.ed.SC_LAYER_BASE)
+		
+	def testCaretLine(self):
+		# Newer Layer / ElementColour API
+		self.assertEquals(self.ed.CaretLineLayer, 0)
+		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
+		self.assertEquals(self.ed.CaretLineFrame, 0)
+		self.assertFalse(self.ed.CaretLineVisibleAlways)
+		
+		self.ed.CaretLineLayer = 10
+		self.assertEquals(self.ed.CaretLineLayer, 10)
+		self.ed.CaretLineFrame = 2
+		self.assertEquals(self.ed.CaretLineFrame, 2)
+		self.ed.CaretLineVisibleAlways = True
+		self.assertTrue(self.ed.CaretLineVisibleAlways)
+		self.ed.SetElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK, self.testColourAlpha)
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK), self.testColourAlpha)
+		
+		self.RestoreCaretLine()
+
+	def testCaretLineLayerDiscouraged(self):
+		# Check old discouraged APIs
+		# This is s bit tricky as there is no clean mapping: parts of the old state are distributed to
+		# sometimes-multiple parts of the new state.
+		backColour = 0x102030
+		backColourOpaque = backColour | self.opaque
+		self.assertEquals(self.ed.CaretLineVisible, 0)
+		self.ed.CaretLineVisible = 1
+		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
+		self.assertEquals(self.ed.CaretLineVisible, 1)
+		self.ed.CaretLineBack = backColour
+		self.assertEquals(self.ed.CaretLineBack, backColour)
+		# Check with newer API
+		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK), backColourOpaque)
+		self.assertEquals(self.ed.CaretLineLayer, 0)
+
+		alpha = 0x7f
+		self.ed.CaretLineBackAlpha = alpha
+		self.assertEquals(self.ed.CaretLineBackAlpha, alpha)
+		backColourTranslucent = backColour | (alpha << 24)
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK), backColourTranslucent)
+		self.assertEquals(self.ed.CaretLineLayer, 10)
+		
+		self.ed.CaretLineBackAlpha = 0x100
+		self.assertEquals(self.ed.CaretLineBackAlpha, 0x100)
+		self.assertEquals(self.ed.CaretLineLayer, 0)	# SC_ALPHA_NOALPHA moved to base layer
+		
+		self.RestoreCaretLine()
+		
+		# Try other orders
+
+		self.ed.CaretLineBackAlpha = 0x100
+		self.assertEquals(self.ed.CaretLineBackAlpha, 0x100)
+		self.assertEquals(self.ed.CaretLineLayer, 0)	# SC_ALPHA_NOALPHA moved to base layer
+		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
+		self.ed.CaretLineVisible = 0
+		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
+
+		self.RestoreCaretLine()
 
 class TestIndices(unittest.TestCase):
 	def setUp(self):

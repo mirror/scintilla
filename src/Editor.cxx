@@ -7248,10 +7248,18 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->GetMaxLineState();
 
 	case SCI_GETCARETLINEVISIBLE:
-		return vs.caretLine.show;
+		return vs.ElementColour(SC_ELEMENT_CARET_LINE_BACK) ? 1 : 0;
 	case SCI_SETCARETLINEVISIBLE:
-		vs.caretLine.show = wParam != 0;
-		InvalidateStyleRedraw();
+		if (wParam) {
+			if (!vs.elementColours.count(SC_ELEMENT_CARET_LINE_BACK)) {
+				vs.elementColours[SC_ELEMENT_CARET_LINE_BACK] = ColourAlpha(0xFF, 0xFF, 0);
+				InvalidateStyleRedraw();
+			}
+		} else {
+			if (vs.ResetElement(SC_ELEMENT_CARET_LINE_BACK)) {
+				InvalidateStyleRedraw();
+			}
+		}
 		break;
 	case SCI_GETCARETLINEVISIBLEALWAYS:
 		return vs.caretLine.alwaysShow;
@@ -7267,16 +7275,38 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 	case SCI_GETCARETLINEBACK:
-		return vs.caretLine.background.OpaqueRGB();
+		if (vs.ElementColour(SC_ELEMENT_CARET_LINE_BACK))
+			return vs.ElementColour(SC_ELEMENT_CARET_LINE_BACK)->OpaqueRGB();
+		else
+			return 0;
+
 	case SCI_SETCARETLINEBACK:
-		vs.caretLine.background = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.SetElementRGB(SC_ELEMENT_CARET_LINE_BACK, static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
+
+	case SCI_GETCARETLINELAYER:
+		return static_cast<sptr_t>(vs.caretLine.layer);
+
+	case SCI_SETCARETLINELAYER:
+		if (vs.caretLine.layer != static_cast<Layer>(wParam)) {
+			vs.caretLine.layer = static_cast<Layer>(wParam);
+			UpdateBaseElements();
+			InvalidateStyleRedraw();
+		}
+		break;
+
 	case SCI_GETCARETLINEBACKALPHA:
-		return vs.caretLine.alpha;
-	case SCI_SETCARETLINEBACKALPHA:
-		vs.caretLine.alpha = static_cast<int>(wParam);
-		InvalidateStyleRedraw();
+		if (vs.caretLine.layer == Layer::base)
+			return SC_ALPHA_NOALPHA;
+		return vs.ElementColour(SC_ELEMENT_CARET_LINE_BACK).value_or(ColourAlpha()).GetAlpha();
+
+	case SCI_SETCARETLINEBACKALPHA: {
+			const Layer layerNew = (wParam == SC_ALPHA_NOALPHA) ? Layer::base : Layer::over;
+			vs.caretLine.layer = layerNew;
+			vs.SetElementAlpha(SC_ELEMENT_CARET_LINE_BACK, static_cast<int>(wParam));
+			InvalidateStyleRedraw();
+		}
 		break;
 
 		// Folding messages
@@ -7441,7 +7471,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETSELALPHA: {
-			Layer layerNew = (wParam == SC_ALPHA_NOALPHA) ? Layer::base : Layer::over;
+			const Layer layerNew = (wParam == SC_ALPHA_NOALPHA) ? Layer::base : Layer::over;
 			if (vs.selection.layer != layerNew) {
 			    vs.selection.layer = layerNew;
 			    UpdateBaseElements();

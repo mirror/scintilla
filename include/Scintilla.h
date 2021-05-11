@@ -284,6 +284,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_ELEMENT_CARET 40
 #define SC_ELEMENT_CARET_ADDITIONAL 41
 #define SC_ELEMENT_CARET_SECONDARY 42
+#define SC_ELEMENT_CARET_LINE_BACK 50
 #define SCI_SETELEMENTCOLOUR 2753
 #define SCI_GETELEMENTCOLOUR 2754
 #define SCI_RESETELEMENTCOLOUR 2755
@@ -300,6 +301,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_LAYER_OVER_TEXT 10
 #define SCI_GETSELECTIONLAYER 2762
 #define SCI_SETSELECTIONLAYER 2763
+#define SCI_GETCARETLINELAYER 2764
+#define SCI_SETCARETLINELAYER 2765
 #define SCI_SETCARETFORE 2069
 #define SCI_ASSIGNCMDKEY 2070
 #define SCI_CLEARCMDKEY 2071

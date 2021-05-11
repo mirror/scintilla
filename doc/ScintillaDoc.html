@@ -3408,6 +3408,13 @@ struct Sci_TextToFind {
            <td>All</td>
            <td>Colour of carets when another window has focus</td>
          </tr>
+         <tr>
+           <th align="left"><code>SC_ELEMENT_CARET_LINE_BACK</code></th>
+           <td>50</td>
+           <td>Translucent</td>
+           <td>All</td>
+           <td>Colour of caret line background</td>
+         </tr>
        </tbody>
      </table>
 
@@ -3454,12 +3461,15 @@ struct Sci_TextToFind {
     <a class="element" href="#SC_ELEMENT_SELECTION_NO_FOCUS_TEXT">SC_ELEMENT_SELECTION_NO_FOCUS_TEXT : colouralpha</a><br />
     <a class="element" href="#SC_ELEMENT_SELECTION_NO_FOCUS_BACK">SC_ELEMENT_SELECTION_NO_FOCUS_BACK : colouralpha</a><br />
     <br />
-    <a class="message" href="#SCI_SETCARETLINEVISIBLE">SCI_SETCARETLINEVISIBLE(bool show)</a><br />
-    <a class="message" href="#SCI_GETCARETLINEVISIBLE">SCI_GETCARETLINEVISIBLE &rarr; bool</a><br />
-    <a class="message" href="#SCI_SETCARETLINEBACK">SCI_SETCARETLINEBACK(colour back)</a><br />
-    <a class="message" href="#SCI_GETCARETLINEBACK">SCI_GETCARETLINEBACK &rarr; colour</a><br />
-    <a class="message" href="#SCI_SETCARETLINEBACKALPHA">SCI_SETCARETLINEBACKALPHA(alpha alpha)</a><br />
-    <a class="message" href="#SCI_GETCARETLINEBACKALPHA">SCI_GETCARETLINEBACKALPHA &rarr; int</a><br />
+    <a class="element" href="#SC_ELEMENT_CARET_LINE_BACK">SC_ELEMENT_CARET_LINE_BACK : colouralpha</a><br />
+    <a class="message" href="#SCI_SETCARETLINELAYER">SCI_SETCARETLINELAYER(int layer)</a><br />
+    <a class="message" href="#SCI_GETCARETLINELAYER">SCI_GETCARETLINELAYER &rarr; int</a><br />
+    <a class="discouraged message" href="#SCI_SETCARETLINEVISIBLE">SCI_SETCARETLINEVISIBLE(bool show)</a><br />
+    <a class="discouraged message" href="#SCI_GETCARETLINEVISIBLE">SCI_GETCARETLINEVISIBLE &rarr; bool</a><br />
+    <a class="discouraged message" href="#SCI_SETCARETLINEBACK">SCI_SETCARETLINEBACK(colour back)</a><br />
+    <a class="discouraged message" href="#SCI_GETCARETLINEBACK">SCI_GETCARETLINEBACK &rarr; colour</a><br />
+    <a class="discouraged message" href="#SCI_SETCARETLINEBACKALPHA">SCI_SETCARETLINEBACKALPHA(alpha alpha)</a><br />
+    <a class="discouraged message" href="#SCI_GETCARETLINEBACKALPHA">SCI_GETCARETLINEBACKALPHA &rarr; int</a><br />
     <a class="message" href="#SCI_SETCARETLINEFRAME">SCI_SETCARETLINEFRAME(int width)</a><br />
     <a class="message" href="#SCI_GETCARETLINEFRAME">SCI_GETCARETLINEFRAME &rarr; int</a><br />
     <a class="message" href="#SCI_SETCARETLINEVISIBLEALWAYS">SCI_SETCARETLINEVISIBLEALWAYS(bool alwaysVisible)</a><br />
@@ -3565,14 +3575,47 @@ struct Sci_TextToFind {
      These elements define the colours to be used for selections without focus.
      </p>
 
+    <p>
+    <b id="SC_ELEMENT_CARET_LINE_BACK">SC_ELEMENT_CARET_LINE_BACK : colouralpha</b><br />
+    <b id="SCI_SETCARETLINELAYER">SCI_SETCARETLINELAYER(int layer)</b><br />
+    <b id="SCI_GETCARETLINELAYER">SCI_GETCARETLINELAYER &rarr; int</b><br />
+     You can choose to make the background colour of the line containing the caret different by setting the
+     <code>SC_ELEMENT_CARET_LINE_BACK</code> element with
+     <a class="message" href="#SCI_SETELEMENTCOLOUR"><code>SCI_SETELEMENTCOLOUR(SC_ELEMENT_CARET_LINE_BACK)</code></a>.
+    This effect may be drawn translucently over the text or opaquely on the base layer with <code>SCI_SETCARETLINELAYER</code>.
+    Background colouring has highest priority when a line has markers that would otherwise change
+    the background colour. When drawn translucently other background colours can show through.
+    The <code class="parameter">layer</code> argument can be one of:</p>
+
+    <table class="standard" summary="Layer">
+      <tbody valign="top">
+        <tr>
+          <th align="left"><code>SC_LAYER_BASE</code></th>
+
+          <td>0</td>
+
+          <td>Draw the caret line background opaquely on the base layer</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>SC_LAYER_OVER_TEXT</code></th>
+
+          <td>10</td>
+
+          <td>Draw the caret line background translucently over the text</td>
+        </tr>
+
+      </tbody>
+    </table>
+
     <p><b id="SCI_SETCARETLINEVISIBLE">SCI_SETCARETLINEVISIBLE(bool show)</b><br />
      <b id="SCI_GETCARETLINEVISIBLE">SCI_GETCARETLINEVISIBLE &rarr; bool</b><br />
      <b id="SCI_SETCARETLINEBACK">SCI_SETCARETLINEBACK(<a class="jump" href="#colour">colour</a> back)</b><br />
      <b id="SCI_GETCARETLINEBACK">SCI_GETCARETLINEBACK &rarr; colour</b><br />
      <b id="SCI_SETCARETLINEBACKALPHA">SCI_SETCARETLINEBACKALPHA(<a class="jump" href="#alpha">alpha</a> alpha)</b><br />
      <b id="SCI_GETCARETLINEBACKALPHA">SCI_GETCARETLINEBACKALPHA &rarr; int</b><br />
-     <b id="SCI_SETCARETLINEFRAME">SCI_SETCARETLINEFRAME(int width)</b><br />
-     <b id="SCI_GETCARETLINEFRAME">SCI_GETCARETLINEFRAME &rarr; int</b><br />
+     These APIs are discouraged. It is better to use the <code>SC_ELEMENT_CARET_LINE_BACK</code>
+     element mentioned in the previous section.<br />
      You can choose to make the background colour of the line containing the caret different with
     these messages. To do this, set the desired background colour with
     <code>SCI_SETCARETLINEBACK</code>, then use <code>SCI_SETCARETLINEVISIBLE(true)</code> to
@@ -3584,9 +3627,14 @@ struct Sci_TextToFind {
            through. This is done by setting the alpha (translucency) value by calling
            SCI_SETCARETLINEBACKALPHA. When the alpha is not SC_ALPHA_NOALPHA,
            the caret line is drawn after all other features so will affect the colour of all other features.
-           Alternatively <code>SCI_SETCARETLINEFRAME</code> can be used to display the caret line framed
-           instead of filling the whole background. Set width != 0 to enable this option and width = 0 to disable it.
           </p>
+
+     <p>
+     <b id="SCI_SETCARETLINEFRAME">SCI_SETCARETLINEFRAME(int width)</b><br />
+     <b id="SCI_GETCARETLINEFRAME">SCI_GETCARETLINEFRAME &rarr; int</b><br />
+           <code>SCI_SETCARETLINEFRAME</code> can be used to display the caret line framed
+           instead of filling the whole background. Set width != 0 to enable this option and width = 0 to disable it.
+     </p>
 
     <p><b id="SCI_SETCARETLINEVISIBLEALWAYS">SCI_SETCARETLINEVISIBLEALWAYS(bool alwaysVisible)</b><br />
      <b id="SCI_GETCARETLINEVISIBLEALWAYS">SCI_GETCARETLINEVISIBLEALWAYS &rarr; bool</b><br />

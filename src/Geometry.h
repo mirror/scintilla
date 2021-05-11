@@ -129,6 +129,10 @@ public:
 		return PRectangle(left + delta, top + delta, right - delta, bottom - delta);
 	}
 
+	constexpr PRectangle Inset(Point delta) const noexcept {
+		return PRectangle(left + delta.x, top + delta.y, right - delta.x, bottom - delta.y);
+	}
+
 	constexpr Point Centre() const noexcept {
 		return Point((left + right) / 2, (top + bottom) / 2);
 	}

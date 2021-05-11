@@ -243,10 +243,10 @@ void ViewStyle::Init(size_t stylesSize_) {
 	caret.style = CARETSTYLE_LINE;
 	caret.width = 1;
 
-	caretLine.background = ColourAlpha(0xff, 0xff, 0);
-	caretLine.show = false;
+	elementColours.erase(SC_ELEMENT_CARET_LINE_BACK);
+	elementAllowsTranslucent.insert(SC_ELEMENT_CARET_LINE_BACK);
 	caretLine.alwaysShow = false;
-	caretLine.alpha = SC_ALPHA_NOALPHA;
+	caretLine.layer = Layer::base;
 	caretLine.frame = 0;
 
 	someStylesProtected = false;
@@ -461,9 +461,10 @@ int ViewStyle::GetFrameWidth() const noexcept {
 	return std::clamp(caretLine.frame, 1, lineHeight / 3);
 }
 
-bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const noexcept {
-	return caretLine.frame && (caretActive || caretLine.alwaysShow) && caretLine.show &&
-		(caretLine.alpha == SC_ALPHA_NOALPHA) && lineContainsCaret;
+bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const {
+	return caretLine.frame && (caretActive || caretLine.alwaysShow) &&
+		ElementColour(SC_ELEMENT_CARET_LINE_BACK) &&
+		(caretLine.layer == Layer::base) && lineContainsCaret;
 }
 
 // See if something overrides the line background colour:  Either if caret is on the line
@@ -474,9 +475,9 @@ bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) cons
 // the colour for the highest numbered one is used.
 std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const {
 	std::optional<ColourAlpha> background;
-	if (!caretLine.frame && (caretActive || caretLine.alwaysShow) && caretLine.show &&
-		(caretLine.alpha == SC_ALPHA_NOALPHA) && lineContainsCaret) {
-		background = caretLine.background;
+	if (!caretLine.frame && (caretActive || caretLine.alwaysShow) &&
+		(caretLine.layer == Layer::base) && lineContainsCaret) {
+		background = ElementColour(SC_ELEMENT_CARET_LINE_BACK);
 	}
 	if (!background && marksOfLine) {
 		int marks = marksOfLine;

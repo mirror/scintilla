@@ -919,35 +919,35 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 		textBack, textFore);
 }
 
-static void DrawFrame(Surface *surface, ColourAlpha colour, int alpha, PRectangle rcFrame) {
-	if (alpha != SC_ALPHA_NOALPHA) {
-		surface->AlphaRectangle(rcFrame, 0, FillStroke(ColourAlpha(colour, alpha)));
-	} else {
-		surface->FillRectangleAligned(rcFrame, Fill(colour));
-	}
-}
-
 static void DrawCaretLineFramed(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine, int subLine) {
+	const std::optional<ColourAlpha> caretlineBack = vsDraw.ElementColour(SC_ELEMENT_CARET_LINE_BACK);
+	if (!caretlineBack) {
+		return;
+	}
+
+	const ColourAlpha colourFrame = (vsDraw.caretLine.layer == Layer::base) ?
+		caretlineBack->Opaque() : *caretlineBack;
+
 	const int width = vsDraw.GetFrameWidth();
-	if (subLine == 0 || ll->wrapIndent == 0 || vsDraw.caretLine.alpha != SC_ALPHA_NOALPHA) {
+
+	// Avoid double drawing the corners by removing the left and right sides when drawing top and bottom borders
+	const PRectangle rcWithoutLeftRight = rcLine.Inset(Point(width, 0.0));
+
+	if (subLine == 0 || ll->wrapIndent == 0 || vsDraw.caretLine.layer == Layer::over) {
 		// Left
-		DrawFrame(surface, vsDraw.caretLine.background, vsDraw.caretLine.alpha,
-			PRectangle(rcLine.left, rcLine.top, rcLine.left + width, rcLine.bottom));
+		surface->FillRectangleAligned(Side(rcLine, Edge::left, width), colourFrame);
 	}
 	if (subLine == 0) {
 		// Top
-		DrawFrame(surface, vsDraw.caretLine.background, vsDraw.caretLine.alpha,
-			PRectangle(rcLine.left + width, rcLine.top, rcLine.right - width, rcLine.top + width));
+		surface->FillRectangleAligned(Side(rcWithoutLeftRight, Edge::top, width), colourFrame);
 	}
-	if (subLine == ll->lines - 1 || vsDraw.caretLine.alpha != SC_ALPHA_NOALPHA) {
+	if (subLine == ll->lines - 1 || vsDraw.caretLine.layer == Layer::over) {
 		// Right
-		DrawFrame(surface, vsDraw.caretLine.background, vsDraw.caretLine.alpha,
-			PRectangle(rcLine.right - width, rcLine.top, rcLine.right, rcLine.bottom));
+		surface->FillRectangleAligned(Side(rcLine, Edge::right, width), colourFrame);
 	}
 	if (subLine == ll->lines - 1) {
 		// Bottom
-		DrawFrame(surface, vsDraw.caretLine.background, vsDraw.caretLine.alpha,
-			PRectangle(rcLine.left + width, rcLine.bottom - width, rcLine.right - width, rcLine.bottom));
+		surface->FillRectangleAligned(Side(rcWithoutLeftRight, Edge::bottom, width), colourFrame);
 	}
 }
 
@@ -1082,10 +1082,9 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			drawWrapMarkEnd = ll->LineStart(subLine + 1) != 0;
 		}
 		if (vsDraw.IsLineFrameOpaque(model.caret.active, ll->containsCaret)) {
-			const int width = vsDraw.GetFrameWidth();
 			// Draw right of frame under marker
-			DrawFrame(surface, vsDraw.caretLine.background, vsDraw.caretLine.alpha,
-				PRectangle(rcLine.right - width, rcLine.top, rcLine.right, rcLine.bottom));
+			surface->FillRectangleAligned(Side(rcLine, Edge::right, vsDraw.GetFrameWidth()),
+				vsDraw.ElementColour(SC_ELEMENT_CARET_LINE_BACK)->Opaque());
 		}
 	}
 
@@ -1667,10 +1666,9 @@ static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, c
 		vsDraw.styles[STYLE_DEFAULT].back));
 
 	if (vsDraw.IsLineFrameOpaque(caretActive, ll->containsCaret)) {
-		const int width = vsDraw.GetFrameWidth();
 		// Draw left of frame under marker
-		DrawFrame(surface, vsDraw.caretLine.background, vsDraw.caretLine.alpha,
-			PRectangle(rcLine.left, rcLine.top, rcLine.left + width, rcLine.bottom));
+		surface->FillRectangleAligned(Side(rcLine, Edge::left, vsDraw.GetFrameWidth()),
+			vsDraw.ElementColour(SC_ELEMENT_CARET_LINE_BACK)->Opaque());
 	}
 
 	if (vsDraw.wrap.visualFlags & SC_WRAPVISUALFLAG_START) {
@@ -1872,12 +1870,12 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 // Draw any translucent whole line states
 static void DrawTranslucentLineState(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 	Sci::Line line, PRectangle rcLine, int subLine) {
-	if ((model.caret.active || vsDraw.caretLine.alwaysShow) && vsDraw.caretLine.show && ll->containsCaret &&
-		vsDraw.caretLine.alpha != SC_ALPHA_NOALPHA) {
+	if ((model.caret.active || vsDraw.caretLine.alwaysShow) && vsDraw.ElementColour(SC_ELEMENT_CARET_LINE_BACK) && ll->containsCaret &&
+		vsDraw.caretLine.layer == Layer::over) {
 		if (vsDraw.caretLine.frame) {
 			DrawCaretLineFramed(surface, vsDraw, ll, rcLine, subLine);
 		} else {
-			SimpleAlphaRectangle(surface, rcLine, vsDraw.caretLine.background, vsDraw.caretLine.alpha);
+			surface->FillRectangleAligned(rcLine, *vsDraw.ElementColour(SC_ELEMENT_CARET_LINE_BACK));
 		}
 	}
 	const int marksOfLine = model.pdoc->GetMark(line);
@@ -2526,7 +2524,6 @@ Sci::Position EditView::FormatRange(bool draw, const Sci_RangeToFormat *pfr, Sur
 	vsPrint.elementBaseColours.clear();
 	vsPrint.whitespaceColours.back.reset();
 	vsPrint.whitespaceColours.fore.reset();
-	vsPrint.caretLine.show = false;
 	vsPrint.caretLine.alwaysShow = false;
 	// Don't highlight matching braces using indicators
 	vsPrint.braceHighlightIndicatorSet = false;
