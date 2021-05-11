@@ -560,8 +560,20 @@ bool ViewStyle::ElementAllowsTranslucent(int element) const {
 	return elementAllowsTranslucent.count(element) > 0;
 }
 
-void ViewStyle::ResetElement(int element) {
+bool ViewStyle::ResetElement(int element) {
+	ElementMap::const_iterator search = elementColours.find(element);
+	const bool changed = (search != elementColours.end()) && (search->second.has_value());
 	elementColours.erase(element);
+	return changed;
+}
+
+bool ViewStyle::SetElementColour(int element, ColourAlpha colour) {
+	ElementMap::const_iterator search = elementColours.find(element);
+	const bool changed =
+		(search == elementColours.end()) ||
+		(search->second.has_value() && !(*search->second == colour));
+	elementColours[element] = colour;
+	return changed;
 }
 
 void ViewStyle::SetElementRGB(int element, int rgb) {
@@ -583,17 +595,12 @@ bool ViewStyle::ElementIsSet(int element) const {
 }
 
 bool ViewStyle::SetElementBase(int element, ColourAlpha colour) {
-	bool different = false;
 	ElementMap::const_iterator search = elementBaseColours.find(element);
-	if (search == elementBaseColours.end()) {
-		different = true;
-	} else {
-		if (search->second.has_value() && !(*search->second == colour)) {
-			different = true;
-		}
-	}
+	const bool changed =
+		(search == elementBaseColours.end()) ||
+		(search->second.has_value() && !(*search->second == colour));
 	elementBaseColours[element] = colour;
-	return different;
+	return changed;
 }
 
 bool ViewStyle::SetWrapState(int wrapState_) noexcept {

@@ -233,7 +233,8 @@ public:
 
 	std::optional<ColourAlpha> ElementColour(int element) const;
 	bool ElementAllowsTranslucent(int element) const;
-	void ResetElement(int element);
+	bool ResetElement(int element);
+	bool SetElementColour(int element, ColourAlpha colour);
 	void SetElementRGB(int element, int rgb);
 	void SetElementAlpha(int element, int alpha);
 	bool ElementIsSet(int element) const;

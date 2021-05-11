@@ -7196,14 +7196,18 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETELEMENTCOLOUR:
-		vs.elementColours[static_cast<int>(wParam)] = ColourAlpha(static_cast<int>(lParam));
+		if (vs.SetElementColour(static_cast<int>(wParam), ColourAlpha(static_cast<int>(lParam)))) {
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_GETELEMENTCOLOUR:
 		return vs.ElementColour(static_cast<int>(wParam)).value_or(ColourAlpha()).AsInteger();
 
 	case SCI_RESETELEMENTCOLOUR:
-		vs.ResetElement(static_cast<int>(wParam));
+		if (vs.ResetElement(static_cast<int>(wParam))) {
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_GETELEMENTISSET:
