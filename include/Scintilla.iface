@@ -705,6 +705,9 @@ get bool GetElementIsSet=2756(Element element,)
 # Get whether an element supports translucency.
 get bool GetElementAllowsTranslucent=2757(Element element,)
 
+# Get the colour of an element.
+get colouralpha GetElementBaseColour=2758(Element element,)
+
 # Set the foreground colour of the main and additional selections and whether to use this setting.
 fun void SetSelFore=2067(bool useSetting, colour fore)
 

@@ -1938,7 +1938,7 @@ class TestElements(unittest.TestCase):
 		pass
 
 	def testIsSet(self):
-		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST), 0)
+		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_SELECTION_TEXT), 0)
 
 	def testAllowsTranslucent(self):
 		self.assertEquals(self.ed.GetElementAllowsTranslucent(self.ed.SC_ELEMENT_LIST), 0)
@@ -1950,11 +1950,27 @@ class TestElements(unittest.TestCase):
 		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST_BACK), 1)
 
 	def testReset(self):
-		self.ed.SetElementColour(self.ed.SC_ELEMENT_LIST_BACK, self.testColourAlpha)
-		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_LIST_BACK), self.testColourAlpha)
-		self.ed.ResetElementColour(self.ed.SC_ELEMENT_LIST_BACK)
-		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_LIST_BACK), 0)
-		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST_BACK), 0)
+		self.ed.SetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT, self.testColourAlpha)
+		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), self.testColourAlpha)
+		self.ed.ResetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT)
+		self.assertEquals(self.ed.GetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), 0)
+		self.assertEquals(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), 0)
+
+	def testBaseColour(self):
+		if sys.platform == "win32":
+			# SC_ELEMENT_LIST* base colours only currently implemented on Win32
+			opaque = 0xff000000
+			dropAlpha = 0x00ffffff
+			text = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST)
+			back = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST_BACK)
+			self.assertEquals(text & opaque, opaque)
+			self.assertEquals(back & opaque, opaque)
+			self.assertNotEquals(text & dropAlpha, back & dropAlpha)
+			selText = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST_SELECTED)
+			selBack = self.ed.GetElementBaseColour(self.ed.SC_ELEMENT_LIST_SELECTED_BACK)
+			self.assertEquals(selText & opaque, opaque)
+			self.assertEquals(selBack & opaque, opaque)
+			self.assertNotEquals(selText & dropAlpha, selBack & dropAlpha)
 
 class TestIndices(unittest.TestCase):
 	def setUp(self):

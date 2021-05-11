@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 10 May 2021 NH</p>
+    <p>Last edited 11 May 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -3247,6 +3247,7 @@ struct Sci_TextToFind {
     <a class="message" href="#SCI_RESETELEMENTCOLOUR">SCI_RESETELEMENTCOLOUR(int element)</a><br />
     <a class="message" href="#SCI_GETELEMENTISSET">SCI_GETELEMENTISSET(int element) &rarr; bool</a><br />
     <a class="message" href="#SCI_GETELEMENTALLOWSTRANSLUCENT">SCI_GETELEMENTALLOWSTRANSLUCENT(int element) &rarr; bool</a><br />
+    <a class="message" href="#SCI_GETELEMENTBASECOLOUR">SCI_GETELEMENTBASECOLOUR(int element) &rarr; colouralpha</a><br />
     </code>
 
     <p>
@@ -3275,6 +3276,18 @@ struct Sci_TextToFind {
      and newer versions of Scintilla may implement translucency for elements that did not previously support it. 
      </p>
      
+    <p>
+    <b id="SCI_GETELEMENTBASECOLOUR">SCI_GETELEMENTBASECOLOUR(int element) &rarr; colouralpha</b><br />
+     Returns the default colour of an element.
+     This may be a value defined by Scintilla or it may be derived from the operating system or platform.
+     Which values are set from the operating system may differ between operating systems and operating system versions. 
+     When undefined the return value is 0 which is equivalent to completely transparent black.
+     These colours may be useful when defining styles with similarities such as synthesizing dark
+     mode styles that use the same colours as the system</p>
+     <p>On Win32, autocompletion list colours like <code>SC_ELEMENT_LIST</code> are currently available.
+     On Cocoa, selection background colours like <code>SC_ELEMENT_SELECTION_BACK</code> are currently available.
+     </p>
+
      <table class="standard" summary="Elements">
       <thead align="left">
         <tr>
