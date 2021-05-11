@@ -1972,6 +1972,12 @@ class TestElements(unittest.TestCase):
 			self.assertEquals(selBack & opaque, opaque)
 			self.assertNotEquals(selText & dropAlpha, selBack & dropAlpha)
 
+	def testSelectionLayer(self):
+		self.ed.SelectionLayer = self.ed.SC_LAYER_OVER_TEXT
+		self.assertEquals(self.ed.SelectionLayer, self.ed.SC_LAYER_OVER_TEXT)
+		self.ed.SelectionLayer = self.ed.SC_LAYER_BASE
+		self.assertEquals(self.ed.SelectionLayer, self.ed.SC_LAYER_BASE)
+
 class TestIndices(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame
