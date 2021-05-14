@@ -7518,8 +7518,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETWHITESPACEBACK:
-		vs.whitespaceBack = OptionalColour(wParam, lParam);
-		InvalidateStyleRedraw();
+		if (vs.SetElementColourOptional(SC_ELEMENT_WHITE_SPACE_BACK, wParam, lParam)) {
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_SETSELECTIONLAYER:

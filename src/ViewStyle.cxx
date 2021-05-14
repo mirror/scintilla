@@ -108,7 +108,6 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 	textStart = source.textStart;
 	zoomLevel = source.zoomLevel;
 	viewWhitespace = source.viewWhitespace;
-	whitespaceBack = source.whitespaceBack;
 	tabDrawMode = source.tabDrawMode;
 	whitespaceSize = source.whitespaceSize;
 	viewIndentationGuides = source.viewIndentationGuides;
@@ -265,7 +264,6 @@ void ViewStyle::Init(size_t stylesSize_) {
 	textStart = marginInside ? fixedColumnWidth : leftMarginWidth;
 	zoomLevel = 0;
 	viewWhitespace = WhiteSpace::invisible;
-	whitespaceBack.reset();
 	tabDrawMode = TabDrawMode::longArrow;
 	whitespaceSize = 1;
 	elementColours.erase(SC_ELEMENT_WHITE_SPACE);
@@ -522,8 +520,8 @@ bool ViewStyle::SelectionTextDrawn() const {
 		ElementIsSet(SC_ELEMENT_SELECTION_NO_FOCUS_TEXT);
 }
 
-bool ViewStyle::WhitespaceBackgroundDrawn() const noexcept {
-	return (viewWhitespace != WhiteSpace::invisible) && (whitespaceBack);
+bool ViewStyle::WhitespaceBackgroundDrawn() const {
+	return (viewWhitespace != WhiteSpace::invisible) && (ElementIsSet(SC_ELEMENT_WHITE_SPACE_BACK));
 }
 
 bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
@@ -532,7 +530,7 @@ bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
 		viewWhitespace == WhiteSpace::visibleAlways;
 }
 
-ColourAlpha ViewStyle::WrapColour() const noexcept {
+ColourAlpha ViewStyle::WrapColour() const {
 	return ElementColour(SC_ELEMENT_WHITE_SPACE).value_or(styles[STYLE_DEFAULT].fore);
 }
 

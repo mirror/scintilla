@@ -153,7 +153,6 @@ public:
 	int textStart;	///< Starting x position of text within the view
 	int zoomLevel;
 	WhiteSpace viewWhitespace;
-	std::optional<ColourAlpha> whitespaceBack;
 	TabDrawMode tabDrawMode;
 	int whitespaceSize;
 	IndentView viewIndentationGuides;
@@ -220,8 +219,8 @@ public:
 	std::optional<ColourAlpha> Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
 	bool SelectionBackgroundDrawn() const noexcept;
 	bool SelectionTextDrawn() const;
-	bool WhitespaceBackgroundDrawn() const noexcept;
-	ColourAlpha WrapColour() const noexcept;
+	bool WhitespaceBackgroundDrawn() const;
+	ColourAlpha WrapColour() const;
 
 	void AddMultiEdge(uptr_t wParam, sptr_t lParam);
 

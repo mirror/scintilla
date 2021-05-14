@@ -1726,8 +1726,9 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 			if (ts.representation) {
 				if (ll->chars[i] == '\t') {
 					// Tab display
-					if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
-						textBack = *vsDraw.whitespaceBack;
+					if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation)) {
+						textBack = vsDraw.ElementColour(SC_ELEMENT_WHITE_SPACE_BACK)->Opaque();
+					}
 				} else {
 					// Blob display
 					inIndentation = false;
@@ -1745,7 +1746,8 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 									rcSegment.top,
 									ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
 									rcSegment.bottom);
-								surface->FillRectangleAligned(rcSpace, Fill(*vsDraw.whitespaceBack));
+								surface->FillRectangleAligned(rcSpace,
+									vsDraw.ElementColour(SC_ELEMENT_WHITE_SPACE_BACK)->Opaque());
 							}
 						} else {
 							inIndentation = false;
@@ -1972,7 +1974,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					// Tab display
 					if (phasesDraw == PhasesDraw::one) {
 						if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
-							textBack = *vsDraw.whitespaceBack;
+							textBack = vsDraw.ElementColour(SC_ELEMENT_WHITE_SPACE_BACK)->Opaque();
 						surface->FillRectangleAligned(rcSegment, Fill(textBack));
 					}
 					if (inIndentation && vsDraw.viewIndentationGuides == IndentView::real) {
@@ -2034,7 +2036,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 									const XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
 									if ((phasesDraw == PhasesDraw::one) && drawWhitespaceBackground) {
-										textBack = *vsDraw.whitespaceBack;
+										textBack = vsDraw.ElementColour(SC_ELEMENT_WHITE_SPACE_BACK)->Opaque();
 										const PRectangle rcSpace(
 											ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
 											rcSegment.top,
@@ -2514,7 +2516,6 @@ Sci::Position EditView::FormatRange(bool draw, const Sci_RangeToFormat *pfr, Sur
 	// Don't show the selection when printing
 	vsPrint.elementColours.clear();
 	vsPrint.elementBaseColours.clear();
-	vsPrint.whitespaceBack.reset();
 	vsPrint.caretLine.alwaysShow = false;
 	// Don't highlight matching braces using indicators
 	vsPrint.braceHighlightIndicatorSet = false;

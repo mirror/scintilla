@@ -288,6 +288,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_ELEMENT_CARET_SECONDARY 42
 #define SC_ELEMENT_CARET_LINE_BACK 50
 #define SC_ELEMENT_WHITE_SPACE 60
+#define SC_ELEMENT_WHITE_SPACE_BACK 61
 #define SCI_SETELEMENTCOLOUR 2753
 #define SCI_GETELEMENTCOLOUR 2754
 #define SCI_RESETELEMENTCOLOUR 2755
