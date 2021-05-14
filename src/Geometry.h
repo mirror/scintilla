@@ -167,6 +167,9 @@ PRectangle PixelAlignOutside(const PRectangle &rc, int pixelDivisions) noexcept;
 constexpr const float componentMaximum = 255.0f;
 class ColourAlpha {
 	int co;
+	constexpr static unsigned int Mixed(unsigned char a, unsigned char b, double proportion) noexcept {
+		return static_cast<unsigned int>(a + proportion * (b - a));
+	}
 public:
 	constexpr explicit ColourAlpha(int co_ = 0) noexcept : co(co_) {
 	}
@@ -241,6 +244,14 @@ public:
 		const unsigned int blue = (GetBlue() + other.GetBlue()) / 2;
 		const unsigned int alpha = (GetAlpha() + other.GetAlpha()) / 2;
 		return ColourAlpha(red, green, blue, alpha);
+	}
+
+	constexpr ColourAlpha MixedWith(ColourAlpha other, double proportion) const noexcept {
+		return ColourAlpha(
+			Mixed(GetRed(), other.GetRed(), proportion),
+			Mixed(GetGreen(), other.GetGreen(), proportion),
+			Mixed(GetBlue(), other.GetBlue(), proportion),
+			Mixed(GetAlpha(), other.GetAlpha(), proportion));
 	}
 };
 
