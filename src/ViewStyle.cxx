@@ -90,7 +90,6 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 	hotspotColours = source.hotspotColours;
 	hotspotUnderline = source.hotspotUnderline;
 
-	whitespaceColours = source.whitespaceColours;
 	controlCharSymbol = source.controlCharSymbol;
 	controlCharWidth = source.controlCharWidth;
 	selbar = source.selbar;
@@ -109,6 +108,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 	textStart = source.textStart;
 	zoomLevel = source.zoomLevel;
 	viewWhitespace = source.viewWhitespace;
+	whitespaceBack = source.whitespaceBack;
 	tabDrawMode = source.tabDrawMode;
 	whitespaceSize = source.whitespaceSize;
 	viewIndentationGuides = source.viewIndentationGuides;
@@ -223,8 +223,6 @@ void ViewStyle::Init(size_t stylesSize_) {
 	foldmarginColour.reset();
 	foldmarginHighlightColour.reset();
 
-	whitespaceColours.fore.reset();
-	whitespaceColours.back.reset();
 	controlCharSymbol = 0;	/* Draw the control characters */
 	controlCharWidth = 0;
 	selbar = Platform::Chrome();
@@ -267,8 +265,12 @@ void ViewStyle::Init(size_t stylesSize_) {
 	textStart = marginInside ? fixedColumnWidth : leftMarginWidth;
 	zoomLevel = 0;
 	viewWhitespace = WhiteSpace::invisible;
+	whitespaceBack.reset();
 	tabDrawMode = TabDrawMode::longArrow;
 	whitespaceSize = 1;
+	elementColours.erase(SC_ELEMENT_WHITE_SPACE);
+	elementAllowsTranslucent.insert(SC_ELEMENT_WHITE_SPACE);
+
 	viewIndentationGuides = IndentView::none;
 	viewEOL = false;
 	extraFontFlag = 0;
@@ -521,7 +523,7 @@ bool ViewStyle::SelectionTextDrawn() const {
 }
 
 bool ViewStyle::WhitespaceBackgroundDrawn() const noexcept {
-	return (viewWhitespace != WhiteSpace::invisible) && (whitespaceColours.back);
+	return (viewWhitespace != WhiteSpace::invisible) && (whitespaceBack);
 }
 
 bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
@@ -531,7 +533,7 @@ bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
 }
 
 ColourAlpha ViewStyle::WrapColour() const noexcept {
-	return whitespaceColours.fore.value_or(styles[STYLE_DEFAULT].fore);
+	return ElementColour(SC_ELEMENT_WHITE_SPACE).value_or(styles[STYLE_DEFAULT].fore);
 }
 
 // Insert new edge in sorted order.
@@ -579,6 +581,14 @@ bool ViewStyle::SetElementColour(int element, ColourAlpha colour) {
 		(search->second.has_value() && !(*search->second == colour));
 	elementColours[element] = colour;
 	return changed;
+}
+
+bool ViewStyle::SetElementColourOptional(int element, uptr_t wParam, sptr_t lParam) {
+	if (wParam) {
+		return SetElementColour(element, ColourAlpha::FromRGB(static_cast<int>(lParam)));
+	} else {
+		return ResetElement(element);
+	}
 }
 
 void ViewStyle::SetElementRGB(int element, int rgb) {

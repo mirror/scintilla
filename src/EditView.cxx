@@ -1727,7 +1727,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 				if (ll->chars[i] == '\t') {
 					// Tab display
 					if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
-						textBack = *vsDraw.whitespaceColours.back;
+						textBack = *vsDraw.whitespaceBack;
 				} else {
 					// Blob display
 					inIndentation = false;
@@ -1745,7 +1745,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 									rcSegment.top,
 									ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
 									rcSegment.bottom);
-								surface->FillRectangleAligned(rcSpace, Fill(*vsDraw.whitespaceColours.back));
+								surface->FillRectangleAligned(rcSpace, Fill(*vsDraw.whitespaceBack));
 							}
 						} else {
 							inIndentation = false;
@@ -1972,7 +1972,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					// Tab display
 					if (phasesDraw == PhasesDraw::one) {
 						if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
-							textBack = *vsDraw.whitespaceColours.back;
+							textBack = *vsDraw.whitespaceBack;
 						surface->FillRectangleAligned(rcSegment, Fill(textBack));
 					}
 					if (inIndentation && vsDraw.viewIndentationGuides == IndentView::real) {
@@ -1988,15 +1988,14 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					}
 					if (vsDraw.viewWhitespace != WhiteSpace::invisible) {
 						if (vsDraw.WhiteSpaceVisible(inIndentation)) {
-							if (vsDraw.whitespaceColours.fore)
-								textFore = *vsDraw.whitespaceColours.fore;
 							const PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
 							const int segmentTop = static_cast<int>(rcSegment.top) + vsDraw.lineHeight / 2;
+							const ColourAlpha whiteSpaceFore = vsDraw.ElementColour(SC_ELEMENT_WHITE_SPACE).value_or(textFore);
 							if (!customDrawTabArrow)
-								DrawTabArrow(surface, rcTab, segmentTop, vsDraw, Stroke(textFore, 1.0f));
+								DrawTabArrow(surface, rcTab, segmentTop, vsDraw, Stroke(whiteSpaceFore, 1.0f));
 							else
-								customDrawTabArrow(surface, rcTab, segmentTop, vsDraw, Stroke(textFore, 1.0f));
+								customDrawTabArrow(surface, rcTab, segmentTop, vsDraw, Stroke(whiteSpaceFore, 1.0f));
 						}
 					}
 				} else {
@@ -2032,12 +2031,10 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
 							if (vsDraw.viewWhitespace != WhiteSpace::invisible) {
-								if (vsDraw.whitespaceColours.fore)
-									textFore = *vsDraw.whitespaceColours.fore;
 								if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 									const XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
 									if ((phasesDraw == PhasesDraw::one) && drawWhitespaceBackground) {
-										textBack = *vsDraw.whitespaceColours.back;
+										textBack = *vsDraw.whitespaceBack;
 										const PRectangle rcSpace(
 											ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
 											rcSegment.top,
@@ -2050,7 +2047,8 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 										rcSegment.top + vsDraw.lineHeight / 2, 0.0f, 0.0f);
 									rcDot.right = rcDot.left + vsDraw.whitespaceSize;
 									rcDot.bottom = rcDot.top + vsDraw.whitespaceSize;
-									surface->FillRectangleAligned(rcDot, Fill(textFore));
+									const ColourAlpha whiteSpaceFore = vsDraw.ElementColour(SC_ELEMENT_WHITE_SPACE).value_or(textFore);
+									surface->FillRectangleAligned(rcDot, Fill(whiteSpaceFore));
 								}
 							}
 							if (inIndentation && vsDraw.viewIndentationGuides == IndentView::real) {
@@ -2516,8 +2514,7 @@ Sci::Position EditView::FormatRange(bool draw, const Sci_RangeToFormat *pfr, Sur
 	// Don't show the selection when printing
 	vsPrint.elementColours.clear();
 	vsPrint.elementBaseColours.clear();
-	vsPrint.whitespaceColours.back.reset();
-	vsPrint.whitespaceColours.fore.reset();
+	vsPrint.whitespaceBack.reset();
 	vsPrint.caretLine.alwaysShow = false;
 	// Don't highlight matching braces using indicators
 	vsPrint.braceHighlightIndicatorSet = false;

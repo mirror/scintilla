@@ -134,7 +134,6 @@ public:
 
 	SelectionAppearance selection;
 
-	ForeBackColours whitespaceColours;
 	int controlCharSymbol;
 	XYPOSITION controlCharWidth;
 	ColourAlpha selbar;
@@ -154,6 +153,7 @@ public:
 	int textStart;	///< Starting x position of text within the view
 	int zoomLevel;
 	WhiteSpace viewWhitespace;
+	std::optional<ColourAlpha> whitespaceBack;
 	TabDrawMode tabDrawMode;
 	int whitespaceSize;
 	IndentView viewIndentationGuides;
@@ -229,6 +229,7 @@ public:
 	bool ElementAllowsTranslucent(int element) const;
 	bool ResetElement(int element);
 	bool SetElementColour(int element, ColourAlpha colour);
+	bool SetElementColourOptional(int element, uptr_t wParam, sptr_t lParam);
 	void SetElementRGB(int element, int rgb);
 	void SetElementAlpha(int element, int alpha);
 	bool ElementIsSet(int element) const;

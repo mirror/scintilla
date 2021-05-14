@@ -7512,12 +7512,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETWHITESPACEFORE:
-		vs.whitespaceColours.fore = OptionalColour(wParam, lParam);
-		InvalidateStyleRedraw();
+		if (vs.SetElementColourOptional(SC_ELEMENT_WHITE_SPACE, wParam, lParam)) {
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_SETWHITESPACEBACK:
-		vs.whitespaceColours.back = OptionalColour(wParam, lParam);
+		vs.whitespaceBack = OptionalColour(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
