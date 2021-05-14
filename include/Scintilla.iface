@@ -696,6 +696,8 @@ val SC_ELEMENT_CARET_SECONDARY=42
 val SC_ELEMENT_CARET_LINE_BACK=50
 val SC_ELEMENT_WHITE_SPACE=60
 val SC_ELEMENT_WHITE_SPACE_BACK=61
+val SC_ELEMENT_HOT_SPOT_ACTIVE=70
+val SC_ELEMENT_HOT_SPOT_ACTIVE_BACK=71
 
 # Set the colour of an element. Translucency (alpha) may or may not be significant
 # and this may depend on the platform. The alpha byte should commonly be 0xff for opaque.

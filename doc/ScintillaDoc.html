@@ -3457,6 +3457,22 @@ struct Sci_TextToFind {
            <td></td>
            <td>Colour of visible white space background</td>
          </tr>
+         <tr class="section">
+           <th align="left"><code>SC_ELEMENT_HOT_SPOT_ACTIVE</code></th>
+           <td>70</td>
+           <td>Translucent</td>
+           <td>All</td>
+           <td></td>
+           <td>Text colour of active hot spot</td>
+         </tr>
+         <tr>
+           <th align="left"><code>SC_ELEMENT_HOT_SPOT_ACTIVE_BACK</code></th>
+           <td>71</td>
+           <td>Opaque</td>
+           <td>All</td>
+           <td></td>
+           <td>Background colour of active hot spot</td>
+         </tr>
        </tbody>
      </table>
 
@@ -3527,10 +3543,12 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETCARETSTICKY">SCI_GETCARETSTICKY &rarr; int</a><br />
      <a class="message" href="#SCI_TOGGLECARETSTICKY">SCI_TOGGLECARETSTICKY</a><br />
     <br />
-    <a class="message" href="#SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useSetting, colour fore)</a><br />
-    <a class="message" href="#SCI_GETHOTSPOTACTIVEFORE">SCI_GETHOTSPOTACTIVEFORE &rarr; colour</a><br />
-    <a class="message" href="#SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK(bool useSetting, colour back)</a><br />
-    <a class="message" href="#SCI_GETHOTSPOTACTIVEBACK">SCI_GETHOTSPOTACTIVEBACK &rarr; colour</a><br />
+    <a class="element" href="#SC_ELEMENT_HOT_SPOT_ACTIVE">SC_ELEMENT_HOT_SPOT_ACTIVE : colouralpha</a><br />
+    <a class="discouraged message" href="#SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useSetting, colour fore)</a><br />
+    <a class="discouraged message" href="#SCI_GETHOTSPOTACTIVEFORE">SCI_GETHOTSPOTACTIVEFORE &rarr; colour</a><br />
+    <a class="element" href="#SC_ELEMENT_HOT_SPOT_ACTIVE_BACK">SC_ELEMENT_HOT_SPOT_ACTIVE_BACK : colouralpha</a><br />
+    <a class="discouraged message" href="#SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK(bool useSetting, colour back)</a><br />
+    <a class="discouraged message" href="#SCI_GETHOTSPOTACTIVEBACK">SCI_GETHOTSPOTACTIVEBACK &rarr; colour</a><br />
     <a class="message" href="#SCI_SETHOTSPOTACTIVEUNDERLINE">SCI_SETHOTSPOTACTIVEUNDERLINE(bool underline)</a><br />
     <a class="message" href="#SCI_GETHOTSPOTACTIVEUNDERLINE">SCI_GETHOTSPOTACTIVEUNDERLINE &rarr; bool</a><br />
     <a class="message" href="#SCI_SETHOTSPOTSINGLELINE">SCI_SETHOTSPOTSINGLELINE(bool singleLine)</a><br />
@@ -3767,8 +3785,11 @@ struct Sci_TextToFind {
     <p><code>SCI_TOGGLECARETSTICKY</code> switches from <code>SC_CARETSTICKY_ON</code> and <code>SC_CARETSTICKY_WHITESPACE</code>
     to <code>SC_CARETSTICKY_OFF</code> and from <code>SC_CARETSTICKY_OFF</code> to <code>SC_CARETSTICKY_ON</code>.</p>
 
-    <p><b id="SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useSetting, <a class="jump" href="#colour">colour</a> fore)</b><br />
+    <p>
+    <b id="SC_ELEMENT_HOT_SPOT_ACTIVE">SC_ELEMENT_HOT_SPOT_ACTIVE : colouralpha</b><br />
+    <b id="SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useSetting, <a class="jump" href="#colour">colour</a> fore)</b><br />
     <b id="SCI_GETHOTSPOTACTIVEFORE">SCI_GETHOTSPOTACTIVEFORE &rarr; colour</b><br />
+    <b id="SC_ELEMENT_HOT_SPOT_ACTIVE_BACK">SC_ELEMENT_HOT_SPOT_ACTIVE_BACK : colouralpha</b><br />
     <b id="SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK(bool useSetting,
     <a class="jump" href="#colour">colour</a> back)</b><br />
     <b id="SCI_GETHOTSPOTACTIVEBACK">SCI_GETHOTSPOTACTIVEBACK &rarr; colour</b><br />

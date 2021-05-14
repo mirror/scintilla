@@ -871,8 +871,8 @@ static ColourAlpha TextBackground(const EditModel &model, const ViewStyle &vsDra
 		(i >= ll->edgeColumn) &&
 		(i < ll->numCharsBeforeEOL))
 		return vsDraw.theEdge.colour;
-	if (inHotspot && vsDraw.hotspotColours.back)
-		return *vsDraw.hotspotColours.back;
+	if (inHotspot && vsDraw.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE_BACK))
+		return vsDraw.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE_BACK)->Opaque();
 	if (background && (styleMain != STYLE_BRACELIGHT) && (styleMain != STYLE_BRACEBAD)) {
 		return *background;
 	} else {
@@ -1930,11 +1930,11 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			const int styleMain = ll->styles[i];
 			ColourAlpha textFore = vsDraw.styles[styleMain].fore;
 			const Font *textFont = vsDraw.styles[styleMain].font.get();
-			//hotspot foreground
+			// Hot-spot foreground
 			const bool inHotspot = (ll->hotspot.Valid()) && ll->hotspot.ContainsCharacter(iDoc);
 			if (inHotspot) {
-				if (vsDraw.hotspotColours.fore)
-					textFore = *vsDraw.hotspotColours.fore;
+				if (vsDraw.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE))
+					textFore = *vsDraw.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE);
 			}
 			if (vsDraw.indicatorsSetFore) {
 				// At least one indicator sets the text colour so see if it applies to this segment
@@ -2074,8 +2074,8 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				PRectangle rcUL = rcSegment;
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 				rcUL.bottom = rcUL.top + 1;
-				if (vsDraw.hotspotColours.fore)
-					surface->FillRectangleAligned(rcUL, Fill(*vsDraw.hotspotColours.fore));
+				if (vsDraw.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE))
+					surface->FillRectangleAligned(rcUL, Fill(*vsDraw.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE)));
 				else
 					surface->FillRectangleAligned(rcUL, Fill(textFore));
 			} else if (vsDraw.styles[styleMain].underline) {

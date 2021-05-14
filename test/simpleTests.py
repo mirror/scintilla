@@ -2054,6 +2054,38 @@ class TestElements(unittest.TestCase):
 		self.ed.MarkerSetAlpha(1, 0x100)
 		self.assertEquals(self.ed.MarkerGetLayer(1), 0)
 
+	def testHotSpot(self):
+		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE))
+		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE_BACK))
+		self.assertEquals(self.ed.HotspotActiveFore, 0)
+		self.assertEquals(self.ed.HotspotActiveBack, 0)
+		
+		testColour = 0x804020
+		resetColour = 0x112233	# Doesn't get set
+		self.ed.SetHotspotActiveFore(1, testColour)
+		self.assertEquals(self.ed.HotspotActiveFore, testColour)
+		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE))
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE), testColour | self.opaque)
+		self.ed.SetHotspotActiveFore(0, resetColour)
+		self.assertEquals(self.ed.HotspotActiveFore, 0)
+		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE))
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE), 0)
+		
+		translucentColour = 0x50403020
+		self.ed.SetElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE, translucentColour)
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE), translucentColour)
+		self.assertEquals(self.ed.HotspotActiveFore, translucentColour & self.dropAlpha)
+
+		backColour = 0x204080
+		self.ed.SetHotspotActiveBack(1, backColour)
+		self.assertEquals(self.ed.HotspotActiveBack, backColour)
+		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE_BACK))
+		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE_BACK), backColour | self.opaque)
+
+		# Restore
+		self.ed.ResetElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE)
+		self.ed.ResetElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE_BACK)
+
 class TestIndices(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame

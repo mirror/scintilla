@@ -8114,20 +8114,22 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETHOTSPOTACTIVEFORE:
-		vs.hotspotColours.fore = OptionalColour(wParam, lParam);
-		InvalidateStyleRedraw();
+		if (vs.SetElementColourOptional(SC_ELEMENT_HOT_SPOT_ACTIVE, wParam, lParam)) {
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_GETHOTSPOTACTIVEFORE:
-		return vs.hotspotColours.fore.value_or(ColourAlpha()).OpaqueRGB();
+		return vs.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE).value_or(ColourAlpha()).OpaqueRGB();
 
 	case SCI_SETHOTSPOTACTIVEBACK:
-		vs.hotspotColours.back = OptionalColour(wParam, lParam);
-		InvalidateStyleRedraw();
+		if (vs.SetElementColourOptional(SC_ELEMENT_HOT_SPOT_ACTIVE_BACK, wParam, lParam)) {
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_GETHOTSPOTACTIVEBACK:
-		return vs.hotspotColours.back.value_or(ColourAlpha()).OpaqueRGB();
+		return vs.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE_BACK).value_or(ColourAlpha()).OpaqueRGB();
 
 	case SCI_SETHOTSPOTACTIVEUNDERLINE:
 		vs.hotspotUnderline = wParam != 0;

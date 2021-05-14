@@ -58,11 +58,6 @@ inline std::optional<ColourAlpha> OptionalColour(uptr_t wParam, sptr_t lParam) {
 	}
 }
 
-struct ForeBackColours {
-	std::optional<ColourAlpha> fore;
-	std::optional<ColourAlpha> back;
-};
-
 struct SelectionAppearance {
 	// Whether to draw on base layer or over text
 	Layer layer;
@@ -140,7 +135,6 @@ public:
 	ColourAlpha selbarlight;
 	std::optional<ColourAlpha> foldmarginColour;
 	std::optional<ColourAlpha> foldmarginHighlightColour;
-	ForeBackColours hotspotColours;
 	bool hotspotUnderline;
 	/// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
 	int leftMarginWidth;	///< Spacing margin on left of text

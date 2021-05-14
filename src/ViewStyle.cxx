@@ -87,7 +87,6 @@ ViewStyle::ViewStyle(const ViewStyle &source) : markers(MARKER_MAX + 1), indicat
 	foldmarginColour = source.foldmarginColour;
 	foldmarginHighlightColour = source.foldmarginHighlightColour;
 
-	hotspotColours = source.hotspotColours;
 	hotspotUnderline = source.hotspotUnderline;
 
 	controlCharSymbol = source.controlCharSymbol;
@@ -249,9 +248,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 	someStylesProtected = false;
 	someStylesForceCase = false;
 
-	hotspotColours.fore.reset();
-	hotspotColours.back.reset();
 	hotspotUnderline = true;
+	elementColours.erase(SC_ELEMENT_HOT_SPOT_ACTIVE);
+	elementAllowsTranslucent.insert(SC_ELEMENT_HOT_SPOT_ACTIVE);
 
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
