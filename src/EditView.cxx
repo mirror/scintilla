@@ -888,12 +888,6 @@ void EditView::DrawIndentGuide(Surface *surface, Sci::Line lineVisible, int line
 		highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
 }
 
-static void SimpleAlphaRectangle(Surface *surface, PRectangle rc, ColourAlpha fill, int alpha) {
-	if (alpha != SC_ALPHA_NOALPHA) {
-		surface->FillRectangleAligned(rc, ColourAlpha(fill, alpha));
-	}
-}
-
 static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle rcSegment,
 	std::string_view text, ColourAlpha textBack, ColourAlpha textFore, bool fillBackground) {
 	if (rcSegment.Empty())
@@ -1790,13 +1784,13 @@ static void DrawEdgeLine(Surface *surface, const ViewStyle &vsDraw, const LineLa
 	}
 }
 
-// Draw underline mark as part of background if not transparent
+// Draw underline mark as part of background if on base layer
 static void DrawMarkUnderline(Surface *surface, const EditModel &model, const ViewStyle &vsDraw,
 	Sci::Line line, PRectangle rcLine) {
 	int marks = model.pdoc->GetMark(line);
 	for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 		if ((marks & 1) && (vsDraw.markers[markBit].markType == SC_MARK_UNDERLINE) &&
-			(vsDraw.markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
+			(vsDraw.markers[markBit].layer == Layer::base)) {
 			PRectangle rcUnderline = rcLine;
 			rcUnderline.top = rcUnderline.bottom - 2;
 			surface->FillRectangleAligned(rcUnderline, Fill(vsDraw.markers[markBit].back));
@@ -1883,11 +1877,11 @@ static void DrawTranslucentLineState(Surface *surface, const EditModel &model, c
 	for (int markBit = 0; (markBit < 32) && marksDrawnInText; markBit++) {
 		if (marksDrawnInText & 1) {
 			if (vsDraw.markers[markBit].markType == SC_MARK_BACKGROUND) {
-				SimpleAlphaRectangle(surface, rcLine, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
+				surface->FillRectangleAligned(rcLine, vsDraw.markers[markBit].BackWithAlpha());
 			} else if (vsDraw.markers[markBit].markType == SC_MARK_UNDERLINE) {
 				PRectangle rcUnderline = rcLine;
 				rcUnderline.top = rcUnderline.bottom - 2;
-				SimpleAlphaRectangle(surface, rcUnderline, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
+				surface->FillRectangleAligned(rcUnderline, vsDraw.markers[markBit].BackWithAlpha());
 			}
 		}
 		marksDrawnInText >>= 1;
@@ -1895,7 +1889,7 @@ static void DrawTranslucentLineState(Surface *surface, const EditModel &model, c
 	int marksDrawnInLine = marksOfLine & vsDraw.maskInLine;
 	for (int markBit = 0; (markBit < 32) && marksDrawnInLine; markBit++) {
 		if (marksDrawnInLine & 1) {
-			SimpleAlphaRectangle(surface, rcLine, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
+			surface->FillRectangleAligned(rcLine, vsDraw.markers[markBit].BackWithAlpha());
 		}
 		marksDrawnInLine >>= 1;
 	}

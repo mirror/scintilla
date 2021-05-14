@@ -483,7 +483,7 @@ std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActi
 		int marks = marksOfLine;
 		for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 			if ((marks & 1) && (markers[markBit].markType == SC_MARK_BACKGROUND) &&
-				(markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
+				(markers[markBit].layer == Layer::base)) {
 				background = markers[markBit].back;
 			}
 			marks >>= 1;
@@ -494,14 +494,18 @@ std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActi
 		if (marksMasked) {
 			for (int markBit = 0; (markBit < 32) && marksMasked; markBit++) {
 				if ((marksMasked & 1) &&
-					(markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
+					(markers[markBit].layer == Layer::base)) {
 					background = markers[markBit].back;
 				}
 				marksMasked >>= 1;
 			}
 		}
 	}
-	return background;
+	if (background) {
+		return background->Opaque();
+	} else {
+		return {};
+	}
 }
 
 bool ViewStyle::SelectionBackgroundDrawn() const noexcept {

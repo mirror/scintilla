@@ -177,6 +177,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_MARKERDEFINEPIXMAP 2049
 #define SCI_MARKERADDSET 2466
 #define SCI_MARKERSETALPHA 2476
+#define SCI_MARKERGETLAYER 2734
+#define SCI_MARKERSETLAYER 2735
 #define SC_MAX_MARGIN 4
 #define SC_MARGIN_SYMBOL 0
 #define SC_MARGIN_NUMBER 1

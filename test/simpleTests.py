@@ -2047,6 +2047,13 @@ class TestElements(unittest.TestCase):
 
 		self.RestoreCaretLine()
 
+	def testMarkerLayer(self):
+		self.assertEquals(self.ed.MarkerGetLayer(1), 0)
+		self.ed.MarkerSetAlpha(1, 23)
+		self.assertEquals(self.ed.MarkerGetLayer(1), 10)
+		self.ed.MarkerSetAlpha(1, 0x100)
+		self.assertEquals(self.ed.MarkerGetLayer(1), 0)
+
 class TestIndices(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame

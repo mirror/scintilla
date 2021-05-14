@@ -453,6 +453,12 @@ fun void MarkerAddSet=2466(line line, int markerSet)
 # Set the alpha used for a marker that is drawn in the text area, not the margin.
 set void MarkerSetAlpha=2476(int markerNumber, Alpha alpha)
 
+# Get the layer used for a marker that is drawn in the text area, not the margin.
+get Layer MarkerGetLayer=2734(int markerNumber,)
+
+# Set the layer used for a marker that is drawn in the text area, not the margin.
+set void MarkerSetLayer=2735(int markerNumber, Layer layer)
+
 val SC_MAX_MARGIN=4
 
 enu MarginType=SC_MARGIN_

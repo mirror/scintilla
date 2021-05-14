@@ -37,6 +37,7 @@ LineMarker::LineMarker(const LineMarker &other) {
 	back = other.back;
 	backSelected = other.backSelected;
 	strokeWidth = other.strokeWidth;
+	layer = other.layer;
 	alpha = other.alpha;
 	if (other.pxpm)
 		pxpm = std::make_unique<XPM>(*other.pxpm);
@@ -57,6 +58,7 @@ LineMarker &LineMarker::operator=(const LineMarker &other) {
 		back = other.back;
 		backSelected = other.backSelected;
 		strokeWidth = other.strokeWidth;
+		layer = other.layer;
 		alpha = other.alpha;
 		if (other.pxpm)
 			pxpm = std::make_unique<XPM>(*other.pxpm);
@@ -69,6 +71,10 @@ LineMarker &LineMarker::operator=(const LineMarker &other) {
 		customDraw = other.customDraw;
 	}
 	return *this;
+}
+
+ColourAlpha LineMarker::BackWithAlpha() const noexcept {
+	return ColourAlpha(back, alpha);
 }
 
 void LineMarker::SetXPM(const char *textForm) {

@@ -63,8 +63,6 @@ struct ForeBackColours {
 	std::optional<ColourAlpha> back;
 };
 
-enum class Layer { base=0, over=10 };
-
 struct SelectionAppearance {
 	// Whether to draw on base layer or over text
 	Layer layer;

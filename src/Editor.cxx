@@ -6997,10 +6997,26 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETALPHA:
-		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].alpha = static_cast<int>(lParam);
-		InvalidateStyleRedraw();
+		if (wParam <= MARKER_MAX) {
+			if (lParam == SC_ALPHA_NOALPHA) {
+				SetAppearance(vs.markers[wParam].alpha, 0xff);
+				SetAppearance(vs.markers[wParam].layer, Layer::base);
+			} else {
+				SetAppearance(vs.markers[wParam].alpha, static_cast<int>(lParam));
+				SetAppearance(vs.markers[wParam].layer, Layer::over);
+			}
+		}
 		break;
+	case SCI_MARKERSETLAYER:
+		if (wParam <= MARKER_MAX) {
+			SetAppearance(vs.markers[wParam].layer, static_cast<Layer>(lParam));
+		}
+		break;
+	case SCI_MARKERGETLAYER:
+		if (wParam <= MARKER_MAX) {
+			return static_cast<sptr_t>(vs.markers[wParam].layer);
+		}
+		return 0;
 	case SCI_MARKERADD: {
 			const int markerID = pdoc->AddMark(static_cast<Sci::Line>(wParam), static_cast<int>(lParam));
 			return markerID;

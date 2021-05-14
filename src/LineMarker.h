@@ -15,6 +15,8 @@ class RGBAImage;
 
 typedef void (*DrawLineMarkerFn)(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, int tFold, int marginStyle, const void *lineMarker);
 
+enum class Layer { base = 0, over = 10 };
+
 /**
  */
 class LineMarker {
@@ -25,6 +27,7 @@ public:
 	ColourAlpha fore = ColourAlpha(0, 0, 0);
 	ColourAlpha back = ColourAlpha(0xff, 0xff, 0xff);
 	ColourAlpha backSelected = ColourAlpha(0xff, 0x00, 0x00);
+	Layer layer = Layer::base;
 	int alpha = SC_ALPHA_NOALPHA;
 	XYPOSITION strokeWidth = 1.0f;
 	std::unique_ptr<XPM> pxpm;
@@ -41,6 +44,8 @@ public:
 	LineMarker &operator=(const LineMarker& other);
 	LineMarker &operator=(LineMarker&&) noexcept = default;
 	virtual ~LineMarker() = default;
+
+	ColourAlpha BackWithAlpha() const noexcept;
 
 	void SetXPM(const char *textForm);
 	void SetXPM(const char *const *linesForm);

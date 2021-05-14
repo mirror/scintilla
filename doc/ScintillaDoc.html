@@ -267,19 +267,18 @@
           This is similar to <a class="seealso" href="#colour">colour</a> but with a byte
           of <a class="seealso" href="#colour">alpha</a> added. They are combined as:
           red | (green &lt;&lt; 8) | (blue &lt;&lt; 16) | (alpha &lt;&lt; 24).
-          Fully opaque uses an alpha of 255. SC_ALPHA_NOALPHA is not possible for
-          colouralpha values.</td>
+          Fully opaque uses an alpha of 255.
         </tr>
 
         <tr>
           <th align="left" id="alpha"><code>alpha</code></th>
 
           <td>Translucency is set using an alpha value.
-                        Alpha ranges from 0 (SC_ALPHA_TRANSPARENT) which is completely transparent to
-                               255 (SC_ALPHA_OPAQUE) which is opaque. The value 256 (SC_ALPHA_NOALPHA)
-                               is opaque and uses code that is not alpha-aware and may be faster. Not all platforms support
-                               translucency and only some Scintilla features implement translucency.
-                               The default alpha value for most features is SC_ALPHA_NOALPHA.</td>
+		Alpha ranges from 0 (SC_ALPHA_TRANSPARENT) which is completely transparent to
+                   255 (SC_ALPHA_OPAQUE) which is opaque.
+		Previous versions used the value 256 (SC_ALPHA_NOALPHA) to indicate that drawing was to be
+		performed opaquely on the base layer. This is now discouraged and code should use the <code>&hellip;LAYER&hellip;</code>
+		methods to choose the layer.</td>
         </tr>
 
         <tr>
@@ -4744,6 +4743,8 @@ struct Sci_TextToFind {
     back)</a><br />
     <a class="message" href="#SCI_MARKERSETSTROKEWIDTH">SCI_MARKERSETSTROKEWIDTH(int markerNumber, int hundredths)</a><br />
     <a class="message" href="#SCI_MARKERENABLEHIGHLIGHT">SCI_MARKERENABLEHIGHLIGHT(bool enabled)</a><br />
+     <a class="message" href="#SCI_MARKERSETLAYER">SCI_MARKERSETLAYER(int markerNumber, int layer)</a><br />
+     <a class="message" href="#SCI_MARKERGETLAYER">SCI_MARKERGETLAYER(int markerNumber) &rarr; int</a><br />
      <a class="message" href="#SCI_MARKERSETALPHA">SCI_MARKERSETALPHA(int markerNumber, alpha alpha)</a><br />
      <a class="message" href="#SCI_MARKERADD">SCI_MARKERADD(line line, int markerNumber) &rarr; int</a><br />
      <a class="message" href="#SCI_MARKERADDSET">SCI_MARKERADDSET(line line, int markerSet)</a><br />
@@ -4974,11 +4975,17 @@ struct Sci_TextToFind {
      <p><b id="SCI_MARKERENABLEHIGHLIGHT">SCI_MARKERENABLEHIGHLIGHT(bool enabled)</b><br />
      This message allows to enable/disable the highlight folding block when it is selected. (i.e. block that contains the caret)</p>
 
-     <p><b id="SCI_MARKERSETALPHA">SCI_MARKERSETALPHA(int markerNumber,
+     <p>
+     <b id="SCI_MARKERSETLAYER">SCI_MARKERSETLAYER(int markerNumber, int layer)</b><br />
+     <b id="SCI_MARKERGETLAYER">SCI_MARKERGETLAYER(int markerNumber) &rarr; int</b><br />
+     <b id="SCI_MARKERSETALPHA">SCI_MARKERSETALPHA(int markerNumber,
      <a class="jump" href="#alpha">alpha</a> alpha)</b><br />
      When markers are drawn in the content area, either because there is no margin for them or
-     they are of <code>SC_MARK_BACKGROUND</code> or <code>SC_MARK_UNDERLINE</code> types, they may be drawn translucently by
-     setting an alpha value. This is only for the content area - in margins, translucency is achieved through the <code>SCI_MARKERSET&hellip;TRANSLUCENT</code>
+     they are of <code>SC_MARK_BACKGROUND</code> or <code>SC_MARK_UNDERLINE</code> types, they may be drawn translucently over text
+     or opaquely on the base layer.
+     The layer to draw on is defined by <code>SCI_MARKERSETLAYER</code>.
+     The degree of translucency can be chosen by setting an alpha value.
+     This is only for the content area - in margins, translucency is achieved through the <code>SCI_MARKERSET&hellip;TRANSLUCENT</code>
      methods.</p>
 
     <p><b id="SCI_MARKERADD">SCI_MARKERADD(line line, int markerNumber) &rarr; int</b><br />
