@@ -7320,7 +7320,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETCARETLINEBACKALPHA: {
 			const Layer layerNew = (wParam == SC_ALPHA_NOALPHA) ? Layer::base : Layer::over;
 			vs.caretLine.layer = layerNew;
-			vs.SetElementAlpha(SC_ELEMENT_CARET_LINE_BACK, static_cast<int>(wParam));
+			if (vs.ElementColour(SC_ELEMENT_CARET_LINE_BACK)) {
+				vs.SetElementAlpha(SC_ELEMENT_CARET_LINE_BACK, static_cast<int>(wParam));
+			}
 			InvalidateStyleRedraw();
 		}
 		break;
