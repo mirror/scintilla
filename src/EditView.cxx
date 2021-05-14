@@ -1391,7 +1391,7 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	}
 
 	// Draw any box or stadium shape
-	if (FlagSet(phase, DrawPhase::indicatorsFore)) {
+	if (FlagSet(phase, DrawPhase::indicatorsBack)) {
 		if (vsDraw.eolAnnotationVisible >= EOLANNOTATION_BOXED) {
 			PRectangle rcBox = rcSegment;
 			rcBox.left = std::round(rcSegment.left);
