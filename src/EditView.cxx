@@ -927,7 +927,7 @@ static void DrawCaretLineFramed(Surface *surface, const ViewStyle &vsDraw, const
 	// Avoid double drawing the corners by removing the left and right sides when drawing top and bottom borders
 	const PRectangle rcWithoutLeftRight = rcLine.Inset(Point(width, 0.0));
 
-	if (subLine == 0 || ll->wrapIndent == 0 || vsDraw.caretLine.layer == Layer::over) {
+	if (subLine == 0 || ll->wrapIndent == 0 || vsDraw.caretLine.layer != Layer::base) {
 		// Left
 		surface->FillRectangleAligned(Side(rcLine, Edge::left, width), colourFrame);
 	}
@@ -935,7 +935,7 @@ static void DrawCaretLineFramed(Surface *surface, const ViewStyle &vsDraw, const
 		// Top
 		surface->FillRectangleAligned(Side(rcWithoutLeftRight, Edge::top, width), colourFrame);
 	}
-	if (subLine == ll->lines - 1 || vsDraw.caretLine.layer == Layer::over) {
+	if (subLine == ll->lines - 1 || vsDraw.caretLine.layer != Layer::base) {
 		// Right
 		surface->FillRectangleAligned(Side(rcLine, Edge::right, width), colourFrame);
 	}
@@ -1029,8 +1029,14 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			} else {
 				surface->FillRectangleAligned(rcSegment, Fill(textBack));
 			}
-			DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, phasesDraw == PhasesDraw::one);
-			if (eolInSelection && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer == Layer::over)) {
+			const bool drawEOLSelection = eolInSelection && (line < model.pdoc->LinesTotal() - 1);
+			ColourAlpha blobText = textBack;
+			if (drawEOLSelection && (vsDraw.selection.layer == Layer::under)) {
+				surface->FillRectangleAligned(rcSegment, selectionBack);
+				blobText = textBack.MixedWith(selectionBack, selectionBack.GetAlphaComponent());
+			}
+			DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, blobText, textFore, phasesDraw == PhasesDraw::one);
+			if (drawEOLSelection && (vsDraw.selection.layer == Layer::over)) {
 				surface->FillRectangleAligned(rcSegment, selectionBack);
 			}
 		}
@@ -1052,7 +1058,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		} else {
 			surface->FillRectangleAligned(rcSegment, Fill(vsDraw.styles[STYLE_DEFAULT].back));
 		}
-		if (eolInSelection && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer == Layer::over)) {
+		if (eolInSelection && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer != Layer::base)) {
 			surface->FillRectangleAligned(rcSegment, selectionBack);
 		}
 	}
@@ -1277,7 +1283,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	}
 
 	if (FlagSet(phase, DrawPhase::selectionTranslucent)) {
-		if (eolInSelection && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer == Layer::over)) {
+		if (eolInSelection && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer != Layer::base)) {
 			surface->FillRectangleAligned(rcSegment, SelectionBackground(model, vsDraw, eolInSelection));
 		}
 	}
@@ -1802,8 +1808,8 @@ static void DrawMarkUnderline(Surface *surface, const EditModel &model, const Vi
 }
 
 static void DrawTranslucentSelection(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-	Sci::Line line, PRectangle rcLine, int subLine, Range lineRange, int xStart, int tabWidthMinimumPixels) {
-	if (vsDraw.selection.layer == Layer::over) {
+	Sci::Line line, PRectangle rcLine, int subLine, Range lineRange, int xStart, int tabWidthMinimumPixels, Layer layer) {
+	if (vsDraw.selection.layer == layer) {
 		const Sci::Position posLineStart = model.pdoc->LineStart(line);
 		const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
 		// For each selection draw
@@ -1865,9 +1871,9 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 
 // Draw any translucent whole line states
 static void DrawTranslucentLineState(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-	Sci::Line line, PRectangle rcLine, int subLine) {
+	Sci::Line line, PRectangle rcLine, int subLine, Layer layer) {
 	if ((model.caret.active || vsDraw.caretLine.alwaysShow) && vsDraw.ElementColour(SC_ELEMENT_CARET_LINE_BACK) && ll->containsCaret &&
-		vsDraw.caretLine.layer == Layer::over) {
+		vsDraw.caretLine.layer == layer) {
 		if (vsDraw.caretLine.frame) {
 			DrawCaretLineFramed(surface, vsDraw, ll, rcLine, subLine);
 		} else {
@@ -1877,7 +1883,7 @@ static void DrawTranslucentLineState(Surface *surface, const EditModel &model, c
 	const int marksOfLine = model.pdoc->GetMark(line);
 	int marksDrawnInText = marksOfLine & vsDraw.maskDrawInText;
 	for (int markBit = 0; (markBit < 32) && marksDrawnInText; markBit++) {
-		if (marksDrawnInText & 1) {
+		if ((marksDrawnInText & 1) && (vsDraw.markers[markBit].layer == layer)) {
 			if (vsDraw.markers[markBit].markType == SC_MARK_BACKGROUND) {
 				surface->FillRectangleAligned(rcLine, vsDraw.markers[markBit].BackWithAlpha());
 			} else if (vsDraw.markers[markBit].markType == SC_MARK_UNDERLINE) {
@@ -1890,7 +1896,7 @@ static void DrawTranslucentLineState(Surface *surface, const EditModel &model, c
 	}
 	int marksDrawnInLine = marksOfLine & vsDraw.maskInLine;
 	for (int markBit = 0; (markBit < 32) && marksDrawnInLine; markBit++) {
-		if (marksDrawnInLine & 1) {
+		if ((marksDrawnInLine & 1) && (vsDraw.markers[markBit].layer == layer)) {
 			surface->FillRectangleAligned(rcLine, vsDraw.markers[markBit].BackWithAlpha());
 		}
 		marksDrawnInLine >>= 1;
@@ -2191,6 +2197,8 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 
 	if (FlagSet(phase, DrawPhase::text)) {
+		DrawTranslucentSelection(surface, model, vsDraw, ll, line, rcLine, subLine, lineRange, xStart, tabWidthMinimumPixels, Layer::under);
+		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine, subLine, Layer::under);
 		DrawForeground(surface, model, vsDraw, ll, lineVisible, rcLine, lineRange, posLineStart, xStart,
 			subLine, background);
 	}
@@ -2217,11 +2225,11 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 
 	if (!hideSelection && FlagSet(phase, DrawPhase::selectionTranslucent)) {
-		DrawTranslucentSelection(surface, model, vsDraw, ll, line, rcLine, subLine, lineRange, xStart, tabWidthMinimumPixels);
+		DrawTranslucentSelection(surface, model, vsDraw, ll, line, rcLine, subLine, lineRange, xStart, tabWidthMinimumPixels, Layer::over);
 	}
 
 	if (FlagSet(phase, DrawPhase::lineTranslucent)) {
-		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine, subLine);
+		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine, subLine, Layer::over);
 	}
 }
 
@@ -2467,7 +2475,7 @@ void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const
 		} else {
 			surface->FillRectangleAligned(rcArea, Fill(vsDraw.styles[STYLE_DEFAULT].back));
 		}
-		if (eolInSelection && vsDraw.selection.eolFilled && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer == Layer::over)) {
+		if (eolInSelection && vsDraw.selection.eolFilled && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer != Layer::base)) {
 			surface->FillRectangleAligned(rcArea, SelectionBackground(model, vsDraw, eolInSelection));
 		}
 	}

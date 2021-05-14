@@ -739,7 +739,8 @@ set void SetSelEOLFilled=2480(bool filled,)
 
 enu Layer=SC_LAYER_
 val SC_LAYER_BASE=0
-val SC_LAYER_OVER_TEXT=10
+val SC_LAYER_UNDER_TEXT=1
+val SC_LAYER_OVER_TEXT=2
 
 # Get the layer for drawing selections
 get Layer GetSelectionLayer=2762(,)

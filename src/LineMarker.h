@@ -15,7 +15,7 @@ class RGBAImage;
 
 typedef void (*DrawLineMarkerFn)(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, int tFold, int marginStyle, const void *lineMarker);
 
-enum class Layer { base = 0, over = 10 };
+enum class Layer { base = 0, under = 1, over = 2 };
 
 /**
  */

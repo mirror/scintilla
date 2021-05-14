@@ -304,7 +304,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETSELEOLFILLED 2479
 #define SCI_SETSELEOLFILLED 2480
 #define SC_LAYER_BASE 0
-#define SC_LAYER_OVER_TEXT 10
+#define SC_LAYER_UNDER_TEXT 1
+#define SC_LAYER_OVER_TEXT 2
 #define SCI_GETSELECTIONLAYER 2762
 #define SCI_SETSELECTIONLAYER 2763
 #define SCI_GETCARETLINELAYER 2764

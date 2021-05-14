@@ -3586,11 +3586,21 @@ struct Sci_TextToFind {
         </tr>
 
         <tr>
+          <th align="left"><code>SC_LAYER_UNDER_TEXT</code>.</th>
+
+          <td>1</td>
+
+          <td>Draw the selection background translucently under the text.<br />
+	  This will not work in single phase drawing mode (<code class="deprecated">SC_PHASES_ONE</code>)
+	  as there is no under-text phase.</td>
+        </tr>
+
+        <tr>
           <th align="left"><code>SC_LAYER_OVER_TEXT</code></th>
 
-          <td>10</td>
+          <td>2</td>
 
-          <td>Draw the selection background translucently over the text</td>
+          <td>Draw the selection background translucently over the text.</td>
         </tr>
 
       </tbody>
@@ -3654,15 +3664,25 @@ struct Sci_TextToFind {
 
           <td>0</td>
 
-          <td>Draw the caret line background opaquely on the base layer</td>
+          <td>Draw the selection background opaquely on the base layer</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>SC_LAYER_UNDER_TEXT</code>.</th>
+
+          <td>1</td>
+
+          <td>Draw the selection background translucently under the text.<br />
+	  This will not work in single phase drawing mode (<code class="deprecated">SC_PHASES_ONE</code>)
+	  as there is no under-text phase.</td>
         </tr>
 
         <tr>
           <th align="left"><code>SC_LAYER_OVER_TEXT</code></th>
 
-          <td>10</td>
+          <td>2</td>
 
-          <td>Draw the caret line background translucently over the text</td>
+          <td>Draw the selection background translucently over the text.</td>
         </tr>
 
       </tbody>
@@ -5050,7 +5070,39 @@ struct Sci_TextToFind {
      The layer to draw on is defined by <code>SCI_MARKERSETLAYER</code>.
      The degree of translucency can be chosen by setting an alpha value.
      This is only for the content area - in margins, translucency is achieved through the <code>SCI_MARKERSET&hellip;TRANSLUCENT</code>
-     methods.</p>
+     methods.
+     The <code class="parameter">layer</code> argument can be one of:</p>
+
+    <table class="standard" summary="Layer">
+      <tbody valign="top">
+        <tr>
+          <th align="left"><code>SC_LAYER_BASE</code></th>
+
+          <td>0</td>
+
+          <td>Draw the selection background opaquely on the base layer</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>SC_LAYER_UNDER_TEXT</code>.</th>
+
+          <td>1</td>
+
+          <td>Draw the selection background translucently under the text.<br />
+	  This will not work in single phase drawing mode (<code class="deprecated">SC_PHASES_ONE</code>)
+	  as there is no under-text phase.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>SC_LAYER_OVER_TEXT</code></th>
+
+          <td>2</td>
+
+          <td>Draw the selection background translucently over the text.</td>
+        </tr>
+
+      </tbody>
+    </table>
 
     <p><b id="SCI_MARKERADD">SCI_MARKERADD(line line, int markerNumber) &rarr; int</b><br />
      This message adds marker number <code class="parameter">markerNumber</code> to a line. The message returns -1 if

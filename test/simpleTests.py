@@ -1995,8 +1995,8 @@ class TestElements(unittest.TestCase):
 		self.assertEquals(self.ed.CaretLineFrame, 0)
 		self.assertFalse(self.ed.CaretLineVisibleAlways)
 		
-		self.ed.CaretLineLayer = 10
-		self.assertEquals(self.ed.CaretLineLayer, 10)
+		self.ed.CaretLineLayer = 2
+		self.assertEquals(self.ed.CaretLineLayer, 2)
 		self.ed.CaretLineFrame = 2
 		self.assertEquals(self.ed.CaretLineFrame, 2)
 		self.ed.CaretLineVisibleAlways = True
@@ -2028,7 +2028,7 @@ class TestElements(unittest.TestCase):
 		self.assertEquals(self.ed.CaretLineBackAlpha, alpha)
 		backColourTranslucent = backColour | (alpha << 24)
 		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK), backColourTranslucent)
-		self.assertEquals(self.ed.CaretLineLayer, 10)
+		self.assertEquals(self.ed.CaretLineLayer, 2)
 		
 		self.ed.CaretLineBackAlpha = 0x100
 		self.assertEquals(self.ed.CaretLineBackAlpha, 0x100)
@@ -2050,7 +2050,7 @@ class TestElements(unittest.TestCase):
 	def testMarkerLayer(self):
 		self.assertEquals(self.ed.MarkerGetLayer(1), 0)
 		self.ed.MarkerSetAlpha(1, 23)
-		self.assertEquals(self.ed.MarkerGetLayer(1), 10)
+		self.assertEquals(self.ed.MarkerGetLayer(1), 2)
 		self.ed.MarkerSetAlpha(1, 0x100)
 		self.assertEquals(self.ed.MarkerGetLayer(1), 0)
 
