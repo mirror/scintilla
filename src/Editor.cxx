@@ -4944,7 +4944,7 @@ void Editor::ButtonUpWithModifiers(Point pt, unsigned int curTime, int modifiers
 		ptMouseLast = pt;
 		SetMouseCapture(false);
 		FineTickerCancel(TickReason::scroll);
-		NotifyIndicatorClick(false, newPos.Position(), 0);
+		NotifyIndicatorClick(false, newPos.Position(), modifiers);
 		if (inDragDrop == DragDrop::dragging) {
 			const SelectionPosition selStart = SelectionStart();
 			const SelectionPosition selEnd = SelectionEnd();
