@@ -6763,7 +6763,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.wrap.indentMode;
 
 	case SCI_SETLAYOUTCACHE:
-		view.llc.SetLevel(static_cast<LineLayoutCache::Cache>(wParam));
+		if (wParam <= SC_CACHE_DOCUMENT) {
+			view.llc.SetLevel(static_cast<LineLayoutCache::Cache>(wParam));
+		}
 		break;
 
 	case SCI_GETLAYOUTCACHE:
