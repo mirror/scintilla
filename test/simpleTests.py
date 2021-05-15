@@ -2041,6 +2041,7 @@ class TestElements(unittest.TestCase):
 		self.ed.CaretLineBackAlpha = 0x100
 		self.assertEquals(self.ed.CaretLineBackAlpha, 0x100)
 		self.assertEquals(self.ed.CaretLineLayer, 0)	# SC_ALPHA_NOALPHA moved to base layer
+		self.ed.CaretLineBack = backColour
 		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
 		self.ed.CaretLineVisible = 0
 		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
