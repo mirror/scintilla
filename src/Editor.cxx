@@ -7494,8 +7494,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			    vs.selection.layer = layerNew;
 			    UpdateBaseElements();
 			}
-			vs.SetElementAlpha(SC_ELEMENT_SELECTION_BACK, static_cast<int>(wParam));
-			vs.SetElementAlpha(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, static_cast<int>(wParam));
+			const int alpha = static_cast<int>(wParam);
+			vs.SetElementAlpha(SC_ELEMENT_SELECTION_BACK, alpha);
+			vs.SetElementAlpha(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, alpha);
+			vs.SetElementAlpha(SC_ELEMENT_SELECTION_SECONDARY_BACK, alpha);
+			vs.SetElementAlpha(SC_ELEMENT_SELECTION_NO_FOCUS_BACK, alpha);
 			InvalidateStyleRedraw();
 		}
 		break;
