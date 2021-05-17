@@ -363,8 +363,8 @@ class ScintillaWin :
 	void Finalise() override;
 #if defined(USE_D2D)
 	void EnsureRenderTarget(HDC hdc);
-	void DropRenderTarget();
 #endif
+	void DropRenderTarget() noexcept;
 	HWND MainHWND() const noexcept;
 
 	static sptr_t DirectFunction(
@@ -394,7 +394,7 @@ class ScintillaWin :
 	sptr_t HandleCompositionWindowed(uptr_t wParam, sptr_t lParam);
 	sptr_t HandleCompositionInline(uptr_t wParam, sptr_t lParam);
 	static bool KoreanIME() noexcept;
-	void MoveImeCarets(Sci::Position offset);
+	void MoveImeCarets(Sci::Position offset) noexcept;
 	void DrawImeIndicator(int indicator, Sci::Position len);
 	void SetCandidateWindowPos();
 	void SelectionToHangul();
@@ -602,9 +602,7 @@ void ScintillaWin::Finalise() {
 		FineTickerCancel(tr);
 	}
 	SetIdle(false);
-#if defined(USE_D2D)
 	DropRenderTarget();
-#endif
 	::RevokeDragDrop(MainHWND());
 	if (SUCCEEDED(hrOle)) {
 		::OleUninitialize();
@@ -627,7 +625,7 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 
 		// Create a Direct2D render target.
 #if 1
-		D2D1_RENDER_TARGET_PROPERTIES drtp;
+		D2D1_RENDER_TARGET_PROPERTIES drtp {};
 		drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
 		drtp.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
 		drtp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_UNKNOWN;
@@ -651,7 +649,7 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 			}
 
 		} else {
-			D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp;
+			D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp {};
 			dhrtp.hwnd = hw;
 			dhrtp.pixelSize = size;
 			dhrtp.presentOptions = (technology == SC_TECHNOLOGY_DIRECTWRITERETAIN) ?
@@ -690,12 +688,14 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 		}
 	}
 }
-
-void ScintillaWin::DropRenderTarget() {
-	ReleaseUnknown(pRenderTarget);
-}
-
 #endif
+
+
+void ScintillaWin::DropRenderTarget() noexcept {
+#if defined(USE_D2D)
+	ReleaseUnknown(pRenderTarget);
+#endif
+}
 
 HWND ScintillaWin::MainHWND() const noexcept {
 	return HwndFromWindow(wMain);
@@ -991,7 +991,7 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 
 			// Set new position after converted
 			const Point pos = PointMainCaret();
-			COMPOSITIONFORM CompForm;
+			COMPOSITIONFORM CompForm {};
 			CompForm.dwStyle = CFS_POINT;
 			CompForm.ptCurrentPos = POINTFromPoint(pos);
 			::ImmSetCompositionWindow(imc.hIMC, &CompForm);
@@ -1006,7 +1006,7 @@ bool ScintillaWin::KoreanIME() noexcept {
 	return codePage == 949 || codePage == 1361;
 }
 
-void ScintillaWin::MoveImeCarets(Sci::Position offset) {
+void ScintillaWin::MoveImeCarets(Sci::Position offset) noexcept {
 	// Move carets relatively by bytes.
 	for (size_t r=0; r<sel.Count(); r++) {
 		const Sci::Position positionInsert = sel.Range(r).Start().Position();
@@ -1835,9 +1835,7 @@ sptr_t ScintillaWin::SciMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 				} else {
 					bidirectional = EditModel::Bidirectional::bidiDisabled;
 				}
-#if defined(USE_D2D)
 				DropRenderTarget();
-#endif
 				technology = technologyNew;
 				// Invalidate all cached information including layout.
 				DropGraphics();

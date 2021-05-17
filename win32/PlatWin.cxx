@@ -408,7 +408,7 @@ public:
 	}
 };
 
-constexpr int stackBufferLength = 1000;
+constexpr int stackBufferLength = 400;
 class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
 public:
 	int tlen;	// Using int instead of size_t as most Win32 APIs take int.
@@ -471,7 +471,7 @@ class SurfaceGDI : public Surface {
 	void PenColour(ColourAlpha fore, XYPOSITION widthStroke) noexcept;
 
 	void BrushColour(ColourAlpha back) noexcept;
-	void SetFont(const Font *font_) noexcept;
+	void SetFont(const Font *font_);
 	void Clear() noexcept;
 
 public:
@@ -663,9 +663,12 @@ void SurfaceGDI::BrushColour(ColourAlpha back) noexcept {
 	brushOld = SelectBrush(hdc, brush);
 }
 
-void SurfaceGDI::SetFont(const Font *font_) noexcept {
+void SurfaceGDI::SetFont(const Font *font_) {
 	const FontGDI *pfm = dynamic_cast<const FontGDI *>(font_);
 	PLATFORM_ASSERT(pfm);
+	if (!pfm) {
+		throw std::runtime_error("SurfaceGDI::SetFont: wrong Font type.");
+	}
 	if (fontOld) {
 		SelectFont(hdc, pfm->hfont);
 	} else {
@@ -990,7 +993,7 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 		const SIZE size { width, height };
 		DIBSection section(hdc, size);
 		if (section) {
-			RGBAImage::BGRAFromRGBA(section.Bytes(), pixelsImage, width * height);
+			RGBAImage::BGRAFromRGBA(section.Bytes(), pixelsImage, static_cast<size_t>(width) * height);
 			AlphaBlend(hdc, static_cast<int>(rc.left), static_cast<int>(rc.top),
 				static_cast<int>(rc.Width()), static_cast<int>(rc.Height()), section.DC(),
 				0, 0, width, height, mergeAlpha);
@@ -1314,7 +1317,7 @@ class SurfaceD2D : public Surface {
 	int logPixelsY = USER_DEFAULT_SCREEN_DPI;
 
 	void Clear() noexcept;
-	void SetFont(const Font *font_) noexcept;
+	void SetFont(const Font *font_);
 	HRESULT GetBitmap(ID2D1Bitmap **ppBitmap);
 
 public:
@@ -1489,9 +1492,12 @@ void SurfaceD2D::D2DPenColourAlpha(ColourAlpha fore) noexcept {
 	}
 }
 
-void SurfaceD2D::SetFont(const Font *font_) noexcept {
+void SurfaceD2D::SetFont(const Font *font_) {
 	const FontDirectWrite *pfm = dynamic_cast<const FontDirectWrite *>(font_);
 	PLATFORM_ASSERT(pfm);
+	if (!pfm) {
+		throw std::runtime_error("SurfaceD2D::SetFont: wrong Font type.");
+	}
 	pTextFormat = pfm->pTextFormat;
 	yAscent = pfm->yAscent;
 	yDescent = pfm->yDescent;
@@ -1657,6 +1663,9 @@ void SurfaceD2D::FillRectangleAligned(PRectangle rc, Fill fill) {
 void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	SurfaceD2D *psurfOther = dynamic_cast<SurfaceD2D *>(&surfacePattern);
 	PLATFORM_ASSERT(psurfOther);
+	if (!psurfOther) {
+		throw std::runtime_error("SurfaceD2D::FillRectangle: wrong Surface type.");
+	}
 	ID2D1Bitmap *pBitmap = nullptr;
 	HRESULT hr = psurfOther->GetBitmap(&pBitmap);
 	if (SUCCEEDED(hr) && pBitmap) {
@@ -2083,6 +2092,9 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 
 		const FontDirectWrite *pfm =
 			dynamic_cast<const FontDirectWrite *>(screenLine->FontOfPosition(bytePosition));
+		if (!pfm) {
+			throw std::runtime_error("FillTextLayoutFormats: wrong Font type.");
+		}
 
 		const unsigned int fontFamilyNameSize = pfm->pTextFormat->GetFontFamilyNameLength();
 		std::wstring fontFamilyName(fontFamilyNameSize, 0);
@@ -2141,7 +2153,7 @@ ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) {
 	// Get textFormat
 	const FontDirectWrite *pfm = dynamic_cast<const FontDirectWrite *>(screenLine->FontOfPosition(0));
 
-	if (!pIDWriteFactory || !pfm->pTextFormat) {
+	if (!pIDWriteFactory || !pfm || !pfm->pTextFormat) {
 		return;
 	}
 
@@ -2214,7 +2226,7 @@ size_t ScreenLineLayout::PositionFromX(XYPOSITION xDistance, bool charPosition) 
 	if (charPosition) {
 		pos = isTrailingHit ? hitTestMetrics.textPosition : caretMetrics.textPosition;
 	} else {
-		pos = isTrailingHit ? hitTestMetrics.textPosition + hitTestMetrics.length : caretMetrics.textPosition;
+		pos = isTrailingHit ? static_cast<size_t>(hitTestMetrics.textPosition) + hitTestMetrics.length : caretMetrics.textPosition;
 	}
 
 	// Get the character position in original string
