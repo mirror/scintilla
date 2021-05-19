@@ -285,7 +285,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_ELEMENT_SELECTION_NO_FOCUS_BACK 17
 #define SC_ELEMENT_CARET 40
 #define SC_ELEMENT_CARET_ADDITIONAL 41
-#define SC_ELEMENT_CARET_SECONDARY 42
 #define SC_ELEMENT_CARET_LINE_BACK 50
 #define SC_ELEMENT_WHITE_SPACE 60
 #define SC_ELEMENT_WHITE_SPACE_BACK 61

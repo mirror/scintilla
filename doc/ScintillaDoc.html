@@ -3425,14 +3425,6 @@ struct Sci_TextToFind {
            <td></td>
            <td>Colour of caret for additional selections</td>
          </tr>
-         <tr>
-           <th align="left"><code>SC_ELEMENT_CARET_SECONDARY</code></th>
-           <td>42</td>
-           <td>Translucent</td>
-           <td>All</td>
-           <td></td>
-           <td>Colour of carets when another window has focus</td>
-         </tr>
          <tr class="section">
            <th align="left"><code>SC_ELEMENT_CARET_LINE_BACK</code></th>
            <td>50</td>
@@ -3514,7 +3506,6 @@ struct Sci_TextToFind {
     <br />
     <a class="element" href="#SC_ELEMENT_SELECTION_SECONDARY_TEXT">SC_ELEMENT_SELECTION_SECONDARY_TEXT : colouralpha</a><br />
     <a class="element" href="#SC_ELEMENT_SELECTION_SECONDARY_BACK">SC_ELEMENT_SELECTION_SECONDARY_BACK : colouralpha</a><br />
-    <a class="element" href="#SC_ELEMENT_CARET_SECONDARY">SC_ELEMENT_CARET_SECONDARY : colouralpha</a><br />
     <br />
     <a class="element" href="#SC_ELEMENT_SELECTION_NO_FOCUS_TEXT">SC_ELEMENT_SELECTION_NO_FOCUS_TEXT : colouralpha</a><br />
     <a class="element" href="#SC_ELEMENT_SELECTION_NO_FOCUS_BACK">SC_ELEMENT_SELECTION_NO_FOCUS_BACK : colouralpha</a><br />
@@ -3629,8 +3620,7 @@ struct Sci_TextToFind {
 
     <p>
      <b id="SC_ELEMENT_SELECTION_SECONDARY_TEXT">SC_ELEMENT_SELECTION_SECONDARY_TEXT : colouralpha</b><br />
-     <b id="SC_ELEMENT_SELECTION_SECONDARY_BACK">SC_ELEMENT_SELECTION_SECONDARY_TEXT : colouralpha</b><br />
-     <b id="SC_ELEMENT_CARET_SECONDARY">SC_ELEMENT_CARET_SECONDARY : colouralpha</b><br />
+     <b id="SC_ELEMENT_SELECTION_SECONDARY_BACK">SC_ELEMENT_SELECTION_SECONDARY_BACK : colouralpha</b><br />
      On Unix systems running with the X window system or Wayland there is a 'primary selection' which is the text most recently
      selected in any application and which can be pasted by a middle button click.
      When working with a selection, it is commonly the primary selection so Scintilla draws the primary selection with the main and additional

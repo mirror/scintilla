@@ -1641,9 +1641,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 					rcCaret.left = std::round(xposCaret - caretWidthOffset);
 					rcCaret.right = rcCaret.left + vsDraw.caret.width;
 				}
-				int elementCaret = mainCaret ? SC_ELEMENT_CARET : SC_ELEMENT_CARET_ADDITIONAL;
-				if (!model.primarySelection)
-					elementCaret = SC_ELEMENT_CARET_SECONDARY;
+				const int elementCaret = mainCaret ? SC_ELEMENT_CARET : SC_ELEMENT_CARET_ADDITIONAL;
 				const ColourAlpha caretColour = *vsDraw.ElementColour(elementCaret);
 				//assert(caretColour.IsOpaque());
 				if (drawBlockCaret) {

@@ -230,11 +230,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 
 	elementBaseColours[SC_ELEMENT_CARET] = ColourAlpha(0, 0, 0);
 	elementBaseColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourAlpha(0x7f, 0x7f, 0x7f);
-	elementBaseColours[SC_ELEMENT_CARET_SECONDARY] = ColourAlpha(0, 0, 0, 0x40);
 	elementAllowsTranslucent.insert({
 		SC_ELEMENT_CARET,
 		SC_ELEMENT_CARET_ADDITIONAL,
-		SC_ELEMENT_CARET_SECONDARY,
 	});
 	caret.style = CARETSTYLE_LINE;
 	caret.width = 1;
