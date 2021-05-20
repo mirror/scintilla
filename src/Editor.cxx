@@ -2462,7 +2462,7 @@ bool Editor::NotifyMarginClick(Point pt, int modifiers) {
 				FoldAll(SC_FOLDACTION_TOGGLE);
 			} else {
 				const int levelClick = pdoc->GetLevel(lineClick);
-				if (levelClick & SC_FOLDLEVELHEADERFLAG) {
+				if (LevelIsHeader(levelClick)) {
 					if (shift) {
 						// Ensure all children visible
 						FoldExpand(lineClick, SC_FOLDACTION_EXPAND, levelClick);
@@ -5358,7 +5358,7 @@ Sci::Line Editor::ExpandLine(Sci::Line line) {
 	while (line <= lineMaxSubord) {
 		pcs->SetVisible(line, line, true);
 		const int level = pdoc->GetLevel(line);
-		if (level & SC_FOLDLEVELHEADERFLAG) {
+		if (LevelIsHeader(level)) {
 			if (pcs->GetExpanded(line)) {
 				line = ExpandLine(line);
 			} else {
@@ -5379,7 +5379,7 @@ void Editor::SetFoldExpanded(Sci::Line lineDoc, bool expanded) {
 void Editor::FoldLine(Sci::Line line, int action) {
 	if (line >= 0) {
 		if (action == SC_FOLDACTION_TOGGLE) {
-			if ((pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG) == 0) {
+			if (!LevelIsHeader(pdoc->GetLevel(line))) {
 				line = pdoc->GetFoldParent(line);
 				if (line < 0)
 					return;
@@ -5432,7 +5432,7 @@ void Editor::FoldExpand(Sci::Line line, int action, int level) {
 	pcs->SetVisible(line, lineMaxSubord, expanding);
 	while (line <= lineMaxSubord) {
 		const int levelLine = pdoc->GetLevel(line);
-		if (levelLine & SC_FOLDLEVELHEADERFLAG) {
+		if (LevelIsHeader(levelLine)) {
 			SetFoldExpanded(line, expanding);
 		}
 		line++;
@@ -5443,7 +5443,7 @@ void Editor::FoldExpand(Sci::Line line, int action, int level) {
 
 Sci::Line Editor::ContractedFoldNext(Sci::Line lineStart) const {
 	for (Sci::Line line = lineStart; line<pdoc->LinesTotal();) {
-		if (!pcs->GetExpanded(line) && (pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG))
+		if (!pcs->GetExpanded(line) && LevelIsHeader(pdoc->GetLevel(line)))
 			return line;
 		line = pcs->ContractedNext(line+1);
 		if (line < 0)
@@ -5470,7 +5470,7 @@ void Editor::EnsureLineVisible(Sci::Line lineDoc, bool enforcePolicy) {
 		// Back up to find a non-blank line
 		Sci::Line lookLine = lineDoc;
 		int lookLineLevel = pdoc->GetLevel(lookLine);
-		while ((lookLine > 0) && (lookLineLevel & SC_FOLDLEVELWHITEFLAG)) {
+		while ((lookLine > 0) && LevelIsWhitespace(lookLineLevel)) {
 			lookLineLevel = pdoc->GetLevel(--lookLine);
 		}
 		Sci::Line lineParent = pdoc->GetFoldParent(lookLine);
@@ -5519,7 +5519,7 @@ void Editor::FoldAll(int action) {
 	if (action == SC_FOLDACTION_TOGGLE) {
 		// Discover current state
 		for (int lineSeek = 0; lineSeek < maxLine; lineSeek++) {
-			if (pdoc->GetLevel(lineSeek) & SC_FOLDLEVELHEADERFLAG) {
+			if (LevelIsHeader(pdoc->GetLevel(lineSeek))) {
 				expanding = !pcs->GetExpanded(lineSeek);
 				break;
 			}
@@ -5529,14 +5529,14 @@ void Editor::FoldAll(int action) {
 		pcs->SetVisible(0, maxLine-1, true);
 		for (int line = 0; line < maxLine; line++) {
 			const int levelLine = pdoc->GetLevel(line);
-			if (levelLine & SC_FOLDLEVELHEADERFLAG) {
+			if (LevelIsHeader(levelLine)) {
 				SetFoldExpanded(line, true);
 			}
 		}
 	} else {
 		for (Sci::Line line = 0; line < maxLine; line++) {
 			const int level = pdoc->GetLevel(line);
-			if ((level & SC_FOLDLEVELHEADERFLAG) &&
+			if (LevelIsHeader(level) &&
 					(SC_FOLDLEVELBASE == LevelNumber(level))) {
 				SetFoldExpanded(line, false);
 				const Sci::Line lineMaxSubord = pdoc->GetLastChild(line, -1);
@@ -5551,15 +5551,15 @@ void Editor::FoldAll(int action) {
 }
 
 void Editor::FoldChanged(Sci::Line line, int levelNow, int levelPrev) {
-	if (levelNow & SC_FOLDLEVELHEADERFLAG) {
-		if (!(levelPrev & SC_FOLDLEVELHEADERFLAG)) {
+	if (LevelIsHeader(levelNow)) {
+		if (!LevelIsHeader(levelPrev)) {
 			// Adding a fold point.
 			if (pcs->SetExpanded(line, true)) {
 				RedrawSelMargin();
 			}
 			FoldExpand(line, SC_FOLDACTION_EXPAND, levelPrev);
 		}
-	} else if (levelPrev & SC_FOLDLEVELHEADERFLAG) {
+	} else if (LevelIsHeader(levelPrev)) {
 		const Sci::Line prevLine = line - 1;
 		const int prevLineLevel = pdoc->GetLevel(prevLine);
 
@@ -5577,7 +5577,7 @@ void Editor::FoldChanged(Sci::Line line, int levelNow, int levelPrev) {
 			FoldExpand(line, SC_FOLDACTION_EXPAND, levelPrev);
 		}
 	}
-	if (!(levelNow & SC_FOLDLEVELWHITEFLAG) &&
+	if (!LevelIsWhitespace(levelNow) &&
 	        (LevelNumber(levelPrev) > LevelNumber(levelNow))) {
 		if (pcs->HiddenLines()) {
 			// See if should still be hidden
@@ -5591,7 +5591,7 @@ void Editor::FoldChanged(Sci::Line line, int levelNow, int levelPrev) {
 	}
 
 	// Combining two blocks where the first one is collapsed (e.g. by adding characters in the line which separates the two blocks)
-	if (!(levelNow & SC_FOLDLEVELWHITEFLAG) && (LevelNumber(levelPrev) < LevelNumber(levelNow))) {
+	if (!LevelIsWhitespace(levelNow) && (LevelNumber(levelPrev) < LevelNumber(levelNow))) {
 		if (pcs->HiddenLines()) {
 			const Sci::Line parentLine = pdoc->GetFoldParent(line);
 			if (!pcs->GetExpanded(parentLine) && pcs->GetVisible(line))

@@ -2112,7 +2112,7 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 			xStartText = 100000;	// Don't limit to visible indentation on empty line
 			// This line is empty, so use indentation of last line with text
 			int indentLastWithText = model.pdoc->GetLineIndentation(lineLastWithText);
-			const int isFoldHeader = model.pdoc->GetLevel(lineLastWithText) & SC_FOLDLEVELHEADERFLAG;
+			const int isFoldHeader = LevelIsHeader(model.pdoc->GetLevel(lineLastWithText));
 			if (isFoldHeader) {
 				// Level is one more level than parent
 				indentLastWithText += model.pdoc->IndentSize();
@@ -2235,7 +2235,7 @@ static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewSt
 	const bool expanded = model.pcs->GetExpanded(line);
 	const int level = model.pdoc->GetLevel(line);
 	const int levelNext = model.pdoc->GetLevel(line + 1);
-	if ((level & SC_FOLDLEVELHEADERFLAG) &&
+	if (LevelIsHeader(level) &&
 		(LevelNumber(level) < LevelNumber(levelNext))) {
 		// Paint the line above the fold
 		if ((expanded && (model.foldFlags & SC_FOLDFLAG_LINEBEFORE_EXPANDED))
