@@ -945,14 +945,14 @@ Sci_Position SCI_METHOD Document::GetRelativePosition(Sci_Position positionStart
 		while (characterOffset != 0) {
 			const Sci::Position posNext = NextPosition(pos, increment);
 			if (posNext == pos)
-				return INVALID_POSITION;
+				return Sci::invalidPosition;
 			pos = posNext;
 			characterOffset -= increment;
 		}
 	} else {
 		pos = positionStart + characterOffset;
 		if ((pos < 0) || (pos > Length()))
-			return INVALID_POSITION;
+			return Sci::invalidPosition;
 	}
 	return pos;
 }
@@ -964,7 +964,7 @@ Sci::Position Document::GetRelativePositionUTF16(Sci::Position positionStart, Sc
 		while (characterOffset != 0) {
 			const Sci::Position posNext = NextPosition(pos, increment);
 			if (posNext == pos)
-				return INVALID_POSITION;
+				return Sci::invalidPosition;
 			if (std::abs(pos-posNext) > 3)	// 4 byte character = 2*UTF16.
 				characterOffset -= increment;
 			pos = posNext;
@@ -973,7 +973,7 @@ Sci::Position Document::GetRelativePositionUTF16(Sci::Position positionStart, Sc
 	} else {
 		pos = positionStart + characterOffset;
 		if ((pos < 0) || (pos > LengthNoExcept()))
-			return INVALID_POSITION;
+			return Sci::invalidPosition;
 	}
 	return pos;
 }

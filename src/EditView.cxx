@@ -626,7 +626,7 @@ void EditView::UpdateBidiData(const EditModel &model, const ViewStyle &vstyle, L
 Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, Sci::Line topLine,
 				     const ViewStyle &vs, PointEnd pe, const PRectangle rcClient) {
 	Point pt;
-	if (pos.Position() == INVALID_POSITION)
+	if (pos.Position() == Sci::invalidPosition)
 		return pt;
 	Sci::Line lineDoc = model.pdoc->SciLineFromPosition(pos.Position());
 	Sci::Position posLineStart = model.pdoc->LineStart(lineDoc);
@@ -702,9 +702,9 @@ SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditMo
 		visibleLine = 0;
 	const Sci::Line lineDoc = model.pcs->DocFromDisplay(visibleLine);
 	if (canReturnInvalid && (lineDoc < 0))
-		return SelectionPosition(INVALID_POSITION);
+		return SelectionPosition(Sci::invalidPosition);
 	if (lineDoc >= model.pdoc->LinesTotal())
-		return SelectionPosition(canReturnInvalid ? INVALID_POSITION :
+		return SelectionPosition(canReturnInvalid ? Sci::invalidPosition :
 			model.pdoc->Length());
 	const Sci::Position posLineStart = model.pdoc->LineStart(lineDoc);
 	std::shared_ptr<LineLayout> ll = RetrieveLineLayout(lineDoc, model);
@@ -749,7 +749,7 @@ SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditMo
 		if (!canReturnInvalid)
 			return SelectionPosition(ll->numCharsInLine + posLineStart);
 	}
-	return SelectionPosition(canReturnInvalid ? INVALID_POSITION : posLineStart);
+	return SelectionPosition(canReturnInvalid ? Sci::invalidPosition : posLineStart);
 }
 
 /**
@@ -797,7 +797,7 @@ Sci::Line EditView::DisplayFromPosition(Surface *surface, const EditModel &model
 Sci::Position EditView::StartEndDisplayLine(Surface *surface, const EditModel &model, Sci::Position pos, bool start, const ViewStyle &vs) {
 	const Sci::Line line = model.pdoc->SciLineFromPosition(pos);
 	std::shared_ptr<LineLayout> ll = RetrieveLineLayout(line, model);
-	Sci::Position posRet = INVALID_POSITION;
+	Sci::Position posRet = Sci::invalidPosition;
 	if (surface && ll) {
 		const Sci::Position posLineStart = model.pdoc->LineStart(line);
 		LayoutLine(model, surface, vs, ll.get(), model.wrapWidth);

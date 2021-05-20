@@ -136,7 +136,7 @@ Editor::Editor() : durationWrapOneByte(0.000001, 0.0000001, 0.00001) {
 	inDragDrop = DragDrop::none;
 	dropWentOutside = false;
 	posDrop = SelectionPosition(Sci::invalidPosition);
-	hotSpotClickPos = INVALID_POSITION;
+	hotSpotClickPos = Sci::invalidPosition;
 	selectionUnit = TextUnit::character;
 
 	lastXChosen = 0;
@@ -403,11 +403,11 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 
 	if (canReturnInvalid) {
 		if (!rcClient.Contains(pt))
-			return SelectionPosition(INVALID_POSITION);
+			return SelectionPosition(Sci::invalidPosition);
 		if (pt.x < vs.textStart)
-			return SelectionPosition(INVALID_POSITION);
+			return SelectionPosition(Sci::invalidPosition);
 		if (pt.y < 0)
-			return SelectionPosition(INVALID_POSITION);
+			return SelectionPosition(Sci::invalidPosition);
 	}
 	const PointDocument ptdoc = DocumentPointFromView(pt);
 	return view.SPositionFromLocation(surface, *this, ptdoc, canReturnInvalid,
@@ -872,7 +872,7 @@ void Editor::MovedCaret(SelectionPosition newPos, SelectionPosition previousPos,
 
 void Editor::MovePositionTo(SelectionPosition newPos, Selection::SelTypes selt, bool ensureVisible) {
 	const SelectionPosition spCaret = ((sel.Count() == 1) && sel.Empty()) ?
-		sel.Last() : SelectionPosition(INVALID_POSITION);
+		sel.Last() : SelectionPosition(Sci::invalidPosition);
 
 	const Sci::Position delta = newPos.Position() - sel.MainCaret();
 	newPos = ClampPositionIntoDocument(newPos);
@@ -3259,7 +3259,7 @@ Sci::Position Editor::StartEndDisplayLine(Sci::Position pos, bool start) {
 	RefreshStyleData();
 	AutoSurface surface(this);
 	const Sci::Position posRet = view.StartEndDisplayLine(surface, *this, pos, start, vs);
-	if (posRet == INVALID_POSITION) {
+	if (posRet == Sci::invalidPosition) {
 		return pos;
 	} else {
 		return posRet;
@@ -3625,7 +3625,7 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 
 	sel.RemoveDuplicates();
 
-	MovedCaret(sel.RangeMain().caret, SelectionPosition(INVALID_POSITION), true, caretPolicies);
+	MovedCaret(sel.RangeMain().caret, SelectionPosition(Sci::invalidPosition), true, caretPolicies);
 
 	// Invalidate the new state of the selection
 	InvalidateWholeSelection();
@@ -3696,7 +3696,7 @@ int Editor::DelWordOrLine(unsigned int iMessage) {
 	// May need something stronger here: can selections overlap at this point?
 	sel.RemoveDuplicates();
 
-	MovedCaret(sel.RangeMain().caret, SelectionPosition(INVALID_POSITION), true, caretPolicies);
+	MovedCaret(sel.RangeMain().caret, SelectionPosition(Sci::invalidPosition), true, caretPolicies);
 
 	// Invalidate the new state of the selection
 	InvalidateWholeSelection();
@@ -4129,7 +4129,7 @@ Sci::Position Editor::SearchText(
     sptr_t lParam) {			///< The text to search for.
 
 	const char *txt = CharPtrFromSPtr(lParam);
-	Sci::Position pos = INVALID_POSITION;
+	Sci::Position pos = Sci::invalidPosition;
 	Sci::Position lengthFound = strlen(txt);
 	if (!pdoc->HasCaseFolder())
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
@@ -4145,9 +4145,9 @@ Sci::Position Editor::SearchText(
 		}
 	} catch (RegexError &) {
 		errorStatus = SC_STATUS_WARN_REGEX;
-		return INVALID_POSITION;
+		return Sci::invalidPosition;
 	}
-	if (pos != INVALID_POSITION) {
+	if (pos != Sci::invalidPosition) {
 		SetSelection(pos, pos + lengthFound);
 	}
 
@@ -4725,17 +4725,17 @@ bool Editor::PositionIsHotspot(Sci::Position position) const {
 
 bool Editor::PointIsHotspot(Point pt) {
 	const Sci::Position pos = PositionFromLocation(pt, true, true);
-	if (pos == INVALID_POSITION)
+	if (pos == Sci::invalidPosition)
 		return false;
 	return PositionIsHotspot(pos);
 }
 
 void Editor::SetHoverIndicatorPosition(Sci::Position position) {
 	const Sci::Position hoverIndicatorPosPrev = hoverIndicatorPos;
-	hoverIndicatorPos = INVALID_POSITION;
+	hoverIndicatorPos = Sci::invalidPosition;
 	if (!vs.indicatorsDynamic)
 		return;
-	if (position != INVALID_POSITION) {
+	if (position != Sci::invalidPosition) {
 		for (const IDecoration *deco : pdoc->decorations->View()) {
 			if (vs.indicators[deco->Indicator()].IsDynamic()) {
 				if (pdoc->decorations->ValueAt(deco->Indicator(), position)) {
@@ -4751,7 +4751,7 @@ void Editor::SetHoverIndicatorPosition(Sci::Position position) {
 
 void Editor::SetHoverIndicatorPoint(Point pt) {
 	if (!vs.indicatorsDynamic) {
-		SetHoverIndicatorPosition(INVALID_POSITION);
+		SetHoverIndicatorPosition(Sci::invalidPosition);
 	} else {
 		SetHoverIndicatorPosition(PositionFromLocation(pt, true, true));
 	}
@@ -4879,11 +4879,11 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 		if (hotspot.Valid() && !PointIsHotspot(pt))
 			SetHotSpotRange(nullptr);
 
-		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt, true, true) != hotSpotClickPos) {
+		if (hotSpotClickPos != Sci::invalidPosition && PositionFromLocation(pt, true, true) != hotSpotClickPos) {
 			if (inDragDrop == DragDrop::none) {
 				DisplayCursor(Window::Cursor::text);
 			}
-			hotSpotClickPos = INVALID_POSITION;
+			hotSpotClickPos = Sci::invalidPosition;
 		}
 
 	} else {
@@ -4919,7 +4919,7 @@ void Editor::ButtonUpWithModifiers(Point pt, unsigned int curTime, int modifiers
 	//Platform::DebugPrintf("ButtonUp %d %d\n", HaveMouseCapture(), inDragDrop);
 	SelectionPosition newPos = SPositionFromLocation(pt, false, false,
 		AllowVirtualSpace(virtualSpaceOptions, sel.IsRectangular()));
-	if (hoverIndicatorPos != INVALID_POSITION)
+	if (hoverIndicatorPos != Sci::invalidPosition)
 		InvalidateRange(newPos.Position(), newPos.Position() + 1);
 	newPos = MovePositionOutsideChar(newPos, sel.MainCaret() - newPos.Position());
 	if (inDragDrop == DragDrop::initial) {
@@ -4928,8 +4928,8 @@ void Editor::ButtonUpWithModifiers(Point pt, unsigned int curTime, int modifiers
 		selectionUnit = TextUnit::character;
 		originalAnchorPos = sel.MainCaret();
 	}
-	if (hotSpotClickPos != INVALID_POSITION && PointIsHotspot(pt)) {
-		hotSpotClickPos = INVALID_POSITION;
+	if (hotSpotClickPos != Sci::invalidPosition && PointIsHotspot(pt)) {
+		hotSpotClickPos = Sci::invalidPosition;
 		SelectionPosition newCharPos = SPositionFromLocation(pt, false, true, false);
 		newCharPos = MovePositionOutsideChar(newCharPos, -1);
 		NotifyHotSpotReleaseClick(newCharPos.Position(), modifiers & SCI_CTRL);
@@ -8022,7 +8022,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 					return (iMessage == SCI_GETLINESELSTARTPOSITION) ? portion.start.Position() : portion.end.Position();
 				}
 			}
-			return INVALID_POSITION;
+			return Sci::invalidPosition;
 		}
 
 	case SCI_SETOVERTYPE:
