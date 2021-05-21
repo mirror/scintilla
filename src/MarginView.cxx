@@ -187,7 +187,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 			rcSelMargin.right = rcSelMargin.left + vs.ms[margin].width;
 
 			if (vs.ms[margin].style != SC_MARGIN_NUMBER) {
-				if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
+				if (vs.ms[margin].ShowsFolding()) {
 					// Required because of special way brush is created for selection margin
 					// Ensure patterns line up when scrolling with separate margin view
 					// by choosing correctly aligned variant.
@@ -223,7 +223,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 			// lessening of fold level which implies a 'fold tail' but which should not
 			// be displayed until the last of a sequence of whitespace.
 			bool needWhiteClosure = false;
-			if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
+			if (vs.ms[margin].ShowsFolding()) {
 				const int level = model.pdoc->GetLevel(model.pcs->DocFromDisplay(visibleLine));
 				if (LevelIsWhitespace(level)) {
 					Sci::Line lineBack = model.pcs->DocFromDisplay(visibleLine);
@@ -266,7 +266,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 
 				bool headWithTail = false;
 
-				if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
+				if (vs.ms[margin].ShowsFolding()) {
 					// Decide which fold indicator should be displayed
 					const int level = model.pdoc->GetLevel(lineDoc);
 					const int levelNext = model.pdoc->GetLevel(lineDoc + 1);
@@ -428,7 +428,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 					for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 						if (marks & 1) {
 							LineMarker::FoldPart part = LineMarker::FoldPart::undefined;
-							if ((vs.ms[margin].mask & SC_MASK_FOLDERS) && highlightDelimiter.IsFoldBlockHighlighted(lineDoc)) {
+							if (vs.ms[margin].ShowsFolding() && highlightDelimiter.IsFoldBlockHighlighted(lineDoc)) {
 								if (highlightDelimiter.IsBodyOfFoldBlock(lineDoc)) {
 									part = LineMarker::FoldPart::body;
 								} else if (highlightDelimiter.IsHeadOfFoldBlock(lineDoc)) {

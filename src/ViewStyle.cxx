@@ -38,6 +38,10 @@ MarginStyle::MarginStyle(int style_, int width_, int mask_) noexcept :
 	style(style_), width(width_), mask(mask_), sensitive(false), cursor(SC_CURSORREVERSEARROW) {
 }
 
+bool MarginStyle::ShowsFolding() const noexcept {
+	return (mask & SC_MASK_FOLDERS) != 0;
+}
+
 FontRealised::FontRealised() noexcept = default;
 
 FontRealised::~FontRealised() = default;

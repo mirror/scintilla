@@ -21,6 +21,7 @@ public:
 	bool sensitive;
 	int cursor;
 	MarginStyle(int style_= SC_MARGIN_SYMBOL, int width_=0, int mask_=0) noexcept;
+	bool ShowsFolding() const noexcept;
 };
 
 /**
