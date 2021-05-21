@@ -73,8 +73,8 @@ LineMarker &LineMarker::operator=(const LineMarker &other) {
 	return *this;
 }
 
-ColourAlpha LineMarker::BackWithAlpha() const noexcept {
-	return ColourAlpha(back, alpha);
+ColourRGBA LineMarker::BackWithAlpha() const noexcept {
+	return ColourRGBA(back, alpha);
 }
 
 void LineMarker::SetXPM(const char *textForm) {
@@ -98,7 +98,7 @@ enum class Expansion { Minus, Plus };
 enum class Shape { Square, Circle };
 
 void DrawSymbol(Surface *surface, Shape shape, Expansion expansion, PRectangle rcSymbol, XYPOSITION widthStroke,
-	ColourAlpha colourFill, ColourAlpha colourFrame, ColourAlpha colourFrameRight, ColourAlpha colourExpansion) {
+	ColourRGBA colourFill, ColourRGBA colourFrame, ColourRGBA colourFrameRight, ColourRGBA colourExpansion) {
 
 	const FillStroke fillStroke(colourFill, colourFrame, widthStroke);
 	const PRectangle rcSymbolLeft = Side(rcSymbol, Edge::left, (rcSymbol.Width() + widthStroke) / 2.0f);
@@ -137,7 +137,7 @@ void DrawSymbol(Surface *surface, Shape shape, Expansion expansion, PRectangle r
 	}
 }
 
-void DrawTail(Surface *surface, XYPOSITION leftLine, XYPOSITION rightTail, XYPOSITION centreY, XYPOSITION widthSymbolStroke, ColourAlpha fill) {
+void DrawTail(Surface *surface, XYPOSITION leftLine, XYPOSITION rightTail, XYPOSITION centreY, XYPOSITION widthSymbolStroke, ColourRGBA fill) {
 	const XYPOSITION slopeLength = 2.0f + widthSymbolStroke;
 	const XYPOSITION strokeTop = centreY + slopeLength;
 	const XYPOSITION halfWidth = widthSymbolStroke / 2.0f;
@@ -158,9 +158,9 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 	// Assume: edges of rcWhole are integers.
 	// Code can only really handle integer strokeWidth.
 
-	ColourAlpha colourHead = back;
-	ColourAlpha colourBody = back;
-	ColourAlpha colourTail = back;
+	ColourRGBA colourHead = back;
+	ColourRGBA colourBody = back;
+	ColourRGBA colourTail = back;
 
 	switch (part) {
 	case FoldPart::head:
@@ -258,11 +258,11 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 		break;
 
 	case SC_MARK_BOXPLUSCONNECTED: {
-			const ColourAlpha colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
+			const ColourRGBA colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
 			surface->FillRectangle(rcBelowSymbol, colourBelow);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
 
-			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourRGBA colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Square, Expansion::Plus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}
@@ -278,7 +278,7 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 			surface->FillRectangle(rcBelowSymbol, colourHead);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
 
-			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourRGBA colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Square, Expansion::Minus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}
@@ -290,11 +290,11 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 		break;
 
 	case SC_MARK_CIRCLEPLUSCONNECTED: {
-			const ColourAlpha colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
+			const ColourRGBA colourBelow = (part == FoldPart::headWithTail) ? colourTail : colourBody;
 			surface->FillRectangle(rcBelowSymbol, colourBelow);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
 
-			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourRGBA colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Circle, Expansion::Plus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}
@@ -309,7 +309,7 @@ void LineMarker::DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, Fo
 	case SC_MARK_CIRCLEMINUSCONNECTED: {
 			surface->FillRectangle(rcBelowSymbol, colourHead);
 			surface->FillRectangle(rcAboveSymbol, colourBody);
-			const ColourAlpha colourRight = (part == FoldPart::body) ? colourTail : colourHead;
+			const ColourRGBA colourRight = (part == FoldPart::body) ? colourTail : colourHead;
 			DrawSymbol(surface, Shape::Circle, Expansion::Minus, rcSymbol, widthStroke,
 				fore, colourHead, colourRight, colourTail);
 		}

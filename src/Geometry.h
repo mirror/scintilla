@@ -165,33 +165,33 @@ PRectangle PixelAlignOutside(const PRectangle &rc, int pixelDivisions) noexcept;
 * Holds an RGBA colour with 8 bits for each component.
 */
 constexpr const float componentMaximum = 255.0f;
-class ColourAlpha {
+class ColourRGBA {
 	int co;
 	constexpr static unsigned int Mixed(unsigned char a, unsigned char b, double proportion) noexcept {
 		return static_cast<unsigned int>(a + proportion * (b - a));
 	}
 public:
-	constexpr explicit ColourAlpha(int co_ = 0) noexcept : co(co_) {
+	constexpr explicit ColourRGBA(int co_ = 0) noexcept : co(co_) {
 	}
 
-	constexpr ColourAlpha(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha=0xff) noexcept :
-		ColourAlpha(red | (green << 8) | (blue << 16) | (alpha << 24)) {
+	constexpr ColourRGBA(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha=0xff) noexcept :
+		ColourRGBA(red | (green << 8) | (blue << 16) | (alpha << 24)) {
 	}
 
-	constexpr ColourAlpha(ColourAlpha cd, unsigned int alpha) noexcept :
-		ColourAlpha(cd.OpaqueRGB() | (alpha << 24)) {
+	constexpr ColourRGBA(ColourRGBA cd, unsigned int alpha) noexcept :
+		ColourRGBA(cd.OpaqueRGB() | (alpha << 24)) {
 	}
 
-	static constexpr ColourAlpha FromRGB(int co_) noexcept {
-		return ColourAlpha(co_ | (0xffu << 24));
+	static constexpr ColourRGBA FromRGB(int co_) noexcept {
+		return ColourRGBA(co_ | (0xffu << 24));
 	}
 
-	constexpr ColourAlpha WithoutAlpha() const noexcept {
-		return ColourAlpha(co & 0xffffff);
+	constexpr ColourRGBA WithoutAlpha() const noexcept {
+		return ColourRGBA(co & 0xffffff);
 	}
 
-	constexpr ColourAlpha Opaque() const noexcept {
-		return ColourAlpha(co | (0xffu << 24));
+	constexpr ColourRGBA Opaque() const noexcept {
+		return ColourRGBA(co | (0xffu << 24));
 	}
 
 	constexpr int AsInteger() const noexcept {
@@ -230,7 +230,7 @@ public:
 		return GetAlpha() / componentMaximum;
 	}
 
-	constexpr bool operator==(const ColourAlpha &other) const noexcept {
+	constexpr bool operator==(const ColourRGBA &other) const noexcept {
 		return co == other.co;
 	}
 
@@ -238,16 +238,16 @@ public:
 		return GetAlpha() == 0xff;
 	}
 
-	constexpr ColourAlpha MixedWith(ColourAlpha other) const noexcept {
+	constexpr ColourRGBA MixedWith(ColourRGBA other) const noexcept {
 		const unsigned int red = (GetRed() + other.GetRed()) / 2;
 		const unsigned int green = (GetGreen() + other.GetGreen()) / 2;
 		const unsigned int blue = (GetBlue() + other.GetBlue()) / 2;
 		const unsigned int alpha = (GetAlpha() + other.GetAlpha()) / 2;
-		return ColourAlpha(red, green, blue, alpha);
+		return ColourRGBA(red, green, blue, alpha);
 	}
 
-	constexpr ColourAlpha MixedWith(ColourAlpha other, double proportion) const noexcept {
-		return ColourAlpha(
+	constexpr ColourRGBA MixedWith(ColourRGBA other, double proportion) const noexcept {
+		return ColourRGBA(
 			Mixed(GetRed(), other.GetRed(), proportion),
 			Mixed(GetGreen(), other.GetGreen(), proportion),
 			Mixed(GetBlue(), other.GetBlue(), proportion),
@@ -260,9 +260,9 @@ public:
 */
 class Stroke {
 public:
-	ColourAlpha colour;
+	ColourRGBA colour;
 	XYPOSITION width;
-	constexpr Stroke(ColourAlpha colour_, XYPOSITION width_=1.0) noexcept : 
+	constexpr Stroke(ColourRGBA colour_, XYPOSITION width_=1.0) noexcept : 
 		colour(colour_), width(width_) {
 	}
 	constexpr float WidthF() const noexcept {
@@ -275,8 +275,8 @@ public:
 */
 class Fill {
 public:
-	ColourAlpha colour;
-	constexpr Fill(ColourAlpha colour_) noexcept : 
+	ColourRGBA colour;
+	constexpr Fill(ColourRGBA colour_) noexcept : 
 		colour(colour_) {
 	}
 };
@@ -288,10 +288,10 @@ class FillStroke {
 public:
 	Fill fill;
 	Stroke stroke;
-	constexpr FillStroke(ColourAlpha colourFill_, ColourAlpha colourStroke_, XYPOSITION widthStroke_=1.0) noexcept : 
+	constexpr FillStroke(ColourRGBA colourFill_, ColourRGBA colourStroke_, XYPOSITION widthStroke_=1.0) noexcept : 
 		fill(colourFill_), stroke(colourStroke_, widthStroke_) {
 	}
-	constexpr FillStroke(ColourAlpha colourBoth, XYPOSITION widthStroke_=1.0) noexcept : 
+	constexpr FillStroke(ColourRGBA colourBoth, XYPOSITION widthStroke_=1.0) noexcept : 
 		fill(colourBoth), stroke(colourBoth, widthStroke_) {
 	}
 };
@@ -302,8 +302,8 @@ public:
 class ColourStop {
 public:
 	XYPOSITION position;
-	ColourAlpha colour;
-	constexpr ColourStop(XYPOSITION position_, ColourAlpha colour_) noexcept :
+	ColourRGBA colour;
+	constexpr ColourStop(XYPOSITION position_, ColourRGBA colour_) noexcept :
 		position(position_), colour(colour_) {
 	}
 };

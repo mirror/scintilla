@@ -524,7 +524,7 @@ static AtkAttributeSet *AddTextIntAttribute(AtkAttributeSet *attributes, AtkText
 	return AddTextAttribute(attributes, attr, g_strdup(atk_text_attribute_get_value(attr, i)));
 }
 
-static AtkAttributeSet *AddTextColorAttribute(AtkAttributeSet *attributes, AtkTextAttribute attr, ColourAlpha colour) {
+static AtkAttributeSet *AddTextColorAttribute(AtkAttributeSet *attributes, AtkTextAttribute attr, ColourRGBA colour) {
 	return AddTextAttribute(attributes, attr,
 		g_strdup_printf("%u,%u,%u", colour.GetRed() * 257, colour.GetGreen() * 257, colour.GetBlue() * 257));
 }

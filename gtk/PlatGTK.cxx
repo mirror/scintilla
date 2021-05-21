@@ -146,7 +146,7 @@ class SurfaceImpl : public Surface {
 	PangoLayout *layout = nullptr;
 	Converter conv;
 	int characterSet = -1;
-	void PenColourAlpha(ColourAlpha fore) noexcept;
+	void PenColourAlpha(ColourRGBA fore) noexcept;
 	void SetConverter(int characterSet_);
 	void CairoRectangle(PRectangle rc) noexcept;
 public:
@@ -190,17 +190,17 @@ public:
 
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore);
-	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore);
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
 
-	void DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore);
-	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore);
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
 
@@ -276,7 +276,7 @@ const char *CharacterSetID(int characterSet) noexcept {
 	}
 }
 
-void SurfaceImpl::PenColourAlpha(ColourAlpha fore) noexcept {
+void SurfaceImpl::PenColourAlpha(ColourRGBA fore) noexcept {
 	if (context) {
 		cairo_set_source_rgba(context,
 			fore.GetRedComponent(),
@@ -767,7 +767,7 @@ size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t len) n
 }
 
 void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-			       ColourAlpha fore) {
+			       ColourRGBA fore) {
 	if (context) {
 		PenColourAlpha(fore);
 		const XYPOSITION xText = rc.left;
@@ -793,20 +793,20 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybas
 }
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				 ColourAlpha fore, ColourAlpha back) {
+				 ColourRGBA fore, ColourRGBA back) {
 	FillRectangleAligned(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				  ColourAlpha fore, ColourAlpha back) {
+				  ColourRGBA fore, ColourRGBA back) {
 	FillRectangleAligned(rc, back);
 	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				      ColourAlpha fore) {
+				      ColourRGBA fore) {
 	// Avoid drawing spaces in transparent mode
 	for (size_t i=0; i<text.length(); i++) {
 		if (text[i] != ' ') {
@@ -983,7 +983,7 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 }
 
 void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore) {
+	ColourRGBA fore) {
 	if (context) {
 		PenColourAlpha(fore);
 		const XYPOSITION xText = rc.left;
@@ -999,20 +999,20 @@ void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION 
 }
 
 void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	FillRectangleAligned(rc, back);
 	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	FillRectangleAligned(rc, back);
 	DrawTextBaseUTF8(rc, font_, ybase, text, fore);
 }
 
 void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore) {
+	ColourRGBA fore) {
 	// Avoid drawing spaces in transparent mode
 	for (size_t i = 0; i < text.length(); i++) {
 		if (text[i] != ' ') {
@@ -2104,12 +2104,12 @@ void Menu::Show(Point pt, const Window &w) {
 #endif
 }
 
-ColourAlpha Platform::Chrome() {
-	return ColourAlpha(0xe0, 0xe0, 0xe0);
+ColourRGBA Platform::Chrome() {
+	return ColourRGBA(0xe0, 0xe0, 0xe0);
 }
 
-ColourAlpha Platform::ChromeHighlight() {
-	return ColourAlpha(0xff, 0xff, 0xff);
+ColourRGBA Platform::ChromeHighlight() {
+	return ColourRGBA(0xff, 0xff, 0xff);
 }
 
 const char *Platform::DefaultFont() {

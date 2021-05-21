@@ -59,10 +59,10 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 	setAttribute(Qt::WA_KeyCompression);
 	setAttribute(Qt::WA_InputMethodEnabled);
 
-	sqt->vs.indicators[SC_INDICATOR_UNKNOWN] = Indicator(INDIC_HIDDEN, ColourAlpha(0, 0, 0xff));
-	sqt->vs.indicators[SC_INDICATOR_INPUT] = Indicator(INDIC_DOTS, ColourAlpha(0, 0, 0xff));
-	sqt->vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(INDIC_COMPOSITIONTHICK, ColourAlpha(0, 0, 0xff));
-	sqt->vs.indicators[SC_INDICATOR_TARGET] = Indicator(INDIC_STRAIGHTBOX, ColourAlpha(0, 0, 0xff));
+	sqt->vs.indicators[SC_INDICATOR_UNKNOWN] = Indicator(INDIC_HIDDEN, ColourRGBA(0, 0, 0xff));
+	sqt->vs.indicators[SC_INDICATOR_INPUT] = Indicator(INDIC_DOTS, ColourRGBA(0, 0, 0xff));
+	sqt->vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(INDIC_COMPOSITIONTHICK, ColourRGBA(0, 0, 0xff));
+	sqt->vs.indicators[SC_INDICATOR_TARGET] = Indicator(INDIC_STRAIGHTBOX, ColourRGBA(0, 0, 0xff));
 
 	connect(sqt, SIGNAL(notifyParent(SCNotification)),
 	        this, SLOT(notifyParent(SCNotification)));

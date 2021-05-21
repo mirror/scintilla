@@ -2528,10 +2528,10 @@ void ScintillaCocoa::SetFocusActiveState() {
 namespace {
 
 /**
- * Convert from an NSColor into a ColourAlpha
+ * Convert from an NSColor into a ColourRGBA
  */
-ColourAlpha ColourFromNSColor(NSColor *value) {
-	return ColourAlpha(static_cast<unsigned int>(value.redComponent * componentMaximum),
+ColourRGBA ColourFromNSColor(NSColor *value) {
+	return ColourRGBA(static_cast<unsigned int>(value.redComponent * componentMaximum),
 			   static_cast<unsigned int>(value.greenComponent * componentMaximum),
 			   static_cast<unsigned int>(value.blueComponent * componentMaximum),
 			   static_cast<unsigned int>(value.alphaComponent * componentMaximum));
@@ -2565,10 +2565,10 @@ void ScintillaCocoa::UpdateBaseElements() {
 			const int alpha = textBack.brightnessComponent > 0.5 ? 0x40 : 0x60;
 			// Make a translucent colour that approximates selectedTextBackgroundColor
 			NSColor *accent = [NSColor.controlAccentColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
-			const ColourAlpha colourAccent = ColourFromNSColor(accent);
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_BACK, ColourAlpha(colourAccent, alpha));
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, ColourAlpha(colourAccent, alpha/2)) || changed;
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_NO_FOCUS_BACK, ColourAlpha(ColourFromNSColor(noFocusBack), alpha)) || changed;
+			const ColourRGBA colourAccent = ColourFromNSColor(accent);
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_BACK, ColourRGBA(colourAccent, alpha));
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, ColourRGBA(colourAccent, alpha/2)) || changed;
+			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_NO_FOCUS_BACK, ColourRGBA(ColourFromNSColor(noFocusBack), alpha)) || changed;
 
 		}
 	}

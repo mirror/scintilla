@@ -497,7 +497,7 @@ int SurfaceImpl::Supports(int feature) noexcept {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::FillColour(ColourAlpha fill) {
+void SurfaceImpl::FillColour(ColourRGBA fill) {
 	// Set the Fill color to match
 	CGContextSetRGBFillColor(gc,
 				 fill.GetRedComponent(),
@@ -508,7 +508,7 @@ void SurfaceImpl::FillColour(ColourAlpha fill) {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::PenColourAlpha(ColourAlpha fore) {
+void SurfaceImpl::PenColourAlpha(ColourRGBA fore) {
 	// Set the Stroke color to match
 	CGContextSetRGBStrokeColor(gc,
 				   fore.GetRedComponent(),
@@ -741,7 +741,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	// For now, assume that copy can only be called on PixMap surfaces. Shows up black.
 	CGImageRef image = patternSurface.CreateImage();
 	if (image == NULL) {
-		FillRectangle(rc, ColourAlpha::FromRGB(0));
+		FillRectangle(rc, ColourRGBA::FromRGB(0));
 		return;
 	}
 
@@ -1147,7 +1147,7 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
 	CGImageRef image = source.CreateImage();
 	// If we could not get an image reference, fill the rectangle black
 	if (image == NULL) {
-		FillRectangle(rc, ColourAlpha::FromRGB(0));
+		FillRectangle(rc, ColourRGBA::FromRGB(0));
 		return;
 	}
 
@@ -1179,7 +1179,7 @@ std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *screen
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				 ColourAlpha fore, ColourAlpha back) {
+				 ColourRGBA fore, ColourRGBA back) {
 	FillRectangleAligned(rc, back);
 	DrawTextTransparent(rc, font_, ybase, text, fore);
 }
@@ -1187,7 +1187,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION yb
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				  ColourAlpha fore, ColourAlpha back) {
+				  ColourRGBA fore, ColourRGBA back) {
 	CGContextSaveGState(gc);
 	CGContextClipToRect(gc, PRectangleToCGRect(rc));
 	DrawTextNoClip(rc, font_, ybase, text, fore, back);
@@ -1252,7 +1252,7 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet) {
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				      ColourAlpha fore) {
+				      ColourRGBA fore) {
 	QuartzTextStyle *style = TextStyleFromFont(font_);
 	if (!style) {
 		return;
@@ -1351,7 +1351,7 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				 ColourAlpha fore, ColourAlpha back) {
+				 ColourRGBA fore, ColourRGBA back) {
 	FillRectangleAligned(rc, back);
 	DrawTextTransparentUTF8(rc, font_, ybase, text, fore);
 }
@@ -1359,7 +1359,7 @@ void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITIO
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				  ColourAlpha fore, ColourAlpha back) {
+				  ColourRGBA fore, ColourRGBA back) {
 	CGContextSaveGState(gc);
 	CGContextClipToRect(gc, PRectangleToCGRect(rc));
 	DrawTextNoClipUTF8(rc, font_, ybase, text, fore, back);
@@ -1369,7 +1369,7 @@ void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITI
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-				      ColourAlpha fore) {
+				      ColourRGBA fore) {
 	QuartzTextStyle *style = TextStyleFromFont(font_);
 	if (!style) {
 		return;
@@ -2287,14 +2287,14 @@ void Menu::Show(Point, const Window &) {
 
 //----------------- Platform -----------------------------------------------------------------------
 
-ColourAlpha Platform::Chrome() {
-	return ColourAlpha(0xE0, 0xE0, 0xE0);
+ColourRGBA Platform::Chrome() {
+	return ColourRGBA(0xE0, 0xE0, 0xE0);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-ColourAlpha Platform::ChromeHighlight() {
-	return ColourAlpha(0xFF, 0xFF, 0xFF);
+ColourRGBA Platform::ChromeHighlight() {
+	return ColourRGBA(0xFF, 0xFF, 0xFF);
 }
 
 //--------------------------------------------------------------------------------------------------

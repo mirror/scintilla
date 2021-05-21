@@ -179,9 +179,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 	// There are no image markers by default, so no need for calling CalcLargestMarkerHeight()
 	largestMarkerHeight = 0;
 
-	indicators[0] = Indicator(INDIC_SQUIGGLE, ColourAlpha(0, 0x7f, 0));
-	indicators[1] = Indicator(INDIC_TT, ColourAlpha(0, 0, 0xff));
-	indicators[2] = Indicator(INDIC_PLAIN, ColourAlpha(0xff, 0, 0));
+	indicators[0] = Indicator(INDIC_SQUIGGLE, ColourRGBA(0, 0x7f, 0));
+	indicators[1] = Indicator(INDIC_TT, ColourRGBA(0, 0, 0xff));
+	indicators[2] = Indicator(INDIC_PLAIN, ColourRGBA(0xff, 0, 0));
 
 	technology = SC_TECHNOLOGY_DEFAULT;
 	indicatorsDynamic = false;
@@ -200,10 +200,10 @@ void ViewStyle::Init(size_t stylesSize_) {
 	elementColours.erase(SC_ELEMENT_SELECTION_SECONDARY_TEXT);
 	elementColours.erase(SC_ELEMENT_SELECTION_NO_FOCUS_TEXT);
 	// Shades of grey for selection backgrounds
-	elementBaseColours[SC_ELEMENT_SELECTION_BACK] = ColourAlpha(0xc0, 0xc0, 0xc0, 0xff);
-	elementBaseColours[SC_ELEMENT_SELECTION_ADDITIONAL_BACK] = ColourAlpha(0xd7, 0xd7, 0xd7, 0xff);
-	elementBaseColours[SC_ELEMENT_SELECTION_SECONDARY_BACK] = ColourAlpha(0xb0, 0xb0, 0xb0, 0xff);
-	elementBaseColours[SC_ELEMENT_SELECTION_NO_FOCUS_BACK] = ColourAlpha(0x80, 0x80, 0x80, 0x3f);
+	elementBaseColours[SC_ELEMENT_SELECTION_BACK] = ColourRGBA(0xc0, 0xc0, 0xc0, 0xff);
+	elementBaseColours[SC_ELEMENT_SELECTION_ADDITIONAL_BACK] = ColourRGBA(0xd7, 0xd7, 0xd7, 0xff);
+	elementBaseColours[SC_ELEMENT_SELECTION_SECONDARY_BACK] = ColourRGBA(0xb0, 0xb0, 0xb0, 0xff);
+	elementBaseColours[SC_ELEMENT_SELECTION_NO_FOCUS_BACK] = ColourRGBA(0x80, 0x80, 0x80, 0x3f);
 	elementAllowsTranslucent.insert({
 		SC_ELEMENT_SELECTION_TEXT,
 		SC_ELEMENT_SELECTION_BACK,
@@ -225,11 +225,11 @@ void ViewStyle::Init(size_t stylesSize_) {
 	controlCharWidth = 0;
 	selbar = Platform::Chrome();
 	selbarlight = Platform::ChromeHighlight();
-	styles[STYLE_LINENUMBER].fore = ColourAlpha(0, 0, 0);
+	styles[STYLE_LINENUMBER].fore = ColourRGBA(0, 0, 0);
 	styles[STYLE_LINENUMBER].back = Platform::Chrome();
 
-	elementBaseColours[SC_ELEMENT_CARET] = ColourAlpha(0, 0, 0);
-	elementBaseColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourAlpha(0x7f, 0x7f, 0x7f);
+	elementBaseColours[SC_ELEMENT_CARET] = ColourRGBA(0, 0, 0);
+	elementBaseColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourRGBA(0x7f, 0x7f, 0x7f);
 	elementAllowsTranslucent.insert({
 		SC_ELEMENT_CARET,
 		SC_ELEMENT_CARET_ADDITIONAL,
@@ -282,7 +282,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	braceBadLightIndicator = 0;
 
 	edgeState = EDGE_NONE;
-	theEdge = EdgeProperties(0, ColourAlpha(0xc0, 0xc0, 0xc0));
+	theEdge = EdgeProperties(0, ColourRGBA(0xc0, 0xc0, 0xc0));
 
 	marginNumberPadding = 3;
 	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
@@ -384,8 +384,8 @@ void ViewStyle::EnsureStyle(size_t index) {
 }
 
 void ViewStyle::ResetDefaultStyle() {
-	styles[STYLE_DEFAULT].Clear(ColourAlpha(0,0,0),
-	        ColourAlpha(0xff,0xff,0xff),
+	styles[STYLE_DEFAULT].Clear(ColourRGBA(0,0,0),
+	        ColourRGBA(0xff,0xff,0xff),
 	        Platform::DefaultFontSize() * SC_FONT_SIZE_MULTIPLIER, fontNames.Save(Platform::DefaultFont()),
 	        SC_CHARSET_DEFAULT,
 	        SC_WEIGHT_NORMAL, false, false, false, Style::CaseForce::mixed, true, true, false);
@@ -401,8 +401,8 @@ void ViewStyle::ClearStyles() {
 	styles[STYLE_LINENUMBER].back = Platform::Chrome();
 
 	// Set call tip fore/back to match the values previously set for call tips
-	styles[STYLE_CALLTIP].back = ColourAlpha(0xff, 0xff, 0xff);
-	styles[STYLE_CALLTIP].fore = ColourAlpha(0x80, 0x80, 0x80);
+	styles[STYLE_CALLTIP].back = ColourRGBA(0xff, 0xff, 0xff);
+	styles[STYLE_CALLTIP].fore = ColourRGBA(0x80, 0x80, 0x80);
 }
 
 void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {
@@ -470,8 +470,8 @@ bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) cons
 // display itself (as long as it's not an SC_MARK_EMPTY marker).  These are checked in order
 // with the earlier taking precedence.  When multiple markers cause background override,
 // the colour for the highest numbered one is used.
-std::optional<ColourAlpha> ViewStyle::Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const {
-	std::optional<ColourAlpha> background;
+std::optional<ColourRGBA> ViewStyle::Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const {
+	std::optional<ColourRGBA> background;
 	if (!caretLine.frame && (caretActive || caretLine.alwaysShow) &&
 		(caretLine.layer == Layer::base) && lineContainsCaret) {
 		background = ElementColour(SC_ELEMENT_CARET_LINE_BACK);
@@ -527,7 +527,7 @@ bool ViewStyle::WhiteSpaceVisible(bool inIndent) const noexcept {
 		viewWhitespace == WhiteSpace::visibleAlways;
 }
 
-ColourAlpha ViewStyle::WrapColour() const {
+ColourRGBA ViewStyle::WrapColour() const {
 	return ElementColour(SC_ELEMENT_WHITE_SPACE).value_or(styles[STYLE_DEFAULT].fore);
 }
 
@@ -542,7 +542,7 @@ void ViewStyle::AddMultiEdge(uptr_t wParam, sptr_t lParam) {
 		EdgeProperties(column, lParam));
 }
 
-std::optional<ColourAlpha> ViewStyle::ElementColour(int element) const {
+std::optional<ColourRGBA> ViewStyle::ElementColour(int element) const {
 	ElementMap::const_iterator search = elementColours.find(element);
 	if (search != elementColours.end()) {
 		if (search->second.has_value()) {
@@ -569,7 +569,7 @@ bool ViewStyle::ResetElement(int element) {
 	return changed;
 }
 
-bool ViewStyle::SetElementColour(int element, ColourAlpha colour) {
+bool ViewStyle::SetElementColour(int element, ColourRGBA colour) {
 	ElementMap::const_iterator search = elementColours.find(element);
 	const bool changed =
 		(search == elementColours.end()) ||
@@ -580,20 +580,20 @@ bool ViewStyle::SetElementColour(int element, ColourAlpha colour) {
 
 bool ViewStyle::SetElementColourOptional(int element, uptr_t wParam, sptr_t lParam) {
 	if (wParam) {
-		return SetElementColour(element, ColourAlpha::FromRGB(static_cast<int>(lParam)));
+		return SetElementColour(element, ColourRGBA::FromRGB(static_cast<int>(lParam)));
 	} else {
 		return ResetElement(element);
 	}
 }
 
 void ViewStyle::SetElementRGB(int element, int rgb) {
-	const ColourAlpha current = ElementColour(element).value_or(ColourAlpha(0, 0, 0, 0));
-	elementColours[element] = ColourAlpha(ColourAlpha(rgb), current.GetAlpha());
+	const ColourRGBA current = ElementColour(element).value_or(ColourRGBA(0, 0, 0, 0));
+	elementColours[element] = ColourRGBA(ColourRGBA(rgb), current.GetAlpha());
 }
 
 void ViewStyle::SetElementAlpha(int element, int alpha) {
-	const ColourAlpha current = ElementColour(element).value_or(ColourAlpha(0, 0, 0, 0));
-	elementColours[element] = ColourAlpha(current, std::min(alpha, 0xff));
+	const ColourRGBA current = ElementColour(element).value_or(ColourRGBA(0, 0, 0, 0));
+	elementColours[element] = ColourRGBA(current, std::min(alpha, 0xff));
 }
 
 bool ViewStyle::ElementIsSet(int element) const {
@@ -604,7 +604,7 @@ bool ViewStyle::ElementIsSet(int element) const {
 	return false;
 }
 
-bool ViewStyle::SetElementBase(int element, ColourAlpha colour) {
+bool ViewStyle::SetElementBase(int element, ColourRGBA colour) {
 	ElementMap::const_iterator search = elementBaseColours.find(element);
 	const bool changed =
 		(search == elementBaseColours.end()) ||

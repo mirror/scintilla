@@ -468,9 +468,9 @@ class SurfaceGDI : public Surface {
 	// There appears to be a 16 bit string length limit in GDI on NT.
 	int maxLenText = 65535;
 
-	void PenColour(ColourAlpha fore, XYPOSITION widthStroke) noexcept;
+	void PenColour(ColourRGBA fore, XYPOSITION widthStroke) noexcept;
 
-	void BrushColour(ColourAlpha back) noexcept;
+	void BrushColour(ColourRGBA back) noexcept;
 	void SetFont(const Font *font_);
 	void Clear() noexcept;
 
@@ -516,16 +516,16 @@ public:
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
 	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
 
 	void DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
-	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
 
@@ -630,7 +630,7 @@ void SurfaceGDI::SetMode(SurfaceMode mode_) {
 	mode = mode_;
 }
 
-void SurfaceGDI::PenColour(ColourAlpha fore, XYPOSITION widthStroke) noexcept {
+void SurfaceGDI::PenColour(ColourRGBA fore, XYPOSITION widthStroke) noexcept {
 	if (pen) {
 		::SelectObject(hdc, penOld);
 		::DeleteObject(pen);
@@ -652,7 +652,7 @@ void SurfaceGDI::PenColour(ColourAlpha fore, XYPOSITION widthStroke) noexcept {
 	penOld = SelectPen(hdc, pen);
 }
 
-void SurfaceGDI::BrushColour(ColourAlpha back) noexcept {
+void SurfaceGDI::BrushColour(ColourRGBA back) noexcept {
 	if (brush) {
 		::SelectObject(hdc, brushOld);
 		::DeleteObject(brush);
@@ -773,7 +773,7 @@ constexpr byte AlphaScaled(unsigned char component, unsigned int alpha) noexcept
 	return static_cast<byte>(component * alpha / 255);
 }
 
-constexpr DWORD dwordMultiplied(ColourAlpha colour) noexcept {
+constexpr DWORD dwordMultiplied(ColourRGBA colour) noexcept {
 	return dwordFromBGRA(
 		AlphaScaled(colour.GetBlue(), colour.GetAlpha()),
 		AlphaScaled(colour.GetGreen(), colour.GetAlpha()),
@@ -866,15 +866,15 @@ constexpr unsigned int Proportional(unsigned char a, unsigned char b, XYPOSITION
 	return static_cast<unsigned int>(a + t * (b - a));
 }
 
-ColourAlpha Proportional(ColourAlpha a, ColourAlpha b, XYPOSITION t) noexcept {
-	return ColourAlpha(
+ColourRGBA Proportional(ColourRGBA a, ColourRGBA b, XYPOSITION t) noexcept {
+	return ColourRGBA(
 		Proportional(a.GetRed(), b.GetRed(), t),
 		Proportional(a.GetGreen(), b.GetGreen(), t),
 		Proportional(a.GetBlue(), b.GetBlue(), t),
 		Proportional(a.GetAlpha(), b.GetAlpha(), t));
 }
 
-ColourAlpha GradientValue(const std::vector<ColourStop> &stops, XYPOSITION proportion) noexcept {
+ColourRGBA GradientValue(const std::vector<ColourStop> &stops, XYPOSITION proportion) noexcept {
 	for (size_t stop = 0; stop < stops.size() - 1; stop++) {
 		// Loop through each pair of stops
 		const XYPOSITION positionStart = stops[stop].position;
@@ -886,7 +886,7 @@ ColourAlpha GradientValue(const std::vector<ColourStop> &stops, XYPOSITION propo
 		}
 	}
 	// Loop should always find a value
-	return ColourAlpha();
+	return ColourRGBA();
 }
 
 constexpr SIZE SizeOfRect(RECT rc) noexcept {
@@ -959,7 +959,7 @@ void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 			for (LONG y = 0; y < size.cy; y++) {
 				// Find y/height proportional colour
 				const XYPOSITION proportion = y / (rc.Height() - 1.0f);
-				const ColourAlpha mixed = GradientValue(stops, proportion);
+				const ColourRGBA mixed = GradientValue(stops, proportion);
 				const DWORD valFill = dwordMultiplied(mixed);
 				for (LONG x = 0; x < size.cx; x++) {
 					section.SetPixel(x, y, valFill);
@@ -969,7 +969,7 @@ void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> 
 			for (LONG x = 0; x < size.cx; x++) {
 				// Find x/width proportional colour
 				const XYPOSITION proportion = x / (rc.Width() - 1.0f);
-				const ColourAlpha mixed = GradientValue(stops, proportion);
+				const ColourRGBA mixed = GradientValue(stops, proportion);
 				const DWORD valFill = dwordMultiplied(mixed);
 				for (LONG y = 0; y < size.cy; y++) {
 					section.SetPixel(x, y, valFill);
@@ -1042,21 +1042,21 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 }
 
 void SurfaceGDI::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	::SetTextColor(hdc, fore.OpaqueRGB());
 	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	::SetTextColor(hdc, fore.OpaqueRGB());
 	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommon(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
 }
 
 void SurfaceGDI::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore) {
+	ColourRGBA fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
@@ -1134,21 +1134,21 @@ void SurfaceGDI::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION
 }
 
 void SurfaceGDI::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	::SetTextColor(hdc, fore.OpaqueRGB());
 	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	::SetTextColor(hdc, fore.OpaqueRGB());
 	::SetBkColor(hdc, back.OpaqueRGB());
 	DrawTextCommonUTF8(rc, font_, ybase, text, ETO_OPAQUE | ETO_CLIPPED);
 }
 
 void SurfaceGDI::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore) {
+	ColourRGBA fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
@@ -1276,7 +1276,7 @@ const int SupportsD2D[] = {
 	SC_SUPPORTS_PIXEL_MODIFICATION,
 };
 
-constexpr D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {
+constexpr D2D_COLOR_F ColorFromColourAlpha(ColourRGBA colour) noexcept {
 	return D2D_COLOR_F{
 		colour.GetRedComponent(),
 		colour.GetGreenComponent(),
@@ -1341,7 +1341,7 @@ public:
 	int Supports(int feature) noexcept override;
 	bool Initialised() override;
 
-	void D2DPenColourAlpha(ColourAlpha fore) noexcept;
+	void D2DPenColourAlpha(ColourRGBA fore) noexcept;
 	int LogPixelsY() override;
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
@@ -1366,15 +1366,15 @@ public:
 
 	void DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, int codePageOverride, UINT fuOptions);
 
-	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
 
-	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore, ColourAlpha back) override;
-	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore, ColourRGBA back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
 
@@ -1478,7 +1478,7 @@ HRESULT SurfaceD2D::GetBitmap(ID2D1Bitmap **ppBitmap) {
 	return pBitmapRenderTarget->GetBitmap(ppBitmap);
 }
 
-void SurfaceD2D::D2DPenColourAlpha(ColourAlpha fore) noexcept {
+void SurfaceD2D::D2DPenColourAlpha(ColourRGBA fore) noexcept {
 	if (pRenderTarget) {
 		const D2D_COLOR_F col = ColorFromColourAlpha(fore);
 		if (pBrush) {
@@ -2356,7 +2356,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 }
 
 void SurfaceD2D::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
@@ -2365,7 +2365,7 @@ void SurfaceD2D::DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION yba
 }
 
 void SurfaceD2D::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
@@ -2374,7 +2374,7 @@ void SurfaceD2D::DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION yb
 }
 
 void SurfaceD2D::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore) {
+	ColourRGBA fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
@@ -2483,7 +2483,7 @@ XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
 }
 
 void SurfaceD2D::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
@@ -2492,7 +2492,7 @@ void SurfaceD2D::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION
 }
 
 void SurfaceD2D::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore, ColourAlpha back) {
+	ColourRGBA fore, ColourRGBA back) {
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
@@ -2501,7 +2501,7 @@ void SurfaceD2D::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITIO
 }
 
 void SurfaceD2D::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text,
-	ColourAlpha fore) {
+	ColourRGBA fore) {
 	// Avoid drawing spaces in transparent mode
 	for (const char ch : text) {
 		if (ch != ' ') {
@@ -3158,7 +3158,7 @@ void ListBoxX::ClearRegisteredImages() {
 
 namespace {
 
-int ColourOfElement(std::optional<ColourAlpha> colour, int nIndex) {
+int ColourOfElement(std::optional<ColourRGBA> colour, int nIndex) {
 	if (colour.has_value()) {
 		return colour.value().OpaqueRGB();
 	} else {
@@ -3811,12 +3811,12 @@ void Menu::Show(Point pt, const Window &w) {
 	Destroy();
 }
 
-ColourAlpha Platform::Chrome() {
-	return ColourAlpha::FromRGB(::GetSysColor(COLOR_3DFACE));
+ColourRGBA Platform::Chrome() {
+	return ColourRGBA::FromRGB(::GetSysColor(COLOR_3DFACE));
 }
 
-ColourAlpha Platform::ChromeHighlight() {
-	return ColourAlpha::FromRGB(::GetSysColor(COLOR_3DHIGHLIGHT));
+ColourRGBA Platform::ChromeHighlight() {
+	return ColourRGBA::FromRGB(::GetSysColor(COLOR_3DHIGHLIGHT));
 }
 
 const char *Platform::DefaultFont() {

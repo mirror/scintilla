@@ -1004,19 +1004,19 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_CALLTIPSETBACK:
-		ct.colourBG = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		ct.colourBG = ColourRGBA::FromRGB(static_cast<int>(wParam));
 		vs.styles[STYLE_CALLTIP].back = ct.colourBG;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_CALLTIPSETFORE:
-		ct.colourUnSel = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		ct.colourUnSel = ColourRGBA::FromRGB(static_cast<int>(wParam));
 		vs.styles[STYLE_CALLTIP].fore = ct.colourUnSel;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_CALLTIPSETFOREHLT:
-		ct.colourSel = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		ct.colourSel = ColourRGBA::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 

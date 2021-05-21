@@ -44,11 +44,11 @@ public:
 	Window wDraw;
 	bool inCallTipMode;
 	Sci::Position posStartCallTip;
-	ColourAlpha colourBG;
-	ColourAlpha colourUnSel;
-	ColourAlpha colourSel;
-	ColourAlpha colourShade;
-	ColourAlpha colourLight;
+	ColourRGBA colourBG;
+	ColourRGBA colourUnSel;
+	ColourRGBA colourSel;
+	ColourRGBA colourShade;
+	ColourRGBA colourLight;
 	int codePage;
 	int clickPlace;
 
@@ -91,7 +91,7 @@ public:
 	bool UseStyleCallTip() const noexcept;
 
 	// Modify foreground and background colours
-	void SetForeBack(const ColourAlpha &fore, const ColourAlpha &back) noexcept;
+	void SetForeBack(const ColourRGBA &fore, const ColourRGBA &back) noexcept;
 };
 
 }

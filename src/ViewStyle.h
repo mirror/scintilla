@@ -15,7 +15,7 @@ namespace Scintilla {
 class MarginStyle {
 public:
 	int style;
-	ColourAlpha back;
+	ColourRGBA back;
 	int width;
 	int mask;
 	bool sensitive;
@@ -50,9 +50,9 @@ typedef std::map<FontSpecification, std::unique_ptr<FontRealised>> FontMap;
 
 enum class WrapMode { none, word, character, whitespace };
 
-inline std::optional<ColourAlpha> OptionalColour(uptr_t wParam, sptr_t lParam) {
+inline std::optional<ColourRGBA> OptionalColour(uptr_t wParam, sptr_t lParam) {
 	if (wParam) {
-		return ColourAlpha::FromRGB(static_cast<int>(lParam));
+		return ColourRGBA::FromRGB(static_cast<int>(lParam));
 	} else {
 		return {};
 	}
@@ -96,12 +96,12 @@ struct WrapAppearance {
 
 struct EdgeProperties {
 	int column = 0;
-	ColourAlpha colour;
-	EdgeProperties(int column_ = 0, ColourAlpha colour_ = ColourAlpha::FromRGB(0)) noexcept :
+	ColourRGBA colour;
+	EdgeProperties(int column_ = 0, ColourRGBA colour_ = ColourRGBA::FromRGB(0)) noexcept :
 		column(column_), colour(colour_) {
 	}
 	EdgeProperties(uptr_t wParam, sptr_t lParam) noexcept :
-		column(static_cast<int>(wParam)), colour(ColourAlpha::FromRGB(static_cast<int>(lParam))) {
+		column(static_cast<int>(wParam)), colour(ColourRGBA::FromRGB(static_cast<int>(lParam))) {
 	}
 };
 
@@ -131,10 +131,10 @@ public:
 
 	int controlCharSymbol;
 	XYPOSITION controlCharWidth;
-	ColourAlpha selbar;
-	ColourAlpha selbarlight;
-	std::optional<ColourAlpha> foldmarginColour;
-	std::optional<ColourAlpha> foldmarginHighlightColour;
+	ColourRGBA selbar;
+	ColourRGBA selbarlight;
+	std::optional<ColourRGBA> foldmarginColour;
+	std::optional<ColourRGBA> foldmarginHighlightColour;
 	bool hotspotUnderline;
 	/// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
 	int leftMarginWidth;	///< Spacing margin on left of text
@@ -177,7 +177,7 @@ public:
 	int ctrlCharPadding; // the padding around control character text blobs
 	int lastSegItalicsOffset; // the offset so as not to clip italic characters at EOLs
 
-	using ElementMap = std::map<int, std::optional<ColourAlpha>>;
+	using ElementMap = std::map<int, std::optional<ColourRGBA>>;
 	ElementMap elementColours;
 	ElementMap elementBaseColours;
 	std::set<int> elementAllowsTranslucent;
@@ -210,23 +210,23 @@ public:
 	void CalcLargestMarkerHeight() noexcept;
 	int GetFrameWidth() const noexcept;
 	bool IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const;
-	std::optional<ColourAlpha> Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
+	std::optional<ColourRGBA> Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
 	bool SelectionBackgroundDrawn() const noexcept;
 	bool SelectionTextDrawn() const;
 	bool WhitespaceBackgroundDrawn() const;
-	ColourAlpha WrapColour() const;
+	ColourRGBA WrapColour() const;
 
 	void AddMultiEdge(uptr_t wParam, sptr_t lParam);
 
-	std::optional<ColourAlpha> ElementColour(int element) const;
+	std::optional<ColourRGBA> ElementColour(int element) const;
 	bool ElementAllowsTranslucent(int element) const;
 	bool ResetElement(int element);
-	bool SetElementColour(int element, ColourAlpha colour);
+	bool SetElementColour(int element, ColourRGBA colour);
 	bool SetElementColourOptional(int element, uptr_t wParam, sptr_t lParam);
 	void SetElementRGB(int element, int rgb);
 	void SetElementAlpha(int element, int alpha);
 	bool ElementIsSet(int element) const;
-	bool SetElementBase(int element, ColourAlpha colour);
+	bool SetElementBase(int element, ColourRGBA colour);
 
 	bool SetWrapState(int wrapState_) noexcept;
 	bool SetWrapVisualFlags(int wrapVisualFlags_) noexcept;

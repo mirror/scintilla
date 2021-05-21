@@ -28,7 +28,7 @@ using namespace Scintilla;
 void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine, const PRectangle &rcCharacter, State state, int value) const {
 	StyleAndColour sacDraw = sacNormal;
 	if (Flags() & SC_INDICFLAG_VALUEFORE) {
-		sacDraw.fore = ColourAlpha::FromRGB(value & SC_INDICVALUEMASK);
+		sacDraw.fore = ColourRGBA::FromRGB(value & SC_INDICVALUEMASK);
 	}
 	if (state == State::hover) {
 		sacDraw = sacHover;
@@ -80,13 +80,13 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			for (int x = 0; x < width; x++) {
 				if (x%2) {
 					// Two halfway columns have a full pixel in middle flanked by light pixels
-					image.SetPixel(x, 0, ColourAlpha(sacDraw.fore, alphaSide));
-					image.SetPixel(x, 1, ColourAlpha(sacDraw.fore, alphaFull));
-					image.SetPixel(x, 2, ColourAlpha(sacDraw.fore, alphaSide));
+					image.SetPixel(x, 0, ColourRGBA(sacDraw.fore, alphaSide));
+					image.SetPixel(x, 1, ColourRGBA(sacDraw.fore, alphaFull));
+					image.SetPixel(x, 2, ColourRGBA(sacDraw.fore, alphaSide));
 				} else {
 					// Extreme columns have a full pixel at bottom or top and a mid-tone pixel in centre
-					image.SetPixel(x, (x % 4) ? 0 : 2, ColourAlpha(sacDraw.fore, alphaFull));
-					image.SetPixel(x, 1, ColourAlpha(sacDraw.fore, alphaSide2));
+					image.SetPixel(x, (x % 4) ? 0 : 2, ColourRGBA(sacDraw.fore, alphaFull));
+					image.SetPixel(x, 1, ColourRGBA(sacDraw.fore, alphaSide2));
 				}
 			}
 			surface->DrawRGBAImage(rcSquiggle, image.GetWidth(), image.GetHeight(), image.Pixels());
@@ -161,7 +161,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			PRectangle rcBox = rcFullHeightAligned;
 			rcBox.top = rcBox.top + 1.0f;
 			rcBox.bottom = ymid + 1.0f;
-			surface->RectangleFrame(rcBox, Stroke(ColourAlpha(sacDraw.fore, outlineAlpha), strokeWidth));
+			surface->RectangleFrame(rcBox, Stroke(ColourRGBA(sacDraw.fore, outlineAlpha), strokeWidth));
 		}
 		break;
 
@@ -172,7 +172,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			if (sacDraw.style != INDIC_FULLBOX)
 				rcBox.top = rcBox.top + 1;
 			surface->AlphaRectangle(rcBox, (sacDraw.style == INDIC_ROUNDBOX) ? 1.0f : 0.0f,
-						FillStroke(ColourAlpha(sacDraw.fore, fillAlpha), ColourAlpha(sacDraw.fore, outlineAlpha), strokeWidth));
+						FillStroke(ColourRGBA(sacDraw.fore, fillAlpha), ColourRGBA(sacDraw.fore, outlineAlpha), strokeWidth));
 		}
 		break;
 
@@ -181,8 +181,8 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			PRectangle rcBox = rcFullHeightAligned;
 			rcBox.top = rcBox.top + 1;
 			const Surface::GradientOptions options = Surface::GradientOptions::topToBottom;
-			const ColourAlpha start(sacDraw.fore, fillAlpha);
-			const ColourAlpha end(sacDraw.fore, 0);
+			const ColourRGBA start(sacDraw.fore, fillAlpha);
+			const ColourRGBA end(sacDraw.fore, 0);
 			std::vector<ColourStop> stops;
 			switch (sacDraw.style) {
 			case INDIC_GRADIENT:
@@ -209,13 +209,13 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			// Draw horizontal lines top and bottom
 			for (int x=0; x<width; x++) {
 				for (int y = 0; y< height; y += height - 1) {
-					image.SetPixel(x, y, ColourAlpha(sacDraw.fore, ((x + y) % 2) ? outlineAlpha : fillAlpha));
+					image.SetPixel(x, y, ColourRGBA(sacDraw.fore, ((x + y) % 2) ? outlineAlpha : fillAlpha));
 				}
 			}
 			// Draw vertical lines left and right
 			for (int y = 1; y<height; y++) {
 				for (int x=0; x<width; x += width-1) {
-					image.SetPixel(x, y, ColourAlpha(sacDraw.fore, ((x + y) % 2) ? outlineAlpha : fillAlpha));
+					image.SetPixel(x, y, ColourRGBA(sacDraw.fore, ((x + y) % 2) ? outlineAlpha : fillAlpha));
 				}
 			}
 			surface->DrawRGBAImage(rcBox, image.GetWidth(), image.GetHeight(), image.Pixels());

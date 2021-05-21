@@ -230,24 +230,24 @@ bool SurfaceImpl::Initialised()
 	return device != nullptr;
 }
 
-void SurfaceImpl::PenColour(ColourAlpha fore)
+void SurfaceImpl::PenColour(ColourRGBA fore)
 {
-	QPen penOutline(QColorFromColourAlpha(fore));
+	QPen penOutline(QColorFromColourRGBA(fore));
 	penOutline.setCapStyle(Qt::FlatCap);
 	GetPainter()->setPen(penOutline);
 }
 
-void SurfaceImpl::PenColourWidth(ColourAlpha fore, XYPOSITION strokeWidth) {
-	QPen penOutline(QColorFromColourAlpha(fore));
+void SurfaceImpl::PenColourWidth(ColourRGBA fore, XYPOSITION strokeWidth) {
+	QPen penOutline(QColorFromColourRGBA(fore));
 	penOutline.setCapStyle(Qt::FlatCap);
 	penOutline.setJoinStyle(Qt::MiterJoin);
 	penOutline.setWidthF(strokeWidth);
 	GetPainter()->setPen(penOutline);
 }
 
-void SurfaceImpl::BrushColour(ColourAlpha back)
+void SurfaceImpl::BrushColour(ColourRGBA back)
 {
-	GetPainter()->setBrush(QBrush(QColorFromColourAlpha(back)));
+	GetPainter()->setBrush(QBrush(QColorFromColourRGBA(back)));
 }
 
 void SurfaceImpl::SetCodec(const Font *font)
@@ -334,7 +334,7 @@ void SurfaceImpl::RectangleFrame(PRectangle rc, Stroke stroke) {
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Fill fill)
 {
-	GetPainter()->fillRect(QRectFFromPRect(rc), QColorFromColourAlpha(fill.colour));
+	GetPainter()->fillRect(QRectFFromPRect(rc), QColorFromColourRGBA(fill.colour));
 }
 
 void SurfaceImpl::FillRectangleAligned(PRectangle rc, Fill fill)
@@ -370,7 +370,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, FillStroke fillStroke)
 
 void SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke)
 {
-	QColor qFill = QColorFromColourAlpha(fillStroke.fill.colour);
+	QColor qFill = QColorFromColourRGBA(fillStroke.fill.colour);
 	QBrush brushFill(qFill);
 	GetPainter()->setBrush(brushFill);
 	if (fillStroke.fill.colour == fillStroke.stroke.colour) {
@@ -384,7 +384,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStrok
 			GetPainter()->fillRect(rect, brushFill);
 		}
 	} else {
-		QColor qOutline = QColorFromColourAlpha(fillStroke.stroke.colour);
+		QColor qOutline = QColorFromColourRGBA(fillStroke.stroke.colour);
 		QPen penOutline(qOutline);
 		penOutline.setWidthF(fillStroke.stroke.width);
 		GetPainter()->setPen(penOutline);
@@ -414,7 +414,7 @@ void SurfaceImpl::GradientRectangle(PRectangle rc, const std::vector<ColourStop>
 	}
 	linearGradient.setSpread(QGradient::RepeatSpread);
 	for (const ColourStop &stop : stops) {
-		linearGradient.setColorAt(stop.position, QColorFromColourAlpha(stop.colour));
+		linearGradient.setColorAt(stop.position, QColorFromColourRGBA(stop.colour));
 	}
 	QBrush brush = QBrush(linearGradient);
 	GetPainter()->fillRect(rect, brush);
@@ -521,13 +521,13 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc,
 				 const Font *font,
                                  XYPOSITION ybase,
 				 std::string_view text,
-                                 ColourAlpha fore,
-                                 ColourAlpha back)
+				 ColourRGBA fore,
+				 ColourRGBA back)
 {
 	SetFont(font);
 	PenColour(fore);
 
-	GetPainter()->setBackground(QColorFromColourAlpha(back));
+	GetPainter()->setBackground(QColorFromColourRGBA(back));
 	GetPainter()->setBackgroundMode(Qt::OpaqueMode);
 	QString su = UnicodeFromText(codec, text);
 	GetPainter()->drawText(QPointF(rc.left, ybase), su);
@@ -537,8 +537,8 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc,
 				  const Font *font,
                                   XYPOSITION ybase,
 				  std::string_view text,
-                                  ColourAlpha fore,
-                                  ColourAlpha back)
+				  ColourRGBA fore,
+				  ColourRGBA back)
 {
 	SetClip(rc);
 	DrawTextNoClip(rc, font, ybase, text, fore, back);
@@ -549,7 +549,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc,
 				      const Font *font,
                                       XYPOSITION ybase,
 				      std::string_view text,
-        ColourAlpha fore)
+	ColourRGBA fore)
 {
 	SetFont(font);
 	PenColour(fore);
@@ -633,13 +633,13 @@ void SurfaceImpl::DrawTextNoClipUTF8(PRectangle rc,
 				 const Font *font,
 				 XYPOSITION ybase,
 				 std::string_view text,
-				 ColourAlpha fore,
-				 ColourAlpha back)
+				 ColourRGBA fore,
+				 ColourRGBA back)
 {
 	SetFont(font);
 	PenColour(fore);
 
-	GetPainter()->setBackground(QColorFromColourAlpha(back));
+	GetPainter()->setBackground(QColorFromColourRGBA(back));
 	GetPainter()->setBackgroundMode(Qt::OpaqueMode);
 	QString su = QString::fromUtf8(text.data(), static_cast<int>(text.length()));
 	GetPainter()->drawText(QPointF(rc.left, ybase), su);
@@ -649,8 +649,8 @@ void SurfaceImpl::DrawTextClippedUTF8(PRectangle rc,
 				  const Font *font,
 				  XYPOSITION ybase,
 				  std::string_view text,
-				  ColourAlpha fore,
-				  ColourAlpha back)
+				  ColourRGBA fore,
+				  ColourRGBA back)
 {
 	SetClip(rc);
 	DrawTextNoClip(rc, font, ybase, text, fore, back);
@@ -661,7 +661,7 @@ void SurfaceImpl::DrawTextTransparentUTF8(PRectangle rc,
 				      const Font *font,
 				      XYPOSITION ybase,
 				      std::string_view text,
-	ColourAlpha fore)
+	ColourRGBA fore)
 {
 	SetFont(font);
 	PenColour(fore);
@@ -1284,16 +1284,16 @@ void Menu::Show(Point pt, const Window & /*w*/)
 
 //----------------------------------------------------------------------
 
-ColourAlpha Platform::Chrome()
+ColourRGBA Platform::Chrome()
 {
 	QColor c(Qt::gray);
-	return ColourAlpha(c.red(), c.green(), c.blue());
+	return ColourRGBA(c.red(), c.green(), c.blue());
 }
 
-ColourAlpha Platform::ChromeHighlight()
+ColourRGBA Platform::ChromeHighlight()
 {
 	QColor c(Qt::lightGray);
-	return ColourAlpha(c.red(), c.green(), c.blue());
+	return ColourRGBA(c.red(), c.green(), c.blue());
 }
 
 const char *Platform::DefaultFont()

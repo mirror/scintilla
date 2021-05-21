@@ -56,9 +56,9 @@ private:
 	int bitmapHeight;
 
 	/** Set the CGContext's fill colour to the specified desired colour. */
-	void FillColour(ColourAlpha fill);
+	void FillColour(ColourRGBA fill);
 
-	void PenColourAlpha(ColourAlpha fore);
+	void PenColourAlpha(ColourRGBA fore);
 
 	void SetFillStroke(FillStroke fillStroke);
 
@@ -111,19 +111,19 @@ public:
 	void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
-	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore,
-			    ColourAlpha back) override;
-	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore,
-			     ColourAlpha back) override;
-	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore,
+			    ColourRGBA back) override;
+	void DrawTextClipped(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore,
+			     ColourRGBA back) override;
+	void DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthText(const Font *font_, std::string_view text) override;
 
-	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore,
-			    ColourAlpha back) override;
-	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore,
-			     ColourAlpha back) override;
-	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourAlpha fore) override;
+	void DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore,
+			    ColourRGBA back) override;
+	void DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore,
+			     ColourRGBA back) override;
+	void DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore) override;
 	void MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) override;
 	XYPOSITION WidthTextUTF8(const Font *font_, std::string_view text) override;
 

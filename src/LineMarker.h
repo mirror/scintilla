@@ -24,9 +24,9 @@ public:
 	enum class FoldPart { undefined, head, body, tail, headWithTail };
 
 	int markType = SC_MARK_CIRCLE;
-	ColourAlpha fore = ColourAlpha(0, 0, 0);
-	ColourAlpha back = ColourAlpha(0xff, 0xff, 0xff);
-	ColourAlpha backSelected = ColourAlpha(0xff, 0x00, 0x00);
+	ColourRGBA fore = ColourRGBA(0, 0, 0);
+	ColourRGBA back = ColourRGBA(0xff, 0xff, 0xff);
+	ColourRGBA backSelected = ColourRGBA(0xff, 0x00, 0x00);
 	Layer layer = Layer::base;
 	int alpha = SC_ALPHA_NOALPHA;
 	XYPOSITION strokeWidth = 1.0f;
@@ -45,7 +45,7 @@ public:
 	LineMarker &operator=(LineMarker&&) noexcept = default;
 	virtual ~LineMarker() = default;
 
-	ColourAlpha BackWithAlpha() const noexcept;
+	ColourRGBA BackWithAlpha() const noexcept;
 
 	void SetXPM(const char *textForm);
 	void SetXPM(const char *const *linesForm);

@@ -5705,10 +5705,10 @@ void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	vs.EnsureStyle(wParam);
 	switch (iMessage) {
 	case SCI_STYLESETFORE:
-		vs.styles[wParam].fore = ColourAlpha::FromRGB(static_cast<int>(lParam));
+		vs.styles[wParam].fore = ColourRGBA::FromRGB(static_cast<int>(lParam));
 		break;
 	case SCI_STYLESETBACK:
-		vs.styles[wParam].back = ColourAlpha::FromRGB(static_cast<int>(lParam));
+		vs.styles[wParam].back = ColourRGBA::FromRGB(static_cast<int>(lParam));
 		break;
 	case SCI_STYLESETBOLD:
 		vs.styles[wParam].weight = lParam != 0 ? SC_WEIGHT_BOLD : SC_WEIGHT_NORMAL;
@@ -6954,37 +6954,37 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_MARKERSETFORE:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].fore = ColourAlpha::FromRGB(static_cast<int>(lParam));
+			vs.markers[wParam].fore = ColourRGBA::FromRGB(static_cast<int>(lParam));
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACK:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].back = ColourAlpha::FromRGB(static_cast<int>(lParam));
+			vs.markers[wParam].back = ColourRGBA::FromRGB(static_cast<int>(lParam));
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACKSELECTED:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].backSelected = ColourAlpha::FromRGB(static_cast<int>(lParam));
+			vs.markers[wParam].backSelected = ColourRGBA::FromRGB(static_cast<int>(lParam));
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETFORETRANSLUCENT:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].fore = ColourAlpha(static_cast<int>(lParam));
+			vs.markers[wParam].fore = ColourRGBA(static_cast<int>(lParam));
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACKTRANSLUCENT:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].back = ColourAlpha(static_cast<int>(lParam));
+			vs.markers[wParam].back = ColourRGBA(static_cast<int>(lParam));
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACKSELECTEDTRANSLUCENT:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].backSelected = ColourAlpha(static_cast<int>(lParam));
+			vs.markers[wParam].backSelected = ColourRGBA(static_cast<int>(lParam));
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
@@ -7149,7 +7149,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETMARGINBACKN:
 		if (ValidMargin(wParam)) {
-			vs.ms[wParam].back = ColourAlpha::FromRGB(static_cast<int>(lParam));
+			vs.ms[wParam].back = ColourRGBA::FromRGB(static_cast<int>(lParam));
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -7214,13 +7214,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETELEMENTCOLOUR:
-		if (vs.SetElementColour(static_cast<int>(wParam), ColourAlpha(static_cast<int>(lParam)))) {
+		if (vs.SetElementColour(static_cast<int>(wParam), ColourRGBA(static_cast<int>(lParam)))) {
 			InvalidateStyleRedraw();
 		}
 		break;
 
 	case SCI_GETELEMENTCOLOUR:
-		return vs.ElementColour(static_cast<int>(wParam)).value_or(ColourAlpha()).AsInteger();
+		return vs.ElementColour(static_cast<int>(wParam)).value_or(ColourRGBA()).AsInteger();
 
 	case SCI_RESETELEMENTCOLOUR:
 		if (vs.ResetElement(static_cast<int>(wParam))) {
@@ -7235,7 +7235,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.ElementAllowsTranslucent(static_cast<int>(wParam));
 
 	case SCI_GETELEMENTBASECOLOUR:
-		return vs.elementBaseColours[static_cast<int>(wParam)].value_or(ColourAlpha()).AsInteger();
+		return vs.elementBaseColours[static_cast<int>(wParam)].value_or(ColourRGBA()).AsInteger();
 
 	case SCI_SETFONTLOCALE:
 		if (lParam) {
@@ -7270,7 +7270,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETCARETLINEVISIBLE:
 		if (wParam) {
 			if (!vs.elementColours.count(SC_ELEMENT_CARET_LINE_BACK)) {
-				vs.elementColours[SC_ELEMENT_CARET_LINE_BACK] = ColourAlpha(0xFF, 0xFF, 0);
+				vs.elementColours[SC_ELEMENT_CARET_LINE_BACK] = ColourRGBA(0xFF, 0xFF, 0);
 				InvalidateStyleRedraw();
 			}
 		} else {
@@ -7317,7 +7317,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETCARETLINEBACKALPHA:
 		if (vs.caretLine.layer == Layer::base)
 			return SC_ALPHA_NOALPHA;
-		return vs.ElementColour(SC_ELEMENT_CARET_LINE_BACK).value_or(ColourAlpha()).GetAlpha();
+		return vs.ElementColour(SC_ELEMENT_CARET_LINE_BACK).value_or(ColourRGBA()).GetAlpha();
 
 	case SCI_SETCARETLINEBACKALPHA: {
 			const Layer layerNew = (wParam == SC_ALPHA_NOALPHA) ? Layer::base : Layer::over;
@@ -7542,7 +7542,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return static_cast<sptr_t>(vs.selection.layer);
 
 	case SCI_SETCARETFORE:
-		vs.elementColours[SC_ELEMENT_CARET] = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.elementColours[SC_ELEMENT_CARET] = ColourRGBA::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
@@ -7596,8 +7596,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_INDICSETFORE:
 		if (wParam <= INDICATOR_MAX) {
-			vs.indicators[wParam].sacNormal.fore = ColourAlpha::FromRGB(static_cast<int>(lParam));
-			vs.indicators[wParam].sacHover.fore = ColourAlpha::FromRGB(static_cast<int>(lParam));
+			vs.indicators[wParam].sacNormal.fore = ColourRGBA::FromRGB(static_cast<int>(lParam));
+			vs.indicators[wParam].sacHover.fore = ColourRGBA::FromRGB(static_cast<int>(lParam));
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -7617,7 +7617,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_INDICSETHOVERFORE:
 		if (wParam <= INDICATOR_MAX) {
-			vs.indicators[wParam].sacHover.fore = ColourAlpha::FromRGB(static_cast<int>(lParam));
+			vs.indicators[wParam].sacHover.fore = ColourRGBA::FromRGB(static_cast<int>(lParam));
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -7877,7 +7877,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.theEdge.colour.OpaqueRGB();
 
 	case SCI_SETEDGECOLOUR:
-		vs.theEdge.colour = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.theEdge.colour = ColourRGBA::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
@@ -8127,7 +8127,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETHOTSPOTACTIVEFORE:
-		return vs.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE).value_or(ColourAlpha()).OpaqueRGB();
+		return vs.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE).value_or(ColourRGBA()).OpaqueRGB();
 
 	case SCI_SETHOTSPOTACTIVEBACK:
 		if (vs.SetElementColourOptional(SC_ELEMENT_HOT_SPOT_ACTIVE_BACK, wParam, lParam)) {
@@ -8136,7 +8136,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETHOTSPOTACTIVEBACK:
-		return vs.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE_BACK).value_or(ColourAlpha()).OpaqueRGB();
+		return vs.ElementColour(SC_ELEMENT_HOT_SPOT_ACTIVE_BACK).value_or(ColourRGBA()).OpaqueRGB();
 
 	case SCI_SETHOTSPOTACTIVEUNDERLINE:
 		vs.hotspotUnderline = wParam != 0;
@@ -8506,7 +8506,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return virtualSpaceOptions;
 
 	case SCI_SETADDITIONALSELFORE:
-		vs.elementColours[SC_ELEMENT_SELECTION_ADDITIONAL_TEXT] = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.elementColours[SC_ELEMENT_SELECTION_ADDITIONAL_TEXT] = ColourRGBA::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 
@@ -8526,7 +8526,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.ElementColour(SC_ELEMENT_SELECTION_ADDITIONAL_BACK)->GetAlpha();
 
 	case SCI_SETADDITIONALCARETFORE:
-		vs.elementColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourAlpha::FromRGB(static_cast<int>(wParam));
+		vs.elementColours[SC_ELEMENT_CARET_ADDITIONAL] = ColourRGBA::FromRGB(static_cast<int>(wParam));
 		InvalidateStyleRedraw();
 		break;
 

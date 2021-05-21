@@ -59,7 +59,7 @@ using namespace Scintilla;
 namespace Scintilla {
 
 void DrawWrapMarker(Surface *surface, PRectangle rcPlace,
-	bool isEndMarker, ColourAlpha wrapColour) {
+	bool isEndMarker, ColourRGBA wrapColour) {
 
 	const XYPOSITION extraFinalPixel = surface->Supports(SC_SUPPORTS_LINE_DRAWS_FINAL) ? 0.0f : 1.0f;
 
@@ -132,10 +132,10 @@ void MarginView::RefreshPixMaps(Surface *surfaceWindow, const ViewStyle &vsDraw)
 		const PRectangle rcPattern = PRectangle::FromInts(0, 0, patternSize, patternSize);
 
 		// Initialize default colours based on the chrome colour scheme.  Typically the highlight is white.
-		ColourAlpha colourFMFill = vsDraw.selbar;
-		ColourAlpha colourFMStripes = vsDraw.selbarlight;
+		ColourRGBA colourFMFill = vsDraw.selbar;
+		ColourRGBA colourFMStripes = vsDraw.selbarlight;
 
-		if (!(vsDraw.selbarlight == ColourAlpha(0xff, 0xff, 0xff))) {
+		if (!(vsDraw.selbarlight == ColourRGBA(0xff, 0xff, 0xff))) {
 			// User has chosen an unusual chrome colour scheme so just use the highlight edge colour.
 			// (Typically, the highlight colour is white.)
 			colourFMFill = vsDraw.selbarlight;
@@ -195,7 +195,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 					surface->FillRectangle(rcSelMargin,
 						invertPhase ? *pixmapSelPattern : *pixmapSelPatternOffset1);
 				} else {
-					ColourAlpha colour;
+					ColourRGBA colour;
 					switch (vs.ms[margin].style) {
 					case SC_MARGIN_BACK:
 						colour = vs.styles[STYLE_DEFAULT].back;

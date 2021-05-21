@@ -12,10 +12,10 @@ namespace Scintilla {
 
 struct StyleAndColour {
 	int style;
-	ColourAlpha fore;
+	ColourRGBA fore;
 	StyleAndColour() noexcept : style(INDIC_PLAIN), fore(0, 0, 0) {
 	}
-	StyleAndColour(int style_, ColourAlpha fore_ = ColourAlpha(0, 0, 0)) noexcept : style(style_), fore(fore_) {
+	StyleAndColour(int style_, ColourRGBA fore_ = ColourRGBA(0, 0, 0)) noexcept : style(style_), fore(fore_) {
 	}
 	bool operator==(const StyleAndColour &other) const noexcept {
 		return (style == other.style) && (fore == other.fore);
@@ -36,7 +36,7 @@ public:
 	XYPOSITION strokeWidth = 1.0f;
 	Indicator() noexcept : under(false), fillAlpha(30), outlineAlpha(50), attributes(0) {
 	}
-	Indicator(int style_, ColourAlpha fore_= ColourAlpha(0,0,0), bool under_=false, int fillAlpha_=30, int outlineAlpha_=50) noexcept :
+	Indicator(int style_, ColourRGBA fore_= ColourRGBA(0,0,0), bool under_=false, int fillAlpha_=30, int outlineAlpha_=50) noexcept :
 		sacNormal(style_, fore_), sacHover(style_, fore_), under(under_), fillAlpha(fillAlpha_), outlineAlpha(outlineAlpha_), attributes(0) {
 	}
 	void Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine, const PRectangle &rcCharacter, State drawState, int value) const;
