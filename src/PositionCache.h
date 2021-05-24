@@ -8,7 +8,7 @@
 #ifndef POSITIONCACHE_H
 #define POSITIONCACHE_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 inline constexpr bool IsEOLChar(int ch) noexcept {
 	return (ch == '\r') || (ch == '\n');
@@ -151,14 +151,8 @@ struct ScreenLine : public IScreenLine {
  */
 class LineLayoutCache {
 public:
-	enum class Cache {
-		none = SC_CACHE_NONE,
-		caret = SC_CACHE_CARET,
-		page = SC_CACHE_PAGE,
-		document = SC_CACHE_DOCUMENT
-	};
 private:
-	Cache level;
+	Scintilla::LineCache level;
 	std::vector<std::shared_ptr<LineLayout>>cache;
 	bool allInvalidated;
 	int styleClock;
@@ -174,8 +168,8 @@ public:
 	virtual ~LineLayoutCache();
 	void Deallocate() noexcept;
 	void Invalidate(LineLayout::ValidLevel validity_) noexcept;
-	void SetLevel(Cache level_) noexcept;
-	Cache GetLevel() const noexcept { return level; }
+	void SetLevel(Scintilla::LineCache level_) noexcept;
+	Scintilla::LineCache GetLevel() const noexcept { return level; }
 	std::shared_ptr<LineLayout> Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
 		Sci::Line linesOnScreen, Sci::Line linesInDoc);
 };

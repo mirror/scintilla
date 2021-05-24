@@ -45,14 +45,14 @@
 #include <dwrite.h>
 #endif
 
+#include "ScintillaTypes.h"
+
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
-#include "Scintilla.h"
 #include "XPM.h"
 #include "UniConversion.h"
 #include "DBCS.h"
-#include "FontQuality.h"
 
 #include "PlatWin.h"
 
@@ -69,9 +69,11 @@
 #pragma clang diagnostic ignored "-Wlanguage-extension-token"
 #endif
 
-namespace Scintilla {
+using namespace Scintilla;
 
-UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) noexcept;
+namespace Scintilla::Internal {
+
+UINT CodePageFromCharSet(CharacterSet characterSet, UINT documentCodePage) noexcept;
 
 #if defined(USE_D2D)
 IDWriteFactory *pIDWriteFactory = nullptr;
@@ -211,38 +213,38 @@ void LoadDpiForWindow() noexcept {
 
 HINSTANCE hinstPlatformRes {};
 
-const int SupportsGDI[] = {
-	SC_SUPPORTS_PIXEL_MODIFICATION,
+const Supports SupportsGDI[] = {
+	Supports::PixelModification,
 };
 
-constexpr BYTE Win32MapFontQuality(int extraFontFlag) noexcept {
-	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
+constexpr BYTE Win32MapFontQuality(FontQuality extraFontFlag) noexcept {
+	switch (extraFontFlag & FontQuality::QualityMask) {
 
-		case SC_EFF_QUALITY_NON_ANTIALIASED:
+		case FontQuality::QualityNonAntialiased:
 			return NONANTIALIASED_QUALITY;
 
-		case SC_EFF_QUALITY_ANTIALIASED:
+		case FontQuality::QualityAntialiased:
 			return ANTIALIASED_QUALITY;
 
-		case SC_EFF_QUALITY_LCD_OPTIMIZED:
+		case FontQuality::QualityLcdOptimized:
 			return CLEARTYPE_QUALITY;
 
 		default:
-			return SC_EFF_QUALITY_DEFAULT;
+			return DEFAULT_QUALITY;
 	}
 }
 
 #if defined(USE_D2D)
-constexpr D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) noexcept {
-	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
+constexpr D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(FontQuality extraFontFlag) noexcept {
+	switch (extraFontFlag & FontQuality::QualityMask) {
 
-		case SC_EFF_QUALITY_NON_ANTIALIASED:
+		case FontQuality::QualityNonAntialiased:
 			return D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
 
-		case SC_EFF_QUALITY_ANTIALIASED:
+		case FontQuality::QualityAntialiased:
 			return D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
 
-		case SC_EFF_QUALITY_LCD_OPTIMIZED:
+		case FontQuality::QualityLcdOptimized:
 			return D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE;
 
 		default:
@@ -256,11 +258,11 @@ struct FontWin : public Font {
 	virtual HFONT HFont() const noexcept = 0;
 };
 
-void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, XYPOSITION size, int weight, bool italic, int extraFontFlag) {
+void SetLogFont(LOGFONTW &lf, const char *faceName, CharacterSet characterSet, XYPOSITION size, FontWeight weight, bool italic, FontQuality extraFontFlag) {
 	lf = LOGFONTW();
 	// The negative is to allow for leading
 	lf.lfHeight = -(std::abs(std::lround(size)));
-	lf.lfWeight = weight;
+	lf.lfWeight = static_cast<LONG>(weight);
 	lf.lfItalic = italic ? 1 : 0;
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
 	lf.lfQuality = Win32MapFontQuality(extraFontFlag);
@@ -296,8 +298,8 @@ struct FontGDI : public FontWin {
 #if defined(USE_D2D)
 struct FontDirectWrite : public FontWin {
 	IDWriteTextFormat *pTextFormat = nullptr;
-	int extraFontFlag = SC_EFF_QUALITY_DEFAULT;
-	int characterSet = 0;
+	FontQuality extraFontFlag = FontQuality::QualityDefault;
+	CharacterSet characterSet = CharacterSet::Ansi;
 	FLOAT yAscent = 2.0f;
 	FLOAT yDescent = 1.0f;
 	FLOAT yInternalLeading = 0.0f;
@@ -372,7 +374,7 @@ struct FontDirectWrite : public FontWin {
 
 std::shared_ptr<Font> Font::Allocate(const FontParameters &fp) {
 #if defined(USE_D2D)
-	if (fp.technology != SCWIN_TECH_GDI) {
+	if (fp.technology != Technology::Default) {
 		return std::make_shared<FontDirectWrite>(fp);
 	}
 #endif
@@ -414,7 +416,7 @@ public:
 	int tlen;	// Using int instead of size_t as most Win32 APIs take int.
 	TextWide(std::string_view text, int codePage) :
 		VarBuffer<wchar_t, stackBufferLength>(text.length()) {
-		if (codePage == SC_CP_UTF8) {
+		if (codePage == CpUtf8) {
 			tlen = static_cast<int>(UTF16FromUTF8(text, buffer, text.length()));
 		} else {
 			// Support Asian string display in 9x English
@@ -492,7 +494,7 @@ public:
 	void SetMode(SurfaceMode mode_) override;
 
 	void Release() noexcept override;
-	int Supports(int feature) noexcept override;
+	int SupportsFeature(Supports feature) noexcept override;
 	bool Initialised() override;
 	int LogPixelsY() override;
 	int PixelDivisions() override;
@@ -593,8 +595,8 @@ void SurfaceGDI::Release() noexcept {
 	Clear();
 }
 
-int SurfaceGDI::Supports(int feature) noexcept {
-	for (const int f : SupportsGDI) {
+int SurfaceGDI::SupportsFeature(Supports feature) noexcept {
+	for (const Supports f : SupportsGDI) {
 		if (f == feature)
 			return 1;
 	}
@@ -1033,7 +1035,7 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, const Font *font_, XYPOSITION yba
 	const int x = static_cast<int>(rc.left);
 	const int yBaseInt = static_cast<int>(ybase);
 
-	if (mode.codePage == SC_CP_UTF8) {
+	if (mode.codePage == CpUtf8) {
 		const TextWide tbuf(text, mode.codePage);
 		::ExtTextOutW(hdc, x, yBaseInt, fuOptions, &rcw, tbuf.buffer, tbuf.tlen, nullptr);
 	} else {
@@ -1077,7 +1079,7 @@ void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 	int fit = 0;
 	int i = 0;
 	const int len = static_cast<int>(text.length());
-	if (mode.codePage == SC_CP_UTF8) {
+	if (mode.codePage == CpUtf8) {
 		const TextWide tbuf(text, mode.codePage);
 		TextPositionsI poses(tbuf.tlen);
 		if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tbuf.tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
@@ -1114,7 +1116,7 @@ void SurfaceGDI::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 XYPOSITION SurfaceGDI::WidthText(const Font *font_, std::string_view text) {
 	SetFont(font_);
 	SIZE sz = { 0,0 };
-	if (!(mode.codePage == SC_CP_UTF8)) {
+	if (!(mode.codePage == CpUtf8)) {
 		::GetTextExtentPoint32A(hdc, text.data(), std::min(static_cast<int>(text.length()), maxLenText), &sz);
 	} else {
 		const TextWide tbuf(text, mode.codePage);
@@ -1129,7 +1131,7 @@ void SurfaceGDI::DrawTextCommonUTF8(PRectangle rc, const Font *font_, XYPOSITION
 	const int x = static_cast<int>(rc.left);
 	const int yBaseInt = static_cast<int>(ybase);
 
-	const TextWide tbuf(text, SC_CP_UTF8);
+	const TextWide tbuf(text, CpUtf8);
 	::ExtTextOutW(hdc, x, yBaseInt, fuOptions, &rcw, tbuf.buffer, tbuf.tlen, nullptr);
 }
 
@@ -1169,7 +1171,7 @@ void SurfaceGDI::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 	int fit = 0;
 	int i = 0;
 	const int len = static_cast<int>(text.length());
-	const TextWide tbuf(text, SC_CP_UTF8);
+	const TextWide tbuf(text, CpUtf8);
 	TextPositionsI poses(tbuf.tlen);
 	if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tbuf.tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
 		// Failure
@@ -1194,7 +1196,7 @@ void SurfaceGDI::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 XYPOSITION SurfaceGDI::WidthTextUTF8(const Font *font_, std::string_view text) {
 	SetFont(font_);
 	SIZE sz = { 0,0 };
-	const TextWide tbuf(text, SC_CP_UTF8);
+	const TextWide tbuf(text, CpUtf8);
 	::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
 	return static_cast<XYPOSITION>(sz.cx);
 }
@@ -1269,11 +1271,11 @@ constexpr D2D1_POINT_2F DPointFromPoint(Point point) noexcept {
 	return { static_cast<FLOAT>(point.x), static_cast<FLOAT>(point.y) };
 }
 
-const int SupportsD2D[] = {
-	SC_SUPPORTS_LINE_DRAWS_FINAL,
-	SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH,
-	SC_SUPPORTS_TRANSLUCENT_STROKE,
-	SC_SUPPORTS_PIXEL_MODIFICATION,
+const Supports SupportsD2D[] = {
+	Supports::LineDrawsFinal,
+	Supports::FractionalStrokeWidth,
+	Supports::TranslucentStroke,
+	Supports::PixelModification,
 };
 
 constexpr D2D_COLOR_F ColorFromColourAlpha(ColourRGBA colour) noexcept {
@@ -1338,7 +1340,7 @@ public:
 	void SetMode(SurfaceMode mode_) override;
 
 	void Release() noexcept override;
-	int Supports(int feature) noexcept override;
+	int SupportsFeature(Supports feature) noexcept override;
 	bool Initialised() override;
 
 	void D2DPenColourAlpha(ColourRGBA fore) noexcept;
@@ -1442,8 +1444,8 @@ void SurfaceD2D::SetScale(WindowID wid) noexcept {
 	logPixelsY = DpiForWindow(wid);
 }
 
-int SurfaceD2D::Supports(int feature) noexcept {
-	for (const int f : SupportsD2D) {
+int SurfaceD2D::SupportsFeature(Supports feature) noexcept {
+	for (const Supports f : SupportsD2D) {
 		if (f == feature)
 			return 1;
 	}
@@ -1503,8 +1505,8 @@ void SurfaceD2D::SetFont(const Font *font_) {
 	yDescent = pfm->yDescent;
 	yInternalLeading = pfm->yInternalLeading;
 	codePageText = mode.codePage;
-	if (!(mode.codePage == SC_CP_UTF8) && pfm->characterSet) {
-		codePageText = Scintilla::CodePageFromCharSet(pfm->characterSet, mode.codePage);
+	if (!(mode.codePage == CpUtf8) && (pfm->characterSet != CharacterSet::Ansi)) {
+		codePageText = CodePageFromCharSet(pfm->characterSet, mode.codePage);
 	}
 	if (pRenderTarget) {
 		D2D1_TEXT_ANTIALIAS_MODE aaMode;
@@ -2130,7 +2132,7 @@ void ScreenLineLayout::FillTextLayoutFormats(const IScreenLine *screenLine, IDWr
 /* Convert to a wide character string and replace tabs with X to stop DirectWrite tab expansion */
 
 std::wstring ScreenLineLayout::ReplaceRepresentation(std::string_view text) {
-	const TextWide wideText(text, SC_CP_UTF8);
+	const TextWide wideText(text, CpUtf8);
 	std::wstring ws(wideText.buffer, wideText.tlen);
 	std::replace(ws.begin(), ws.end(), L'\t', L'X');
 	return ws;
@@ -2421,7 +2423,7 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 		position += clusterMetrics[ci].width;
 	}
 	PLATFORM_ASSERT(ti == tbuf.tlen);
-	if (mode.codePage == SC_CP_UTF8) {
+	if (mode.codePage == CpUtf8) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 		size_t i = 0;
 		for (int ui = 0; ui < tbuf.tlen; ui++) {
@@ -2487,7 +2489,7 @@ void SurfaceD2D::DrawTextNoClipUTF8(PRectangle rc, const Font *font_, XYPOSITION
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
-		DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, ETO_OPAQUE);
+		DrawTextCommon(rc, font_, ybase, text, CpUtf8, ETO_OPAQUE);
 	}
 }
 
@@ -2496,7 +2498,7 @@ void SurfaceD2D::DrawTextClippedUTF8(PRectangle rc, const Font *font_, XYPOSITIO
 	if (pRenderTarget) {
 		FillRectangleAligned(rc, back);
 		D2DPenColourAlpha(fore);
-		DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, ETO_OPAQUE | ETO_CLIPPED);
+		DrawTextCommon(rc, font_, ybase, text, CpUtf8, ETO_OPAQUE | ETO_CLIPPED);
 	}
 }
 
@@ -2507,7 +2509,7 @@ void SurfaceD2D::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOS
 		if (ch != ' ') {
 			if (pRenderTarget) {
 				D2DPenColourAlpha(fore);
-				DrawTextCommon(rc, font_, ybase, text, SC_CP_UTF8, 0);
+				DrawTextCommon(rc, font_, ybase, text, CpUtf8, 0);
 			}
 			return;
 		}
@@ -2520,7 +2522,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 		// SetFont failed or no access to DirectWrite so give up.
 		return;
 	}
-	const TextWide tbuf(text, SC_CP_UTF8);
+	const TextWide tbuf(text, CpUtf8);
 	TextPositions poses(tbuf.tlen);
 	// Initialize poses for safety.
 	std::fill(poses.buffer, poses.buffer + tbuf.tlen, 0.0f);
@@ -2570,7 +2572,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 XYPOSITION SurfaceD2D::WidthTextUTF8(const Font * font_, std::string_view text) {
 	FLOAT width = 1.0;
 	SetFont(font_);
-	const TextWide tbuf(text, SC_CP_UTF8);
+	const TextWide tbuf(text, CpUtf8);
 	if (pIDWriteFactory && pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = nullptr;
@@ -2651,9 +2653,9 @@ void SurfaceD2D::FlushDrawing() {
 
 #endif
 
-std::unique_ptr<Surface> Surface::Allocate(int technology) {
+std::unique_ptr<Surface> Surface::Allocate(Technology technology) {
 #if defined(USE_D2D)
-	if (technology == SCWIN_TECH_GDI)
+	if (technology == Technology::Default)
 		return std::make_unique<SurfaceGDI>();
 	else
 		return std::make_unique<SurfaceD2D>();
@@ -2909,7 +2911,7 @@ ListBox::~ListBox() noexcept {
 class ListBoxX : public ListBox {
 	int lineHeight;
 	HFONT fontCopy;
-	int technology;
+	Technology technology;
 	RGBAImageSet images;
 	LineToItem lti;
 	HWND lb;
@@ -2954,7 +2956,7 @@ class ListBoxX : public ListBox {
 	static constexpr Point ImageInset {1, 0};	// Padding around image
 
 public:
-	ListBoxX() : lineHeight(10), fontCopy{}, technology(0), lb{}, unicodeMode(false),
+	ListBoxX() : lineHeight(10), fontCopy{}, technology(Technology::Default), lb{}, unicodeMode(false),
 		desiredVisibleRows(9), maxItemCharacters(0), aveCharWidth(8),
 		parent(nullptr), ctrlID(0), dpi(USER_DEFAULT_SCREEN_DPI),
 		delegate(nullptr),
@@ -2971,7 +2973,7 @@ public:
 		}
 	}
 	void SetFont(const Font *font) override;
-	void Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, int technology_) override;
+	void Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, Technology technology_) override;
 	void SetAverageCharWidth(int width) override;
 	void SetVisibleRows(int rows) override;
 	int GetVisibleRows() const override;
@@ -2999,7 +3001,7 @@ std::unique_ptr<ListBox> ListBox::Allocate() {
 	return std::make_unique<ListBoxX>();
 }
 
-void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, int technology_) {
+void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, Technology technology_) {
 	parent = &parent_;
 	ctrlID = ctrlID_;
 	location = location_;
@@ -3067,7 +3069,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 	if (widestItem) {
 		len = static_cast<int>(strlen(widestItem));
 		if (unicodeMode) {
-			const TextWide tbuf(widestItem, SC_CP_UTF8);
+			const TextWide tbuf(widestItem, CpUtf8);
 			::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &textSize);
 		} else {
 			::GetTextExtentPoint32A(hdc, widestItem, len, &textSize);
@@ -3201,7 +3203,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		::InsetRect(&rcText, static_cast<int>(TextInset.x), static_cast<int>(TextInset.y));
 
 		if (unicodeMode) {
-			const TextWide tbuf(text, SC_CP_UTF8);
+			const TextWide tbuf(text, CpUtf8);
 			::DrawTextW(pDrawItem->hDC, tbuf.buffer, tbuf.tlen, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
 		} else {
 			::DrawTextA(pDrawItem->hDC, text, len, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
@@ -3211,7 +3213,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		const RGBAImage *pimage = images.Get(pixId);
 		if (pimage) {
 			std::unique_ptr<Surface> surfaceItem(Surface::Allocate(technology));
-			if (technology == SCWIN_TECH_GDI) {
+			if (technology == Technology::Default) {
 				surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
 				const long left = pDrawItem->rcItem.left + static_cast<int>(ItemInset.x + ImageInset.x);
 				const PRectangle rcImage = PRectangle::FromInts(left, pDrawItem->rcItem.top,

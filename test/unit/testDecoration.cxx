@@ -24,7 +24,7 @@
 
 const int indicator=4;
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 // Test Decoration.
 

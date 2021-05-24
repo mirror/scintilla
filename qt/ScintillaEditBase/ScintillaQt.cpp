@@ -23,7 +23,7 @@
 #include <QTimer>
 
 using namespace Scintilla;
-
+using namespace Scintilla::Internal;
 
 ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 : QObject(parent), scrollArea(parent), vMax(0),  hMax(0), vPage(0), hPage(0),
@@ -32,7 +32,7 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 
 	wMain = scrollArea->viewport();
 
-	imeInteraction = IMEInteraction::internal;
+	imeInteraction = IMEInteraction::Inline;
 
 	// On OS X drawing text into a pixmap moves it around 1 pixel to
 	// the right compared to drawing it directly onto a window.
@@ -385,7 +385,7 @@ void ScintillaQt::PasteFromMode(QClipboard::Mode clipboardMode_)
 	selText.Copy(dest, pdoc->dbcsCodePage, CharacterSetOfDocument(), isRectangular, false);
 
 	UndoGroup ug(pdoc);
-	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+	ClearSelection(multiPasteMode == MultiPaste::Each);
 	InsertPasteShape(selText.Data(), selText.Length(),
 		isRectangular ? PasteShape::rectangular : (isLine ? PasteShape::line : PasteShape::stream));
 	EnsureCaretVisible();
@@ -432,7 +432,7 @@ void ScintillaQt::NotifyFocus(bool focus)
 	Editor::NotifyFocus(focus);
 }
 
-void ScintillaQt::NotifyParent(SCNotification scn)
+void ScintillaQt::NotifyParent(NotificationData scn)
 {
 	scn.nmhdr.hwndFrom = wMain.GetID();
 	scn.nmhdr.idFrom = GetCtrlID();
@@ -441,8 +441,8 @@ void ScintillaQt::NotifyParent(SCNotification scn)
 
 void ScintillaQt::NotifyURIDropped(const char *uri)
 {
-	SCNotification scn = {};
-	scn.nmhdr.code = SCN_URIDROPPED;
+	NotificationData scn = {};
+	scn.nmhdr.code = Notification::URIDropped;
 	scn.text = uri;
 
 	NotifyParent(scn);
@@ -519,7 +519,7 @@ bool ScintillaQt::SetIdle(bool on)
 	return ChangeIdle(on);
 }
 
-int ScintillaQt::CharacterSetOfDocument() const
+CharacterSet ScintillaQt::CharacterSetOfDocument() const
 {
 	return vs.styles[STYLE_DEFAULT].characterSet;
 }
@@ -689,7 +689,7 @@ public:
 	void paintEvent(QPaintEvent *) override
 	{
 		if (pct->inCallTipMode) {
-			std::unique_ptr<Surface> surfaceWindow = Surface::Allocate(0);
+			std::unique_ptr<Surface> surfaceWindow = Surface::Allocate(Technology::Default);
 			surfaceWindow->Init(this);
 			surfaceWindow->SetMode(SurfaceMode(pct->codePage, false));
 			pct->PaintCT(surfaceWindow.get());
@@ -732,37 +732,37 @@ void ScintillaQt::AddToPopUp(const char *label,
 	        this, SLOT(execCommand(QAction *)));
 }
 
-sptr_t ScintillaQt::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
+sptr_t ScintillaQt::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam)
 {
 	try {
 		switch (iMessage) {
 
-		case SCI_SETIMEINTERACTION:
+		case Message::SetIMEInteraction:
 			// Only inline IME supported on Qt
 			break;
 
-		case SCI_GRABFOCUS:
+		case Message::GrabFocus:
 			scrollArea->setFocus(Qt::OtherFocusReason);
 			break;
 
-		case SCI_GETDIRECTFUNCTION:
+		case Message::GetDirectFunction:
 			return reinterpret_cast<sptr_t>(DirectFunction);
 
-		case SCI_GETDIRECTPOINTER:
+		case Message::GetDirectPointer:
 			return reinterpret_cast<sptr_t>(this);
 
 		default:
 			return ScintillaBase::WndProc(iMessage, wParam, lParam);
 		}
 	} catch (std::bad_alloc &) {
-		errorStatus = SC_STATUS_BADALLOC;
+		errorStatus = Status::BadAlloc;
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return 0;
 }
 
-sptr_t ScintillaQt::DefWndProc(unsigned int, uptr_t, sptr_t)
+sptr_t ScintillaQt::DefWndProc(Message, uptr_t, sptr_t)
 {
 	return 0;
 }
@@ -770,7 +770,7 @@ sptr_t ScintillaQt::DefWndProc(unsigned int, uptr_t, sptr_t)
 sptr_t ScintillaQt::DirectFunction(
     sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
-	return reinterpret_cast<ScintillaQt *>(ptr)->WndProc(iMessage, wParam, lParam);
+	return reinterpret_cast<ScintillaQt *>(ptr)->WndProc(static_cast<Message>(iMessage), wParam, lParam);
 }
 
 // Additions to merge in Scientific Toolworks widget structure

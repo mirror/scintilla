@@ -21,13 +21,14 @@
 #include <iterator>
 #include <memory>
 
+#include "ScintillaTypes.h"
+#include "ScintillaMessages.h"
+#include "ILoader.h"
+#include "ILexer.h"
+
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
-
-#include "ILoader.h"
-#include "ILexer.h"
-#include "Scintilla.h"
 
 #include "CharacterCategoryMap.h"
 #include "Position.h"
@@ -51,6 +52,7 @@
 #include "PositionCache.h"
 
 using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 void BidiData::Resize(size_t maxLineLength_) {
 	stylesFonts.resize(maxLineLength_ + 1);
@@ -134,7 +136,7 @@ int LineLayout::LineStart(int line) const noexcept {
 	}
 }
 
-int Scintilla::LineLayout::LineLength(int line) const noexcept {
+int LineLayout::LineLength(int line) const noexcept {
 	if (!lineStarts) {
 		return numCharsInLine;
 	} if (line >= lines - 1) {
@@ -361,7 +363,7 @@ XYPOSITION ScreenLine::TabPositionAfter(XYPOSITION xPosition) const {
 }
 
 LineLayoutCache::LineLayoutCache() :
-	level(Cache::none),
+	level(LineCache::None),
 	allInvalidated(false), styleClock(-1) {
 }
 
@@ -380,13 +382,13 @@ constexpr size_t alignmentLLC = 20;
 
 size_t LineLayoutCache::EntryForLine(Sci::Line line) const noexcept {
 	switch (level) {
-	case Cache::none:
+	case LineCache::None:
 		return 0;
-	case Cache::caret:
+	case LineCache::Caret:
 		return 0;
-	case Cache::page:
+	case LineCache::Page:
 		return 1 + (line % (cache.size() - 1));
-	case Cache::document:
+	case LineCache::Document:
 		return line;
 	}
 	return 0;
@@ -394,11 +396,11 @@ size_t LineLayoutCache::EntryForLine(Sci::Line line) const noexcept {
 
 void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc) {
 	size_t lengthForLevel = 0;
-	if (level == Cache::caret) {
+	if (level == LineCache::Caret) {
 		lengthForLevel = 1;
-	} else if (level == Cache::page) {
+	} else if (level == LineCache::Page) {
 		lengthForLevel = AlignUp(linesOnScreen + 1, alignmentLLC);
-	} else if (level == Cache::document) {
+	} else if (level == LineCache::Document) {
 		lengthForLevel = AlignUp(linesInDoc, alignmentLLC);
 	}
 
@@ -408,7 +410,7 @@ void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesI
 		// Cache::none -> no entries
 		// Cache::caret -> 1 entry can take any line
 		// Cache::document -> entry per line so each line in correct entry after resize
-		if (level == Cache::page) {
+		if (level == LineCache::Page) {
 			// Cache::page -> locates lines in particular entries which may be incorrect after
 			// a resize so move them to correct entries.
 			for (size_t i = 1; i < cache.size();) {
@@ -462,7 +464,7 @@ void LineLayoutCache::Invalidate(LineLayout::ValidLevel validity_) noexcept {
 	}
 }
 
-void LineLayoutCache::SetLevel(Cache level_) noexcept {
+void LineLayoutCache::SetLevel(LineCache level_) noexcept {
 	if (level != level_) {
 		level = level_;
 		allInvalidated = false;
@@ -479,7 +481,7 @@ std::shared_ptr<LineLayout> LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci:
 	}
 	allInvalidated = false;
 	size_t pos = 0;
-	if (level == Cache::page) {
+	if (level == LineCache::Page) {
 		// If first entry is this line then just reuse it.
 		if (!(cache[0] && (cache[0]->lineNumber == lineNumber))) {
 			const size_t posForLine = EntryForLine(lineNumber);
@@ -503,7 +505,7 @@ std::shared_ptr<LineLayout> LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci:
 				pos = posForLine;
 			}
 		}
-	} else if (level == Cache::document) {
+	} else if (level == LineCache::Document) {
 		pos = lineNumber;
 	}
 

@@ -12,9 +12,10 @@
 #include <algorithm>
 #include <memory>
 
+#include "ScintillaTypes.h"
+
 #include "Debugging.h"
 
-#include "Scintilla.h"
 #include "Position.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
@@ -24,7 +25,9 @@
 
 #include "catch.hpp"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
+
+constexpr int FoldBase = static_cast<int>(Scintilla::FoldLevel::Base);
 
 // Test MarkerHandleSet.
 
@@ -170,41 +173,41 @@ TEST_CASE("LineLevels") {
 
 	SECTION("Initial") {
 		// Initial State
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(0));
+		REQUIRE(FoldBase == ll.GetLevel(0));
 	}
 
 	SECTION("SetLevel") {
-		REQUIRE(SC_FOLDLEVELBASE == ll.SetLevel(1, 200, 5));
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(0));
+		REQUIRE(FoldBase == ll.SetLevel(1, 200, 5));
+		REQUIRE(FoldBase == ll.GetLevel(0));
 		REQUIRE(200 == ll.GetLevel(1));
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(2));
+		REQUIRE(FoldBase == ll.GetLevel(2));
 		ll.ClearLevels();
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(1));
+		REQUIRE(FoldBase == ll.GetLevel(1));
 		ll.ExpandLevels(5);
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(7));
+		REQUIRE(FoldBase == ll.GetLevel(7));
 	}
 
 	SECTION("InsertRemoveLine") {
 		ll.SetLevel(1, 1, 5);
 		ll.SetLevel(2, 2, 5);
 		ll.InsertLine(2);
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(0));
+		REQUIRE(FoldBase == ll.GetLevel(0));
 		REQUIRE(1 == ll.GetLevel(1));
 		REQUIRE(2 == ll.GetLevel(2));
 		REQUIRE(2 == ll.GetLevel(3));
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(4));
+		REQUIRE(FoldBase == ll.GetLevel(4));
 		ll.RemoveLine(2);
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(0));
+		REQUIRE(FoldBase == ll.GetLevel(0));
 		REQUIRE(1 == ll.GetLevel(1));
 		REQUIRE(2 == ll.GetLevel(2));
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(3));
+		REQUIRE(FoldBase == ll.GetLevel(3));
 		ll.InsertLines(2, 2);
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(0));
+		REQUIRE(FoldBase == ll.GetLevel(0));
 		REQUIRE(1 == ll.GetLevel(1));
 		REQUIRE(2 == ll.GetLevel(2));
 		REQUIRE(2 == ll.GetLevel(3));
 		REQUIRE(2 == ll.GetLevel(4));
-		REQUIRE(SC_FOLDLEVELBASE == ll.GetLevel(5));
+		REQUIRE(FoldBase == ll.GetLevel(5));
 	}
 }
 

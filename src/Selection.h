@@ -8,7 +8,7 @@
 #ifndef SELECTION_H
 #define SELECTION_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 class SelectionPosition {
 	Sci::Position position;

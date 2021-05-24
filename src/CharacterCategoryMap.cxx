@@ -15,7 +15,7 @@
 
 #include "CharacterCategoryMap.h"
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 namespace {
 	// Use an unnamed namespace to protect the declarations from name conflicts

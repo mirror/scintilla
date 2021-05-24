@@ -17,7 +17,7 @@
 
 #include "catch.hpp"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 // Test UniConversion.
 // Use examples from Wikipedia:

@@ -885,6 +885,7 @@ val SC_INDICVALUEBIT=0x1000000
 val SC_INDICVALUEMASK=0xFFFFFF
 
 enu IndicFlag=SC_INDICFLAG_
+val SC_INDICFLAG_NONE=0
 val SC_INDICFLAG_VALUEFORE=1
 
 ali SC_INDICFLAG_VALUEFORE=VALUE_FORE
@@ -1416,6 +1417,7 @@ fun line DocLineFromVisible=2221(line displayLine,)
 fun line WrapCount=2235(line docLine,)
 
 enu FoldLevel=SC_FOLDLEVEL
+val SC_FOLDLEVELNONE=0x0
 val SC_FOLDLEVELBASE=0x400
 val SC_FOLDLEVELWHITEFLAG=0x1000
 val SC_FOLDLEVELHEADERFLAG=0x2000
@@ -1501,6 +1503,7 @@ fun void FoldAll=2662(FoldAction action,)
 fun void EnsureVisible=2232(line line,)
 
 enu AutomaticFold=SC_AUTOMATICFOLD_
+val SC_AUTOMATICFOLD_NONE=0x0000
 val SC_AUTOMATICFOLD_SHOW=0x0001
 val SC_AUTOMATICFOLD_CLICK=0x0002
 val SC_AUTOMATICFOLD_CHANGE=0x0004
@@ -1512,6 +1515,7 @@ set void SetAutomaticFold=2663(AutomaticFold automaticFold,)
 get AutomaticFold GetAutomaticFold=2664(,)
 
 enu FoldFlag=SC_FOLDFLAG_
+val SC_FOLDFLAG_NONE=0x0000
 val SC_FOLDFLAG_LINEBEFORE_EXPANDED=0x0002
 val SC_FOLDFLAG_LINEBEFORE_CONTRACTED=0x0004
 val SC_FOLDFLAG_LINEAFTER_EXPANDED=0x0008
@@ -3169,6 +3173,7 @@ ali SC_MOD_CHANGEEOLANNOTATION=CHANGE_E_O_L_ANNOTATION
 ali SC_MODEVENTMASKALL=EVENT_MASK_ALL
 
 enu Update=SC_UPDATE_
+val SC_UPDATE_NONE=0x0
 val SC_UPDATE_CONTENT=0x1
 val SC_UPDATE_SELECTION=0x2
 val SC_UPDATE_V_SCROLL=0x4
@@ -3178,6 +3183,7 @@ val SC_UPDATE_H_SCROLL=0x8
 # and should have had exactly the same values as the EN_* constants.
 # Unfortunately the SETFOCUS and KILLFOCUS are flipped over from EN_*
 # As clients depend on these constants, this will not be changed.
+enu FocusChange=SCEN_
 val SCEN_CHANGE=768
 val SCEN_SETFOCUS=512
 val SCEN_KILLFOCUS=256

@@ -38,12 +38,16 @@
 #include <windows.h>
 #endif
 
+#include "ScintillaTypes.h"
+#include "ScintillaMessages.h"
+#include "ScintillaStructures.h"
+#include "ILoader.h"
+#include "ILexer.h"
+
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
 
-#include "ILoader.h"
-#include "ILexer.h"
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
 #include "CharacterCategoryMap.h"
@@ -90,6 +94,7 @@
 #define SC_INDICATOR_UNKNOWN INDICATOR_IME_MAX
 
 using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 // From PlatGTK.cxx
 extern std::string UTF8FromLatin1(std::string_view text);
@@ -363,7 +368,7 @@ void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 
 		Finalise();
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -385,7 +390,7 @@ void ScintillaGTK::MapThis() {
 		ChangeSize();
 		gdk_window_show(PWindow(wMain));
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -406,7 +411,7 @@ void ScintillaGTK::UnMapThis() {
 		if (PWidget(scrollbarv))
 			gtk_widget_unmap(PWidget(scrollbarv));
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -423,7 +428,7 @@ void ScintillaGTK::ForAll(GtkCallback callback, gpointer callback_data) {
 		if (PWidget(scrollbarh))
 			(*callback)(PWidget(scrollbarh), callback_data);
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -489,7 +494,7 @@ gint ScintillaGTK::FocusInThis(GtkWidget *) {
 			}
 		}
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -509,7 +514,7 @@ gint ScintillaGTK::FocusOutThis(GtkWidget *) {
 			gtk_im_context_focus_out(im_context);
 
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -563,7 +568,7 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 		sciThis->Resize(allocation->width, allocation->height);
 
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -686,10 +691,10 @@ void ScintillaGTK::Init() {
 		timers[tr].reason = static_cast<TickReason>(tr);
 		timers[tr].scintilla = this;
 	}
-	vs.indicators[SC_INDICATOR_UNKNOWN] = Indicator(INDIC_HIDDEN, ColourRGBA(0, 0, 0xff));
-	vs.indicators[SC_INDICATOR_INPUT] = Indicator(INDIC_DOTS, ColourRGBA(0, 0, 0xff));
-	vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(INDIC_COMPOSITIONTHICK, ColourRGBA(0, 0, 0xff));
-	vs.indicators[SC_INDICATOR_TARGET] = Indicator(INDIC_STRAIGHTBOX, ColourRGBA(0, 0, 0xff));
+	vs.indicators[SC_INDICATOR_UNKNOWN] = Indicator(IndicatorStyle::Hidden, ColourRGBA(0, 0, 0xff));
+	vs.indicators[SC_INDICATOR_INPUT] = Indicator(IndicatorStyle::Dots, ColourRGBA(0, 0, 0xff));
+	vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(IndicatorStyle::CompositionThick, ColourRGBA(0, 0, 0xff));
+	vs.indicators[SC_INDICATOR_TARGET] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(0, 0, 0xff));
 
 	fontOptionsPrevious = FontOptions(PWidget(wText));
 }
@@ -715,7 +720,7 @@ bool ScintillaGTK::AbandonPaint() {
 }
 
 void ScintillaGTK::DisplayCursor(Window::Cursor c) {
-	if (cursorMode == SC_CURSORNORMAL)
+	if (cursorMode == CursorShape::Normal)
 		wText.SetCursor(c);
 	else
 		wText.SetCursor(static_cast<Window::Cursor>(cursorMode));
@@ -867,35 +872,35 @@ std::string ScintillaGTK::EncodedFromUTF8(std::string_view utf8) const {
 	}
 }
 
-sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+sptr_t ScintillaGTK::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	try {
 		switch (iMessage) {
 
-		case SCI_GRABFOCUS:
+		case Message::GrabFocus:
 			gtk_widget_grab_focus(PWidget(wMain));
 			break;
 
-		case SCI_GETDIRECTFUNCTION:
+		case Message::GetDirectFunction:
 			return reinterpret_cast<sptr_t>(DirectFunction);
 
-		case SCI_GETDIRECTPOINTER:
+		case Message::GetDirectPointer:
 			return reinterpret_cast<sptr_t>(this);
 
-		case SCI_TARGETASUTF8:
+		case Message::TargetAsUTF8:
 			return TargetAsUTF8(CharPtrFromSPtr(lParam));
 
-		case SCI_ENCODEDFROMUTF8:
+		case Message::EncodedFromUTF8:
 			return EncodedFromUTF8(ConstCharPtrFromUPtr(wParam),
 					       CharPtrFromSPtr(lParam));
 
-		case SCI_SETRECTANGULARSELECTIONMODIFIER:
+		case Message::SetRectangularSelectionModifier:
 			rectangularSelectionModifier = static_cast<int>(wParam);
 			break;
 
-		case SCI_GETRECTANGULARSELECTIONMODIFIER:
+		case Message::GetRectangularSelectionModifier:
 			return rectangularSelectionModifier;
 
-		case SCI_SETREADONLY: {
+		case Message::SetReadOnly: {
 				const sptr_t ret = ScintillaBase::WndProc(iMessage, wParam, lParam);
 				if (accessible) {
 					ScintillaGTKAccessible *sciAccessible = ScintillaGTKAccessible::FromAccessible(accessible);
@@ -906,10 +911,10 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				return ret;
 			}
 
-		case SCI_GETACCESSIBILITY:
+		case Message::GetAccessibility:
 			return accessibilityEnabled;
 
-		case SCI_SETACCESSIBILITY:
+		case Message::SetAccessibility:
 			accessibilityEnabled = static_cast<int>(wParam);
 			if (accessible) {
 				ScintillaGTKAccessible *sciAccessible = ScintillaGTKAccessible::FromAccessible(accessible);
@@ -923,14 +928,14 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return ScintillaBase::WndProc(iMessage, wParam, lParam);
 		}
 	} catch (std::bad_alloc &) {
-		errorStatus = SC_STATUS_BADALLOC;
+		errorStatus = Status::BadAlloc;
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return 0;
 }
 
-sptr_t ScintillaGTK::DefWndProc(unsigned int, uptr_t, sptr_t) {
+sptr_t ScintillaGTK::DefWndProc(Message, uptr_t, sptr_t) {
 	return 0;
 }
 
@@ -1145,31 +1150,31 @@ void ScintillaGTK::NotifyFocus(bool focus) {
 	Editor::NotifyFocus(focus);
 }
 
-void ScintillaGTK::NotifyParent(SCNotification scn) {
+void ScintillaGTK::NotifyParent(NotificationData scn) {
 	scn.nmhdr.hwndFrom = PWidget(wMain);
 	scn.nmhdr.idFrom = GetCtrlID();
 	g_signal_emit(G_OBJECT(sci), scintilla_signals[NOTIFY_SIGNAL], 0,
 		      GetCtrlID(), &scn);
 }
 
-void ScintillaGTK::NotifyKey(int key, int modifiers) {
-	SCNotification scn = {};
-	scn.nmhdr.code = SCN_KEY;
-	scn.ch = key;
+void ScintillaGTK::NotifyKey(Keys key, KeyMod modifiers) {
+	NotificationData scn = {};
+	scn.nmhdr.code = Notification::Key;
+	scn.ch = static_cast<int>(key);
 	scn.modifiers = modifiers;
 
 	NotifyParent(scn);
 }
 
 void ScintillaGTK::NotifyURIDropped(const char *list) {
-	SCNotification scn = {};
-	scn.nmhdr.code = SCN_URIDROPPED;
+	NotificationData scn = {};
+	scn.nmhdr.code = Notification::URIDropped;
 	scn.text = list;
 
 	NotifyParent(scn);
 }
 
-const char *CharacterSetID(int characterSet);
+const char *CharacterSetID(CharacterSet characterSet);
 
 const char *ScintillaGTK::CharacterSetID() const {
 	return ::CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
@@ -1293,7 +1298,7 @@ std::string ScintillaGTK::CaseMapString(const std::string &s, CaseMapping caseMa
 	}
 }
 
-int ScintillaGTK::KeyDefault(int key, int modifiers) {
+int ScintillaGTK::KeyDefault(Keys key, KeyMod modifiers) {
 	// Pass up to container in case it is an accelerator
 	NotifyKey(key, modifiers);
 	return 0;
@@ -1430,7 +1435,7 @@ void ScintillaGTK::PrimaryGetSelectionThis(GtkClipboard *clip, GtkSelectionData 
 			GetSelection(selection_data, info, &primary);
 		}
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -1448,7 +1453,7 @@ void ScintillaGTK::PrimaryClearSelectionThis(GtkClipboard *clip) {
 			Redraw();
 		}
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -1510,7 +1515,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 		if (IsUnicodeMode()) {
 			// Unknown encoding so assume in Latin1
 			dest = UTF8FromLatin1(dest);
-			selText.Copy(dest, SC_CP_UTF8, 0, isRectangular, false);
+			selText.Copy(dest, CpUtf8, CharacterSet::Ansi, isRectangular, false);
 		} else {
 			// Assume buffer is in same encoding as selection
 			selText.Copy(dest, pdoc->dbcsCodePage,
@@ -1524,7 +1529,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 			selText.Copy(dest, pdoc->dbcsCodePage,
 				     vs.styles[STYLE_DEFAULT].characterSet, isRectangular, false);
 		} else {
-			selText.Copy(dest, SC_CP_UTF8, 0, isRectangular, false);
+			selText.Copy(dest, CpUtf8, CharacterSet::Ansi, isRectangular, false);
 		}
 	}
 }
@@ -1538,7 +1543,7 @@ void ScintillaGTK::InsertSelection(GtkClipboard *clipBoard, GtkSelectionData *se
 
 		UndoGroup ug(pdoc);
 		if (selection == GDK_SELECTION_CLIPBOARD) {
-			ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+			ClearSelection(multiPasteMode == MultiPaste::Each);
 		}
 
 		InsertPasteShape(selText.Data(), selText.Length(),
@@ -1565,7 +1570,7 @@ void ScintillaGTK::ReceivedClipboard(GtkClipboard *clipBoard, GtkSelectionData *
 	try {
 		InsertSelection(clipBoard, selection_data);
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -1585,7 +1590,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 //	else fprintf(stderr, "Target non string %d %d\n", (int)(selection_data->type),
 //		(int)(atomUTF8));
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -1617,9 +1622,9 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	// from code below
 	std::unique_ptr<SelectionText> newline_normalized;
 	{
-		std::string tmpstr = Document::TransformLineEnds(text->Data(), text->Length(), SC_EOL_LF);
+		std::string tmpstr = Document::TransformLineEnds(text->Data(), text->Length(), EndOfLine::Lf);
 		newline_normalized.reset(new SelectionText());
-		newline_normalized->Copy(tmpstr, SC_CP_UTF8, 0, text->rectangular, false);
+		newline_normalized->Copy(tmpstr, CpUtf8, CharacterSet::Ansi, text->rectangular, false);
 		text = newline_normalized.get();
 	}
 #endif
@@ -1631,7 +1636,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 		if (*charSet) {
 			std::string tmputf = ConvertText(text->Data(), text->Length(), "UTF-8", charSet, false);
 			converted = std::make_unique<SelectionText>();
-			converted->Copy(tmputf, SC_CP_UTF8, 0, text->rectangular, false);
+			converted->Copy(tmputf, CpUtf8, CharacterSet::Ansi, text->rectangular, false);
 			text = converted.get();
 		}
 	}
@@ -1692,7 +1697,7 @@ void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
 			}
 		}
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -1888,7 +1893,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 				SetAdjustmentValue(adjustmentv, static_cast<int>(topLine) + 3);
 		}
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return TRUE;
 }
@@ -1914,14 +1919,14 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 				// If mouse released on scroll bar then the position is relative to the
 				// scrollbar, not the drawing window so just repeat the most recent point.
 				pt = sciThis->ptMouseLast;
-			const int modifiers = ModifierFlags(
+			const KeyMod modifiers = ModifierFlags(
 						      (event->state & GDK_SHIFT_MASK) != 0,
 						      (event->state & GDK_CONTROL_MASK) != 0,
 						      (event->state & modifierTranslated(sciThis->rectangularSelectionModifier)) != 0);
 			sciThis->ButtonUpWithModifiers(pt, event->time, modifiers);
 		}
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2010,9 +2015,9 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget, GdkEventScroll *event) {
 			// Text font size zoom
 		} else if (event->state & GDK_CONTROL_MASK) {
 			if (cLineScroll < 0) {
-				sciThis->KeyCommand(SCI_ZOOMIN);
+				sciThis->KeyCommand(Message::ZoomIn);
 			} else {
-				sciThis->KeyCommand(SCI_ZOOMOUT);
+				sciThis->KeyCommand(Message::ZoomOut);
 			}
 
 			// Regular scrolling
@@ -2021,7 +2026,7 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget, GdkEventScroll *event) {
 		}
 		return TRUE;
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2050,13 +2055,13 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 		//Platform::DebugPrintf("Move %x %x %d %c %d %d\n",
 		//	sciThis,event->window,event->time,event->is_hint? 'h' :'.', x, y);
 		const Point pt(static_cast<XYPOSITION>(x), static_cast<XYPOSITION>(y));
-		const int modifiers = ModifierFlags(
+		const KeyMod modifiers = ModifierFlags(
 					      (event->state & GDK_SHIFT_MASK) != 0,
 					      (event->state & GDK_CONTROL_MASK) != 0,
 					      (event->state & modifierTranslated(sciThis->rectangularSelectionModifier)) != 0);
 		sciThis->ButtonMoveWithModifiers(pt, event->time, modifiers);
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2244,7 +2249,7 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		const bool meta = ctrl;
 		ctrl = (event->state & GDK_META_MASK) != 0;
 #endif
-		const bool added = KeyDownWithModifiers(key, ModifierFlags(shift, ctrl, alt, meta, super), &consumed) != 0;
+		const bool added = KeyDownWithModifiers(static_cast<Keys>(key), ModifierFlags(shift, ctrl, alt, meta, super), &consumed) != 0;
 		if (!consumed)
 			consumed = added;
 		//fprintf(stderr, "SK-key: %d %x %x\n",event->keyval, event->state, consumed);
@@ -2257,7 +2262,7 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		}
 		return consumed;
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2289,7 +2294,7 @@ gboolean ScintillaGTK::DrawPreeditThis(GtkWidget *, cairo_t *cr) {
 
 		g_object_unref(layout);
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return TRUE;
 }
@@ -2312,7 +2317,7 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *) {
 		cairo_destroy(context);
 		g_object_unref(layout);
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return TRUE;
 }
@@ -2442,12 +2447,12 @@ void ScintillaGTK::CommitThis(char *commitStr) {
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			InsertCharacter(docChar, CharacterSource::directInput);
+			InsertCharacter(docChar, CharacterSource::DirectInput);
 		}
 		g_free(uniStr);
 		ShowCaretAtCurrentPosition();
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -2504,7 +2509,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			InsertCharacter(docChar, CharacterSource::tentativeInput);
+			InsertCharacter(docChar, CharacterSource::TentativeInput);
 
 			DrawImeIndicator(indicator[i], docChar.size());
 		}
@@ -2528,7 +2533,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 		EnsureCaretVisible();
 		ShowCaretAtCurrentPosition();
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
@@ -2562,12 +2567,12 @@ void ScintillaGTK::PreeditChangedWindowedThis() {
 			gtk_widget_hide(PWidget(wPreedit));
 		}
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 }
 
 void ScintillaGTK::PreeditChanged(GtkIMContext *, ScintillaGTK *sciThis) {
-	if ((sciThis->imeInteraction == IMEInteraction::internal) || (sciThis->KoreanIME())) {
+	if ((sciThis->imeInteraction == IMEInteraction::Inline) || (sciThis->KoreanIME())) {
 		sciThis->PreeditChangedInlineThis();
 	} else {
 		sciThis->PreeditChangedWindowedThis();
@@ -2670,7 +2675,7 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		rcPaint.bottom = y2;
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(Technology::Default));
 		surfaceWindow->Init(cr, PWidget(wText));
 		Paint(surfaceWindow.get(), rcPaint);
 		surfaceWindow->Release();
@@ -2687,7 +2692,7 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		rgnUpdate = 0;
 		paintState = PaintState::notPainting;
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 
 	return FALSE;
@@ -2732,7 +2737,7 @@ gboolean ScintillaGTK::DrawThis(cairo_t *cr) {
 		}
 #endif
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2760,7 +2765,7 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		rgnUpdate = gdk_region_copy(ose->region);
 		const PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(Technology::Default));
 		cairo_t *cr = gdk_cairo_create(PWindow(wText));
 		surfaceWindow->Init(cr, PWidget(wText));
 		Paint(surfaceWindow.get(), rcPaint);
@@ -2778,7 +2783,7 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		}
 		rgnUpdate = nullptr;
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 
 	return FALSE;
@@ -2807,7 +2812,7 @@ gboolean ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
 			GTK_CONTAINER(PWidget(wMain)), PWidget(scrollbarv), ose);
 
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2818,7 +2823,7 @@ void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 	try {
 		sciThis->ScrollTo(static_cast<int>(gtk_adjustment_get_value(adj)), false);
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -2826,7 +2831,7 @@ void ScintillaGTK::ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 	try {
 		sciThis->HorizontalScrollTo(static_cast<int>(gtk_adjustment_get_value(adj)));
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -2849,7 +2854,7 @@ void ScintillaGTK::SelectionGet(GtkWidget *widget,
 			sciThis->GetSelection(selection_data, info, &sciThis->primary);
 		}
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -2880,7 +2885,7 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 		}
 		gdk_drag_status(context, preferredAction, dragtime);
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2897,7 +2902,7 @@ void ScintillaGTK::DragLeave(GtkWidget *widget, GdkDragContext * /*context*/, gu
 		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 		//Platform::DebugPrintf("DragLeave %x\n", sciThis);
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -2911,7 +2916,7 @@ void ScintillaGTK::DragEnd(GtkWidget *widget, GdkDragContext * /*context*/) {
 		//Platform::DebugPrintf("DragEnd %x %d\n", sciThis, sciThis->dragWasDropped);
 		sciThis->inDragDrop = DragDrop::none;
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -2922,7 +2927,7 @@ gboolean ScintillaGTK::Drop(GtkWidget *widget, GdkDragContext * /*context*/,
 		//Platform::DebugPrintf("Drop %x\n", sciThis);
 		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 	return FALSE;
 }
@@ -2934,7 +2939,7 @@ void ScintillaGTK::DragDataReceived(GtkWidget *widget, GdkDragContext * /*contex
 		sciThis->ReceivedDrop(selection_data);
 		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -2961,7 +2966,7 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 		}
 		sciThis->SetDragPosition(SelectionPosition(Sci::invalidPosition));
 	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
+		sciThis->errorStatus = Status::Failure;
 	}
 }
 
@@ -3069,7 +3074,7 @@ gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 
 gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	try {
-		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(Technology::Default));
 		cairo_t *cr = gdk_cairo_create(WindowFromWidget(widget));
 		surfaceWindow->Init(cr, widget);
 		surfaceWindow->SetMode(SurfaceMode(ctip->codePage, false));
@@ -3094,13 +3099,13 @@ AtkObject *ScintillaGTK::GetAccessible(GtkWidget *widget) {
 
 sptr_t ScintillaGTK::DirectFunction(
 	sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
-	return reinterpret_cast<ScintillaGTK *>(ptr)->WndProc(iMessage, wParam, lParam);
+	return reinterpret_cast<ScintillaGTK *>(ptr)->WndProc(static_cast<Message>(iMessage), wParam, lParam);
 }
 
 /* legacy name for scintilla_object_send_message */
 sptr_t scintilla_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	ScintillaGTK *psci = static_cast<ScintillaGTK *>(sci->pscin);
-	return psci->WndProc(iMessage, wParam, lParam);
+	return psci->WndProc(static_cast<Message>(iMessage), wParam, lParam);
 }
 
 gintptr scintilla_object_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {

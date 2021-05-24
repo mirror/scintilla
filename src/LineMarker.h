@@ -8,14 +8,12 @@
 #ifndef LINEMARKER_H
 #define LINEMARKER_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 class XPM;
 class RGBAImage;
 
-typedef void (*DrawLineMarkerFn)(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, int tFold, int marginStyle, const void *lineMarker);
-
-enum class Layer { base = 0, under = 1, over = 2 };
+typedef void (*DrawLineMarkerFn)(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, int tFold, Scintilla::MarginType marginStyle, const void *lineMarker);
 
 /**
  */
@@ -23,12 +21,12 @@ class LineMarker {
 public:
 	enum class FoldPart { undefined, head, body, tail, headWithTail };
 
-	int markType = SC_MARK_CIRCLE;
+	Scintilla::MarkerSymbol markType = Scintilla::MarkerSymbol::Circle;
 	ColourRGBA fore = ColourRGBA(0, 0, 0);
 	ColourRGBA back = ColourRGBA(0xff, 0xff, 0xff);
 	ColourRGBA backSelected = ColourRGBA(0xff, 0x00, 0x00);
-	Layer layer = Layer::base;
-	int alpha = SC_ALPHA_NOALPHA;
+	Scintilla::Layer layer = Scintilla::Layer::Base;
+	Scintilla::Alpha alpha = Scintilla::Alpha::NoAlpha;
 	XYPOSITION strokeWidth = 1.0f;
 	std::unique_ptr<XPM> pxpm;
 	std::unique_ptr<RGBAImage> image;
@@ -51,7 +49,7 @@ public:
 	void SetXPM(const char *const *linesForm);
 	void SetRGBAImage(Point sizeRGBAImage, float scale, const unsigned char *pixelsRGBAImage);
 	void AlignedPolygon(Surface *surface, const Point *pts, size_t npts) const;
-	void Draw(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, FoldPart part, int marginStyle) const;
+	void Draw(Surface *surface, const PRectangle &rcWhole, const Font *fontForCharacter, FoldPart part, Scintilla::MarginType marginStyle) const;
 	void DrawFoldingMark(Surface *surface, const PRectangle &rcWhole, FoldPart part) const;
 };
 

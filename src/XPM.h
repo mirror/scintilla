@@ -8,7 +8,7 @@
 #ifndef XPM_H
 #define XPM_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 /**
  * Hold a pixmap in XPM format.

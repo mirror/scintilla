@@ -20,7 +20,7 @@
 #include "CaseConvert.h"
 #include "UniConversion.h"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 namespace {
 	// Use an unnamed namespace to protect the declarations from name conflicts
@@ -795,7 +795,7 @@ CaseConverter *ConverterForConversion(CaseConversion conversion) noexcept {
 
 }
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 ICaseConverter *ConverterFor(CaseConversion conversion) {
 	CaseConverter *pCaseConv = ConverterForConversion(conversion);

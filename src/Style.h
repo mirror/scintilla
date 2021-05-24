@@ -8,22 +8,22 @@
 #ifndef STYLE_H
 #define STYLE_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 struct FontSpecification {
 	const char *fontName;
-	int weight;
+	Scintilla::FontWeight weight;
 	bool italic;
 	int size;
-	int characterSet;
-	int extraFontFlag;
+	Scintilla::CharacterSet characterSet;
+	Scintilla::FontQuality extraFontFlag;
 	FontSpecification() noexcept :
 		fontName(nullptr),
-		weight(SC_WEIGHT_NORMAL),
+		weight(Scintilla::FontWeight::Normal),
 		italic(false),
-		size(10 * SC_FONT_SIZE_MULTIPLIER),
-		characterSet(0),
-		extraFontFlag(0) {
+		size(10 * Scintilla::FontSizeMultiplier),
+		characterSet(Scintilla::CharacterSet::Ansi),
+		extraFontFlag(Scintilla::FontQuality::QualityDefault) {
 	}
 	bool operator==(const FontSpecification &other) const noexcept;
 	bool operator<(const FontSpecification &other) const noexcept;
@@ -64,8 +64,8 @@ public:
 	Style &operator=(Style &&) = delete;
 	void Clear(ColourRGBA fore_, ColourRGBA back_,
 	           int size_,
-	           const char *fontName_, int characterSet_,
-	           int weight_, bool italic_, bool eolFilled_,
+	           const char *fontName_, Scintilla::CharacterSet characterSet_,
+	           Scintilla::FontWeight weight_, bool italic_, bool eolFilled_,
 	           bool underline_, CaseForce caseForce_,
 	           bool visible_, bool changeable_, bool hotspot_) noexcept;
 	void ClearTo(const Style &source) noexcept;

@@ -14,7 +14,7 @@
 #include "UniConversion.h"
 #include "HanjaDic.h"
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 namespace HanjaDict {
 

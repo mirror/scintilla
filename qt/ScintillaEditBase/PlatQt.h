@@ -20,6 +20,8 @@
 
 #include "Debugging.h"
 #include "Geometry.h"
+#include "ScintillaTypes.h"
+#include "ScintillaMessages.h"
 #include "Platform.h"
 
 #include <QUrl>
@@ -27,9 +29,9 @@
 #include <QPainter>
 #include <QHash>
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
-const char *CharacterSetID(int characterSet);
+const char *CharacterSetID(Scintilla::CharacterSet characterSet);
 
 inline QColor QColorFromColourRGBA(ColourRGBA ca)
 {
@@ -89,7 +91,7 @@ public:
 	void SetMode(SurfaceMode mode) override;
 
 	void Release() noexcept override;
-	int Supports(int feature) noexcept override;
+	int SupportsFeature(Scintilla::Supports feature) noexcept override;
 	bool Initialised() override;
 	void PenColour(ColourRGBA fore);
 	void PenColourWidth(ColourRGBA fore, XYPOSITION strokeWidth);

@@ -9,7 +9,7 @@
 #ifndef SPLITVECTOR_H
 #define SPLITVECTOR_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 template <typename T>
 class SplitVector {

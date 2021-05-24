@@ -24,6 +24,9 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
+#include "ScintillaTypes.h"
+#include "ScintillaMessages.h"
+
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
@@ -41,6 +44,7 @@
 #endif
 
 using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 namespace {
 
@@ -87,10 +91,10 @@ enum class EncodingType { singleByte, utf8, dbcs };
 class FontHandle : public Font {
 public:
 	PangoFontDescription *pfd = nullptr;
-	int characterSet;
-	FontHandle() noexcept : pfd(nullptr), characterSet(-1) {
+	CharacterSet characterSet;
+	FontHandle() noexcept : pfd(nullptr), characterSet(CharacterSet::Ansi) {
 	}
-	FontHandle(PangoFontDescription *pfd_, int characterSet_) noexcept {
+	FontHandle(PangoFontDescription *pfd_, CharacterSet characterSet_) noexcept {
 		pfd = pfd_;
 		characterSet = characterSet_;
 	}
@@ -145,9 +149,9 @@ class SurfaceImpl : public Surface {
 	PangoContext *pcontext = nullptr;
 	PangoLayout *layout = nullptr;
 	Converter conv;
-	int characterSet = -1;
+	CharacterSet characterSet = static_cast<CharacterSet>(-1);
 	void PenColourAlpha(ColourRGBA fore) noexcept;
-	void SetConverter(int characterSet_);
+	void SetConverter(CharacterSet characterSet_);
 	void CairoRectangle(PRectangle rc) noexcept;
 public:
 	SurfaceImpl() noexcept;
@@ -167,7 +171,7 @@ public:
 
 	void Clear() noexcept;
 	void Release() noexcept override;
-	int Supports(int feature) noexcept override;
+	int SupportsFeature(Supports feature) noexcept override;
 	bool Initialised() override;
 	int LogPixelsY() override;
 	int PixelDivisions() override;
@@ -216,60 +220,60 @@ public:
 	void FlushDrawing() override;
 };
 
-const int SupportsGTK[] = {
-	SC_SUPPORTS_LINE_DRAWS_FINAL,
-	SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH,
-	SC_SUPPORTS_TRANSLUCENT_STROKE,
-	SC_SUPPORTS_PIXEL_MODIFICATION,
+const Supports SupportsGTK[] = {
+	Supports::LineDrawsFinal,
+	Supports::FractionalStrokeWidth,
+	Supports::TranslucentStroke,
+	Supports::PixelModification,
 };
 
 }
 
-const char *CharacterSetID(int characterSet) noexcept {
+const char *CharacterSetID(CharacterSet characterSet) noexcept {
 	switch (characterSet) {
-	case SC_CHARSET_ANSI:
+	case CharacterSet::Ansi:
 		return "";
-	case SC_CHARSET_DEFAULT:
+	case CharacterSet::Default:
 		return "ISO-8859-1";
-	case SC_CHARSET_BALTIC:
+	case CharacterSet::Baltic:
 		return "ISO-8859-13";
-	case SC_CHARSET_CHINESEBIG5:
+	case CharacterSet::ChineseBig5:
 		return "BIG-5";
-	case SC_CHARSET_EASTEUROPE:
+	case CharacterSet::EastEurope:
 		return "ISO-8859-2";
-	case SC_CHARSET_GB2312:
+	case CharacterSet::GB2312:
 		return "CP936";
-	case SC_CHARSET_GREEK:
+	case CharacterSet::Greek:
 		return "ISO-8859-7";
-	case SC_CHARSET_HANGUL:
+	case CharacterSet::Hangul:
 		return "CP949";
-	case SC_CHARSET_MAC:
+	case CharacterSet::Mac:
 		return "MACINTOSH";
-	case SC_CHARSET_OEM:
+	case CharacterSet::Oem:
 		return "ASCII";
-	case SC_CHARSET_RUSSIAN:
+	case CharacterSet::Russian:
 		return "KOI8-R";
-	case SC_CHARSET_OEM866:
+	case CharacterSet::Oem866:
 		return "CP866";
-	case SC_CHARSET_CYRILLIC:
+	case CharacterSet::Cyrillic:
 		return "CP1251";
-	case SC_CHARSET_SHIFTJIS:
+	case CharacterSet::ShiftJis:
 		return "SHIFT-JIS";
-	case SC_CHARSET_SYMBOL:
+	case CharacterSet::Symbol:
 		return "";
-	case SC_CHARSET_TURKISH:
+	case CharacterSet::Turkish:
 		return "ISO-8859-9";
-	case SC_CHARSET_JOHAB:
+	case CharacterSet::Johab:
 		return "CP1361";
-	case SC_CHARSET_HEBREW:
+	case CharacterSet::Hebrew:
 		return "ISO-8859-8";
-	case SC_CHARSET_ARABIC:
+	case CharacterSet::Arabic:
 		return "ISO-8859-6";
-	case SC_CHARSET_VIETNAMESE:
+	case CharacterSet::Vietnamese:
 		return "";
-	case SC_CHARSET_THAI:
+	case CharacterSet::Thai:
 		return "ISO-8859-11";
-	case SC_CHARSET_8859_15:
+	case CharacterSet::Iso8859_15:
 		return "ISO-8859-15";
 	default:
 		return "";
@@ -286,7 +290,7 @@ void SurfaceImpl::PenColourAlpha(ColourRGBA fore) noexcept {
 	}
 }
 
-void SurfaceImpl::SetConverter(int characterSet_) {
+void SurfaceImpl::SetConverter(CharacterSet characterSet_) {
 	if (characterSet != characterSet_) {
 		characterSet = characterSet_;
 		conv.Open("UTF-8", CharacterSetID(characterSet), false);
@@ -342,7 +346,7 @@ void SurfaceImpl::Clear() noexcept {
 		g_object_unref(pcontext);
 	pcontext = nullptr;
 	conv.Close();
-	characterSet = -1;
+	characterSet = static_cast<CharacterSet>(-1);
 	inited = false;
 	createdGC = false;
 }
@@ -417,8 +421,8 @@ void SurfaceImpl::SetMode(SurfaceMode mode_) {
 	}
 }
 
-int SurfaceImpl::Supports(int feature) noexcept {
-	for (const int f : SupportsGTK) {
+int SurfaceImpl::SupportsFeature(Supports feature) noexcept {
+	for (const Supports f : SupportsGTK) {
 		if (f == feature)
 			return 1;
 	}
@@ -913,8 +917,8 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 				const size_t lenPositions = text.length();
 				// Either 8-bit or DBCS conversion failed so treat as 8-bit.
 				SetConverter(PFont(font_)->characterSet);
-				const bool rtlCheck = PFont(font_)->characterSet == SC_CHARSET_HEBREW ||
-							    PFont(font_)->characterSet == SC_CHARSET_ARABIC;
+				const bool rtlCheck = PFont(font_)->characterSet == CharacterSet::Hebrew ||
+							    PFont(font_)->characterSet == CharacterSet::Arabic;
 				std::string utfForm = UTF8FromIconv(conv, text);
 				if (utfForm.empty()) {
 					utfForm = UTF8FromLatin1(text);
@@ -1120,7 +1124,7 @@ void SurfaceImpl::FlushCachedState() {}
 void SurfaceImpl::FlushDrawing() {
 }
 
-std::unique_ptr<Surface> Surface::Allocate(int) {
+std::unique_ptr<Surface> Surface::Allocate(Technology) {
 	return std::make_unique<SurfaceImpl>();
 }
 
@@ -1385,7 +1389,7 @@ public:
 #endif
 	}
 	void SetFont(const Font *font) override;
-	void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_, int technology_) override;
+	void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_, Technology technology_) override;
 	void SetAverageCharWidth(int width) override;
 	void SetVisibleRows(int rows) override;
 	int GetVisibleRows() const override;
@@ -1570,7 +1574,7 @@ static void StyleSet(GtkWidget *w, GtkStyle *, void *) {
 #endif
 }
 
-void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
+void ListBoxX::Create(Window &parent, int, Point, int, bool, Technology) {
 	if (widCached != nullptr) {
 		wid = widCached;
 		return;

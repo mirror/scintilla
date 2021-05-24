@@ -27,6 +27,10 @@
 #import <QuartzCore/CAAnimation.h>
 #import <QuartzCore/CATransaction.h>
 
+#import "ScintillaTypes.h"
+#import "ScintillaMessages.h"
+#import "ScintillaStructures.h"
+
 #import "Debugging.h"
 #import "Geometry.h"
 #import "Platform.h"
@@ -35,6 +39,7 @@
 #import "PlatCocoa.h"
 
 using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 NSString *ScintillaRecPboardType = @"com.scintilla.utf16-plain-text.rectangular";
 
@@ -45,99 +50,107 @@ NSString *ScintillaRecPboardType = @"com.scintilla.utf16-plain-text.rectangular"
 #define SCI_SCMD ( SCI_CMD | SCI_SHIFT)
 #define SCI_SMETA ( SCI_META | SCI_SHIFT)
 
+namespace {
+
+constexpr Keys Key(char ch) {
+    return static_cast<Keys>(ch);
+}
+
+}
+
 static const KeyToCommand macMapDefault[] = {
 	// OS X specific
-	{SCK_DOWN,      SCI_CTRL,   SCI_DOCUMENTEND},
-	{SCK_DOWN,      SCI_CSHIFT, SCI_DOCUMENTENDEXTEND},
-	{SCK_UP,        SCI_CTRL,   SCI_DOCUMENTSTART},
-	{SCK_UP,        SCI_CSHIFT, SCI_DOCUMENTSTARTEXTEND},
-	{SCK_LEFT,      SCI_CTRL,   SCI_VCHOME},
-	{SCK_LEFT,      SCI_CSHIFT, SCI_VCHOMEEXTEND},
-	{SCK_RIGHT,     SCI_CTRL,   SCI_LINEEND},
-	{SCK_RIGHT,     SCI_CSHIFT, SCI_LINEENDEXTEND},
+	{Keys::Down,      SCI_CTRL,   Message::DocumentEnd},
+	{Keys::Down,      SCI_CSHIFT, Message::DocumentEndExtend},
+	{Keys::Up,        SCI_CTRL,   Message::DocumentStart},
+	{Keys::Up,        SCI_CSHIFT, Message::DocumentStartExtend},
+	{Keys::Left,      SCI_CTRL,   Message::VCHome},
+	{Keys::Left,      SCI_CSHIFT, Message::VCHomeExtend},
+	{Keys::Right,     SCI_CTRL,   Message::LineEnd},
+	{Keys::Right,     SCI_CSHIFT, Message::LineEndExtend},
 
 	// Similar to Windows and GTK+
 	// Where equivalent clashes with OS X standard, use Meta instead
-	{SCK_DOWN,      SCI_NORM,   SCI_LINEDOWN},
-	{SCK_DOWN,      SCI_SHIFT,  SCI_LINEDOWNEXTEND},
-	{SCK_DOWN,      SCI_META,   SCI_LINESCROLLDOWN},
-	{SCK_DOWN,      SCI_ASHIFT, SCI_LINEDOWNRECTEXTEND},
-	{SCK_UP,        SCI_NORM,   SCI_LINEUP},
-	{SCK_UP,        SCI_SHIFT,  SCI_LINEUPEXTEND},
-	{SCK_UP,        SCI_META,   SCI_LINESCROLLUP},
-	{SCK_UP,        SCI_ASHIFT, SCI_LINEUPRECTEXTEND},
-	{'[',           SCI_CTRL,   SCI_PARAUP},
-	{'[',           SCI_CSHIFT, SCI_PARAUPEXTEND},
-	{']',           SCI_CTRL,   SCI_PARADOWN},
-	{']',           SCI_CSHIFT, SCI_PARADOWNEXTEND},
-	{SCK_LEFT,      SCI_NORM,   SCI_CHARLEFT},
-	{SCK_LEFT,      SCI_SHIFT,  SCI_CHARLEFTEXTEND},
-	{SCK_LEFT,      SCI_ALT,    SCI_WORDLEFT},
-	{SCK_LEFT,      SCI_META,   SCI_WORDLEFT},
-	{SCK_LEFT,      SCI_SMETA,  SCI_WORDLEFTEXTEND},
-	{SCK_LEFT,      SCI_ASHIFT, SCI_CHARLEFTRECTEXTEND},
-	{SCK_RIGHT,     SCI_NORM,   SCI_CHARRIGHT},
-	{SCK_RIGHT,     SCI_SHIFT,  SCI_CHARRIGHTEXTEND},
-	{SCK_RIGHT,     SCI_ALT,    SCI_WORDRIGHT},
-	{SCK_RIGHT,     SCI_META,   SCI_WORDRIGHT},
-	{SCK_RIGHT,     SCI_SMETA,  SCI_WORDRIGHTEXTEND},
-	{SCK_RIGHT,     SCI_ASHIFT, SCI_CHARRIGHTRECTEXTEND},
-	{'/',           SCI_CTRL,   SCI_WORDPARTLEFT},
-	{'/',           SCI_CSHIFT, SCI_WORDPARTLEFTEXTEND},
-	{'\\',          SCI_CTRL,   SCI_WORDPARTRIGHT},
-	{'\\',          SCI_CSHIFT, SCI_WORDPARTRIGHTEXTEND},
-	{SCK_HOME,      SCI_NORM,   SCI_VCHOME},
-	{SCK_HOME,      SCI_SHIFT,  SCI_VCHOMEEXTEND},
-	{SCK_HOME,      SCI_CTRL,   SCI_DOCUMENTSTART},
-	{SCK_HOME,      SCI_CSHIFT, SCI_DOCUMENTSTARTEXTEND},
-	{SCK_HOME,      SCI_ALT,    SCI_HOMEDISPLAY},
-	{SCK_HOME,      SCI_ASHIFT, SCI_VCHOMERECTEXTEND},
-	{SCK_END,       SCI_NORM,   SCI_LINEEND},
-	{SCK_END,       SCI_SHIFT,  SCI_LINEENDEXTEND},
-	{SCK_END,       SCI_CTRL,   SCI_DOCUMENTEND},
-	{SCK_END,       SCI_CSHIFT, SCI_DOCUMENTENDEXTEND},
-	{SCK_END,       SCI_ALT,    SCI_LINEENDDISPLAY},
-	{SCK_END,       SCI_ASHIFT, SCI_LINEENDRECTEXTEND},
-	{SCK_PRIOR,     SCI_NORM,   SCI_PAGEUP},
-	{SCK_PRIOR,     SCI_SHIFT,  SCI_PAGEUPEXTEND},
-	{SCK_PRIOR,     SCI_ASHIFT, SCI_PAGEUPRECTEXTEND},
-	{SCK_NEXT,      SCI_NORM,   SCI_PAGEDOWN},
-	{SCK_NEXT,      SCI_SHIFT,  SCI_PAGEDOWNEXTEND},
-	{SCK_NEXT,      SCI_ASHIFT, SCI_PAGEDOWNRECTEXTEND},
-	{SCK_DELETE,    SCI_NORM,   SCI_CLEAR},
-	{SCK_DELETE,    SCI_SHIFT,  SCI_CUT},
-	{SCK_DELETE,    SCI_CTRL,   SCI_DELWORDRIGHT},
-	{SCK_DELETE,    SCI_CSHIFT, SCI_DELLINERIGHT},
-	{SCK_INSERT,    SCI_NORM,   SCI_EDITTOGGLEOVERTYPE},
-	{SCK_INSERT,    SCI_SHIFT,  SCI_PASTE},
-	{SCK_INSERT,    SCI_CTRL,   SCI_COPY},
-	{SCK_ESCAPE,    SCI_NORM,   SCI_CANCEL},
-	{SCK_BACK,      SCI_NORM,   SCI_DELETEBACK},
-	{SCK_BACK,      SCI_SHIFT,  SCI_DELETEBACK},
-	{SCK_BACK,      SCI_CTRL,   SCI_DELWORDLEFT},
-	{SCK_BACK,      SCI_ALT,    SCI_DELWORDLEFT},
-	{SCK_BACK,      SCI_CSHIFT, SCI_DELLINELEFT},
-	{'z',           SCI_CMD,    SCI_UNDO},
-	{'z',           SCI_SCMD,   SCI_REDO},
-	{'x',           SCI_CMD,    SCI_CUT},
-	{'c',           SCI_CMD,    SCI_COPY},
-	{'v',           SCI_CMD,    SCI_PASTE},
-	{'a',           SCI_CMD,    SCI_SELECTALL},
-	{SCK_TAB,       SCI_NORM,   SCI_TAB},
-	{SCK_TAB,       SCI_SHIFT,  SCI_BACKTAB},
-	{SCK_RETURN,    SCI_NORM,   SCI_NEWLINE},
-	{SCK_RETURN,    SCI_SHIFT,  SCI_NEWLINE},
-	{SCK_ADD,       SCI_CMD,    SCI_ZOOMIN},
-	{SCK_SUBTRACT,  SCI_CMD,    SCI_ZOOMOUT},
-	{SCK_DIVIDE,    SCI_CMD,    SCI_SETZOOM},
-	{'l',           SCI_CMD,    SCI_LINECUT},
-	{'l',           SCI_CSHIFT, SCI_LINEDELETE},
-	{'t',           SCI_CSHIFT, SCI_LINECOPY},
-	{'t',           SCI_CTRL,   SCI_LINETRANSPOSE},
-	{'d',           SCI_CTRL,   SCI_SELECTIONDUPLICATE},
-	{'u',           SCI_CTRL,   SCI_LOWERCASE},
-	{'u',           SCI_CSHIFT, SCI_UPPERCASE},
-	{0, 0, 0},
+	{Keys::Down,      SCI_NORM,   Message::LineDown},
+	{Keys::Down,      SCI_SHIFT,  Message::LineDownExtend},
+	{Keys::Down,      SCI_META,   Message::LineScrollDown},
+	{Keys::Down,      SCI_ASHIFT, Message::LineDownRectExtend},
+	{Keys::Up,        SCI_NORM,   Message::LineUp},
+	{Keys::Up,        SCI_SHIFT,  Message::LineUpExtend},
+	{Keys::Up,        SCI_META,   Message::LineScrollUp},
+	{Keys::Up,        SCI_ASHIFT, Message::LineUpRectExtend},
+	{Key('['),           SCI_CTRL,   Message::ParaUp},
+	{Key('['),           SCI_CSHIFT, Message::ParaUpExtend},
+	{Key(']'),           SCI_CTRL,   Message::ParaDown},
+	{Key(']'),           SCI_CSHIFT, Message::ParaDownExtend},
+	{Keys::Left,      SCI_NORM,   Message::CharLeft},
+	{Keys::Left,      SCI_SHIFT,  Message::CharLeftExtend},
+	{Keys::Left,      SCI_ALT,    Message::WordLeft},
+	{Keys::Left,      SCI_META,   Message::WordLeft},
+	{Keys::Left,      SCI_SMETA,  Message::WordLeftExtend},
+	{Keys::Left,      SCI_ASHIFT, Message::CharLeftRectExtend},
+	{Keys::Right,     SCI_NORM,   Message::CharRight},
+	{Keys::Right,     SCI_SHIFT,  Message::CharRightExtend},
+	{Keys::Right,     SCI_ALT,    Message::WordRight},
+	{Keys::Right,     SCI_META,   Message::WordRight},
+	{Keys::Right,     SCI_SMETA,  Message::WordRightExtend},
+	{Keys::Right,     SCI_ASHIFT, Message::CharRightRectExtend},
+	{Key('/'),           SCI_CTRL,   Message::WordPartLeft},
+	{Key('/'),           SCI_CSHIFT, Message::WordPartLeftExtend},
+	{Key('\\'),          SCI_CTRL,   Message::WordPartRight},
+	{Key('\\'),          SCI_CSHIFT, Message::WordPartRightExtend},
+	{Keys::Home,      SCI_NORM,   Message::VCHome},
+	{Keys::Home,      SCI_SHIFT,  Message::VCHomeExtend},
+	{Keys::Home,      SCI_CTRL,   Message::DocumentStart},
+	{Keys::Home,      SCI_CSHIFT, Message::DocumentStartExtend},
+	{Keys::Home,      SCI_ALT,    Message::HomeDisplay},
+	{Keys::Home,      SCI_ASHIFT, Message::VCHomeRectExtend},
+	{Keys::End,       SCI_NORM,   Message::LineEnd},
+	{Keys::End,       SCI_SHIFT,  Message::LineEndExtend},
+	{Keys::End,       SCI_CTRL,   Message::DocumentEnd},
+	{Keys::End,       SCI_CSHIFT, Message::DocumentEndExtend},
+	{Keys::End,       SCI_ALT,    Message::LineEndDisplay},
+	{Keys::End,       SCI_ASHIFT, Message::LineEndRectExtend},
+	{Keys::Prior,     SCI_NORM,   Message::PageUp},
+	{Keys::Prior,     SCI_SHIFT,  Message::PageUpExtend},
+	{Keys::Prior,     SCI_ASHIFT, Message::PageUpRectExtend},
+	{Keys::Next,      SCI_NORM,   Message::PageDown},
+	{Keys::Next,      SCI_SHIFT,  Message::PageDownExtend},
+	{Keys::Next,      SCI_ASHIFT, Message::PageDownRectExtend},
+	{Keys::Delete,    SCI_NORM,   Message::Clear},
+	{Keys::Delete,    SCI_SHIFT,  Message::Cut},
+	{Keys::Delete,    SCI_CTRL,   Message::DelWordRight},
+	{Keys::Delete,    SCI_CSHIFT, Message::DelLineRight},
+	{Keys::Insert,    SCI_NORM,   Message::EditToggleOvertype},
+	{Keys::Insert,    SCI_SHIFT,  Message::Paste},
+	{Keys::Insert,    SCI_CTRL,   Message::Copy},
+	{Keys::Escape,    SCI_NORM,   Message::Cancel},
+	{Keys::Back,      SCI_NORM,   Message::DeleteBack},
+	{Keys::Back,      SCI_SHIFT,  Message::DeleteBack},
+	{Keys::Back,      SCI_CTRL,   Message::DelWordLeft},
+	{Keys::Back,      SCI_ALT,    Message::DelWordLeft},
+	{Keys::Back,      SCI_CSHIFT, Message::DelLineLeft},
+	{Key('z'),           SCI_CMD,    Message::Undo},
+	{Key('z'),           SCI_SCMD,   Message::Redo},
+	{Key('x'),           SCI_CMD,    Message::Cut},
+	{Key('c'),           SCI_CMD,    Message::Copy},
+	{Key('v'),           SCI_CMD,    Message::Paste},
+	{Key('a'),           SCI_CMD,    Message::SelectAll},
+	{Keys::Tab,       SCI_NORM,   Message::Tab},
+	{Keys::Tab,       SCI_SHIFT,  Message::BackTab},
+	{Keys::Return,    SCI_NORM,   Message::NewLine},
+	{Keys::Return,    SCI_SHIFT,  Message::NewLine},
+	{Keys::Add,       SCI_CMD,    Message::ZoomIn},
+	{Keys::Subtract,  SCI_CMD,    Message::ZoomOut},
+	{Keys::Divide,    SCI_CMD,    Message::SetZoom},
+	{Key('l'),           SCI_CMD,    Message::LineCut},
+	{Key('l'),           SCI_CSHIFT, Message::LineDelete},
+	{Key('t'),           SCI_CSHIFT, Message::LineCopy},
+	{Key('t'),           SCI_CTRL,   Message::LineTranspose},
+	{Key('d'),           SCI_CTRL,   Message::SelectionDuplicate},
+	{Key('u'),           SCI_CTRL,   Message::LowerCase},
+	{Key('u'),           SCI_CSHIFT, Message::UpperCase},
+	{Key(0), KeyMod::Norm, static_cast<Message>(0)},
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -300,7 +313,7 @@ const CGFloat paddingHighlightY = 2;
 
 - (void) hideMatch {
 	self.sFind = @"";
-	self.positionFind = INVALID_POSITION;
+	self.positionFind = Sci::invalidPosition;
 	self.hidden = YES;
 }
 
@@ -409,7 +422,7 @@ ScintillaCocoa::ScintillaCocoa(ScintillaView *sciView_, SCIContentView *viewCont
 	scrollTicks = 2000;
 	observer = NULL;
 	layerFindIndicator = NULL;
-	imeInteraction = IMEInteraction::internal;
+	imeInteraction = IMEInteraction::Inline;
 	std::fill(timers, std::end(timers), nil);
 	Init();
 }
@@ -428,13 +441,13 @@ ScintillaCocoa::~ScintillaCocoa() {
 void ScintillaCocoa::Init() {
 
 	// Tell Scintilla not to buffer: Quartz buffers drawing for us.
-	WndProc(SCI_SETBUFFEREDDRAW, 0, 0);
+	WndProc(Message::SetBufferedDraw, 0, 0);
 
 	// We are working with Unicode exclusively.
-	WndProc(SCI_SETCODEPAGE, SC_CP_UTF8, 0);
+	WndProc(Message::SetCodePage, SC_CP_UTF8, 0);
 
 	// Add Mac specific key bindings.
-	for (int i = 0; macMapDefault[i].key; i++)
+	for (int i = 0; static_cast<int>(macMapDefault[i].key); i++)
 		kmap.AssignCmdKey(macMapDefault[i].key, macMapDefault[i].modifiers, macMapDefault[i].msg);
 
 }
@@ -590,7 +603,7 @@ std::unique_ptr<CaseFolder> ScintillaCocoa::CaseFolderForEncoding() {
 		return std::make_unique<CaseFolderUnicode>();
 	} else {
 		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-					    vs.styles[STYLE_DEFAULT].characterSet);
+					    vs.styles[StyleDefault].characterSet);
 		if (pdoc->dbcsCodePage == 0) {
 			std::unique_ptr<CaseFolderTable> pcf = std::make_unique<CaseFolderTable>();
 			pcf->StandardASCII();
@@ -639,7 +652,7 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, CaseMapping case
 	}
 
 	CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-				    vs.styles[STYLE_DEFAULT].characterSet);
+				    vs.styles[StyleDefault].characterSet);
 
 	CFStringRef cfsVal = CFStringFromString(s.c_str(), s.length(), encoding);
 	if (!cfsVal) {
@@ -698,7 +711,7 @@ SCIContentView *ScintillaCocoa::ContentView() {
 /**
  * Return the top left visible point relative to the origin point of the whole document.
  */
-Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain() const {
+Scintilla::Internal::Point ScintillaCocoa::GetVisibleOriginInMain() const {
 	NSScrollView *scrollView = ScrollContainer();
 	NSRect contentRect = scrollView.contentView.bounds;
 	return Point(static_cast<XYPOSITION>(contentRect.origin.x), static_cast<XYPOSITION>(contentRect.origin.y));
@@ -743,10 +756,10 @@ PRectangle ScintillaCocoa::GetClientDrawingRectangle() {
  * a native Point structure. Base coordinates are used for the top window used in the view hierarchy.
  * Returned value is in view coordinates.
  */
-Scintilla::Point ScintillaCocoa::ConvertPoint(NSPoint point) {
+Scintilla::Internal::Point ScintillaCocoa::ConvertPoint(NSPoint point) {
 	NSView *container = ContentView();
 	NSPoint result = [container convertPoint: point fromView: nil];
-	Scintilla::Point ptOrigin = GetVisibleOriginInMain();
+	Scintilla::Internal::Point ptOrigin = GetVisibleOriginInMain();
 	return Point(static_cast<XYPOSITION>(result.x - ptOrigin.x), static_cast<XYPOSITION>(result.y - ptOrigin.y));
 }
 
@@ -798,7 +811,7 @@ void ScintillaCocoa::Redraw() {
  */
 sptr_t ScintillaCocoa::DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam,
 				      sptr_t lParam) {
-	return reinterpret_cast<ScintillaCocoa *>(ptr)->WndProc(iMessage, wParam, lParam);
+	return reinterpret_cast<ScintillaCocoa *>(ptr)->WndProc(static_cast<Message>(iMessage), wParam, lParam);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -837,66 +850,66 @@ bool SupportAnimatedFind() {
  * would be system messages on Windows (e.g. for key down, mouse move etc.) are handled by
  * directly calling appropriate handlers.
  */
-sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+sptr_t ScintillaCocoa::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	try {
 		switch (iMessage) {
-		case SCI_GETDIRECTFUNCTION:
+		case Message::GetDirectFunction:
 			return reinterpret_cast<sptr_t>(DirectFunction);
 
-		case SCI_GETDIRECTPOINTER:
+		case Message::GetDirectPointer:
 			return reinterpret_cast<sptr_t>(this);
 
-		case SCI_SETBIDIRECTIONAL:
-			bidirectional = static_cast<EditModel::Bidirectional>(wParam);
+		case Message::SetBidirectional:
+			bidirectional = static_cast<Bidirectional>(wParam);
 			// Invalidate all cached information including layout.
 			DropGraphics();
 			InvalidateStyleRedraw();
 			return 0;
 
-		case SCI_TARGETASUTF8:
+		case Message::TargetAsUTF8:
 			return TargetAsUTF8(CharPtrFromSPtr(lParam));
 
-		case SCI_ENCODEDFROMUTF8:
+		case Message::EncodedFromUTF8:
 			return EncodedFromUTF8(ConstCharPtrFromUPtr(wParam),
 					       CharPtrFromSPtr(lParam));
 
-		case SCI_SETIMEINTERACTION:
+		case Message::SetIMEInteraction:
 			// Only inline IME supported on Cocoa
 			break;
 
-		case SCI_GRABFOCUS:
+		case Message::GrabFocus:
 			[ContentView().window makeFirstResponder: ContentView()];
 			break;
 
-		case SCI_SETBUFFEREDDRAW:
+		case Message::SetBufferedDraw:
 			// Buffered drawing not supported on Cocoa
 			view.bufferedDraw = false;
 			break;
 
-		case SCI_FINDINDICATORSHOW:
+		case Message::FindIndicatorShow:
 			if (SupportAnimatedFind()) {
 				ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), YES);
 			}
 			return 0;
 
-		case SCI_FINDINDICATORFLASH:
+		case Message::FindIndicatorFlash:
 			if (SupportAnimatedFind()) {
 				ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), NO);
 			}
 			return 0;
 
-		case SCI_FINDINDICATORHIDE:
+		case Message::FindIndicatorHide:
 			HideFindIndicator();
 			return 0;
 
-		case SCI_SETPHASESDRAW: {
+		case Message::SetPhasesDraw: {
 				sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
 				[sciView updateIndicatorIME];
 				return r;
 			}
 
-		case SCI_GETACCESSIBILITY:
-			return SC_ACCESSIBILITY_ENABLED;
+		case Message::GetAccessibility:
+			return static_cast<sptr_t>(Accessibility::Enabled);
 
 		default:
 			sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
@@ -904,9 +917,9 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 			return r;
 		}
 	} catch (std::bad_alloc &) {
-		errorStatus = SC_STATUS_BADALLOC;
+		errorStatus = Status::BadAlloc;
 	} catch (...) {
-		errorStatus = SC_STATUS_FAILURE;
+		errorStatus = Status::Failure;
 	}
 	return 0;
 }
@@ -917,7 +930,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
  * In Windows lingo this is the handler which handles anything that wasn't handled in the normal
  * window proc which would usually send the message back to generic window proc that Windows uses.
  */
-sptr_t ScintillaCocoa::DefWndProc(unsigned int, uptr_t, sptr_t) {
+sptr_t ScintillaCocoa::DefWndProc(Message, uptr_t, sptr_t) {
 	return 0;
 }
 
@@ -1058,7 +1071,7 @@ void ScintillaCocoa::Paste(bool forceRectangular) {
 
 void ScintillaCocoa::CTPaint(void *gc, NSRect rc) {
 #pragma unused(rc)
-	std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+	std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(Technology::Default));
 	surfaceWindow->Init(gc, wMain.GetID());
 	surfaceWindow->SetMode(SurfaceMode(ct.codePage, BidirectionalR2L()));
 	ct.PaintCT(surfaceWindow.get());
@@ -1200,7 +1213,7 @@ std::string ScintillaCocoa::UTF8FromEncoded(std::string_view encoded) const {
 		return std::string(encoded);
 	} else {
 		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-					    vs.styles[STYLE_DEFAULT].characterSet);
+					    vs.styles[StyleDefault].characterSet);
 		CFStringRef cfsVal = CFStringFromString(encoded.data(), encoded.length(), encoding);
 		std::string utf = EncodedBytesString(cfsVal, kCFStringEncodingUTF8);
 		if (cfsVal)
@@ -1216,7 +1229,7 @@ std::string ScintillaCocoa::EncodedFromUTF8(std::string_view utf8) const {
 		return std::string(utf8);
 	} else {
 		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-					    vs.styles[STYLE_DEFAULT].characterSet);
+					    vs.styles[StyleDefault].characterSet);
 		CFStringRef cfsVal = CFStringFromString(utf8.data(), utf8.length(), kCFStringEncodingUTF8);
 		const std::string sEncoded = EncodedBytesString(cfsVal, encoding);
 		if (cfsVal)
@@ -1347,17 +1360,17 @@ void ScintillaCocoa::StartDrag() {
 	Sci::Position ep;
 	PRectangle rcSel;
 
-	if (startLine==endLine && WndProc(SCI_GETWRAPMODE, 0, 0) != SC_WRAP_NONE) {
+	if (startLine==endLine && WndProc(Message::GetWrapMode, 0, 0) != static_cast<sptr_t>(Wrap::None)) {
 		// Komodo bug http://bugs.activestate.com/show_bug.cgi?id=87571
 		// Scintilla bug https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3040200&group_id=2439
 		// If the width on a wrapped-line selection is negative,
 		// find a better bounding rectangle.
 
 		Point ptStart, ptEnd;
-		startPos = WndProc(SCI_GETLINESELSTARTPOSITION, startLine, 0);
-		endPos =   WndProc(SCI_GETLINESELENDPOSITION,   startLine, 0);
+		startPos = WndProc(Message::GetLineSelStartPosition, startLine, 0);
+		endPos =   WndProc(Message::GetLineSelEndPosition,   startLine, 0);
 		// step back a position if we're counting the newline
-		ep =       WndProc(SCI_GETLINEENDPOSITION,      startLine, 0);
+		ep =       WndProc(Message::GetLineEndPosition,      startLine, 0);
 		if (endPos > ep) endPos = ep;
 		ptStart = LocationFromPosition(startPos);
 		ptEnd =   LocationFromPosition(endPos);
@@ -1367,7 +1380,7 @@ void ScintillaCocoa::StartDrag() {
 			rcSel.right = ptEnd.x < client.right ? ptEnd.x : client.right;
 		} else {
 			// Find the bounding box.
-			startPos = WndProc(SCI_POSITIONFROMLINE, startLine, 0);
+			startPos = WndProc(Message::PositionFromLine, startLine, 0);
 			rcSel.left = LocationFromPosition(startPos).x;
 			rcSel.right = client.right;
 		}
@@ -1379,11 +1392,11 @@ void ScintillaCocoa::StartDrag() {
 	} else {
 		rcSel.top = rcSel.bottom = rcSel.right = rcSel.left = -1;
 		for (Sci::Line l = startLine; l <= endLine; l++) {
-			startPos = WndProc(SCI_GETLINESELSTARTPOSITION, l, 0);
-			endPos = WndProc(SCI_GETLINESELENDPOSITION, l, 0);
+			startPos = WndProc(Message::GetLineSelStartPosition, l, 0);
+			endPos = WndProc(Message::GetLineSelEndPosition, l, 0);
 			if (endPos == startPos) continue;
 			// step back a position if we're counting the newline
-			ep = WndProc(SCI_GETLINEENDPOSITION, l, 0);
+			ep = WndProc(Message::GetLineEndPosition, l, 0);
 			if (endPos > ep) endPos = ep;
 			pt = LocationFromPosition(startPos); // top left of line selection
 			if (pt.x < rcSel.left || rcSel.left < 0) rcSel.left = pt.x;
@@ -1601,7 +1614,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard *board, SelectionText *selec
 	if (data != nil) {
 		if (selectedText != nil) {
 			CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-						    vs.styles[STYLE_DEFAULT].characterSet);
+						    vs.styles[StyleDefault].characterSet);
 			CFRange rangeAll = {0, static_cast<CFIndex>(data.length)};
 			CFIndex usedLen = 0;
 			CFStringGetBytes((CFStringRef)data, rangeAll, encoding, '?',
@@ -1617,7 +1630,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard *board, SelectionText *selec
 			std::string dest(reinterpret_cast<const char *>(buffer.data()), usedLen);
 
 			selectedText->Copy(dest, pdoc->dbcsCodePage,
-					   vs.styles[STYLE_DEFAULT].characterSet, rectangular, false);
+					   vs.styles[StyleDefault].characterSet, rectangular, false);
 		}
 		return true;
 	}
@@ -1637,7 +1650,7 @@ Sci::Position ScintillaCocoa::TargetAsUTF8(char *text) const {
 	} else {
 		// Need to convert
 		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-						  vs.styles[STYLE_DEFAULT].characterSet);
+						  vs.styles[StyleDefault].characterSet);
 		const std::string s = RangeText(targetRange.start.Position(), targetRange.end.Position());
 		CFStringRef cfsVal = CFStringFromString(s.c_str(), s.length(), encoding);
 		if (!cfsVal) {
@@ -1665,7 +1678,7 @@ NSString *ScintillaCocoa::RangeTextAsString(NSRange rangePositions) const {
 	} else {
 		// Need to convert
 		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-						  vs.styles[STYLE_DEFAULT].characterSet);
+						  vs.styles[StyleDefault].characterSet);
 		CFStringRef cfsVal = CFStringFromString(text.c_str(), text.length(), encoding);
 
 		return (__bridge NSString *)cfsVal;
@@ -1741,7 +1754,7 @@ Sci::Position ScintillaCocoa::EncodedFromUTF8(const char *utf8, char *encoded) c
 	} else {
 		// Need to convert
 		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-						  vs.styles[STYLE_DEFAULT].characterSet);
+						  vs.styles[StyleDefault].characterSet);
 
 		CFStringRef cfsVal = CFStringFromString(utf8, inputLength, kCFStringEncodingUTF8);
 		const std::string sEncoded = EncodedBytesString(cfsVal, encoding);
@@ -1774,14 +1787,14 @@ bool ScintillaCocoa::SyncPaint(void *gc, PRectangle rc) {
 	rcPaint = rc;
 	PRectangle rcText = GetTextRectangle();
 	paintingAllText = rcPaint.Contains(rcText);
-	std::unique_ptr<Surface> sw(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+	std::unique_ptr<Surface> sw(Surface::Allocate(Technology::Default));
 	CGContextSetAllowsAntialiasing((CGContextRef)gc,
-				       vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
+				       vs.extraFontFlag != FontQuality::QualityNonAntialiased);
 	CGContextSetAllowsFontSmoothing((CGContextRef)gc,
-					vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+					vs.extraFontFlag == FontQuality::QualityLcdOptimized);
 	CGContextSetAllowsFontSubpixelPositioning((CGContextRef)gc,
-			vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
-			vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+			vs.extraFontFlag == FontQuality::QualityDefault ||
+			vs.extraFontFlag == FontQuality::QualityLcdOptimized);
 	sw->Init(gc, wMain.GetID());
 	Paint(sw.get(), rc);
 	const bool succeeded = paintState != PaintState::abandoned;
@@ -1804,15 +1817,15 @@ void ScintillaCocoa::PaintMargin(NSRect aRect) {
 
 	PRectangle rc = NSRectToPRectangle(aRect);
 	rcPaint = rc;
-	std::unique_ptr<Surface> sw(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+	std::unique_ptr<Surface> sw(Surface::Allocate(Technology::Default));
 	if (sw) {
 		CGContextSetAllowsAntialiasing(gc,
-					       vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
+					       vs.extraFontFlag != FontQuality::QualityNonAntialiased);
 		CGContextSetAllowsFontSmoothing(gc,
-						vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+						vs.extraFontFlag == FontQuality::QualityLcdOptimized);
 		CGContextSetAllowsFontSubpixelPositioning(gc,
-				vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
-				vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+				vs.extraFontFlag == FontQuality::QualityDefault ||
+				vs.extraFontFlag == FontQuality::QualityLcdOptimized);
 		sw->Init(gc, wMargin.GetID());
 		PaintSelMargin(sw.get(), rc);
 		sw->Release();
@@ -1995,7 +2008,7 @@ void ScintillaCocoa::RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc cal
 
 void ScintillaCocoa::NotifyChange() {
 	if (notifyProc != NULL)
-		notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(static_cast<short>(GetCtrlID()), SCEN_CHANGE),
+		notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(static_cast<short>(GetCtrlID()), static_cast<short>(FocusChange::Change)),
 			   (uintptr_t) this);
 }
 
@@ -2004,7 +2017,7 @@ void ScintillaCocoa::NotifyChange() {
 void ScintillaCocoa::NotifyFocus(bool focus) {
 	if (commandEvents && notifyProc)
 		notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(static_cast<short>(GetCtrlID()),
-				(focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS)),
+				static_cast<short>((focus ? FocusChange::Setfocus : FocusChange::Killfocus))),
 			   (uintptr_t) this);
 
 	Editor::NotifyFocus(focus);
@@ -2018,19 +2031,19 @@ void ScintillaCocoa::NotifyFocus(bool focus) {
  *
  * @param scn The notification to send.
  */
-void ScintillaCocoa::NotifyParent(SCNotification scn) {
+void ScintillaCocoa::NotifyParent(NotificationData scn) {
 	scn.nmhdr.hwndFrom = (void *) this;
 	scn.nmhdr.idFrom = GetCtrlID();
 	if (notifyProc != NULL)
 		notifyProc(notifyObj, WM_NOTIFY, GetCtrlID(), (uintptr_t) &scn);
 	if (delegate)
-		[delegate notification: &scn];
-	if (scn.nmhdr.code == SCN_UPDATEUI) {
+		[delegate notification: reinterpret_cast<SCNotification *>(&scn)];
+	if (scn.nmhdr.code == Notification::UpdateUI) {
 		NSView *content = ContentView();
-		if (scn.updated & SC_UPDATE_CONTENT) {
+		if (FlagSet(scn.updated, Update::Content)) {
 			NSAccessibilityPostNotification(content, NSAccessibilityValueChangedNotification);
 		}
-		if (scn.updated & SC_UPDATE_SELECTION) {
+		if (FlagSet(scn.updated, Update::Selection)) {
 			NSAccessibilityPostNotification(content, NSAccessibilitySelectedTextChangedNotification);
 		}
 	}
@@ -2039,8 +2052,8 @@ void ScintillaCocoa::NotifyParent(SCNotification scn) {
 //--------------------------------------------------------------------------------------------------
 
 void ScintillaCocoa::NotifyURIDropped(const char *uri) {
-	SCNotification scn;
-	scn.nmhdr.code = SCN_URIDROPPED;
+	NotificationData scn;
+	scn.nmhdr.code = Notification::URIDropped;
 	scn.text = uri;
 
 	NotifyParent(scn);
@@ -2099,55 +2112,55 @@ bool ScintillaCocoa::Draw(NSRect rect, CGContextRef gc) {
 /**
  * Helper function to translate OS X key codes to Scintilla key codes.
  */
-static inline UniChar KeyTranslate(UniChar unicodeChar, NSEventModifierFlags modifierFlags) {
+static inline Keys KeyTranslate(UniChar unicodeChar, NSEventModifierFlags modifierFlags) {
 	switch (unicodeChar) {
 	case NSDownArrowFunctionKey:
-		return SCK_DOWN;
+		return Keys::Down;
 	case NSUpArrowFunctionKey:
-		return SCK_UP;
+		return Keys::Up;
 	case NSLeftArrowFunctionKey:
-		return SCK_LEFT;
+		return Keys::Left;
 	case NSRightArrowFunctionKey:
-		return SCK_RIGHT;
+		return Keys::Right;
 	case NSHomeFunctionKey:
-		return SCK_HOME;
+		return Keys::Home;
 	case NSEndFunctionKey:
-		return SCK_END;
+		return Keys::End;
 	case NSPageUpFunctionKey:
-		return SCK_PRIOR;
+		return Keys::Prior;
 	case NSPageDownFunctionKey:
-		return SCK_NEXT;
+		return Keys::Next;
 	case NSDeleteFunctionKey:
-		return SCK_DELETE;
+		return Keys::Delete;
 	case NSInsertFunctionKey:
-		return SCK_INSERT;
+		return Keys::Insert;
 	case '\n':
 	case 3:
-		return SCK_RETURN;
+		return Keys::Return;
 	case 27:
-		return SCK_ESCAPE;
+		return Keys::Escape;
 	case '+':
 		if (modifierFlags & NSEventModifierFlagNumericPad)
-			return SCK_ADD;
+			return Keys::Add;
 		else
-			return unicodeChar;
+			return static_cast<Keys>(unicodeChar);
 	case '-':
 		if (modifierFlags & NSEventModifierFlagNumericPad)
-			return SCK_SUBTRACT;
+			return Keys::Subtract;
 		else
-			return unicodeChar;
+			return static_cast<Keys>(unicodeChar);
 	case '/':
 		if (modifierFlags & NSEventModifierFlagNumericPad)
-			return SCK_DIVIDE;
+			return Keys::Divide;
 		else
-			return unicodeChar;
+			return static_cast<Keys>(unicodeChar);
 	case 127:
-		return SCK_BACK;
+		return Keys::Back;
 	case '\t':
 	case 25: // Shift tab, return to unmodified tab and handle that via modifiers.
-		return SCK_TAB;
+		return Keys::Tab;
 	default:
-		return unicodeChar;
+		return static_cast<Keys>(unicodeChar);
 	}
 }
 
@@ -2159,13 +2172,13 @@ static inline UniChar KeyTranslate(UniChar unicodeChar, NSEventModifierFlags mod
  * @param modifiers An integer bit set of NSSEvent modifier flags.
  * @return A set of SCI_* modifier flags.
  */
-static int TranslateModifierFlags(NSUInteger modifiers) {
+static KeyMod TranslateModifierFlags(NSUInteger modifiers) {
 	// Signal Control as SCI_META
 	return
-		(((modifiers & NSEventModifierFlagShift) != 0) ? SCI_SHIFT : 0) |
-		(((modifiers & NSEventModifierFlagCommand) != 0) ? SCI_CTRL : 0) |
-		(((modifiers & NSEventModifierFlagOption) != 0) ? SCI_ALT : 0) |
-		(((modifiers & NSEventModifierFlagControl) != 0) ? SCI_META : 0);
+		(((modifiers & NSEventModifierFlagShift) != 0) ? KeyMod::Shift : KeyMod::Norm) |
+		(((modifiers & NSEventModifierFlagCommand) != 0) ? KeyMod::Ctrl : KeyMod::Norm) |
+		(((modifiers & NSEventModifierFlagOption) != 0) ? KeyMod::Alt : KeyMod::Norm) |
+		(((modifiers & NSEventModifierFlagControl) != 0) ? KeyMod::Meta : KeyMod::Norm);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2188,7 +2201,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent *event) {
 		const UniChar originalKey = [input characterAtIndex: i];
 		NSEventModifierFlags modifierFlags = event.modifierFlags;
 
-		UniChar key = KeyTranslate(originalKey, modifierFlags);
+		Keys key = KeyTranslate(originalKey, modifierFlags);
 
 		bool consumed = false; // Consumed as command?
 
@@ -2227,7 +2240,7 @@ ptrdiff_t ScintillaCocoa::InsertText(NSString *input, CharacterSource charSource
 		return encoded.length();
 	} else {
 		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-									   vs.styles[STYLE_DEFAULT].characterSet);
+									   vs.styles[StyleDefault].characterSet);
 		ptrdiff_t lengthInserted = 0;
 		for (NSInteger i = 0; i < [input length]; i++) {
 			NSString *character = [input substringWithRange:NSMakeRange(i, 1)];
@@ -2248,10 +2261,10 @@ ptrdiff_t ScintillaCocoa::InsertText(NSString *input, CharacterSource charSource
  */
 NSRange ScintillaCocoa::PositionsFromCharacters(NSRange rangeCharacters) const {
 	Sci::Position start = pdoc->GetRelativePositionUTF16(0, rangeCharacters.location);
-	if (start == INVALID_POSITION)
+	if (start == Sci::invalidPosition)
 		start = pdoc->Length();
 	Sci::Position end = pdoc->GetRelativePositionUTF16(start, rangeCharacters.length);
-	if (end == INVALID_POSITION)
+	if (end == Sci::invalidPosition)
 		end = pdoc->Length();
 	return NSMakeRange(start, end - start);
 }
@@ -2318,7 +2331,7 @@ void ScintillaCocoa::CompositionStart() {
  */
 void ScintillaCocoa::CompositionCommit() {
 	pdoc->TentativeCommit();
-	pdoc->DecorationSetCurrentIndicator(INDICATOR_IME);
+	pdoc->DecorationSetCurrentIndicator(static_cast<int>(IndicatorNumbers::Ime));
 	pdoc->DecorationFillRange(0, 0, pdoc->Length());
 }
 
@@ -2366,7 +2379,7 @@ unsigned int TimeOfEvent(NSEvent *event) {
  */
 void ScintillaCocoa::MouseEntered(NSEvent *event) {
 	if (!HaveMouseCapture()) {
-		WndProc(SCI_SETCURSOR, (long int)SC_CURSORNORMAL, 0);
+		WndProc(Message::SetCursor, (long int)CursorShape::Normal, 0);
 
 		// Mouse location is given in screen coordinates and might also be outside of our bounds.
 		Point location = ConvertPoint(event.locationInWindow);
@@ -2433,9 +2446,9 @@ void ScintillaCocoa::MouseWheel(NSEvent *event) {
 		// Zoom! We play with the font sizes in the styles.
 		// Number of steps/line is ignored, we just care if sizing up or down.
 		if (dY > 0.5)
-			KeyCommand(SCI_ZOOMIN);
+			KeyCommand(Message::ZoomIn);
 		else if (dY < -0.5)
-			KeyCommand(SCI_ZOOMOUT);
+			KeyCommand(Message::ZoomOut);
 	} else {
 	}
 }
@@ -2449,7 +2462,7 @@ void ScintillaCocoa::SelectAll() {
 }
 
 void ScintillaCocoa::DeleteBackward() {
-	KeyDownWithModifiers(SCK_BACK, 0, nil);
+	KeyDownWithModifiers(Keys::Back, KeyMod::Norm, nil);
 }
 
 void ScintillaCocoa::Cut() {
@@ -2467,11 +2480,11 @@ void ScintillaCocoa::Redo() {
 //--------------------------------------------------------------------------------------------------
 
 bool ScintillaCocoa::ShouldDisplayPopupOnMargin() {
-	return displayPopupMenu == SC_POPUP_ALL;
+	return displayPopupMenu == PopUp::All;
 }
 
 bool ScintillaCocoa::ShouldDisplayPopupOnText() {
-	return displayPopupMenu == SC_POPUP_ALL || displayPopupMenu == SC_POPUP_TEXT;
+	return displayPopupMenu == PopUp::All || displayPopupMenu == PopUp::Text;
 }
 
 /**
@@ -2557,18 +2570,18 @@ void ScintillaCocoa::UpdateBaseElements() {
 			NSColor *selBack = [NSColor.selectedTextBackgroundColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
 			// Additional selection: blend with text background to make weaker version.
 			NSColor *modified = [selBack blendedColorWithFraction:0.5 ofColor:textBack];
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_BACK, ColourFromNSColor(selBack));
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, ColourFromNSColor(modified)) || changed;
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_NO_FOCUS_BACK, ColourFromNSColor(noFocusBack)) || changed;
+			changed = vs.SetElementBase(Element::SelectionBack, ColourFromNSColor(selBack));
+			changed = vs.SetElementBase(Element::SelectionAdditionalBack, ColourFromNSColor(modified)) || changed;
+			changed = vs.SetElementBase(Element::SelectionNoFocusBack, ColourFromNSColor(noFocusBack)) || changed;
 		} else {
 			// Less translucent colour used in dark mode as otherwise less visible
 			const int alpha = textBack.brightnessComponent > 0.5 ? 0x40 : 0x60;
 			// Make a translucent colour that approximates selectedTextBackgroundColor
 			NSColor *accent = [NSColor.controlAccentColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
 			const ColourRGBA colourAccent = ColourFromNSColor(accent);
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_BACK, ColourRGBA(colourAccent, alpha));
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, ColourRGBA(colourAccent, alpha/2)) || changed;
-			changed = vs.SetElementBase(SC_ELEMENT_SELECTION_NO_FOCUS_BACK, ColourRGBA(ColourFromNSColor(noFocusBack), alpha)) || changed;
+			changed = vs.SetElementBase(Element::SelectionBack, ColourRGBA(colourAccent, alpha));
+			changed = vs.SetElementBase(Element::SelectionAdditionalBack, ColourRGBA(colourAccent, alpha/2)) || changed;
+			changed = vs.SetElementBase(Element::SelectionNoFocusBack, ColourRGBA(ColourFromNSColor(noFocusBack), alpha)) || changed;
 
 		}
 	}
@@ -2614,7 +2627,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
 
 	if (charRange.length) {
 		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-					    vs.styles[STYLE_DEFAULT].characterSet);
+					    vs.styles[StyleDefault].characterSet);
 		std::vector<char> buffer(charRange.length);
 		pdoc->GetCharRange(&buffer[0], charRange.location, charRange.length);
 
@@ -2624,18 +2637,18 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
 			CFRelease(cfsFind);
 		layerFindIndicator.retaining = retaining;
 		layerFindIndicator.positionFind = charRange.location;
-		// SCI_GETSTYLEAT reports a signed byte but want an unsigned to index into styles
-		const char styleByte = static_cast<char>(WndProc(SCI_GETSTYLEAT, charRange.location, 0));
+		// Message::GetStyleAt reports a signed byte but want an unsigned to index into styles
+		const char styleByte = static_cast<char>(WndProc(Message::GetStyleAt, charRange.location, 0));
 		const long style = static_cast<unsigned char>(styleByte);
-		std::vector<char> bufferFontName(WndProc(SCI_STYLEGETFONT, style, 0) + 1);
-		WndProc(SCI_STYLEGETFONT, style, (sptr_t)&bufferFontName[0]);
+		std::vector<char> bufferFontName(WndProc(Message::StyleGetFont, style, 0) + 1);
+		WndProc(Message::StyleGetFont, style, (sptr_t)&bufferFontName[0]);
 		layerFindIndicator.sFont = @(&bufferFontName[0]);
 
-		layerFindIndicator.fontSize = WndProc(SCI_STYLEGETSIZEFRACTIONAL, style, 0) /
-					      (float)SC_FONT_SIZE_MULTIPLIER;
-		layerFindIndicator.widthText = WndProc(SCI_POINTXFROMPOSITION, 0, charRange.location + charRange.length) -
-					       WndProc(SCI_POINTXFROMPOSITION, 0, charRange.location);
-		layerFindIndicator.heightLine = WndProc(SCI_TEXTHEIGHT, 0, 0);
+		layerFindIndicator.fontSize = WndProc(Message::StyleGetSizeFractional, style, 0) /
+					      (float)FontSizeMultiplier;
+		layerFindIndicator.widthText = WndProc(Message::PointXFromPosition, 0, charRange.location + charRange.length) -
+					       WndProc(Message::PointXFromPosition, 0, charRange.location);
+		layerFindIndicator.heightLine = WndProc(Message::TextHeight, 0, 0);
 		MoveFindIndicatorWithBounce(YES);
 	} else {
 		[layerFindIndicator hideMatch];
@@ -2647,8 +2660,8 @@ void ScintillaCocoa::MoveFindIndicatorWithBounce(BOOL bounce) {
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 	if (layerFindIndicator) {
 		CGPoint ptText = CGPointMake(
-					 WndProc(SCI_POINTXFROMPOSITION, 0, layerFindIndicator.positionFind),
-					 WndProc(SCI_POINTYFROMPOSITION, 0, layerFindIndicator.positionFind));
+					 WndProc(Message::PointXFromPosition, 0, layerFindIndicator.positionFind),
+					 WndProc(Message::PointYFromPosition, 0, layerFindIndicator.positionFind));
 		ptText.x = ptText.x - vs.fixedColumnWidth + xOffset;
 		ptText.y += topLine * vs.lineHeight;
 		if (!layerFindIndicator.geometryFlipped) {

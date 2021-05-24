@@ -10,9 +10,9 @@
 
 #include "CharacterType.h"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 int CompareCaseInsensitive(const char *a, const char *b) noexcept {
 	while (*a && *b) {

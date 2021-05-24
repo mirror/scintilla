@@ -20,7 +20,7 @@
 
 #include "catch.hpp"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 const int growSize = 4;
 

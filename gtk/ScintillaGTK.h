@@ -6,7 +6,7 @@
 #ifndef SCINTILLAGTK_H
 #define SCINTILLAGTK_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 class ScintillaGTKAccessible;
 
@@ -105,9 +105,9 @@ private:
 	std::string UTF8FromEncoded(std::string_view encoded) const override;
 	std::string EncodedFromUTF8(std::string_view utf8) const override;
 public: 	// Public for scintilla_send_message
-	sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
+	sptr_t WndProc(Scintilla::Message iMessage, Scintilla::uptr_t wParam, Scintilla::sptr_t lParam) override;
 private:
-	sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
+	sptr_t DefWndProc(Scintilla::Message iMessage, Scintilla::uptr_t wParam, Scintilla::sptr_t lParam) override;
 	struct TimeThunk {
 		TickReason reason;
 		ScintillaGTK *scintilla;
@@ -131,13 +131,13 @@ private:
 	void ReconfigureScrollBars() override;
 	void NotifyChange() override;
 	void NotifyFocus(bool focus) override;
-	void NotifyParent(SCNotification scn) override;
-	void NotifyKey(int key, int modifiers);
+	void NotifyParent(Scintilla::NotificationData scn) override;
+	void NotifyKey(Scintilla::Keys key, Scintilla::KeyMod modifiers);
 	void NotifyURIDropped(const char *list);
 	const char *CharacterSetID() const;
 	std::unique_ptr<CaseFolder> CaseFolderForEncoding() override;
 	std::string CaseMapString(const std::string &s, CaseMapping caseMapping) override;
-	int KeyDefault(int key, int modifiers) override;
+	int KeyDefault(Scintilla::Keys key, Scintilla::KeyMod modifiers) override;
 	void CopyToClipboard(const SelectionText &selectedText) override;
 	void Copy() override;
 	void RequestSelection(GdkAtom atomSelection);

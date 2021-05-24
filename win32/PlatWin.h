@@ -8,7 +8,7 @@
 #ifndef PLATWIN_H
 #define PLATWIN_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 #ifndef USER_DEFAULT_SCREEN_DPI
 #define USER_DEFAULT_SCREEN_DPI		96

@@ -14,7 +14,6 @@
 #include "Scintilla.h"
 #include "UniConversion.h"
 #include "DBCS.h"
-#include "FontQuality.h"
 
 #include <QApplication>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -42,55 +41,57 @@
 #include <QTextLine>
 #include <QLibrary>
 
-namespace Scintilla {
+using namespace Scintilla;
+
+namespace Scintilla::Internal {
 
 //----------------------------------------------------------------------
 
 // Convert from a Scintilla characterSet value to a Qt codec name.
-const char *CharacterSetID(int characterSet)
+const char *CharacterSetID(CharacterSet characterSet)
 {
 	switch (characterSet) {
-		//case SC_CHARSET_ANSI:
+		//case CharacterSet::Ansi:
 		//	return "";
-	case SC_CHARSET_DEFAULT:
+	case CharacterSet::Default:
 		return "ISO 8859-1";
-	case SC_CHARSET_BALTIC:
+	case CharacterSet::Baltic:
 		return "ISO 8859-13";
-	case SC_CHARSET_CHINESEBIG5:
+	case CharacterSet::ChineseBig5:
 		return "Big5";
-	case SC_CHARSET_EASTEUROPE:
+	case CharacterSet::EastEurope:
 		return "ISO 8859-2";
-	case SC_CHARSET_GB2312:
+	case CharacterSet::GB2312:
 		return "GB18030-0";
-	case SC_CHARSET_GREEK:
+	case CharacterSet::Greek:
 		return "ISO 8859-7";
-	case SC_CHARSET_HANGUL:
+	case CharacterSet::Hangul:
 		return "CP949";
-	case SC_CHARSET_MAC:
+	case CharacterSet::Mac:
 		return "Apple Roman";
 		//case SC_CHARSET_OEM:
 		//	return "ASCII";
-	case SC_CHARSET_RUSSIAN:
+	case CharacterSet::Russian:
 		return "KOI8-R";
-	case SC_CHARSET_CYRILLIC:
+	case CharacterSet::Cyrillic:
 		return "Windows-1251";
-	case SC_CHARSET_SHIFTJIS:
+	case CharacterSet::ShiftJis:
 		return "Shift-JIS";
 		//case SC_CHARSET_SYMBOL:
 		//        return "";
-	case SC_CHARSET_TURKISH:
+	case CharacterSet::Turkish:
 		return "ISO 8859-9";
 		//case SC_CHARSET_JOHAB:
 		//        return "CP1361";
-	case SC_CHARSET_HEBREW:
+	case CharacterSet::Hebrew:
 		return "ISO 8859-8";
-	case SC_CHARSET_ARABIC:
+	case CharacterSet::Arabic:
 		return "ISO 8859-6";
-	case SC_CHARSET_VIETNAMESE:
+	case CharacterSet::Vietnamese:
 		return "Windows-1258";
-	case SC_CHARSET_THAI:
+	case CharacterSet::Thai:
 		return "TIS-620";
-	case SC_CHARSET_8859_15:
+	case CharacterSet::Iso8859_15:
 		return "ISO 8859-15";
 	default:
 		return "ISO 8859-1";
@@ -101,27 +102,27 @@ QString UnicodeFromText(QTextCodec *codec, std::string_view text) {
 	return codec->toUnicode(text.data(), static_cast<int>(text.length()));
 }
 
-static QFont::StyleStrategy ChooseStrategy(int eff)
+static QFont::StyleStrategy ChooseStrategy(FontQuality eff)
 {
 	switch (eff) {
-		case SC_EFF_QUALITY_DEFAULT:         return QFont::PreferDefault;
-		case SC_EFF_QUALITY_NON_ANTIALIASED: return QFont::NoAntialias;
-		case SC_EFF_QUALITY_ANTIALIASED:     return QFont::PreferAntialias;
-		case SC_EFF_QUALITY_LCD_OPTIMIZED:   return QFont::PreferAntialias;
+		case FontQuality::QualityDefault:         return QFont::PreferDefault;
+		case FontQuality::QualityNonAntialiased: return QFont::NoAntialias;
+		case FontQuality::QualityAntialiased:     return QFont::PreferAntialias;
+		case FontQuality::QualityLcdOptimized:   return QFont::PreferAntialias;
 		default:                             return QFont::PreferDefault;
 	}
 }
 
 class FontAndCharacterSet : public Font {
 public:
-	int characterSet = 0;
+	CharacterSet characterSet = CharacterSet::Ansi;
 	QFont *pfont = nullptr;
 	FontAndCharacterSet(const FontParameters &fp) {
 		pfont = new QFont;
 		pfont->setStyleStrategy(ChooseStrategy(fp.extraFontFlag));
 		pfont->setFamily(QString::fromUtf8(fp.faceName));
 		pfont->setPointSizeF(fp.size);
-		pfont->setBold(fp.weight > 500);
+		pfont->setBold(static_cast<int>(fp.weight) > 500);
 		pfont->setItalic(fp.italic);
 
 		characterSet = fp.characterSet;
@@ -134,11 +135,11 @@ public:
 
 namespace {
 
-const int SupportsQt[] = {
-	SC_SUPPORTS_LINE_DRAWS_FINAL,
-	SC_SUPPORTS_FRACTIONAL_STROKE_WIDTH,
-	SC_SUPPORTS_TRANSLUCENT_STROKE,
-	SC_SUPPORTS_PIXEL_MODIFICATION,
+const Supports SupportsQt[] = {
+	Supports::LineDrawsFinal,
+	Supports::FractionalStrokeWidth,
+	Supports::TranslucentStroke,
+	Supports::PixelModification,
 };
 
 const FontAndCharacterSet *AsFontAndCharacterSet(const Font *f) {
@@ -216,9 +217,9 @@ void SurfaceImpl::Release() noexcept
 	Clear();
 }
 
-int SurfaceImpl::Supports(int feature) noexcept
+int SurfaceImpl::SupportsFeature(Supports feature) noexcept
 {
-	for (const int f : SupportsQt) {
+	for (const Supports f : SupportsQt) {
 		if (f == feature)
 			return 1;
 	}
@@ -781,7 +782,7 @@ QPainter *SurfaceImpl::GetPainter()
 	return painter;
 }
 
-std::unique_ptr<Surface> Surface::Allocate(int)
+std::unique_ptr<Surface> Surface::Allocate(Technology)
 {
 	return std::make_unique<SurfaceImpl>();
 }
@@ -942,7 +943,7 @@ public:
 
 	void SetFont(const Font *font) override;
 	void Create(Window &parent, int ctrlID, Point location,
-						int lineHeight, bool unicodeMode_, int technology) override;
+						int lineHeight, bool unicodeMode_, Technology technology) override;
 	void SetAverageCharWidth(int width) override;
 	void SetVisibleRows(int rows) override;
 	int GetVisibleRows() const override;
@@ -979,7 +980,7 @@ void ListBoxImpl::Create(Window &parent,
                          Point location,
                          int /*lineHeight*/,
                          bool unicodeMode_,
-			 int)
+			 Technology)
 {
 	unicodeMode = unicodeMode_;
 

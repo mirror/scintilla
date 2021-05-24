@@ -8,12 +8,12 @@
 #ifndef EDITVIEW_H
 #define EDITVIEW_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 struct PrintParameters {
 	int magnification;
-	int colourMode;
-	WrapMode wrapState;
+	Scintilla::PrintOption colourMode;
+	Scintilla::Wrap wrapState;
 	PrintParameters() noexcept;
 };
 
@@ -66,8 +66,7 @@ public:
 	* In multiPhaseDraw mode, drawing is performed in multiple phases with each phase drawing
 	* one feature over the whole drawing area, instead of within one line. This allows text to
 	* overlap from one line to the next. */
-	enum class PhasesDraw { one, two, multiple };
-	PhasesDraw phasesDraw;
+	Scintilla::PhasesDraw phasesDraw;
 
 	int lineWidthMaxSeen;
 
@@ -154,7 +153,7 @@ public:
 		const ViewStyle &vsDraw);
 	void FillLineRemainder(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 		Sci::Line line, PRectangle rcArea, int subLine) const;
-	Sci::Position FormatRange(bool draw, const Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
+	Sci::Position FormatRange(bool draw, const Scintilla::RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
 		const EditModel &model, const ViewStyle &vs);
 };
 

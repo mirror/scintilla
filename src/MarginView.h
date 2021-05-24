@@ -8,7 +8,7 @@
 #ifndef MARGINVIEW_H
 #define MARGINVIEW_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourRGBA wrapColour);
 

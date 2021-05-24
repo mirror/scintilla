@@ -13,7 +13,7 @@
 #include "CharacterType.h"
 #include "CharClassify.h"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 CharClassify::CharClassify() : charClass{} {
 	SetDefaultCharClasses(true);

@@ -8,7 +8,7 @@
 #ifndef CALLTIP_H
 #define CALLTIP_H
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 struct Chunk {
 	size_t start;
@@ -30,7 +30,7 @@ class CallTip {
 	int lineHeight;         // vertical line spacing
 	int offsetMain;         // The alignment point of the call tip
 	int tabSize;            // Tab size in pixels, <=0 no TAB expand
-	bool useStyleCallTip;   // if true, STYLE_CALLTIP should be used
+	bool useStyleCallTip;   // if true, StyleCallTip should be used
 	bool above;		// if true, display calltip above text
 
 	int DrawChunk(Surface *surface, int x, std::string_view sv,
@@ -72,7 +72,7 @@ public:
 	/// Setup the calltip and return a rectangle of the area required.
 	PRectangle CallTipStart(Sci::Position pos, Point pt, int textHeight, const char *defn,
 		const char *faceName, int size, int codePage_,
-		int characterSet, int technology, const char *localeName,
+		Scintilla::CharacterSet characterSet, Scintilla::Technology technology, const char *localeName,
 		const Window &wParent);
 
 	void CallTipCancel();

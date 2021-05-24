@@ -15,20 +15,22 @@
 #include <algorithm>
 #include <memory>
 
+#include "ScintillaTypes.h"
+
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
 
-#include "Scintilla.h"
 #include "Indicator.h"
 #include "XPM.h"
 
 using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine, const PRectangle &rcCharacter, State state, int value) const {
 	StyleAndColour sacDraw = sacNormal;
-	if (Flags() & SC_INDICFLAG_VALUEFORE) {
-		sacDraw.fore = ColourRGBA::FromRGB(value & SC_INDICVALUEMASK);
+	if (FlagSet(Flags(), IndicFlag::ValueFore)) {
+		sacDraw.fore = ColourRGBA::FromRGB(value & static_cast<int>(IndicValue::Mask));
 	}
 	if (state == State::hover) {
 		sacDraw = sacHover;
@@ -50,7 +52,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 	rcClip.bottom = rcFullHeightAligned.bottom;
 
 	switch (sacDraw.style) {
-	case INDIC_SQUIGGLE: {
+	case IndicatorStyle::Squiggle: {
 			surface->SetClip(rcClip);
 			XYPOSITION x = rcAligned.left + halfWidth;
 			const XYPOSITION top = rcAligned.top + halfWidth;
@@ -69,7 +71,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_SQUIGGLEPIXMAP: {
+	case IndicatorStyle::SquigglePixmap: {
 			const PRectangle rcSquiggle = PixelAlign(rc, 1);
 
 			const int width = std::min(4000, static_cast<int>(rcSquiggle.Width()));
@@ -93,7 +95,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_SQUIGGLELOW: {
+	case IndicatorStyle::SquiggleLow: {
 			std::vector<Point> pts;
 			const XYPOSITION top = rcAligned.top + halfWidth;
 			int y = 0;
@@ -112,7 +114,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_TT: {
+	case IndicatorStyle::TT: {
 			surface->SetClip(rcClip);
 			const XYPOSITION yLine = ymid;
 			XYPOSITION x = rcAligned.left + 5.0f;
@@ -129,7 +131,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_DIAGONAL: {
+	case IndicatorStyle::Diagonal: {
 			surface->SetClip(rcClip);
 			XYPOSITION x = rcAligned.left + halfWidth;
 			const XYPOSITION top = rcAligned.top + halfWidth;
@@ -144,7 +146,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_STRIKE: {
+	case IndicatorStyle::Strike: {
 			const XYPOSITION yStrike = std::round(rcLine.Centre().y);
 			const PRectangle rcStrike(
 				rcAligned.left, yStrike, rcAligned.right, yStrike + strokeWidth);
@@ -152,12 +154,12 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_HIDDEN:
-	case INDIC_TEXTFORE:
+	case IndicatorStyle::Hidden:
+	case IndicatorStyle::TextFore:
 		// Draw nothing
 		break;
 
-	case INDIC_BOX: {
+	case IndicatorStyle::Box: {
 			PRectangle rcBox = rcFullHeightAligned;
 			rcBox.top = rcBox.top + 1.0f;
 			rcBox.bottom = ymid + 1.0f;
@@ -165,19 +167,19 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_ROUNDBOX:
-	case INDIC_STRAIGHTBOX:
-	case INDIC_FULLBOX: {
+	case IndicatorStyle::RoundBox:
+	case IndicatorStyle::StraightBox:
+	case IndicatorStyle::FullBox: {
 			PRectangle rcBox = rcFullHeightAligned;
-			if (sacDraw.style != INDIC_FULLBOX)
+			if (sacDraw.style != IndicatorStyle::FullBox)
 				rcBox.top = rcBox.top + 1;
-			surface->AlphaRectangle(rcBox, (sacDraw.style == INDIC_ROUNDBOX) ? 1.0f : 0.0f,
+			surface->AlphaRectangle(rcBox, (sacDraw.style == IndicatorStyle::RoundBox) ? 1.0f : 0.0f,
 						FillStroke(ColourRGBA(sacDraw.fore, fillAlpha), ColourRGBA(sacDraw.fore, outlineAlpha), strokeWidth));
 		}
 		break;
 
-	case INDIC_GRADIENT:
-	case INDIC_GRADIENTCENTRE: {
+	case IndicatorStyle::Gradient:
+	case IndicatorStyle::GradientCentre: {
 			PRectangle rcBox = rcFullHeightAligned;
 			rcBox.top = rcBox.top + 1;
 			const Surface::GradientOptions options = Surface::GradientOptions::topToBottom;
@@ -185,21 +187,23 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			const ColourRGBA end(sacDraw.fore, 0);
 			std::vector<ColourStop> stops;
 			switch (sacDraw.style) {
-			case INDIC_GRADIENT:
+			case IndicatorStyle::Gradient:
 				stops.push_back(ColourStop(0.0, start));
 				stops.push_back(ColourStop(1.0, end));
 				break;
-			case INDIC_GRADIENTCENTRE:
+			case IndicatorStyle::GradientCentre:
 				stops.push_back(ColourStop(0.0, end));
 				stops.push_back(ColourStop(0.5, start));
 				stops.push_back(ColourStop(1.0, end));
+				break;
+			default:
 				break;
 			}
 			surface->GradientRectangle(rcBox, stops, options);
 		}
 		break;
 
-	case INDIC_DOTBOX: {
+	case IndicatorStyle::DotBox: {
 			PRectangle rcBox = rcFullHeightAligned;
 			rcBox.top = rcBox.top + 1;
 			// Cap width at 4000 to avoid large allocations when mistakes made
@@ -222,7 +226,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_DASH: {
+	case IndicatorStyle::Dash: {
 			XYPOSITION x = std::floor(rc.left);
 			const XYPOSITION widthDash = 3 + std::round(strokeWidth);
 			while (x < rc.right) {
@@ -234,7 +238,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_DOTS: {
+	case IndicatorStyle::Dots: {
 			const XYPOSITION widthDot = std::round(strokeWidth);
 			XYPOSITION x = std::floor(rc.left);
 			while (x < rc.right) {
@@ -246,23 +250,23 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		}
 		break;
 
-	case INDIC_COMPOSITIONTHICK: {
+	case IndicatorStyle::CompositionThick: {
 			const PRectangle rcComposition(rc.left+1, rcLine.bottom-2, rc.right-1, rcLine.bottom);
 			surface->FillRectangle(rcComposition, sacDraw.fore);
 		}
 		break;
 
-	case INDIC_COMPOSITIONTHIN: {
+	case IndicatorStyle::CompositionThin: {
 			const PRectangle rcComposition(rc.left+1, rcLine.bottom-2, rc.right-1, rcLine.bottom-1);
 			surface->FillRectangle(rcComposition, sacDraw.fore);
 		}
 		break;
 
-	case INDIC_POINT:
-	case INDIC_POINTCHARACTER:
+	case IndicatorStyle::Point:
+	case IndicatorStyle::PointCharacter:
 		if (rcCharacter.Width() >= 0.1) {
 			const XYPOSITION pixelHeight = std::floor(rc.Height() - 1.0f);	// 1 pixel onto next line if multiphase
-			const XYPOSITION x = (sacDraw.style == INDIC_POINT) ? (rcCharacter.left) : ((rcCharacter.right + rcCharacter.left) / 2);
+			const XYPOSITION x = (sacDraw.style == IndicatorStyle::Point) ? (rcCharacter.left) : ((rcCharacter.right + rcCharacter.left) / 2);
 			// 0.5f is to hit midpoint of pixels:
 			const XYPOSITION ix = std::round(x) + 0.5f;
 			const XYPOSITION iy = std::floor(rc.top + 1.0f) + 0.5f;
@@ -276,12 +280,12 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		break;
 
 	default:
-		// Either INDIC_PLAIN or unknown
+		// Either IndicatorStyle::Plain or unknown
 		surface->FillRectangle(PRectangle(rcAligned.left, ymid,
 			rcAligned.right, ymid + std::round(strokeWidth)), sacDraw.fore);
 	}
 }
 
-void Indicator::SetFlags(int attributes_) noexcept {
+void Indicator::SetFlags(IndicFlag attributes_) noexcept {
 	attributes = attributes_;
 }

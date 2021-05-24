@@ -21,11 +21,11 @@
 
 #include "catch.hpp"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 // Test RunStyles.
 
-namespace Scintilla {	// Xcode clang 9.0 doesn't like this when in the unnamed namespace
+namespace Scintilla::Internal {	// Xcode clang 9.0 doesn't like this when in the unnamed namespace
 	bool operator==(const FillResult<int> &fra, const FillResult<int> &frb) {
 		return fra.changed == frb.changed &&
 			fra.position == frb.position &&

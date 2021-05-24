@@ -18,7 +18,7 @@ public:
 						      &kCFTypeDictionaryKeyCallBacks,
 						      &kCFTypeDictionaryValueCallBacks);
 
-		characterSet = 0;
+		characterSet = Scintilla::CharacterSet::Ansi;
 	}
 
 	QuartzTextStyle(const QuartzTextStyle *other) {
@@ -63,7 +63,7 @@ public:
 		return static_cast<float>(::CTFontGetLeading(fontRef));
 	}
 
-	void setFontRef(CTFontRef inRef, int characterSet_) {
+	void setFontRef(CTFontRef inRef, Scintilla::CharacterSet characterSet_) {
 		fontRef = inRef;
 		characterSet = characterSet_;
 
@@ -81,14 +81,14 @@ public:
 		return fontRef;
 	}
 
-	int getCharacterSet() const noexcept {
+	Scintilla::CharacterSet getCharacterSet() const noexcept {
 		return characterSet;
 	}
 
 private:
 	CFMutableDictionaryRef styleDict;
 	CTFontRef fontRef;
-	int characterSet;
+	Scintilla::CharacterSet characterSet;
 };
 
 #endif

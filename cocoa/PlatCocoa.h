@@ -17,26 +17,28 @@
 
 #include <Cocoa/Cocoa.h>
 
+#include "ScintillaTypes.h"
+#include "ScintillaMessages.h"
+
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
-#include "Scintilla.h"
 
 #include "QuartzTextLayout.h"
 
-NSRect PRectangleToNSRect(const Scintilla::PRectangle &rc);
-Scintilla::PRectangle NSRectToPRectangle(NSRect &rc);
-CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet);
+NSRect PRectangleToNSRect(const Scintilla::Internal::PRectangle &rc);
+Scintilla::Internal::PRectangle NSRectToPRectangle(NSRect &rc);
+CFStringEncoding EncodingFromCharacterSet(bool unicode, Scintilla::CharacterSet characterSet);
 
 @interface ScintillaContextMenu : NSMenu {
-	Scintilla::ScintillaCocoa *owner;
+	Scintilla::Internal::ScintillaCocoa *owner;
 }
 - (void) handleCommand: (NSMenuItem *) sender;
-- (void) setOwner: (Scintilla::ScintillaCocoa *) newOwner;
+- (void) setOwner: (Scintilla::Internal::ScintillaCocoa *) newOwner;
 
 @end
 
-namespace Scintilla {
+namespace Scintilla::Internal {
 
 // A class to do the actual text rendering for us using Quartz 2D.
 class SurfaceImpl : public Surface {
@@ -84,7 +86,7 @@ public:
 	void SetMode(SurfaceMode mode) override;
 
 	void Release() noexcept override;
-	int Supports(int feature) noexcept override;
+	int SupportsFeature(Scintilla::Supports feature) noexcept override;
 	bool Initialised() override;
 
 	/** Returns a CGImageRef that represents the surface. Returns NULL if this is not possible. */
@@ -96,7 +98,7 @@ public:
 	int DeviceHeightFont(int points) override;
 	void LineDraw(Point start, Point end, Stroke stroke) override;
 	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
-	void Polygon(const Scintilla::Point *pts, size_t npts, FillStroke fillStroke) override;
+	void Polygon(const Scintilla::Internal::Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
 	void RectangleFrame(PRectangle rc, Stroke stroke) override;
 	void FillRectangle(PRectangle rc, Fill fill) override;
@@ -108,7 +110,7 @@ public:
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, FillStroke fillStroke) override;
 	void Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) override;
-	void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
+	void Copy(PRectangle rc, Scintilla::Internal::Point from, Surface &surfaceSource) override;
 	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
 	void DrawTextNoClip(PRectangle rc, const Font *font_, XYPOSITION ybase, std::string_view text, ColourRGBA fore,

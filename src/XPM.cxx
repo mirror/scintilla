@@ -17,6 +17,8 @@
 #include <iterator>
 #include <memory>
 
+#include "ScintillaTypes.h"
+
 #include "Debugging.h"
 #include "Geometry.h"
 #include "Platform.h"
@@ -24,6 +26,7 @@
 #include "XPM.h"
 
 using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 namespace {
 

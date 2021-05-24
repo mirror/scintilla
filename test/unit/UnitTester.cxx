@@ -20,7 +20,7 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 
-using namespace Scintilla;
+using namespace Scintilla::Internal;
 
 // Needed for PLATFORM_ASSERT in code being tested
 

@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 13 May 2021 NH</p>
+    <p>Last edited 25 May 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -180,6 +180,12 @@
     does not describe how to link them together to form a useful editor. For now, the best way to
     work out how to develop using Scintilla is to see how SciTE uses it. SciTE exercises most of
     Scintilla's facilities.</p>
+
+    <p>There is a more type-safe binding of this API that can be used from C++.
+    It is implemented in the ScintillaTypes.h, ScintillaMessages.h, and ScintillaStructures.h headers.
+    SciTE contains (in src) a ScintillaCall module that can help further and will, in the future, be
+    moved into Scintilla.
+    </p>
 
     <p>In the descriptions that follow, the messages are described as function calls with zero, one
     or two arguments. These two arguments are the standard <code>wParam</code> and
@@ -274,9 +280,9 @@
           <th align="left" id="alpha"><code>alpha</code></th>
 
           <td>Translucency is set using an alpha value.
-		Alpha ranges from 0 (SC_ALPHA_TRANSPARENT) which is completely transparent to
-                   255 (SC_ALPHA_OPAQUE) which is opaque.
-		Previous versions used the value 256 (SC_ALPHA_NOALPHA) to indicate that drawing was to be
+		Alpha ranges from 0 (<code>SC_ALPHA_TRANSPARENT</code>) which is completely transparent to
+                   255 (<code>SC_ALPHA_OPAQUE</code>) which is opaque.
+		Previous versions used the value 256 (<code>SC_ALPHA_NOALPHA</code>) to indicate that drawing was to be
 		performed opaquely on the base layer. This is now discouraged and code should use the <code>&hellip;LAYER&hellip;</code>
 		methods to choose the layer.</td>
         </tr>
@@ -1649,9 +1655,9 @@ struct Sci_TextToFind {
      working in terms of UTF-16 code units.</p>
 
     <p><b id="SCI_GETLINECHARACTERINDEX">SCI_GETLINECHARACTERINDEX &rarr; int</b><br />
-     Returns which if any indexes are active. It may be <code>SC_LINECHARACTERINDEX_NONE(0)</code> or one or more
-     of <code>SC_LINECHARACTERINDEX_UTF32(1)</code> if whole characters are indexed or
-     <code>SC_LINECHARACTERINDEX_UTF16(2)</code> if UTF-16 code units are indexed.
+     Returns which if any indexes are active. It may be <code>SC_LINECHARACTERINDEX_NONE</code> (0) or one or more
+     of <code>SC_LINECHARACTERINDEX_UTF32</code> (1) if whole characters are indexed or
+     <code>SC_LINECHARACTERINDEX_UTF16</code> (2) if UTF-16 code units are indexed.
      Character indexes are currently only supported for UTF-8 documents.</p>
 
     <p><b id="SCI_ALLOCATELINECHARACTERINDEX">SCI_ALLOCATELINECHARACTERINDEX(int lineCharacterIndex)</b><br />
@@ -1665,7 +1671,7 @@ struct Sci_TextToFind {
     <p><b id="SCI_LINEFROMINDEXPOSITION">SCI_LINEFROMINDEXPOSITION(position pos, int lineCharacterIndex) &rarr; line</b><br />
     <b id="SCI_INDEXPOSITIONFROMLINE">SCI_INDEXPOSITIONFROMLINE(line line, int lineCharacterIndex) &rarr; position</b><br />
      The document line of a particular character or code unit may be found by calling <code>SCI_LINEFROMINDEXPOSITION</code> with one of
-     <code>SC_LINECHARACTERINDEX_UTF32(1)</code> or <code>SC_LINECHARACTERINDEX_UTF16(2)</code>.
+     <code>SC_LINECHARACTERINDEX_UTF32</code> (1) or <code>SC_LINECHARACTERINDEX_UTF16</code> (2).
      The inverse action, finds the starting position of a document line either in characters or code units from the document start by calling
      <code>SCI_INDEXPOSITIONFROMLINE</code> with the same <code class="parameter">lineCharacterIndex</code> argument.</p>
 
@@ -3722,7 +3728,7 @@ struct Sci_TextToFind {
     <p><b id="SCI_SETCARETSTYLE">SCI_SETCARETSTYLE(int caretStyle)</b><br />
      <b id="SCI_GETCARETSTYLE">SCI_GETCARETSTYLE &rarr; int</b><br />
      The style of the caret can be set with <code>SCI_SETCARETSTYLE</code>.
-     There are separate styles for insert mode (lower 4-bits, CARETSTYLE_INS_MASK) and
+     There are separate styles for insert mode (lower 4-bits, <code>CARETSTYLE_INS_MASK</code>) and
      overtype mode (bit 4).
 
      <table class="standard" summary="Caret Styles">
@@ -4457,7 +4463,7 @@ struct Sci_TextToFind {
      <code>SC_EFF_QUALITY_ANTIALIASED</code>,
      <code>SC_EFF_QUALITY_LCD_OPTIMIZED</code>.</p>
      <p>In case it is necessary to squeeze more options into this property, only a limited number of bits defined
-     by SC_EFF_QUALITY_MASK (0xf) will be used for quality.</p>
+     by <code>SC_EFF_QUALITY_MASK</code> (0xF) will be used for quality.</p>
 
     <p><b id="SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</b><br />
      <b id="SCI_GETCODEPAGE">SCI_GETCODEPAGE &rarr; int</b><br />
@@ -4508,7 +4514,8 @@ struct Sci_TextToFind {
      Currently, there is experimental support for bidirectional text on Win32 using DirectWrite and on macOS using Cocoa.
      Only UTF-8 documents will show bidirectional behaviour and only in <code>SC_BIDIRECTIONAL_L2R</code> mode.
      Some features, such as virtual space may not work with
-     bidirectional text or may work only in some circumstances.</p>
+     bidirectional text or may work only in some circumstances.
+     <code>SC_BIDIRECTIONAL_R2L</code> may be implemented in the future.</p>
      <p>There are additional processing and storage costs to bidirectional text.
      As some applications may not want to pay the costs, bidirectional support must be explicitly enabled by calling
      <code>SCI_SETBIDIRECTIONAL(SC_BIDIRECTIONAL_L2R)</code> (1) which chooses left to right as the default direction or
@@ -5169,7 +5176,7 @@ struct Sci_TextToFind {
     They may also be invisible when used to track pieces of content for the application as <code>INDIC_HIDDEN</code>.</p>
 
     <p>The <code>SCI_INDIC*</code> messages allow you to get and set the visual appearance of the
-    indicators. They all use an <code class="parameter">indicator</code> argument in the range 0 to INDICATOR_MAX(35)
+    indicators. They all use an <code class="parameter">indicator</code> argument in the range 0 to <code>INDICATOR_MAX</code>(35)
     to set the indicator to style. To prevent interference the set of indicators is divided up into a range for use
     by lexers (0..7) a range for use by containers
     (8=<code>INDICATOR_CONTAINER</code> .. 31=<code>INDICATOR_IME-1</code>)
@@ -5525,7 +5532,8 @@ struct Sci_TextToFind {
      These messages set and get the flags associated with an indicator.
      There is currently one flag defined, <code>SC_INDICFLAG_VALUEFORE</code>: when this flag is set
      the colour used by the indicator is not from the indicator's fore setting but instead from the value of the indicator at
-     that point in the file. This allows many colours to be displayed for a single indicator. The value is an <a class="jump"
+     that point in the file. <code>SC_INDICFLAG_NONE</code> is the default.
+     This allows many colours to be displayed for a single indicator. The value is an <a class="jump"
     href="#colour">RGB integer colour</a> that has been ored with <code>SC_INDICVALUEBIT</code>(0x1000000)
     when calling <a class="seealso" href="#SCI_SETINDICATORVALUE">SCI_SETINDICATORVALUE</a>.
     To find the colour from the value, and the value with <code>SC_INDICVALUEMASK</code>(0xFFFFFF).
@@ -6941,8 +6949,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     allows it to be treated slightly different then its level may indicate. For example, blank
     lines should generally not be fold points and will be considered part of the preceding section even though
     they may have a lesser fold level.
-    <code>SC_FOLDLEVELHEADERFLAG</code> indicates that
-    the line is a header (fold point).</p>
+    <code>SC_FOLDLEVELHEADERFLAG</code> indicates that the line is a header (fold point).
+    <code>SC_FOLDLEVELNONE</code> is a default level that may occur before folding.
+    </p>
 
     <p>Use <code>SCI_GETFOLDLEVEL(line) &amp; SC_FOLDLEVELNUMBERMASK</code> to get the fold level
     of a line. Likewise, use <code>SCI_GETFOLDLEVEL(line) &amp; SC_FOLDLEVEL*FLAG</code> to get the
@@ -6972,6 +6981,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
       <tbody valign="top">
         <tr>
+          <td align="left">SC_FOLDFLAG_NONE</td>
+          <td align="left">0</td>
+          <td align="left">Default value.</td>
+        </tr>
+
+        <tr>
           <td align="left"></td>
           <td align="left">1</td>
           <td align="left">Experimental feature that has been removed.</td>
@@ -6980,44 +6995,38 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
         <tr>
           <td align="left">SC_FOLDFLAG_LINEBEFORE_EXPANDED</td>
           <td align="left">2</td>
-
           <td align="left">Draw above if expanded</td>
         </tr>
 
         <tr>
           <td align="left">SC_FOLDFLAG_LINEBEFORE_CONTRACTED</td>
           <td align="left">4</td>
-
           <td align="left">Draw above if not expanded</td>
         </tr>
 
         <tr>
           <td align="left">SC_FOLDFLAG_LINEAFTER_EXPANDED</td>
           <td align="left">8</td>
-
           <td align="left">Draw below if expanded</td>
         </tr>
 
         <tr>
           <td align="left">SC_FOLDFLAG_LINEAFTER_CONTRACTED</td>
           <td align="left">16</td>
-
           <td align="left">Draw below if not expanded</td>
         </tr>
 
         <tr>
           <td align="left">SC_FOLDFLAG_LEVELNUMBERS</td>
           <td align="left">64</td>
-
-          <td align="left">display hexadecimal fold levels in line margin to aid debugging of
+          <td align="left">Display hexadecimal fold levels in line margin to aid debugging of
           folding. The appearance of this feature may change in the future.</td>
         </tr>
 
         <tr>
           <td align="left">SC_FOLDFLAG_LINESTATE</td>
           <td align="left">128</td>
-
-          <td align="left">display hexadecimal line state in line margin to aid debugging of lexing and folding.
+          <td align="left">Display hexadecimal line state in line margin to aid debugging of lexing and folding.
 	  May not be used at the same time as <code>SC_FOLDFLAG_LEVELNUMBERS</code>.</td>
         </tr>
       </tbody>
@@ -7173,6 +7182,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
       </tbody>
 
       <tbody valign="top">
+        <tr>
+          <td align="left">SC_AUTOMATICFOLD_NONE</td>
+          <td align="left">0</td>
+          <td align="left">Value with no automatic behaviour.</td>
+        </tr>
+
         <tr>
           <td align="left">SC_AUTOMATICFOLD_SHOW</td>
           <td align="left">1</td>
@@ -8310,6 +8325,16 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
       </tbody>
 
       <tbody valign="top">
+
+        <tr>
+          <td align="left"><code>SC_UPDATE_NONE</code></td>
+
+          <td align="center">0x00</td>
+
+          <td>Value without any changes.</td>
+
+        </tr>
+
         <tr>
           <td align="left"><code>SC_UPDATE_CONTENT</code></td>
 
