@@ -3060,7 +3060,7 @@ gboolean ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, Scintil
 
 gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 	try {
-		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(Technology::Default));
 		surfaceWindow->Init(cr, widget);
 		surfaceWindow->SetMode(SurfaceMode(ctip->codePage, false));
 		ctip->PaintCT(surfaceWindow.get());
