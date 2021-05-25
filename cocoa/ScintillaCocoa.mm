@@ -2566,7 +2566,7 @@ void ScintillaCocoa::UpdateBaseElements() {
 	if (@available(macOS 10.14, *)) {
 		NSColor *textBack = [NSColor.textBackgroundColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
 		NSColor *noFocusBack = [NSColor.unemphasizedSelectedTextBackgroundColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
-		if (vs.selection.layer == Layer::base) {
+		if (vs.selection.layer == Layer::Base) {
 			NSColor *selBack = [NSColor.selectedTextBackgroundColor colorUsingColorSpaceName: NSCalibratedRGBColorSpace];
 			// Additional selection: blend with text background to make weaker version.
 			NSColor *modified = [selBack blendedColorWithFraction:0.5 ofColor:textBack];
