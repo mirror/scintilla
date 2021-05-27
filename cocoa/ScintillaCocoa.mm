@@ -2572,7 +2572,7 @@ void ScintillaCocoa::UpdateBaseElements() {
 			NSColor *modified = [selBack blendedColorWithFraction:0.5 ofColor:textBack];
 			changed = vs.SetElementBase(Element::SelectionBack, ColourFromNSColor(selBack));
 			changed = vs.SetElementBase(Element::SelectionAdditionalBack, ColourFromNSColor(modified)) || changed;
-			changed = vs.SetElementBase(Element::SelectionNoFocusBack, ColourFromNSColor(noFocusBack)) || changed;
+			changed = vs.SetElementBase(Element::SelectionInactiveBack, ColourFromNSColor(noFocusBack)) || changed;
 		} else {
 			// Less translucent colour used in dark mode as otherwise less visible
 			const int alpha = textBack.brightnessComponent > 0.5 ? 0x40 : 0x60;
@@ -2581,7 +2581,7 @@ void ScintillaCocoa::UpdateBaseElements() {
 			const ColourRGBA colourAccent = ColourFromNSColor(accent);
 			changed = vs.SetElementBase(Element::SelectionBack, ColourRGBA(colourAccent, alpha));
 			changed = vs.SetElementBase(Element::SelectionAdditionalBack, ColourRGBA(colourAccent, alpha/2)) || changed;
-			changed = vs.SetElementBase(Element::SelectionNoFocusBack, ColourRGBA(ColourFromNSColor(noFocusBack), alpha)) || changed;
+			changed = vs.SetElementBase(Element::SelectionInactiveBack, ColourRGBA(ColourFromNSColor(noFocusBack), alpha)) || changed;
 
 		}
 	}

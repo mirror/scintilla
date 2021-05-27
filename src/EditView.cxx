@@ -840,8 +840,8 @@ ColourRGBA SelectionBackground(const EditModel &model, const ViewStyle &vsDraw, 
 		element = Element::SelectionAdditionalBack;
 	if (!model.primarySelection)
 		element = Element::SelectionSecondaryBack;
-	if (!model.hasFocus && vsDraw.ElementColour(Element::SelectionNoFocusBack))
-		element = Element::SelectionNoFocusBack;
+	if (!model.hasFocus && vsDraw.ElementColour(Element::SelectionInactiveBack))
+		element = Element::SelectionInactiveBack;
 	return vsDraw.ElementColour(element).value_or(bugColour);
 }
 
@@ -854,8 +854,8 @@ std::optional<ColourRGBA> SelectionForeground(const EditModel &model, const View
 	if (!model.primarySelection)	// Secondary selection
 		element = Element::SelectionSecondaryText;
 	if (!model.hasFocus) {
-		if (vsDraw.ElementColour(Element::SelectionNoFocusText)) {
-			element = Element::SelectionNoFocusText;
+		if (vsDraw.ElementColour(Element::SelectionInactiveText)) {
+			element = Element::SelectionInactiveText;
 		} else {
 			return {};
 		}

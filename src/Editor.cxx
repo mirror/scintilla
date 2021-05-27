@@ -7512,7 +7512,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 			vs.SetElementAlpha(Element::SelectionBack, alpha);
 			vs.SetElementAlpha(Element::SelectionAdditionalBack, alpha);
 			vs.SetElementAlpha(Element::SelectionSecondaryBack, alpha);
-			vs.SetElementAlpha(Element::SelectionNoFocusBack, alpha);
+			vs.SetElementAlpha(Element::SelectionInactiveBack, alpha);
 			InvalidateStyleRedraw();
 		}
 		break;
