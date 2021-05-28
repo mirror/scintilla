@@ -361,7 +361,6 @@ class ScintillaWin :
 	ScintillaWin &operator=(ScintillaWin &&) = delete;
 	// ~ScintillaWin() in public section
 
-	void Init();
 	void Finalise() override;
 #if defined(USE_D2D)
 	void EnsureRenderTarget(HDC hdc);
@@ -568,17 +567,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	if (caret.period < 0)
 		caret.period = 0;
 
-	Init();
-}
-
-ScintillaWin::~ScintillaWin() {
-	if (sysCaretBitmap) {
-		::DeleteObject(sysCaretBitmap);
-		sysCaretBitmap = {};
-	}
-}
-
-void ScintillaWin::Init() {
 	// Initialize COM.  If the app has already done this it will have
 	// no effect.  If the app hasn't, we really shouldn't ask them to call
 	// it just so this internal feature works.
@@ -592,6 +580,13 @@ void ScintillaWin::Init() {
 	vs.indicators[IndicatorInput] = Indicator(IndicatorStyle::Dots, ColourRGBA(0, 0, 0xff));
 	vs.indicators[IndicatorConverted] = Indicator(IndicatorStyle::CompositionThick, ColourRGBA(0, 0, 0xff));
 	vs.indicators[IndicatorTarget] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(0, 0, 0xff));
+}
+
+ScintillaWin::~ScintillaWin() {
+	if (sysCaretBitmap) {
+		::DeleteObject(sysCaretBitmap);
+		sysCaretBitmap = {};
+	}
 }
 
 void ScintillaWin::Finalise() {
@@ -618,12 +613,11 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 	if (pD2DFactory && !pRenderTarget) {
 		HWND hw = MainHWND();
 		RECT rc;
-		GetClientRect(hw, &rc);
+		::GetClientRect(hw, &rc);
 
 		const D2D1_SIZE_U size = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
 
 		// Create a Direct2D render target.
-#if 1
 		D2D1_RENDER_TARGET_PROPERTIES drtp {};
 		drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
 		drtp.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
@@ -663,15 +657,6 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 				pRenderTarget = nullptr;
 			}
 		}
-#else
-		pD2DFactory->CreateHwndRenderTarget(
-			D2D1::RenderTargetProperties(
-				D2D1_RENDER_TARGET_TYPE_DEFAULT ,
-				D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-				96.0f, 96.0f, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_FEATURE_LEVEL_DEFAULT),
-			D2D1::HwndRenderTargetProperties(hw, size),
-			&pRenderTarget);
-#endif
 		// Pixmaps were created to be compatible with previous render target so
 		// need to be recreated.
 		DropGraphics();
@@ -679,7 +664,7 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 
 	if ((technology == Technology::DirectWriteDC) && pRenderTarget) {
 		RECT rcWindow;
-		GetClientRect(MainHWND(), &rcWindow);
+		::GetClientRect(MainHWND(), &rcWindow);
 		const HRESULT hr = static_cast<ID2D1DCRenderTarget*>(pRenderTarget)->BindDC(hdc, &rcWindow);
 		if (FAILED(hr)) {
 			Platform::DebugPrintf("BindDC failed 0x%lx\n", hr);
@@ -1822,7 +1807,7 @@ sptr_t ScintillaWin::SciMessage(Message iMessage, uptr_t wParam, sptr_t lParam) 
 #endif
 
 	case Message::SetTechnology:
-		if (Technology technologyNew = static_cast<Technology>(wParam);
+		if (const Technology technologyNew = static_cast<Technology>(wParam);
 			(technologyNew == Technology::Default) ||
 			(technologyNew == Technology::DirectWriteRetain) ||
 			(technologyNew == Technology::DirectWriteDC) ||
@@ -2169,7 +2154,7 @@ bool ScintillaWin::HaveMouseCapture() {
 
 void ScintillaWin::SetTrackMouseLeaveEvent(bool on) noexcept {
 	if (on && !trackedMouseLeave) {
-		TRACKMOUSEEVENT tme;
+		TRACKMOUSEEVENT tme {};
 		tme.cbSize = sizeof(tme);
 		tme.dwFlags = TME_LEAVE;
 		tme.hwndTrack = MainHWND();
@@ -3160,7 +3145,7 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 	case SB_THUMBPOSITION:
 	case SB_THUMBTRACK: {
 			// Do NOT use wParam, its 16 bit and not enough for very long lines. Its still possible to overflow the 32 bit but you have to try harder =]
-			SCROLLINFO si;
+			SCROLLINFO si {};
 			si.cbSize = sizeof(si);
 			si.fMask = SIF_TRACKPOS;
 			if (GetScrollInfo(SB_HORZ, &si)) {
@@ -3495,13 +3480,13 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 					surfaceWindow->Init(ps.hdc, hWnd);
 				} else {
 #if defined(USE_D2D)
-					D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp;
+					D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp {};
 					dhrtp.hwnd = hWnd;
 					dhrtp.pixelSize = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
 					dhrtp.presentOptions = (sciThis->technology == Technology::DirectWriteRetain) ?
 						D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS : D2D1_PRESENT_OPTIONS_NONE;
 
-					D2D1_RENDER_TARGET_PROPERTIES drtp;
+					D2D1_RENDER_TARGET_PROPERTIES drtp {};
 					drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
 					drtp.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
 					drtp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_UNKNOWN;
