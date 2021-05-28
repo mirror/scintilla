@@ -3409,7 +3409,7 @@ struct Sci_TextToFind {
            <td>Background colour of selections when another window contains the primary selection</td>
          </tr>
          <tr>
-           <th align="left"><code>SC_ELEMENT_SELECTION_NO_FOCUS_TEXT</code></th>
+           <th align="left"><code>SC_ELEMENT_SELECTION_INACTIVE_TEXT</code></th>
            <td>16</td>
            <td>Translucent</td>
            <td>All</td>
@@ -3417,7 +3417,7 @@ struct Sci_TextToFind {
            <td>Text colour of selections when another window has focus</td>
          </tr>
          <tr>
-           <th align="left"><code>SC_ELEMENT_SELECTION_NO_FOCUS_BACK</code></th>
+           <th align="left"><code>SC_ELEMENT_SELECTION_INACTIVE_BACK</code></th>
            <td>17</td>
            <td>Translucent</td>
            <td>All</td>
@@ -3513,8 +3513,8 @@ struct Sci_TextToFind {
     <a class="element" href="#SC_ELEMENT_SELECTION_SECONDARY_TEXT">SC_ELEMENT_SELECTION_SECONDARY_TEXT : colouralpha</a><br />
     <a class="element" href="#SC_ELEMENT_SELECTION_SECONDARY_BACK">SC_ELEMENT_SELECTION_SECONDARY_BACK : colouralpha</a><br />
     <br />
-    <a class="element" href="#SC_ELEMENT_SELECTION_NO_FOCUS_TEXT">SC_ELEMENT_SELECTION_NO_FOCUS_TEXT : colouralpha</a><br />
-    <a class="element" href="#SC_ELEMENT_SELECTION_NO_FOCUS_BACK">SC_ELEMENT_SELECTION_NO_FOCUS_BACK : colouralpha</a><br />
+    <a class="element" href="#SC_ELEMENT_SELECTION_INACTIVE_TEXT">SC_ELEMENT_SELECTION_INACTIVE_TEXT : colouralpha</a><br />
+    <a class="element" href="#SC_ELEMENT_SELECTION_INACTIVE_BACK">SC_ELEMENT_SELECTION_INACTIVE_BACK : colouralpha</a><br />
     <br />
     <a class="element" href="#SC_ELEMENT_CARET_LINE_BACK">SC_ELEMENT_CARET_LINE_BACK : colouralpha</a><br />
     <a class="message" href="#SCI_SETCARETLINELAYER">SCI_SETCARETLINELAYER(int layer)</a><br />
@@ -3635,8 +3635,8 @@ struct Sci_TextToFind {
      </p>
 
     <p>
-     <b id="SC_ELEMENT_SELECTION_NO_FOCUS_TEXT">SC_ELEMENT_SELECTION_NO_FOCUS_TEXT : colouralpha</b><br />
-     <b id="SC_ELEMENT_SELECTION_NO_FOCUS_BACK">SC_ELEMENT_SELECTION_NO_FOCUS_BACK : colouralpha</b><br />
+     <b id="SC_ELEMENT_SELECTION_INACTIVE_TEXT">SC_ELEMENT_SELECTION_INACTIVE_TEXT : colouralpha</b><br />
+     <b id="SC_ELEMENT_SELECTION_INACTIVE_BACK">SC_ELEMENT_SELECTION_INACTIVE_BACK : colouralpha</b><br />
      When a window no longer has the keyboard focus, it is customary to make its selection less noticeable by colouring it grey.
      These elements define the colours to be used for selections without focus.
      </p>
