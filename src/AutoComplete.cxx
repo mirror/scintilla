@@ -134,7 +134,7 @@ struct Sorter {
 		indices.push_back(i); // index of last position
 	}
 
-	bool operator()(int a, int b) {
+	bool operator()(int a, int b) noexcept {
 		const int lenA = indices[a * 2 + 1] - indices[a * 2];
 		const int lenB = indices[b * 2 + 1] - indices[b * 2];
 		const int len  = std::min(lenA, lenB);

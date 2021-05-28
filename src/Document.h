@@ -489,7 +489,7 @@ public:
 	void EOLAnnotationClearAll();
 
 	bool AddWatcher(DocWatcher *watcher, void *userData);
-	bool RemoveWatcher(DocWatcher *watcher, void *userData);
+	bool RemoveWatcher(DocWatcher *watcher, void *userData) noexcept;
 
 	CharacterClass WordCharacterClass(unsigned int ch) const;
 	bool IsWordPartSeparator(unsigned int ch) const;
@@ -525,6 +525,9 @@ public:
 	UndoGroup &operator=(UndoGroup &&) = delete;
 	~UndoGroup() {
 		if (groupNeeded) {
+			// EndUndoAction can throw as it allocates but throw in destructor is fatal.
+			// To fix this UndoHistory should allocate any memory needed by EndUndoAction
+			// beforehand or change EndUndoAction to not require allocation.
 			pdoc->EndUndoAction();
 		}
 	}

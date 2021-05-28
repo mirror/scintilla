@@ -2477,12 +2477,18 @@ bool Document::AddWatcher(DocWatcher *watcher, void *userData) {
 	return true;
 }
 
-bool Document::RemoveWatcher(DocWatcher *watcher, void *userData) {
-	std::vector<WatcherWithUserData>::iterator it =
-		std::find(watchers.begin(), watchers.end(), WatcherWithUserData(watcher, userData));
-	if (it != watchers.end()) {
-		watchers.erase(it);
-		return true;
+bool Document::RemoveWatcher(DocWatcher *watcher, void *userData) noexcept {
+	try {
+		// This can never fail as WatcherWithUserData constructor and == are noexcept
+		// but std::find is not noexcept.
+		std::vector<WatcherWithUserData>::iterator it =
+			std::find(watchers.begin(), watchers.end(), WatcherWithUserData(watcher, userData));
+		if (it != watchers.end()) {
+			watchers.erase(it);
+			return true;
+		}
+	} catch (...) {
+		// Ignore any exception
 	}
 	return false;
 }
