@@ -651,7 +651,7 @@ bool ViewStyle::SetWrapIndentMode(WrapIndentMode wrapIndentMode_) noexcept {
 
 bool ViewStyle::IsBlockCaretStyle() const noexcept {
 	return ((caret.style & CaretStyle::InsMask) == CaretStyle::Block) ||
-		(FlagSet(caret.style, CaretStyle::OverstrikeBlock)) != 0;
+		FlagSet(caret.style, CaretStyle::OverstrikeBlock);
 }
 
 bool ViewStyle::IsCaretVisible() const noexcept {
@@ -662,7 +662,7 @@ bool ViewStyle::DrawCaretInsideSelection(bool inOverstrike, bool imeCaretBlockOv
 	if (FlagSet(caret.style, CaretStyle::BlockAfter))
 		return false;
 	return ((caret.style & CaretStyle::InsMask) == CaretStyle::Block) ||
-		(inOverstrike && (FlagSet(caret.style, CaretStyle::OverstrikeBlock)) != 0) ||
+		(inOverstrike && FlagSet(caret.style, CaretStyle::OverstrikeBlock)) ||
 		imeCaretBlockOverride;
 }
 

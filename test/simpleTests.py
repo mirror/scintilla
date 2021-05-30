@@ -1916,6 +1916,11 @@ class TestStyleAttributes(unittest.TestCase):
 		self.ed.SetDefaultFoldDisplayText(0, b"...")
 		self.assertEquals(self.ed.GetDefaultFoldDisplayText(), b"...")
 
+	def testFontQuality(self):
+		self.assertEquals(self.ed.GetFontQuality(), self.ed.SC_EFF_QUALITY_DEFAULT)
+		self.ed.SetFontQuality(self.ed.SC_EFF_QUALITY_LCD_OPTIMIZED)
+		self.assertEquals(self.ed.GetFontQuality(), self.ed.SC_EFF_QUALITY_LCD_OPTIMIZED)
+
 	def testFontLocale(self):
 		initialLocale = "en-us".encode("UTF-8")
 		testLocale = "zh-Hans".encode("UTF-8")

@@ -595,7 +595,7 @@ void Editor::SetRectangularRange() {
 			SelectionRange range(
 				view.SPositionFromLineX(surface, *this, line, xCaret, vs),
 				view.SPositionFromLineX(surface, *this, line, xAnchor, vs));
-			if ((FlagSet(virtualSpaceOptions, VirtualSpace::RectangularSelection)) == 0)
+			if (!FlagSet(virtualSpaceOptions, VirtualSpace::RectangularSelection))
 				range.ClearVirtualSpace();
 			if (line == lineAnchorRect)
 				sel.SetSelection(range);
@@ -1160,14 +1160,14 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange &ran
 
 	// Vertical positioning
 	if (FlagSet(options, XYScrollOptions::vertical) &&
-		(pt.y < rcClient.top || ptBottomCaret.y >= rcClient.bottom || (FlagSet(policies.y.policy, CaretPolicy::Strict)) != 0)) {
+		(pt.y < rcClient.top || ptBottomCaret.y >= rcClient.bottom || FlagSet(policies.y.policy, CaretPolicy::Strict))) {
 		const Sci::Line lineCaret = DisplayFromPosition(range.caret.Position());
 		const Sci::Line linesOnScreen = LinesOnScreen();
 		const Sci::Line halfScreen = std::max(linesOnScreen - 1, static_cast<Sci::Line>(2)) / 2;
-		const bool bSlop = (FlagSet(policies.y.policy, CaretPolicy::Slop)) != 0;
-		const bool bStrict = (FlagSet(policies.y.policy, CaretPolicy::Strict)) != 0;
-		const bool bJump = (FlagSet(policies.y.policy, CaretPolicy::Jumps)) != 0;
-		const bool bEven = (FlagSet(policies.y.policy, CaretPolicy::Even)) != 0;
+		const bool bSlop = FlagSet(policies.y.policy, CaretPolicy::Slop);
+		const bool bStrict = FlagSet(policies.y.policy, CaretPolicy::Strict);
+		const bool bJump = FlagSet(policies.y.policy, CaretPolicy::Jumps);
+		const bool bEven = FlagSet(policies.y.policy, CaretPolicy::Even);
 
 		// It should be possible to scroll the window to show the caret,
 		// but this fails to remove the caret on GTK+
@@ -1263,10 +1263,10 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange &ran
 	// Horizontal positioning
 	if (FlagSet(options, XYScrollOptions::horizontal) && !Wrapping()) {
 		const int halfScreen = std::max(static_cast<int>(rcClient.Width()) - 4, 4) / 2;
-		const bool bSlop = (FlagSet(policies.x.policy, CaretPolicy::Slop)) != 0;
-		const bool bStrict = (FlagSet(policies.x.policy, CaretPolicy::Strict)) != 0;
-		const bool bJump = (FlagSet(policies.x.policy, CaretPolicy::Jumps)) != 0;
-		const bool bEven = (FlagSet(policies.x.policy, CaretPolicy::Even)) != 0;
+		const bool bSlop = FlagSet(policies.x.policy, CaretPolicy::Slop);
+		const bool bStrict = FlagSet(policies.x.policy, CaretPolicy::Strict);
+		const bool bJump = FlagSet(policies.x.policy, CaretPolicy::Jumps);
+		const bool bEven = FlagSet(policies.x.policy, CaretPolicy::Even);
 
 		if (bSlop) {	// A margin is defined
 			int xMoveL, xMoveR;
@@ -3413,13 +3413,13 @@ int Editor::HorizontalMove(Message iMessage) {
 		case Message::CharLeftExtend: // only when sel.IsRectangular() && sel.MoveExtends()
 			if (pdoc->IsLineEndPosition(spCaret.Position()) && spCaret.VirtualSpace()) {
 				spCaret.SetVirtualSpace(spCaret.VirtualSpace() - 1);
-			} else if ((FlagSet(virtualSpaceOptions, VirtualSpace::NoWrapLineStart)) == 0 || pdoc->GetColumn(spCaret.Position()) > 0) {
+			} else if (!FlagSet(virtualSpaceOptions, VirtualSpace::NoWrapLineStart) || pdoc->GetColumn(spCaret.Position()) > 0) {
 				spCaret = SelectionPosition(spCaret.Position() - 1);
 			}
 			break;
 		case Message::CharRightRectExtend:
 		case Message::CharRightExtend: // only when sel.IsRectangular() && sel.MoveExtends()
-			if ((FlagSet(virtualSpaceOptions, VirtualSpace::RectangularSelection)) && pdoc->IsLineEndPosition(sel.MainCaret())) {
+			if (FlagSet(virtualSpaceOptions, VirtualSpace::RectangularSelection) && pdoc->IsLineEndPosition(sel.MainCaret())) {
 				spCaret.SetVirtualSpace(spCaret.VirtualSpace() + 1);
 			} else {
 				spCaret = SelectionPosition(spCaret.Position() + 1);
@@ -3478,13 +3478,13 @@ int Editor::HorizontalMove(Message iMessage) {
 			case Message::CharLeftExtend:
 				if (spCaret.VirtualSpace()) {
 					spCaret.SetVirtualSpace(spCaret.VirtualSpace() - 1);
-				} else if ((FlagSet(virtualSpaceOptions, VirtualSpace::NoWrapLineStart)) == 0 || pdoc->GetColumn(spCaret.Position()) > 0) {
+				} else if (!FlagSet(virtualSpaceOptions, VirtualSpace::NoWrapLineStart) || pdoc->GetColumn(spCaret.Position()) > 0) {
 					spCaret = SelectionPosition(spCaret.Position() - 1);
 				}
 				break;
 			case Message::CharRight:
 			case Message::CharRightExtend:
-				if ((FlagSet(virtualSpaceOptions, VirtualSpace::UserAccessible)) && pdoc->IsLineEndPosition(spCaret.Position())) {
+				if (FlagSet(virtualSpaceOptions, VirtualSpace::UserAccessible) && pdoc->IsLineEndPosition(spCaret.Position())) {
 					spCaret.SetVirtualSpace(spCaret.VirtualSpace() + 1);
 				} else {
 					spCaret = SelectionPosition(spCaret.Position() + 1);
@@ -6617,7 +6617,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case Message::GetFontQuality:
-		return FlagSet(vs.extraFontFlag, FontQuality::QualityMask);
+		return static_cast<int>(vs.extraFontFlag) & static_cast<int>(FontQuality::QualityMask);
 
 	case Message::SetTabWidth:
 		if (wParam > 0) {

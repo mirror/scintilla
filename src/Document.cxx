@@ -113,7 +113,7 @@ size_t ActionDuration::ActionsInAllowedTime(double secondsAllowed) const noexcep
 }
 
 Document::Document(DocumentOption options) :
-	cb((FlagSet(options, DocumentOption::StylesNone)) == 0, (FlagSet(options, DocumentOption::TextLarge)) != 0),
+	cb(!FlagSet(options, DocumentOption::StylesNone), FlagSet(options, DocumentOption::TextLarge)),
 	durationStyleOneByte(0.000001, 0.0000001, 0.00001) {
 	refCount = 0;
 #ifdef _WIN32
