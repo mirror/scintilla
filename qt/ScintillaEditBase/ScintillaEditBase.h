@@ -100,7 +100,7 @@ signals:
 	void updateUi(Scintilla::Update updated);
 	void modified(Scintilla::ModificationFlags type, int position, int length, int linesAdded,
 		      const QByteArray &text, int line, Scintilla::FoldLevel foldNow, Scintilla::FoldLevel foldPrev);
-	void macroRecord(Scintilla::Message message, uptr_t wParam, sptr_t lParam);
+	void macroRecord(Scintilla::Message message, Scintilla::uptr_t wParam, Scintilla::sptr_t lParam);
 	void marginClicked(int position, Scintilla::KeyMod modifiers, int margin);
 	void textAreaClicked(int line, int modifiers);
 	void needShown(int position, int length);
