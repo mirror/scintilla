@@ -348,7 +348,7 @@ void ScintillaEditBase::mouseReleaseEvent(QMouseEvent *event)
 		sqt->ButtonUpWithModifiers(point, time.elapsed(), ModifiersOfKeyboard());
 
 	int pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
-	int line = send(SCI_LINEFROMPOSITION, pos);
+	sptr_t line = send(SCI_LINEFROMPOSITION, pos);
 	int modifiers = QApplication::keyboardModifiers();
 
 	emit textAreaClicked(line, modifiers);

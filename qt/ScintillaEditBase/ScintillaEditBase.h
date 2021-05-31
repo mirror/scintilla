@@ -84,36 +84,36 @@ signals:
 	void horizontalRangeChanged(int max, int page);
 	void verticalRangeChanged(int max, int page);
 	void notifyChange();
-	void linesAdded(int linesAdded);
+	void linesAdded(Scintilla::Position linesAdded);
 
 	// Clients can use this hook to add additional
 	// formats (e.g. rich text) to the MIME data.
 	void aboutToCopy(QMimeData *data);
 
 	// Scintilla Notifications
-	void styleNeeded(int position);
+	void styleNeeded(Scintilla::Position position);
 	void charAdded(int ch);
 	void savePointChanged(bool dirty);
 	void modifyAttemptReadOnly();
 	void key(int key);
-	void doubleClick(int position, int line);
+	void doubleClick(Scintilla::Position position, Scintilla::Position line);
 	void updateUi(Scintilla::Update updated);
-	void modified(Scintilla::ModificationFlags type, int position, int length, int linesAdded,
-		      const QByteArray &text, int line, Scintilla::FoldLevel foldNow, Scintilla::FoldLevel foldPrev);
+	void modified(Scintilla::ModificationFlags type, Scintilla::Position position, Scintilla::Position length, Scintilla::Position linesAdded,
+		      const QByteArray &text, Scintilla::Position line, Scintilla::FoldLevel foldNow, Scintilla::FoldLevel foldPrev);
 	void macroRecord(Scintilla::Message message, Scintilla::uptr_t wParam, Scintilla::sptr_t lParam);
-	void marginClicked(int position, Scintilla::KeyMod modifiers, int margin);
-	void textAreaClicked(int line, int modifiers);
-	void needShown(int position, int length);
+	void marginClicked(Scintilla::Position position, Scintilla::KeyMod modifiers, int margin);
+	void textAreaClicked(Scintilla::Position line, int modifiers);
+	void needShown(Scintilla::Position position, Scintilla::Position length);
 	void painted();
 	void userListSelection(); // Wants some args.
 	void uriDropped(const QString &uri);
 	void dwellStart(int x, int y);
 	void dwellEnd(int x, int y);
 	void zoom(int zoom);
-	void hotSpotClick(int position, Scintilla::KeyMod modifiers);
-	void hotSpotDoubleClick(int position, Scintilla::KeyMod modifiers);
+	void hotSpotClick(Scintilla::Position position, Scintilla::KeyMod modifiers);
+	void hotSpotDoubleClick(Scintilla::Position position, Scintilla::KeyMod modifiers);
 	void callTipClick();
-	void autoCompleteSelection(int position, const QString &text);
+	void autoCompleteSelection(Scintilla::Position position, const QString &text);
 	void autoCompleteCancelled();
 	void focusChanged(bool focused);
 
