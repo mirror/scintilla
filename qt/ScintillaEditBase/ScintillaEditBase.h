@@ -75,8 +75,8 @@ public slots:
 	void scrollVertical(int value);
 
 	// Emit Scintilla notifications as signals.
-	void notifyParent(SCNotification scn);
-	void event_command(uptr_t wParam, sptr_t lParam);
+	void notifyParent(Scintilla::NotificationData scn);
+	void event_command(Scintilla::uptr_t wParam, Scintilla::sptr_t lParam);
 
 signals:
 	void horizontalScrolled(int value);
@@ -97,11 +97,11 @@ signals:
 	void modifyAttemptReadOnly();
 	void key(int key);
 	void doubleClick(int position, int line);
-	void updateUi(int updated);
-	void modified(int type, int position, int length, int linesAdded,
-	              const QByteArray &text, int line, int foldNow, int foldPrev);
-	void macroRecord(int message, uptr_t wParam, sptr_t lParam);
-	void marginClicked(int position, int modifiers, int margin);
+	void updateUi(Scintilla::Update updated);
+	void modified(Scintilla::ModificationFlags type, int position, int length, int linesAdded,
+		      const QByteArray &text, int line, Scintilla::FoldLevel foldNow, Scintilla::FoldLevel foldPrev);
+	void macroRecord(Scintilla::Message message, uptr_t wParam, sptr_t lParam);
+	void marginClicked(int position, Scintilla::KeyMod modifiers, int margin);
 	void textAreaClicked(int line, int modifiers);
 	void needShown(int position, int length);
 	void painted();
@@ -110,16 +110,16 @@ signals:
 	void dwellStart(int x, int y);
 	void dwellEnd(int x, int y);
 	void zoom(int zoom);
-	void hotSpotClick(int position, int modifiers);
-	void hotSpotDoubleClick(int position, int modifiers);
+	void hotSpotClick(int position, Scintilla::KeyMod modifiers);
+	void hotSpotDoubleClick(int position, Scintilla::KeyMod modifiers);
 	void callTipClick();
 	void autoCompleteSelection(int position, const QString &text);
 	void autoCompleteCancelled();
 	void focusChanged(bool focused);
 
 	// Base notifications for compatibility with other Scintilla implementations
-	void notify(SCNotification *pscn);
-	void command(uptr_t wParam, sptr_t lParam);
+	void notify(Scintilla::NotificationData *pscn);
+	void command(Scintilla::uptr_t wParam, Scintilla::sptr_t lParam);
 
 	// GUI event notifications needed under Qt
 	void buttonPressed(QMouseEvent *event);

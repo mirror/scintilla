@@ -65,8 +65,8 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 	sqt->vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(IndicatorStyle::CompositionThick, ColourRGBA(0, 0, 0xff));
 	sqt->vs.indicators[SC_INDICATOR_TARGET] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(0, 0, 0xff));
 
-	connect(sqt, SIGNAL(notifyParent(SCNotification)),
-	        this, SLOT(notifyParent(SCNotification)));
+	connect(sqt, SIGNAL(notifyParent(Scintilla::NotificationData)),
+		this, SLOT(notifyParent(Scintilla::NotificationData)));
 
 	// Connect scroll bars.
 	connect(verticalScrollBar(), SIGNAL(valueChanged(int)),
@@ -87,8 +87,8 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 	connect(sqt, SIGNAL(notifyChange()),
 	        this, SIGNAL(notifyChange()));
 
-	connect(sqt, SIGNAL(command(uptr_t, sptr_t)),
-	        this, SLOT(event_command(uptr_t, sptr_t)));
+	connect(sqt, SIGNAL(command(Scintilla::uptr_t, Scintilla::sptr_t)),
+		this, SLOT(event_command(Scintilla::uptr_t, Scintilla::sptr_t)));
 
 	connect(sqt, SIGNAL(aboutToCopy(QMimeData *)),
 	        this, SIGNAL(aboutToCopy(QMimeData *)));
@@ -701,46 +701,46 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 	}
 }
 
-void ScintillaEditBase::notifyParent(SCNotification scn)
+void ScintillaEditBase::notifyParent(NotificationData scn)
 {
 	emit notify(&scn);
 	switch (scn.nmhdr.code) {
-		case SCN_STYLENEEDED:
+		case Notification::StyleNeeded:
 			emit styleNeeded(scn.position);
 			break;
 
-		case SCN_CHARADDED:
+		case Notification::CharAdded:
 			emit charAdded(scn.ch);
 			break;
 
-		case SCN_SAVEPOINTREACHED:
+		case Notification::SavePointReached:
 			emit savePointChanged(false);
 			break;
 
-		case SCN_SAVEPOINTLEFT:
+		case Notification::SavePointLeft:
 			emit savePointChanged(true);
 			break;
 
-		case SCN_MODIFYATTEMPTRO:
+		case Notification::ModifyAttemptRO:
 			emit modifyAttemptReadOnly();
 			break;
 
-		case SCN_KEY:
+		case Notification::Key:
 			emit key(scn.ch);
 			break;
 
-		case SCN_DOUBLECLICK:
+		case Notification::DoubleClick:
 			emit doubleClick(scn.position, scn.line);
 			break;
 
-		case SCN_UPDATEUI:
+		case Notification::UpdateUI:
 			emit updateUi(scn.updated);
 			break;
 
-		case SCN_MODIFIED:
+		case Notification::Modified:
 		{
-			bool added = scn.modificationType & SC_MOD_INSERTTEXT;
-			bool deleted = scn.modificationType & SC_MOD_DELETETEXT;
+			const bool added = FlagSet(scn.modificationType, ModificationFlags::InsertText);
+			const bool deleted = FlagSet(scn.modificationType, ModificationFlags::DeleteText);
 
 			int length = send(SCI_GETTEXTLENGTH);
 			bool firstLineAdded = (added && length == 1) ||
@@ -759,67 +759,67 @@ void ScintillaEditBase::notifyParent(SCNotification scn)
 			break;
 		}
 
-		case SCN_MACRORECORD:
+		case Notification::MacroRecord:
 			emit macroRecord(scn.message, scn.wParam, scn.lParam);
 			break;
 
-		case SCN_MARGINCLICK:
+		case Notification::MarginClick:
 			emit marginClicked(scn.position, scn.modifiers, scn.margin);
 			break;
 
-		case SCN_NEEDSHOWN:
+		case Notification::NeedShown:
 			emit needShown(scn.position, scn.length);
 			break;
 
-		case SCN_PAINTED:
+		case Notification::Painted:
 			emit painted();
 			break;
 
-		case SCN_USERLISTSELECTION:
+		case Notification::UserListSelection:
 			emit userListSelection();
 			break;
 
-		case SCN_URIDROPPED:
+		case Notification::URIDropped:
 			emit uriDropped(QString::fromUtf8(scn.text));
 			break;
 
-		case SCN_DWELLSTART:
+		case Notification::DwellStart:
 			emit dwellStart(scn.x, scn.y);
 			break;
 
-		case SCN_DWELLEND:
+		case Notification::DwellEnd:
 			emit dwellEnd(scn.x, scn.y);
 			break;
 
-		case SCN_ZOOM:
+		case Notification::Zoom:
 			emit zoom(send(SCI_GETZOOM));
 			break;
 
-		case SCN_HOTSPOTCLICK:
+		case Notification::HotSpotClick:
 			emit hotSpotClick(scn.position, scn.modifiers);
 			break;
 
-		case SCN_HOTSPOTDOUBLECLICK:
+		case Notification::HotSpotDoubleClick:
 			emit hotSpotDoubleClick(scn.position, scn.modifiers);
 			break;
 
-		case SCN_CALLTIPCLICK:
+		case Notification::CallTipClick:
 			emit callTipClick();
 			break;
 
-		case SCN_AUTOCSELECTION:
+		case Notification::AutoCSelection:
 			emit autoCompleteSelection(scn.lParam, QString::fromUtf8(scn.text));
 			break;
 
-		case SCN_AUTOCCANCELLED:
+		case Notification::AutoCCancelled:
 			emit autoCompleteCancelled();
 			break;
 
-		case SCN_FOCUSIN:
+		case Notification::FocusIn:
 			emit focusChanged(true);
 			break;
 
-		case SCN_FOCUSOUT:
+		case Notification::FocusOut:
 			emit focusChanged(false);
 			break;
 
