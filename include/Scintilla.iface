@@ -2929,7 +2929,7 @@ get LineEndType GetLineEndTypesActive=2658(,)
 # Set the way a character is drawn.
 set void SetRepresentation=2665(string encodedCharacter, string representation)
 
-# Set the way a character is drawn.
+# Get the way a character is drawn.
 # Result is NUL-terminated.
 get int GetRepresentation=2666(string encodedCharacter, stringresult representation)
 
