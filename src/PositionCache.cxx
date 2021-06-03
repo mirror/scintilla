@@ -534,10 +534,10 @@ std::shared_ptr<LineLayout> LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci:
 }
 
 // Simply pack the (maximum 4) character bytes into an int
-static unsigned int KeyFromString(const char *charBytes, size_t len) noexcept {
-	PLATFORM_ASSERT(len <= 4);
+static unsigned int KeyFromString(std::string_view charBytes) noexcept {
+	PLATFORM_ASSERT(charBytes.length() <= 4);
 	unsigned int k=0;
-	for (size_t i=0; i<len && charBytes[i]; i++) {
+	for (size_t i=0; i < charBytes.length(); i++) {
 		k = k * 0x100;
 		const unsigned char uc = charBytes[i];
 		k += uc;
@@ -545,49 +545,74 @@ static unsigned int KeyFromString(const char *charBytes, size_t len) noexcept {
 	return k;
 }
 
-SpecialRepresentations::SpecialRepresentations() {
-	constexpr short none = 0;
-	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
-}
-
-void SpecialRepresentations::SetRepresentation(const char *charBytes, const char *value) {
-	const unsigned int key = KeyFromString(charBytes, UTF8MaxBytes);
-	MapRepresentation::iterator it = mapReprs.find(key);
-	if (it == mapReprs.end()) {
-		// New entry so increment for first byte
-		const unsigned char ucStart = charBytes[0];
-		startByteHasReprs[ucStart]++;
-	}
-	mapReprs[key] = Representation(value);
-}
-
-void SpecialRepresentations::ClearRepresentation(const char *charBytes) {
-	MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes, UTF8MaxBytes));
-	if (it != mapReprs.end()) {
-		mapReprs.erase(it);
-		const unsigned char ucStart = charBytes[0];
-		startByteHasReprs[ucStart]--;
+void SpecialRepresentations::SetRepresentation(std::string_view charBytes, std::string_view value) {
+	if (charBytes.length() <= 4) {
+		const unsigned int key = KeyFromString(charBytes);
+		MapRepresentation::iterator it = mapReprs.find(key);
+		if (it == mapReprs.end()) {
+			// New entry so increment for first byte
+			const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
+			startByteHasReprs[ucStart]++;
+		}
+		mapReprs[key] = Representation(value);
 	}
 }
 
-const Representation *SpecialRepresentations::RepresentationFromCharacter(const char *charBytes, size_t len) const {
-	PLATFORM_ASSERT(len <= 4);
-	const unsigned char ucStart = charBytes[0];
-	if (!startByteHasReprs[ucStart])
-		return nullptr;
-	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes, len));
-	if (it != mapReprs.end()) {
-		return &(it->second);
+void SpecialRepresentations::SetRepresentationAppearance(std::string_view charBytes, RepresentationAppearance appearance) {
+	if (charBytes.length() <= 4) {
+		const unsigned int key = KeyFromString(charBytes);
+		MapRepresentation::iterator it = mapReprs.find(key);
+		if (it == mapReprs.end()) {
+			// Not present so fail
+			return;
+		}
+		mapReprs[key].appearance = appearance;
+	}
+}
+
+void SpecialRepresentations::SetRepresentationColour(std::string_view charBytes, ColourRGBA colour) {
+	if (charBytes.length() <= 4) {
+		const unsigned int key = KeyFromString(charBytes);
+		MapRepresentation::iterator it = mapReprs.find(key);
+		if (it == mapReprs.end()) {
+			// Not present so fail
+			return;
+		}
+		mapReprs[key].appearance = mapReprs[key].appearance | RepresentationAppearance::Colour;
+		mapReprs[key].colour = colour;
+	}
+}
+
+void SpecialRepresentations::ClearRepresentation(std::string_view charBytes) {
+	if (charBytes.length() <= 4) {
+		MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes));
+		if (it != mapReprs.end()) {
+			mapReprs.erase(it);
+			const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
+			startByteHasReprs[ucStart]--;
+		}
+	}
+}
+
+const Representation *SpecialRepresentations::RepresentationFromCharacter(std::string_view charBytes) const {
+	if (charBytes.length() <= 4) {
+		const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
+		if (!startByteHasReprs[ucStart])
+			return nullptr;
+		MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
+		if (it != mapReprs.end()) {
+			return &(it->second);
+		}
 	}
 	return nullptr;
 }
 
-bool SpecialRepresentations::Contains(const char *charBytes, size_t len) const {
-	PLATFORM_ASSERT(len <= 4);
-	const unsigned char ucStart = charBytes[0];
+bool SpecialRepresentations::Contains(std::string_view charBytes) const {
+	PLATFORM_ASSERT(charBytes.length() <= 4);
+	const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
 	if (!startByteHasReprs[ucStart])
 		return false;
-	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes, len));
+	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
 	return it != mapReprs.end();
 }
 
@@ -675,7 +700,10 @@ TextSegment BreakFinder::Next() {
 			else if (encodingFamily == EncodingFamily::dbcs)
 				charWidth = pdoc->DBCSDrawBytes(
 					std::string_view(&ll->chars[nextBreak], lineRange.end - nextBreak));
-			const Representation *repr = preprs->RepresentationFromCharacter(&ll->chars[nextBreak], charWidth);
+			// Special case \r\n line ends if there is a representation
+			if (preprs->Contains("\r\n") && ll->chars[nextBreak] == '\r' && ll->chars[nextBreak + 1] == '\n')
+				charWidth = 2;
+			const Representation *repr = preprs->RepresentationFromCharacter(std::string_view(&ll->chars[nextBreak], charWidth));
 			if (((nextBreak > 0) && (ll->styles[nextBreak] != ll->styles[nextBreak - 1])) ||
 					repr ||
 					(nextBreak == saeNext)) {

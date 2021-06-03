@@ -199,7 +199,10 @@ public:
 class Representation {
 public:
 	std::string stringRep;
-	explicit Representation(const char *value="") : stringRep(value) {
+	RepresentationAppearance appearance;
+	ColourRGBA colour;
+	explicit Representation(std::string_view value="", RepresentationAppearance appearance_= RepresentationAppearance::Blob) :
+		stringRep(value), appearance(appearance_) {
 	}
 };
 
@@ -207,13 +210,14 @@ typedef std::map<unsigned int, Representation> MapRepresentation;
 
 class SpecialRepresentations {
 	MapRepresentation mapReprs;
-	short startByteHasReprs[0x100];
+	short startByteHasReprs[0x100] {};
 public:
-	SpecialRepresentations();
-	void SetRepresentation(const char *charBytes, const char *value);
-	void ClearRepresentation(const char *charBytes);
-	const Representation *RepresentationFromCharacter(const char *charBytes, size_t len) const;
-	bool Contains(const char *charBytes, size_t len) const;
+	void SetRepresentation(std::string_view charBytes, std::string_view value);
+	void SetRepresentationAppearance(std::string_view charBytes, RepresentationAppearance appearance);
+	void SetRepresentationColour(std::string_view charBytes, ColourRGBA colour);
+	void ClearRepresentation(std::string_view charBytes);
+	const Representation *RepresentationFromCharacter(std::string_view charBytes) const;
+	bool Contains(std::string_view charBytes) const;
 	void Clear();
 };
 

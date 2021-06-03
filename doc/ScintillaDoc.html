@@ -3842,7 +3842,12 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SETREPRESENTATION">SCI_SETREPRESENTATION(const char *encodedCharacter, const char *representation)</a><br />
      <a class="message" href="#SCI_GETREPRESENTATION">SCI_GETREPRESENTATION(const char *encodedCharacter, char *representation) &rarr; int</a><br />
      <a class="message" href="#SCI_CLEARREPRESENTATION">SCI_CLEARREPRESENTATION(const char *encodedCharacter)</a><br />
-    <a class="message" href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</a><br />
+     <a class="message" href="#SCI_CLEARALLREPRESENTATIONS">SCI_CLEARALLREPRESENTATIONS</a><br />
+     <a class="message" href="#SCI_SETREPRESENTATIONAPPEARANCE">SCI_SETREPRESENTATIONAPPEARANCE(const char *encodedCharacter, int appearance)</a><br />
+     <a class="message" href="#SCI_GETREPRESENTATIONAPPEARANCE">SCI_GETREPRESENTATIONAPPEARANCE(const char *encodedCharacter) &rarr; int</a><br />
+     <a class="message" href="#SCI_SETREPRESENTATIONCOLOUR">SCI_SETREPRESENTATIONCOLOUR(const char *encodedCharacter, colouralpha colour)</a><br />
+     <a class="message" href="#SCI_GETREPRESENTATIONCOLOUR">SCI_GETREPRESENTATIONCOLOUR(const char *encodedCharacter) &rarr; colouralpha</a><br />
+     <a class="message" href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</a><br />
      <a class="message" href="#SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL &rarr; int</a><br />
     </code>
 
@@ -3859,8 +3864,55 @@ struct Sci_TextToFind {
     <p>The encodedCharacter parameter is a NUL-terminated string of the bytes for one character in the
     current encoding. This can not be used to set a representation for multiple-character strings. </p>
 
+    <p>One exception to the single character restriction is that the two character sequence "\r\n" (Carriage Return + Line Feed)
+    can have a representation that is visible in line end viewing (<a class="seealso" href="#SCI_SETVIEWEOL">SCI_SETVIEWEOL</a>) mode.
+    If there is no representation for "\r\n" then the individual '\r' and '\n' representations will be seen.</p>
+
     <p>The NUL (0) character is a special case since the encodedCharacter parameter is NUL terminated, the NUL
     character is specified as an empty string.</p>
+
+    <p><b id="SCI_CLEARALLREPRESENTATIONS">SCI_CLEARALLREPRESENTATIONS</b><br />
+    Reset representations to defaults with <code>SCI_CLEARALLREPRESENTATIONS</code>.</p>
+
+    <p><b id="SCI_SETREPRESENTATIONAPPEARANCE">SCI_SETREPRESENTATIONAPPEARANCE(const char *encodedCharacter, int appearance)</b><br />
+     <b id="SCI_GETREPRESENTATIONAPPEARANCE">SCI_GETREPRESENTATIONAPPEARANCE(const char *encodedCharacter) &rarr; int</b><br />
+    The appearance may be changed using these flags. If a colour is set and the appearance is set without
+    <code>SC_REPRESENTATION_COLOUR</code> then the representation will show in the colour of the underlying text.</p>
+
+    <table class="standard" summary="Layer">
+      <tbody valign="top">
+        <tr>
+          <th align="left"><code>SC_REPRESENTATION_PLAIN</code></th>
+
+          <td>0</td>
+
+          <td>Draw the representation text with no decorations.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>SC_REPRESENTATION_BLOB</code></th>
+
+          <td>1</td>
+
+          <td>Draw the representation text inverted in a rounded rectangle. This is the default appearance.</td>
+        </tr>
+
+        <tr class="section">
+          <th align="left"><code>SC_REPRESENTATION_COLOUR</code></th>
+
+          <td>0x10</td>
+
+          <td>Draw the representation in the colour set with <a class="seealso" href="#SCI_SETREPRESENTATIONCOLOUR">SCI_SETREPRESENTATIONCOLOUR</a>
+	  instead of in the colour of the style of the text being represented.</td>
+        </tr>
+
+      </tbody>
+    </table>
+
+
+    <p><b id="SCI_SETREPRESENTATIONCOLOUR">SCI_SETREPRESENTATIONCOLOUR(const char *encodedCharacter, colouralpha colour)</b><br />
+     <b id="SCI_GETREPRESENTATIONCOLOUR">SCI_GETREPRESENTATIONCOLOUR(const char *encodedCharacter) &rarr; colouralpha</b><br />
+    The colour and translucency of a representation may be set.</p>
 
     <p><b id="SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</b><br />
      <b id="SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL &rarr; int</b><br />

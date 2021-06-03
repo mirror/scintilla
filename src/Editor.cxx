@@ -222,7 +222,7 @@ void Editor::SetRepresentations() {
 	};
 	for (size_t j=0; j < std::size(reps); j++) {
 		const char c[2] = { static_cast<char>(j), 0 };
-		reprs.SetRepresentation(c, reps[j]);
+		reprs.SetRepresentation(std::string_view(c, 1), reps[j]);
 	}
 	reprs.SetRepresentation("\x7f", "DEL");
 
@@ -8106,7 +8106,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case Message::GetRepresentation: {
 			const Representation *repr = reprs.RepresentationFromCharacter(
-				ConstCharPtrFromUPtr(wParam), UTF8MaxBytes);
+				ConstCharPtrFromUPtr(wParam));
 			if (repr) {
 				return StringResult(lParam, repr->stringRep.c_str());
 			}
@@ -8116,6 +8116,35 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::ClearRepresentation:
 		reprs.ClearRepresentation(ConstCharPtrFromUPtr(wParam));
 		break;
+
+	case Message::ClearAllRepresentations:
+		SetRepresentations();
+		break;
+
+	case Message::SetRepresentationAppearance:
+		reprs.SetRepresentationAppearance(ConstCharPtrFromUPtr(wParam), static_cast<RepresentationAppearance>(lParam));
+		break;
+
+	case Message::GetRepresentationAppearance: {
+			const Representation *repr = reprs.RepresentationFromCharacter(
+				ConstCharPtrFromUPtr(wParam));
+			if (repr) {
+				return static_cast<sptr_t>(repr->appearance);
+			}
+			return 0;
+		}
+	case Message::SetRepresentationColour:
+		reprs.SetRepresentationColour(ConstCharPtrFromUPtr(wParam), ColourRGBA(static_cast<int>(lParam)));
+		break;
+
+	case Message::GetRepresentationColour: {
+			const Representation *repr = reprs.RepresentationFromCharacter(
+				ConstCharPtrFromUPtr(wParam));
+			if (repr) {
+				return repr->colour.AsInteger();
+			}
+			return 0;
+		}
 
 	case Message::StartRecord:
 		recordingMacro = true;
