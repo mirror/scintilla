@@ -7363,7 +7363,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->GetLevel(static_cast<Sci::Line>(wParam));
 
 	case Message::GetLastChild:
-		return pdoc->GetLastChild(static_cast<Sci::Line>(wParam), static_cast<FoldLevel>(lParam));
+		return pdoc->GetLastChild(static_cast<Sci::Line>(wParam), OptionalFoldLevel(lParam));
 
 	case Message::GetFoldParent:
 		return pdoc->GetFoldParent(static_cast<Sci::Line>(wParam));
@@ -7436,7 +7436,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case Message::FoldChildren:
-		FoldExpand(static_cast<Sci::Line>(wParam), static_cast<FoldAction>(lParam), pdoc->GetFoldLevel(static_cast<int>(wParam)));
+		FoldExpand(static_cast<Sci::Line>(wParam), static_cast<FoldAction>(lParam), pdoc->GetFoldLevel(static_cast<Sci::Line>(wParam)));
 		break;
 
 	case Message::FoldAll:
