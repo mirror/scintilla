@@ -846,7 +846,7 @@ sptr_t ScintillaBase::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	switch (iMessage) {
 	case Message::AutoCShow:
 		listType = 0;
-		AutoCompleteStart(static_cast<Sci::Position>(wParam), ConstCharPtrFromSPtr(lParam));
+		AutoCompleteStart(PositionFromUPtr(wParam), ConstCharPtrFromSPtr(lParam));
 		break;
 
 	case Message::AutoCCancel:
@@ -1007,19 +1007,19 @@ sptr_t ScintillaBase::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case Message::CallTipSetBack:
-		ct.colourBG = ColourRGBA::FromRGB(static_cast<int>(wParam));
+		ct.colourBG = ColourRGBA::FromIpRGB(SPtrFromUPtr(wParam));
 		vs.styles[StyleCallTip].back = ct.colourBG;
 		InvalidateStyleRedraw();
 		break;
 
 	case Message::CallTipSetFore:
-		ct.colourUnSel = ColourRGBA::FromRGB(static_cast<int>(wParam));
+		ct.colourUnSel = ColourRGBA::FromIpRGB(SPtrFromUPtr(wParam));
 		vs.styles[StyleCallTip].fore = ct.colourUnSel;
 		InvalidateStyleRedraw();
 		break;
 
 	case Message::CallTipSetForeHlt:
-		ct.colourSel = ColourRGBA::FromRGB(static_cast<int>(wParam));
+		ct.colourSel = ColourRGBA::FromIpRGB(SPtrFromUPtr(wParam));
 		InvalidateStyleRedraw();
 		break;
 
@@ -1046,10 +1046,10 @@ sptr_t ScintillaBase::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case Message::Colourise:
 		if (DocumentLexState()->UseContainerLexing()) {
-			pdoc->ModifiedAt(static_cast<Sci::Position>(wParam));
+			pdoc->ModifiedAt(PositionFromUPtr(wParam));
 			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : lParam);
 		} else {
-			DocumentLexState()->Colourise(static_cast<Sci::Position>(wParam), lParam);
+			DocumentLexState()->Colourise(PositionFromUPtr(wParam), lParam);
 		}
 		Redraw();
 		break;

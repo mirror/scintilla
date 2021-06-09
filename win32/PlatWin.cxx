@@ -3815,11 +3815,11 @@ void Menu::Show(Point pt, const Window &w) {
 }
 
 ColourRGBA Platform::Chrome() {
-	return ColourRGBA::FromRGB(::GetSysColor(COLOR_3DFACE));
+	return ColourRGBA::FromRGB(static_cast<int>(::GetSysColor(COLOR_3DFACE)));
 }
 
 ColourRGBA Platform::ChromeHighlight() {
-	return ColourRGBA::FromRGB(::GetSysColor(COLOR_3DHIGHLIGHT));
+	return ColourRGBA::FromRGB(static_cast<int>(::GetSysColor(COLOR_3DHIGHLIGHT)));
 }
 
 const char *Platform::DefaultFont() {

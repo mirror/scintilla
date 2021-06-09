@@ -1688,7 +1688,7 @@ sptr_t ScintillaWin::EditMessage(unsigned int iMessage, uptr_t wParam, sptr_t lP
 	switch (iMessage) {
 
 	case EM_LINEFROMCHAR:
-		if (static_cast<Sci::Position>(wParam) < 0) {
+		if (PositionFromUPtr(wParam) < 0) {
 			wParam = SelectionStart().Position();
 		}
 		return pdoc->LineFromPosition(wParam);
@@ -2175,7 +2175,7 @@ void ScintillaWin::UpdateBaseElements() {
 	};
 	bool changed = false;
 	for (const ElementToIndex &ei : eti) {
-		changed = vs.SetElementBase(ei.element, ColourRGBA::FromRGB(::GetSysColor(ei.nIndex))) || changed;
+		changed = vs.SetElementBase(ei.element, ColourRGBA::FromRGB(static_cast<int>(::GetSysColor(ei.nIndex)))) || changed;
 	}
 	if (changed) {
 		Redraw();
