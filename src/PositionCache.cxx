@@ -855,7 +855,7 @@ void PositionCache::SetSize(size_t size_) {
 }
 
 void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-	const char *s, unsigned int len, XYPOSITION *positions, const Document *pdoc) {
+	const char *s, unsigned int len, XYPOSITION *positions) {
 
 	allClear = false;
 	size_t probe = pces.size();	// Out of bounds
@@ -879,22 +879,7 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 		}
 	}
 	const Font *fontStyle = vstyle.styles[styleNumber].font.get();
-	if (len > BreakFinder::lengthStartSubdivision) {
-		// Break up into segments
-		unsigned int startSegment = 0;
-		XYPOSITION xStartSegment = 0;
-		while (startSegment < len) {
-			const unsigned int lenSegment = pdoc->SafeSegment(s + startSegment, len - startSegment, BreakFinder::lengthEachSubdivision);
-			surface->MeasureWidths(fontStyle, std::string_view(s + startSegment, lenSegment), positions + startSegment);
-			for (unsigned int inSeg = 0; inSeg < lenSegment; inSeg++) {
-				positions[startSegment + inSeg] += xStartSegment;
-			}
-			xStartSegment = positions[startSegment + lenSegment - 1];
-			startSegment += lenSegment;
-		}
-	} else {
-		surface->MeasureWidths(fontStyle, std::string_view(s, len), positions);
-	}
+	surface->MeasureWidths(fontStyle, std::string_view(s, len), positions);
 	if (probe < pces.size()) {
 		// Store into cache
 		clock++;

@@ -281,7 +281,7 @@ public:
 	void SetSize(size_t size_);
 	size_t GetSize() const noexcept { return pces.size(); }
 	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-		const char *s, unsigned int len, XYPOSITION *positions, const Document *pdoc);
+		const char *s, unsigned int len, XYPOSITION *positions);
 };
 
 }

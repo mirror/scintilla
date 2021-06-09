@@ -489,7 +489,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 						ll->positions[ts.start + 1] = vstyle.styles[ll->styles[ts.start]].spaceWidth;
 					} else {
 						posCache.MeasureWidths(surface, vstyle, ll->styles[ts.start], &ll->chars[ts.start],
-							ts.length, &ll->positions[ts.start + 1], model.pdoc);
+							ts.length, &ll->positions[ts.start + 1]);
 					}
 				}
 				lastSegItalics = (!ts.representation) && ((ll->chars[ts.end() - 1] != ' ') && vstyle.styles[ll->styles[ts.start]].italic);
