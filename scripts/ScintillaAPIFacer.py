@@ -4,8 +4,11 @@
 # Implemented 2019 by Neil Hodgson neilh@scintilla.org
 # Requires Python 3.6 or later
 
+import pathlib
+
 import Face
 import FileGenerator
+import HFacer
 
 def HMessages(f):
 	out = ["enum class Message {"]
@@ -98,10 +101,12 @@ def HConstants(f):
 	return out
 
 def RegenerateAll(root):
+	HFacer.RegenerateAll(root, False)
 	f = Face.Face()
-	f.ReadFromFile(root + "include/Scintilla.iface")
-	FileGenerator.Regenerate(root + "include/ScintillaMessages.h", "//", HMessages(f))
-	FileGenerator.Regenerate(root + "include/ScintillaTypes.h", "//", HEnumerations(f), HConstants(f))
+	include = root / "include"
+	f.ReadFromFile(include / "Scintilla.iface")
+	FileGenerator.Regenerate(include / "ScintillaMessages.h", "//", HMessages(f))
+	FileGenerator.Regenerate(include / "ScintillaTypes.h", "//", HEnumerations(f), HConstants(f))
 
 if __name__ == "__main__":
-	RegenerateAll("../")
+	RegenerateAll(pathlib.Path(__file__).resolve().parent.parent)
