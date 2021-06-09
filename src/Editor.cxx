@@ -5940,6 +5940,15 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		EnsureCaretVisible();
 		break;
 
+	case Message::PasteRectangular: {
+		UndoGroup ug(pdoc);
+		if (!sel.Empty()) {
+			ClearSelection(); // want to replace rectangular selection contents
+		}
+		InsertPasteShape(CharPtrFromSPtr(lParam), static_cast<Sci::Position>(wParam), PasteShape::rectangular);
+		break;
+	}
+
 	case Message::Clear:
 		Clear();
 		SetLastXChosen();

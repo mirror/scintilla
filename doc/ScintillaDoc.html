@@ -1107,6 +1107,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_COPYALLOWLINE">SCI_COPYALLOWLINE</a><br />
      <a class="message" href="#SCI_SETPASTECONVERTENDINGS">SCI_SETPASTECONVERTENDINGS(bool convert)</a><br />
      <a class="message" href="#SCI_GETPASTECONVERTENDINGS">SCI_GETPASTECONVERTENDINGS &rarr; bool</a><br />
+     <a class="message" href="#SCI_PASTERECTANGULAR">SCI_PASTERECTANGULAR(position length, const char *text)</a><br />
     </code>
 
     <p><b id="SCI_CUT">SCI_CUT</b><br />
@@ -1146,6 +1147,9 @@ struct Sci_TextToFind {
      end of line mode as set with
      <a class="seealso" href="#SCI_SETEOLMODE">SCI_SETEOLMODE</a>.
      Defaults to true.</p>
+
+    <p><b id="SCI_PASTERECTANGULAR">SCI_PASTERECTANGULAR(position length, const char *text)</b><br/>
+      Pastes the given text into the existing rectangular or empty selection, overwriting any selected text.</p>
 
     <h2 id="ErrorHandling">Error handling</h2>
 
