@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 28 May 2021 NH</p>
+    <p>Last edited 10 June 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -1107,7 +1107,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_COPYALLOWLINE">SCI_COPYALLOWLINE</a><br />
      <a class="message" href="#SCI_SETPASTECONVERTENDINGS">SCI_SETPASTECONVERTENDINGS(bool convert)</a><br />
      <a class="message" href="#SCI_GETPASTECONVERTENDINGS">SCI_GETPASTECONVERTENDINGS &rarr; bool</a><br />
-     <a class="message" href="#SCI_PASTERECTANGULAR">SCI_PASTERECTANGULAR(position length, const char *text)</a><br />
+     <a class="message" href="#SCI_REPLACERECTANGULAR">SCI_REPLACERECTANGULAR(position length, const char *text)</a><br />
     </code>
 
     <p><b id="SCI_CUT">SCI_CUT</b><br />
@@ -1148,8 +1148,10 @@ struct Sci_TextToFind {
      <a class="seealso" href="#SCI_SETEOLMODE">SCI_SETEOLMODE</a>.
      Defaults to true.</p>
 
-    <p><b id="SCI_PASTERECTANGULAR">SCI_PASTERECTANGULAR(position length, const char *text)</b><br/>
-      Pastes the given text into the existing rectangular or empty selection, overwriting any selected text.</p>
+    <p><b id="SCI_REPLACERECTANGULAR">SCI_REPLACERECTANGULAR(position length, const char *text)</b><br/>
+      Replaces the selected text or empty selection with the given text.
+      The insertion is performed similarly to rectangular pastes: new lines in the given text are interpreted as
+      moving to the next line without inserting new lines unless at the end of the document.</p>
 
     <h2 id="ErrorHandling">Error handling</h2>
 

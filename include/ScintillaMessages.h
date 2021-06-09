@@ -581,7 +581,7 @@ enum class Message {
 	ToggleCaretSticky = 2459,
 	SetPasteConvertEndings = 2467,
 	GetPasteConvertEndings = 2468,
-	PasteRectangular = 2771,
+	ReplaceRectangular = 2771,
 	SelectionDuplicate = 2469,
 	SetCaretLineBackAlpha = 2470,
 	GetCaretLineBackAlpha = 2471,

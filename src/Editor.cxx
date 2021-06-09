@@ -5940,7 +5940,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		EnsureCaretVisible();
 		break;
 
-	case Message::PasteRectangular: {
+	case Message::ReplaceRectangular: {
 		UndoGroup ug(pdoc);
 		if (!sel.Empty()) {
 			ClearSelection(); // want to replace rectangular selection contents

@@ -535,10 +535,10 @@ class TestSimple(unittest.TestCase):
 		self.ed.Clear()
 		self.assertEquals(self.ed.Contents(), b"1c")
 
-	def testPasteRectangular(self):
+	def testReplaceRectangular(self):
 		self.ed.AddText(5, b"a\nb\nc")
 		self.ed.SetSel(0,0)
-		self.ed.PasteRectangular(3, b"1\n2")
+		self.ed.ReplaceRectangular(3, b"1\n2")
 		self.assertEquals(self.ed.Contents(), b"1a\n2b\nc")
 
 	def testCopyAllowLine(self):
