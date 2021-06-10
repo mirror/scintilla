@@ -546,7 +546,7 @@ static unsigned int KeyFromString(std::string_view charBytes) noexcept {
 }
 
 void SpecialRepresentations::SetRepresentation(std::string_view charBytes, std::string_view value) {
-	if (charBytes.length() <= 4) {
+	if ((charBytes.length() <= 4) && (value.length() <= Representation::maxLength)) {
 		const unsigned int key = KeyFromString(charBytes);
 		MapRepresentation::iterator it = mapReprs.find(key);
 		if (it == mapReprs.end()) {
@@ -754,12 +754,12 @@ bool BreakFinder::More() const noexcept {
 }
 
 PositionCacheEntry::PositionCacheEntry() noexcept :
-	styleNumber(0), len(0), clock(0), positions(nullptr) {
+	styleNumber(0), len(0), clock(0) {
 }
 
 // Copy constructor not currently used, but needed for being element in std::vector.
 PositionCacheEntry::PositionCacheEntry(const PositionCacheEntry &other) :
-	styleNumber(other.styleNumber), len(other.styleNumber), clock(other.styleNumber), positions(nullptr) {
+	styleNumber(other.styleNumber), len(other.len), clock(other.clock) {
 	if (other.positions) {
 		const size_t lenData = len + (len / sizeof(XYPOSITION)) + 1;
 		positions = std::make_unique<XYPOSITION[]>(lenData);
@@ -767,18 +767,18 @@ PositionCacheEntry::PositionCacheEntry(const PositionCacheEntry &other) :
 	}
 }
 
-void PositionCacheEntry::Set(unsigned int styleNumber_, const char *s_,
-	unsigned int len_, const XYPOSITION *positions_, unsigned int clock_) {
+void PositionCacheEntry::Set(unsigned int styleNumber_, std::string_view sv,
+	const XYPOSITION *positions_, unsigned int clock_) {
 	Clear();
 	styleNumber = styleNumber_;
-	len = len_;
+	len = static_cast<unsigned int>(sv.length());
 	clock = clock_;
-	if (s_ && positions_) {
+	if (sv.data() && positions_) {
 		positions = std::make_unique<XYPOSITION[]>(len + (len / sizeof(XYPOSITION)) + 1);
 		for (unsigned int i=0; i<len; i++) {
 			positions[i] = positions_[i];
 		}
-		memcpy(&positions[len], s_, len);
+		memcpy(&positions[len], sv.data(), sv.length());
 	}
 }
 
@@ -793,10 +793,9 @@ void PositionCacheEntry::Clear() noexcept {
 	clock = 0;
 }
 
-bool PositionCacheEntry::Retrieve(unsigned int styleNumber_, const char *s_,
-	unsigned int len_, XYPOSITION *positions_) const noexcept {
-	if ((styleNumber == styleNumber_) && (len == len_) &&
-		(memcmp(&positions[len], s_, len)== 0)) {
+bool PositionCacheEntry::Retrieve(unsigned int styleNumber_, std::string_view sv, XYPOSITION *positions_) const noexcept {
+	if ((styleNumber == styleNumber_) && (len == sv.length()) &&
+		(memcmp(&positions[len], sv.data(), sv.length())== 0)) {
 		for (unsigned int i=0; i<len; i++) {
 			positions_[i] = positions[i];
 		}
@@ -806,17 +805,10 @@ bool PositionCacheEntry::Retrieve(unsigned int styleNumber_, const char *s_,
 	}
 }
 
-unsigned int PositionCacheEntry::Hash(unsigned int styleNumber_, const char *s, unsigned int len_) noexcept {
-	unsigned int ret = s[0] << 7;
-	for (unsigned int i=0; i<len_; i++) {
-		ret *= 1000003;
-		ret ^= s[i];
-	}
-	ret *= 1000003;
-	ret ^= len_;
-	ret *= 1000003;
-	ret ^= styleNumber_;
-	return ret;
+size_t PositionCacheEntry::Hash(unsigned int styleNumber_, std::string_view sv) noexcept {
+	const size_t h1 = std::hash<std::string_view>{}(sv);
+	const size_t h2 = std::hash<unsigned int>{}(styleNumber_);
+	return h1 ^ (h2 << 1);
 }
 
 bool PositionCacheEntry::NewerThan(const PositionCacheEntry &other) const noexcept {
@@ -835,10 +827,6 @@ PositionCache::PositionCache() {
 	allClear = true;
 }
 
-PositionCache::~PositionCache() {
-	Clear();
-}
-
 void PositionCache::Clear() noexcept {
 	if (!allClear) {
 		for (PositionCacheEntry &pce : pces) {
@@ -854,23 +842,26 @@ void PositionCache::SetSize(size_t size_) {
 	pces.resize(size_);
 }
 
-void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-	const char *s, unsigned int len, XYPOSITION *positions) {
+size_t PositionCache::GetSize() const noexcept {
+	return pces.size();
+}
 
+void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
+	std::string_view sv, XYPOSITION *positions) {
 	allClear = false;
 	size_t probe = pces.size();	// Out of bounds
-	if ((!pces.empty()) && (len < 30)) {
+	if ((!pces.empty()) && (sv.length() < 30)) {
 		// Only store short strings in the cache so it doesn't churn with
 		// long comments with only a single comment.
 
 		// Two way associative: try two probe positions.
-		const unsigned int hashValue = PositionCacheEntry::Hash(styleNumber, s, len);
+		const size_t hashValue = PositionCacheEntry::Hash(styleNumber, sv);
 		probe = hashValue % pces.size();
-		if (pces[probe].Retrieve(styleNumber, s, len, positions)) {
+		if (pces[probe].Retrieve(styleNumber, sv, positions)) {
 			return;
 		}
-		const unsigned int probe2 = (hashValue * 37) % pces.size();
-		if (pces[probe2].Retrieve(styleNumber, s, len, positions)) {
+		const size_t probe2 = (hashValue * 37) % pces.size();
+		if (pces[probe2].Retrieve(styleNumber, sv, positions)) {
 			return;
 		}
 		// Not found. Choose the oldest of the two slots to replace
@@ -879,7 +870,7 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 		}
 	}
 	const Font *fontStyle = vstyle.styles[styleNumber].font.get();
-	surface->MeasureWidths(fontStyle, std::string_view(s, len), positions);
+	surface->MeasureWidths(fontStyle, sv, positions);
 	if (probe < pces.size()) {
 		// Store into cache
 		clock++;
@@ -891,6 +882,6 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 			}
 			clock = 2;
 		}
-		pces[probe].Set(styleNumber, s, len, positions, clock);
+		pces[probe].Set(styleNumber, sv, positions, clock);
 	}
 }

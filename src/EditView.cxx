@@ -473,7 +473,8 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 						representationWidth = NextTabstopPos(line, x, vstyle.tabWidth) - ll->positions[ts.start];
 					} else {
 						if (representationWidth <= 0.0) {
-							XYPOSITION positionsRepr[256];	// Should expand when needed
+							assert(ts.representation->stringRep.length() <= Representation::maxLength);
+							XYPOSITION positionsRepr[Representation::maxLength+1];
 							surface->MeasureWidthsUTF8(vstyle.styles[StyleControlChar].font.get(), ts.representation->stringRep, positionsRepr);
 							representationWidth = positionsRepr[ts.representation->stringRep.length() - 1];
 							if (FlagSet(ts.representation->appearance, RepresentationAppearance::Blob)) {
@@ -488,8 +489,8 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 						// Over half the segments are single characters and of these about half are space characters.
 						ll->positions[ts.start + 1] = vstyle.styles[ll->styles[ts.start]].spaceWidth;
 					} else {
-						posCache.MeasureWidths(surface, vstyle, ll->styles[ts.start], &ll->chars[ts.start],
-							ts.length, &ll->positions[ts.start + 1]);
+						posCache.MeasureWidths(surface, vstyle, ll->styles[ts.start],
+							std::string_view(&ll->chars[ts.start], ts.length), &ll->positions[ts.start + 1]);
 					}
 				}
 				lastSegItalics = (!ts.representation) && ((ll->chars[ts.end() - 1] != ' ') && vstyle.styles[ll->styles[ts.start]].italic);

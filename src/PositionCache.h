@@ -188,16 +188,17 @@ public:
 	void operator=(const PositionCacheEntry &) = delete;
 	void operator=(PositionCacheEntry &&) = delete;
 	~PositionCacheEntry();
-	void Set(unsigned int styleNumber_, const char *s_, unsigned int len_, const XYPOSITION *positions_, unsigned int clock_);
+	void Set(unsigned int styleNumber_, std::string_view sv, const XYPOSITION *positions_, unsigned int clock_);
 	void Clear() noexcept;
-	bool Retrieve(unsigned int styleNumber_, const char *s_, unsigned int len_, XYPOSITION *positions_) const noexcept;
-	static unsigned int Hash(unsigned int styleNumber_, const char *s, unsigned int len_) noexcept;
+	bool Retrieve(unsigned int styleNumber_, std::string_view sv, XYPOSITION *positions_) const noexcept;
+	static size_t Hash(unsigned int styleNumber_, std::string_view sv) noexcept;
 	bool NewerThan(const PositionCacheEntry &other) const noexcept;
 	void ResetClock() noexcept;
 };
 
 class Representation {
 public:
+	static constexpr size_t maxLength = 200;
 	std::string stringRep;
 	RepresentationAppearance appearance;
 	ColourRGBA colour;
@@ -271,17 +272,11 @@ class PositionCache {
 	bool allClear;
 public:
 	PositionCache();
-	// Deleted so PositionCache objects can not be copied.
-	PositionCache(const PositionCache &) = delete;
-	PositionCache(PositionCache &&) = delete;
-	void operator=(const PositionCache &) = delete;
-	void operator=(PositionCache &&) = delete;
-	~PositionCache();
 	void Clear() noexcept;
 	void SetSize(size_t size_);
-	size_t GetSize() const noexcept { return pces.size(); }
+	size_t GetSize() const noexcept;
 	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-		const char *s, unsigned int len, XYPOSITION *positions);
+		std::string_view sv, XYPOSITION *positions);
 };
 
 }

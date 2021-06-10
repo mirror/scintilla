@@ -3861,20 +3861,22 @@ struct Sci_TextToFind {
      <b id="SCI_GETREPRESENTATION">SCI_GETREPRESENTATION(const char *encodedCharacter, char *representation NUL-terminated) &rarr; int</b><br />
      <b id="SCI_CLEARREPRESENTATION">SCI_CLEARREPRESENTATION(const char *encodedCharacter)</b><br />
     Any character, including those normally displayed  as mnemonics may be represented by a
-    string inverted in a rounded rectangle.</p>
+    Unicode string inverted in a rounded rectangle.</p>
 
     <p>For example, the Ohm sign &#x2126; U+2126 looks very similar to the Greek Omega character &#x3a9; U+03C9 so,
     for the UTF-8 encoding, to distinguish the Ohm sign as "U+2126 &#x2126;" this call could be made:
     <code>SCI_SETREPRESENTATION("\xe2\x84\xa6", "U+2126 \xe2\x84\xa6")</code></p>
 
-    <p>The encodedCharacter parameter is a NUL-terminated string of the bytes for one character in the
+    <p>The <code class="parameter">encodedCharacter</code> parameter is a NUL-terminated string of the bytes for one character in the
     current encoding. This can not be used to set a representation for multiple-character strings. </p>
+
+    <p>The <code class="parameter">representation</code> parameter is a NUL-terminated UTF-8 string with a maximum length of 200 bytes.</p>
 
     <p>One exception to the single character restriction is that the two character sequence "\r\n" (Carriage Return + Line Feed)
     can have a representation that is visible in line end viewing (<a class="seealso" href="#SCI_SETVIEWEOL">SCI_SETVIEWEOL</a>) mode.
     If there is no representation for "\r\n" then the individual '\r' and '\n' representations will be seen.</p>
 
-    <p>The NUL (0) character is a special case since the encodedCharacter parameter is NUL terminated, the NUL
+    <p>The NUL (0) character is a special case since the <code class="parameter">encodedCharacter</code> parameter is NUL terminated, the NUL
     character is specified as an empty string.</p>
 
     <p><b id="SCI_CLEARALLREPRESENTATIONS">SCI_CLEARALLREPRESENTATIONS</b><br />
