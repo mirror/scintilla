@@ -366,6 +366,10 @@ constexpr bool IsControlCharacter(int ch) noexcept {
 	return (ch >= 0 && ch < ' ') || (ch == 127);
 }
 
+bool ViewIsASCII(std::string_view text) {
+	return std::all_of(text.cbegin(), text.cend(), IsASCII);
+}
+
 }
 
 /**
@@ -475,7 +479,14 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 						if (representationWidth <= 0.0) {
 							assert(ts.representation->stringRep.length() <= Representation::maxLength);
 							XYPOSITION positionsRepr[Representation::maxLength+1];
-							surface->MeasureWidthsUTF8(vstyle.styles[StyleControlChar].font.get(), ts.representation->stringRep, positionsRepr);
+							// ts.representation->stringRep is UTF-8 which only matches cache if document is UTF-8
+							// or it only contains ASCII which is a subset of all currently supported encodings.
+							if ((CpUtf8 == model.pdoc->dbcsCodePage) || ViewIsASCII(ts.representation->stringRep)) {
+								posCache.MeasureWidths(surface, vstyle, StyleControlChar, ts.representation->stringRep,
+									positionsRepr);
+							} else {
+								surface->MeasureWidthsUTF8(vstyle.styles[StyleControlChar].font.get(), ts.representation->stringRep, positionsRepr);
+							}
 							representationWidth = positionsRepr[ts.representation->stringRep.length() - 1];
 							if (FlagSet(ts.representation->appearance, RepresentationAppearance::Blob)) {
 								representationWidth += vstyle.ctrlCharPadding;
