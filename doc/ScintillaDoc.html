@@ -1878,7 +1878,7 @@ struct Sci_TextToFind {
      <b id="SCI_GETSELECTIONNENDVIRTUALSPACE">SCI_GETSELECTIONNENDVIRTUALSPACE(int selection) &rarr; position</b><br />
      Set or query the start and end position of each already existing selection.
      Query the virtual space at start and end of each selection.
-     Mostly of use to query each range for its text. The selection parameter is zero-based. </p>
+     Mostly of use to query each range for its text. The <code class="parameter">selection</code> parameter is zero-based. </p>
 
     <p>
      <b id="SCI_SETRECTANGULARSELECTIONCARET">SCI_SETRECTANGULARSELECTIONCARET(position caret)</b><br />
@@ -2268,7 +2268,7 @@ struct Sci_TextToFind {
     <p><b id="SCI_SETVISIBLEPOLICY">SCI_SETVISIBLEPOLICY(int visiblePolicy, int visibleSlop)</b><br />
      This determines how the vertical positioning is determined when <a class="message"
     href="#SCI_ENSUREVISIBLEENFORCEPOLICY"><code>SCI_ENSUREVISIBLEENFORCEPOLICY</code></a> is
-    called. It takes <code>VISIBLE_SLOP</code> and <code>VISIBLE_STRICT</code> flags for the policy
+    called. It takes <code>VISIBLE_SLOP</code> and <code>VISIBLE_STRICT</code> flags for the <code class="parameter">visiblePolicy</code>
     parameter. It is similar in operation to <a class="message"
     href="#SCI_SETYCARETPOLICY"><code>SCI_SETYCARETPOLICY(int caretPolicy, int
     caretSlop)</code></a>.</p>
@@ -2705,9 +2705,9 @@ struct Sci_TextToFind {
      <code>SCI_SETWORDCHARS(0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")</code>;</p>
 
     <p><b id="SCI_GETWORDCHARS">SCI_GETWORDCHARS(&lt;unused&gt;, char *characters) &rarr; int</b><br />
-     This fills the characters parameter with all the characters included in words.
-     The characters parameter must be large enough to hold all of the characters.
-     If the characters parameter is 0 then the length that should be allocated
+     This fills the <code class="parameter">characters</code> parameter with all the characters included in words.
+     The <code class="parameter">characters</code> parameter must be large enough to hold all of the characters.
+     If the <code class="parameter">characters</code> parameter is 0 then the length that should be allocated
      to store the entire set is returned.</p>
 
     <p>For multi-byte encodings, this API will not return meaningful values for 0x80 and above.</p>
@@ -2737,7 +2737,7 @@ struct Sci_TextToFind {
     <b id="SCI_GETCHARACTERCATEGORYOPTIMIZATION">SCI_GETCHARACTERCATEGORYOPTIMIZATION &rarr; int</b><br />
       Optimize speed of character category features like determining whether a character is a space or number at the expense of memory.
       Mostly used for Unicode documents.
-      The countCharacters parameter determines how many character starting from 0 are added to a look-up table with one byte used for each character.
+      The <code class="parameter">countCharacters</code> parameter determines how many character starting from 0 are added to a look-up table with one byte used for each character.
       It is reasonable to cover the set of characters likely to be used in a document so 0x100 for simple Roman text,
       0x1000 to cover most simple alphabets, 0x10000 to cover most of East Asian languages, and 0x110000 to cover all possible characters.
     </p>
@@ -8949,7 +8949,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
         <tr>
           <td align="left"><code>listType</code></td>
 
-          <td align="left">This is set to the <code>listType</code> parameter from the <a
+          <td align="left">This is set to the <code class="parameter">listType</code> parameter from the <a
           class="message" href="#SCI_USERLISTSHOW"><code>SCI_USERLISTSHOW</code></a> message that
           initiated the list.</td>
         </tr>
@@ -9206,7 +9206,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
         <tr>
           <td align="left"><code>listType</code></td>
 
-          <td align="left">This is set to the <code>listType</code> parameter from the <a
+          <td align="left">This is set to the <code class="parameter">listType</code> parameter from the <a
           class="message" href="#SCI_USERLISTSHOW"><code>SCI_USERLISTSHOW</code></a> message
 	  or 0 for an autocompletion.</td>
         </tr>
