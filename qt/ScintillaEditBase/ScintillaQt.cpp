@@ -748,6 +748,9 @@ sptr_t ScintillaQt::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam)
 		case Message::GetDirectFunction:
 			return reinterpret_cast<sptr_t>(DirectFunction);
 
+		case Message::GetDirectStatusFunction:
+			return reinterpret_cast<sptr_t>(DirectStatusFunction);
+
 		case Message::GetDirectPointer:
 			return reinterpret_cast<sptr_t>(this);
 
@@ -770,7 +773,17 @@ sptr_t ScintillaQt::DefWndProc(Message, uptr_t, sptr_t)
 sptr_t ScintillaQt::DirectFunction(
     sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
-	return reinterpret_cast<ScintillaQt *>(ptr)->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+	ScintillaQt *sci = reinterpret_cast<ScintillaQt *>(ptr);
+	return sci->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+}
+
+sptr_t ScintillaQt::DirectStatusFunction(
+    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam, int *pStatus)
+{
+	ScintillaQt *sci = reinterpret_cast<ScintillaQt *>(ptr);
+	const sptr_t returnValue = sci->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+	*pStatus = static_cast<int>(sci->errorStatus);
+	return returnValue;
 }
 
 // Additions to merge in Scientific Toolworks widget structure

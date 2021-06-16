@@ -286,6 +286,7 @@ enum class Message {
 	GetText = 2182,
 	GetTextLength = 2183,
 	GetDirectFunction = 2184,
+	GetDirectStatusFunction = 2772,
 	GetDirectPointer = 2185,
 	SetOvertype = 2186,
 	GetOvertype = 2187,

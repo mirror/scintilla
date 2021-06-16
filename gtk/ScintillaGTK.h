@@ -271,6 +271,8 @@ private:
 
 	static sptr_t DirectFunction(sptr_t ptr,
 				     unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+	static sptr_t DirectStatusFunction(sptr_t ptr,
+				     unsigned int iMessage, uptr_t wParam, sptr_t lParam, int *pStatus);
 };
 
 // helper class to watch a GObject lifetime and get notified when it dies

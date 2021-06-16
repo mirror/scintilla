@@ -811,7 +811,31 @@ void ScintillaCocoa::Redraw() {
  */
 sptr_t ScintillaCocoa::DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam,
 				      sptr_t lParam) {
-	return reinterpret_cast<ScintillaCocoa *>(ptr)->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+	ScintillaCocoa *sci = reinterpret_cast<ScintillaCocoa *>(ptr);
+	return sci->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * A function to directly execute code that would usually go the long way via window messages.
+ * Similar to DirectFunction but also returns the status.
+ * However this is a Windows metaphor and not used here, hence we just call our fake
+ * window proc. The given parameters directly reflect the message parameters used on Windows.
+ *
+ * @param ptr The target which is to be called.
+ * @param iMessage A code that indicates which message was sent.
+ * @param wParam One of the two free parameters for the message. Traditionally a word sized parameter
+ *               (hence the w prefix).
+ * @param lParam The other of the two free parameters. A signed long.
+ * @param pStatus Return the status to the caller. A pointer to an int.
+ */
+sptr_t ScintillaCocoa::DirectStatusFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam,
+				      sptr_t lParam, int *pStatus) {
+	ScintillaCocoa *sci = reinterpret_cast<ScintillaCocoa *>(ptr);
+	const sptr_t returnValue = sci->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+	*pStatus = static_cast<int>(sci->errorStatus);
+	return returnValue;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -855,6 +879,9 @@ sptr_t ScintillaCocoa::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		switch (iMessage) {
 		case Message::GetDirectFunction:
 			return reinterpret_cast<sptr_t>(DirectFunction);
+
+		case Message::GetDirectStatusFunction:
+			return reinterpret_cast<sptr_t>(DirectStatusFunction);
 
 		case Message::GetDirectPointer:
 			return reinterpret_cast<sptr_t>(this);

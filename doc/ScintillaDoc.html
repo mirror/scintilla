@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 10 June 2021 NH</p>
+    <p>Last edited 17 June 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -6654,7 +6654,9 @@ struct Sci_RangeToFormat {
      <code>SC_WRAP_CHAR</code> is not supported for printing.</p>
 
     <h2 id="DirectAccess">Direct access</h2>
-    <code><a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION &rarr; pointer</a><br />
+    <code>
+     <a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION &rarr; pointer</a><br />
+     <a class="message" href="#SCI_GETDIRECTSTATUSFUNCTION">SCI_GETDIRECTSTATUSFUNCTION &rarr; pointer</a><br />
      <a class="message" href="#SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER &rarr; pointer</a><br />
      <a class="message" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER &rarr; pointer</a><br />
      <a class="message" href="#SCI_GETRANGEPOINTER">SCI_GETRANGEPOINTER(position start, position lengthRange) &rarr; pointer</a><br />
@@ -6677,7 +6679,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 }
 </pre>
 
-    <p><code>SciFnDirect</code>, <code>sptr_t</code> and <code>uptr_t</code> are declared in
+    <p><code>SciFnDirect</code>, <code>SciFnDirectStatus</code>, <code>sptr_t</code> and <code>uptr_t</code> are declared in
     <code>Scintilla.h</code>. <code class="parameter">hSciWnd</code> is the window handle returned when you created
     the Scintilla window.</p>
 
@@ -6685,9 +6687,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     to the native thread of the Scintilla window in which case <code>SendMessage(hSciWnd, SCI_*,
     wParam, lParam)</code> should be used to synchronize with the window's thread.</p>
 
-    <p>This feature also works on GTK but has no significant impact on speed.</p>
+    <p>This feature also works on other platforms but has less impact on speed.</p>
 
-    <p>From version 1.47 on Windows, Scintilla exports a function called
+    <p>On Windows, Scintilla exports a function called
     <code>Scintilla_DirectFunction</code> that can be used the same as the function returned by
     <code>SCI_GETDIRECTFUNCTION</code>. This saves you the call to
     <code>SCI_GETDIRECTFUNCTION</code> and the need to call Scintilla indirectly via the function
@@ -6697,6 +6699,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      This message returns the address of the function to call to handle Scintilla messages without
     the overhead of passing through the Windows messaging system. You need only call this once,
     regardless of the number of Scintilla windows you create.</p>
+
+    <p><b id="SCI_GETDIRECTSTATUSFUNCTION">SCI_GETDIRECTSTATUSFUNCTION &rarr; pointer</b><br />
+     This is similar to <code>SCI_GETDIRECTFUNCTION</code> but the returned function
+     is of type <code>SciFnDirectStatus</code> which also returns the status to the caller through a
+     pointer to an int.
+     This saves performing an extra call to retrieve the status in many situations so can be faster.</p>
 
     <p><b id="SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER &rarr; pointer</b><br />
      This returns a pointer to data that identifies which Scintilla window is in use. You must call

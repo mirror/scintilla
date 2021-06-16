@@ -189,6 +189,7 @@ public:
 	std::string EncodedFromUTF8(std::string_view utf8) const override;
 
 	static sptr_t DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+	static sptr_t DirectStatusFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam, int *pStatus);
 
 	NSTimer *timers[static_cast<size_t>(TickReason::platform)+1];
 	void TimerFired(NSTimer *timer);

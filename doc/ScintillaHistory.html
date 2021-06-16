@@ -581,6 +581,12 @@
 	Released 2 June 2021.
 	</li>
 	<li>
+	Add SciFnDirectStatus, a direct access function which also returns status.
+	It can be retrieved with SCI_GETDIRECTSTATUSFUNCTION.
+	This can avoid calling SCI_GETSTATUS after every API to determine failure so can
+	improve performance.
+	</li>
+	<li>
 	Add APIs for setting appearance (traditional blob or plain text) and colour of representations
 	and support setting a representation for the "\r\n" line end sequence.
 	</li>

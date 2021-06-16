@@ -3100,7 +3100,16 @@ AtkObject *ScintillaGTK::GetAccessible(GtkWidget *widget) {
 
 sptr_t ScintillaGTK::DirectFunction(
 	sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
-	return reinterpret_cast<ScintillaGTK *>(ptr)->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+	ScintillaGTK *sci = reinterpret_cast<ScintillaGTK *>(ptr);
+	return sci->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+}
+
+sptr_t ScintillaGTK::DirectStatusFunction(
+	sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam, int *pStatus) {
+	ScintillaGTK *sci = reinterpret_cast<ScintillaGTK *>(ptr);
+	const sptr_t returnValue = sci->WndProc(static_cast<Message>(iMessage), wParam, lParam);
+	*pStatus = static_cast<int>(sci->errorStatus);
+	return returnValue;
 }
 
 /* legacy name for scintilla_object_send_message */

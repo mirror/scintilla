@@ -1296,6 +1296,9 @@ get position GetTextLength=2183(,)
 # Retrieve a pointer to a function that processes messages for this Scintilla.
 get pointer GetDirectFunction=2184(,)
 
+# Retrieve a pointer to a function that processes messages for this Scintilla and returns status.
+get pointer GetDirectStatusFunction=2772(,)
+
 # Retrieve a pointer value to use as the first argument when calling
 # the function returned by GetDirectFunction.
 get pointer GetDirectPointer=2185(,)
