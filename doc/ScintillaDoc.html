@@ -182,9 +182,12 @@
     Scintilla's facilities.</p>
 
     <p>There is a more type-safe binding of this API that can be used from C++.
-    It is implemented in the ScintillaTypes.h, ScintillaMessages.h, and ScintillaStructures.h headers.
-    SciTE contains (in src) a ScintillaCall module that can help further and will, in the future, be
-    moved into Scintilla.
+    It is implemented in the ScintillaTypes.h, ScintillaMessages.h, ScintillaStructures.h, and ScintillaCall.h headers
+    and call/ScintillaCall.cxx.
+    The ScintillaTypes.h, ScintillaMessages.h, and ScintillaStructures.h headers can be used without ScintillaCall
+    but ScintillaCall makes it easier to use the other headers by wrapping the messages in methods
+    which also avoids much type casting.
+    ScintillaCall throws Scintilla::Failure exceptions when a call fails.
     </p>
 
     <p>In the descriptions that follow, the messages are described as function calls with zero, one
