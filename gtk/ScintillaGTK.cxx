@@ -884,6 +884,9 @@ sptr_t ScintillaGTK::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		case Message::GetDirectFunction:
 			return reinterpret_cast<sptr_t>(DirectFunction);
 
+		case Message::GetDirectStatusFunction:
+			return reinterpret_cast<sptr_t>(DirectStatusFunction);
+
 		case Message::GetDirectPointer:
 			return reinterpret_cast<sptr_t>(this);
 
