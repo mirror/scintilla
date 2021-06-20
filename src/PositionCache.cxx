@@ -566,7 +566,7 @@ void SpecialRepresentations::SetRepresentationAppearance(std::string_view charBy
 			// Not present so fail
 			return;
 		}
-		mapReprs[key].appearance = appearance;
+		it->second.appearance = appearance;
 	}
 }
 
@@ -578,8 +578,8 @@ void SpecialRepresentations::SetRepresentationColour(std::string_view charBytes,
 			// Not present so fail
 			return;
 		}
-		mapReprs[key].appearance = mapReprs[key].appearance | RepresentationAppearance::Colour;
-		mapReprs[key].colour = colour;
+		it->second.appearance = it->second.appearance | RepresentationAppearance::Colour;
+		it->second.colour = colour;
 	}
 }
 
