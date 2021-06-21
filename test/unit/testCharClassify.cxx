@@ -26,7 +26,7 @@ class CharClassifyTest {
 	CharClassifyTest(const CharClassifyTest &) = delete;
 protected:
 	CharClassifyTest() {
-		pcc.reset(new CharClassify());
+		pcc = std::make_unique<CharClassify>();
 		for (int ch = 0; ch < 256; ch++) {
 			if (ch == '\r' || ch == '\n')
 				charClass[ch] = CharacterClass::newLine;
@@ -37,9 +37,6 @@ protected:
 			else
 				charClass[ch] = CharacterClass::punctuation;
 		}
-	}
-
-	~CharClassifyTest() {
 	}
 
 	std::unique_ptr<CharClassify> pcc;
@@ -100,26 +97,27 @@ TEST_CASE_METHOD(CharClassifyTest, "CharsOfClass") {
 		CharacterClass thisClass = CharacterClass(classVal % 4);
 		int size = pcc->GetCharsOfClass(thisClass, NULL);
 		std::vector<unsigned char> buffer(size+1);
-		pcc->GetCharsOfClass(thisClass, &buffer[0]);
+		void *pBuffer = static_cast<void *>(buffer.data());
+		pcc->GetCharsOfClass(thisClass, buffer.data());
 		for (int i = 1; i < 256; i++) {
 			if (charClass[i] == thisClass) {
-				if (!memchr(reinterpret_cast<char*>(&buffer[0]), i, size))
+				if (!memchr(pBuffer, i, size))
 					std::cerr
 					<< "Character " << i
 					<< " should be class " << GetClassName(thisClass)
 					<< ", but was not in GetCharsOfClass;"
 					<< " it is reported to be "
 					<< GetClassName(pcc->GetClass(i)) << std::endl;
-				REQUIRE(memchr(reinterpret_cast<char*>(&buffer[0]), i, size));
+				REQUIRE(memchr(pBuffer, i, size));
 			} else {
-				if (memchr(reinterpret_cast<char*>(&buffer[0]), i, size))
+				if (memchr(pBuffer, i, size))
 					std::cerr
 					<< "Character " << i
 					<< " should not be class " << GetClassName(thisClass)
 					<< ", but was in GetCharsOfClass"
 					<< " it is reported to be "
 					<< GetClassName(pcc->GetClass(i)) << std::endl;
-				REQUIRE_FALSE(memchr(reinterpret_cast<char*>(&buffer[0]), i, size));
+				REQUIRE_FALSE(memchr(pBuffer, i, size));
 			}
 		}
 	}

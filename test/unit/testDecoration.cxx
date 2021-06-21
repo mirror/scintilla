@@ -22,7 +22,7 @@
 
 #include "catch.hpp"
 
-const int indicator=4;
+constexpr int indicator=4;
 
 using namespace Scintilla::Internal;
 
@@ -66,7 +66,7 @@ TEST_CASE("DecorationList") {
 	}
 
 	SECTION("HasCorrectCurrentValue") {
-		const int value = 55;
+		constexpr int value = 55;
 		decol->SetCurrentValue(value);
 		REQUIRE(value == decol->GetCurrentValue());
 	}
@@ -74,9 +74,9 @@ TEST_CASE("DecorationList") {
 	SECTION("ExpandSetValues") {
 		decol->SetCurrentIndicator(indicator);
 		decol->InsertSpace(0, 9);
-		const int value = 59;
-		const Sci::Position position = 4;
-		const Sci::Position fillLength = 3;
+		constexpr int value = 59;
+		constexpr Sci::Position position = 4;
+		constexpr Sci::Position fillLength = 3;
 		auto fr = decol->FillRange(position, value, fillLength);
 		REQUIRE(fr.changed);
 		REQUIRE(fr.position == 4);
@@ -85,7 +85,7 @@ TEST_CASE("DecorationList") {
 		REQUIRE(decol->AllOnFor(5) == (1 << indicator));
 		REQUIRE(decol->Start(indicator, 5) == 4);
 		REQUIRE(decol->End(indicator, 5) == 7);
-		const int indicatorB=6;
+		constexpr int indicatorB=6;
 		decol->SetCurrentIndicator(indicatorB);
 		fr = decol->FillRange(position, value, fillLength);
 		REQUIRE(fr.changed);

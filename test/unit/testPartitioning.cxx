@@ -22,9 +22,9 @@
 
 using namespace Scintilla::Internal;
 
-const int growSize = 4;
+constexpr int growSize = 4;
 
-const int lengthTestArray = 8;
+constexpr int lengthTestArray = 8;
 static const int testArray[lengthTestArray] = {3, 4, 5, 6, 7, 8, 9, 10};
 
 // Test SplitVectorWithRangeAdd.

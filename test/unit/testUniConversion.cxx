@@ -255,7 +255,7 @@ TEST_CASE("UniConversion") {
 namespace {
 
 // Simple adapter to avoid casting
-int UTFClass(const char *s) {
+int UTFClass(const char *s) noexcept {
 	return UTF8Classify(reinterpret_cast<const unsigned char *>(s), static_cast<int>(strlen(s)));
 }
 
