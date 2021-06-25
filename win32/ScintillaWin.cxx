@@ -1832,6 +1832,7 @@ sptr_t ScintillaWin::SciMessage(Message iMessage, uptr_t wParam, sptr_t lParam) 
 				}
 				DropRenderTarget();
 				technology = technologyNew;
+				view.bufferedDraw = technologyNew == Technology::Default;
 				// Invalidate all cached information including layout.
 				DropGraphics();
 				InvalidateStyleRedraw();

@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 17 June 2021 NH</p>
+    <p>Last edited 25 June 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -4511,8 +4511,14 @@ struct Sci_TextToFind {
     is retained after being presented which may prevent drawing failures on some cards and drivers.
     <code>SC_TECHNOLOGY_DIRECTWRITEDC</code> differs from
     <code>SC_TECHNOLOGY_DIRECTWRITE</code> by using DirectWrite to draw into a GDI DC.
-    Since Direct2D buffers drawing, Scintilla's buffering can be turned off with
-    <code>SCI_SETBUFFEREDDRAW(0)</code>.
+    </p>
+    <p>
+    On Win32, buffered drawing is set to a reasonable value for the technology: on for GDI and off for Direct2D
+    as Direct2D performs its own buffering.
+    This can be changed after setting technology with
+    <a class="seealso" href="#SCI_SETBUFFEREDDRAW">SCI_SETBUFFEREDDRAW</a>.
+    </p>
+    <p>
     When using DirectWrite, you can use
     <a class="message" href="#SCI_SETFONTLOCALE"><code>SCI_SETFONTLOCALE</code></a>
     to set an appropriate font locale to draw text with expected language-dependent glyphs.
