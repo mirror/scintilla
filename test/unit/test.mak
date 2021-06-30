@@ -12,6 +12,8 @@ CXXFLAGS = /EHsc /std:c++17 /D_HAS_AUTO_PTR_ETC=1 /wd 4805 $(INCLUDEDIRS)
 TESTSRC=test*.cxx
 # Files being tested from scintilla/src directory
 TESTEDSRC=\
+ ../../src/CaseConvert.cxx \
+ ../../src/CaseFolder.cxx \
  ../../src/CellBuffer.cxx \
  ../../src/CharacterCategoryMap.cxx \
  ../../src/CharClassify.cxx \
