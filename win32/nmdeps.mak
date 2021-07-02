@@ -404,43 +404,6 @@ $(DIR_O)/ScintillaBase.obj: \
 	../src/Editor.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h
-$(DIR_O)/ScintillaBaseL.obj: \
-	../src/ScintillaBase.cxx \
-	../include/ScintillaTypes.h \
-	../include/ScintillaMessages.h \
-	../include/ScintillaStructures.h \
-	../include/ILoader.h \
-	../include/Sci_Position.h \
-	../include/ILexer.h \
-	../src/Debugging.h \
-	../src/Geometry.h \
-	../src/Platform.h \
-	../src/CharacterCategoryMap.h \
-	../src/Position.h \
-	../src/UniqueString.h \
-	../src/SplitVector.h \
-	../src/Partitioning.h \
-	../src/RunStyles.h \
-	../src/ContractionState.h \
-	../src/CellBuffer.h \
-	../src/CallTip.h \
-	../src/KeyMap.h \
-	../src/Indicator.h \
-	../src/LineMarker.h \
-	../src/Style.h \
-	../src/ViewStyle.h \
-	../src/CharClassify.h \
-	../src/Decoration.h \
-	../src/CaseFolder.h \
-	../src/Document.h \
-	../src/Selection.h \
-	../src/PositionCache.h \
-	../src/EditModel.h \
-	../src/MarginView.h \
-	../src/EditView.h \
-	../src/Editor.h \
-	../src/AutoComplete.h \
-	../src/ScintillaBase.h
 $(DIR_O)/Selection.obj: \
 	../src/Selection.cxx \
 	../src/Debugging.h \

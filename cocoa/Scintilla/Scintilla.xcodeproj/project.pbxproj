@@ -647,7 +647,6 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../src,
-					../../lexlib,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -682,7 +681,6 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../src,
-					../../lexlib,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";

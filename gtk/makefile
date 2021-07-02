@@ -69,12 +69,12 @@ endif
 COMPLIB=$(basedir)/bin/scintilla.a
 COMPONENT=$(basedir)/bin/libscintilla.$(SHAREDEXTENSION)
 
-vpath %.h $(srcdir) $(basedir)/src $(basedir)/include $(basedir)/lexlib
+vpath %.h $(srcdir) $(basedir)/src $(basedir)/include
 vpath %.c $(srcdir)
-vpath %.cxx $(srcdir) $(basedir)/src $(basedir)/lexlib $(basedir)/lexers
+vpath %.cxx $(srcdir) $(basedir)/src
 
-INCLUDES=-I $(basedir)/include -I $(basedir)/src -I $(basedir)/lexlib
-DEFINES += -DGTK -DSCI_LEXER
+INCLUDES=-I $(basedir)/include -I $(basedir)/src
+DEFINES += -DGTK
 BASE_FLAGS += $(WARNINGS)
 
 ifdef NO_CXX11_REGEX
@@ -166,12 +166,6 @@ $(COMPLIB): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEX_OBJS)
 
 $(COMPONENT): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER)
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) $(LDFLAGS) $^ -o $@ $(CONFIGLIB)
-
-Catalogue.o: Catalogue.cxx
-	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -D SCI_LEXER -D SCI_EMPTYCATALOGUE -c $< -o $@
-
-CatalogueL.o: Catalogue.cxx
-	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
 
 # Automatically generate header dependencies with "make deps"
 include deps.mak
