@@ -892,11 +892,13 @@ Document::CharacterExtracted Document::CharacterAfter(Sci::Position position) co
 			return CharacterExtracted(UnicodeFromUTF8(charBytes), utf8status & UTF8MaskWidth);
 		}
 	} else {
-		if (IsDBCSLeadByteNoExcept(leadByte) && ((position + 1) < LengthNoExcept())) {
-			return CharacterExtracted::DBCS(leadByte, cb.UCharAt(position + 1));
-		} else {
-			return CharacterExtracted(leadByte, 1);
+		if (IsDBCSLeadByteNoExcept(leadByte)) {
+			const unsigned char trailByte = cb.UCharAt(position + 1);
+			if (!IsDBCSTrailByteInvalid(trailByte)) {
+				return CharacterExtracted::DBCS(leadByte, trailByte);
+			}
 		}
+		return CharacterExtracted(leadByte, 1);
 	}
 }
 
@@ -1007,8 +1009,13 @@ int SCI_METHOD Document::GetCharacterAndWidth(Sci_Position position, Sci_Positio
 			}
 		} else {
 			if (IsDBCSLeadByteNoExcept(leadByte)) {
-				bytesInCharacter = 2;
-				character = (leadByte << 8) | cb.UCharAt(position+1);
+				const unsigned char trailByte = cb.UCharAt(position + 1);
+				if (!IsDBCSTrailByteInvalid(trailByte)) {
+					bytesInCharacter = 2;
+					character = (leadByte << 8) | trailByte;
+				} else {
+					character = leadByte;
+				}
 			} else {
 				character = leadByte;
 			}

@@ -100,4 +100,24 @@ TEST_CASE("Document") {
 		REQUIRE(location == 1);
 	}
 
+	SECTION("GetCharacterAndWidth") {
+		Document doc(DocumentOption::Default);
+		doc.SetDBCSCodePage(932);
+		REQUIRE(doc.CodePage() == 932);
+		const Sci::Position length = doc.InsertString(0, "\x84\xff=", 3);
+		REQUIRE(3 == length);
+		REQUIRE(3 == doc.Length());
+		Sci::Position width = 0;
+		int ch = doc.GetCharacterAndWidth(0, &width);
+		REQUIRE(width == 1);
+		REQUIRE(ch == 0x84);
+		width = 0;
+		ch = doc.GetCharacterAndWidth(1, &width);
+		REQUIRE(width == 1);
+		REQUIRE(ch == 0xff);
+		width = 0;
+		ch = doc.GetCharacterAndWidth(2, &width);
+		REQUIRE(width == 1);
+		REQUIRE(ch == '=');
+	}
 }
