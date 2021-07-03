@@ -985,27 +985,22 @@ Sci::Position Document::GetRelativePositionUTF16(Sci::Position positionStart, Sc
 }
 
 int SCI_METHOD Document::GetCharacterAndWidth(Sci_Position position, Sci_Position *pWidth) const {
-	int character;
 	int bytesInCharacter = 1;
 	const unsigned char leadByte = cb.UCharAt(position);
-	if (dbcsCodePage) {
+	int character = leadByte;
+	if (dbcsCodePage && !UTF8IsAscii(leadByte)) {
 		if (CpUtf8 == dbcsCodePage) {
-			if (UTF8IsAscii(leadByte)) {
-				// Single byte character or invalid
-				character =  leadByte;
+			const int widthCharBytes = UTF8BytesOfLead[leadByte];
+			unsigned char charBytes[UTF8MaxBytes] = {leadByte,0,0,0};
+			for (int b=1; b<widthCharBytes; b++)
+				charBytes[b] = cb.UCharAt(position+b);
+			const int utf8status = UTF8Classify(charBytes, widthCharBytes);
+			if (utf8status & UTF8MaskInvalid) {
+				// Report as singleton surrogate values which are invalid Unicode
+				character =  0xDC80 + leadByte;
 			} else {
-				const int widthCharBytes = UTF8BytesOfLead[leadByte];
-				unsigned char charBytes[UTF8MaxBytes] = {leadByte,0,0,0};
-				for (int b=1; b<widthCharBytes; b++)
-					charBytes[b] = cb.UCharAt(position+b);
-				const int utf8status = UTF8Classify(charBytes, widthCharBytes);
-				if (utf8status & UTF8MaskInvalid) {
-					// Report as singleton surrogate values which are invalid Unicode
-					character =  0xDC80 + leadByte;
-				} else {
-					bytesInCharacter = utf8status & UTF8MaskWidth;
-					character = UnicodeFromUTF8(charBytes);
-				}
+				bytesInCharacter = utf8status & UTF8MaskWidth;
+				character = UnicodeFromUTF8(charBytes);
 			}
 		} else {
 			if (IsDBCSLeadByteNoExcept(leadByte)) {
@@ -1013,15 +1008,9 @@ int SCI_METHOD Document::GetCharacterAndWidth(Sci_Position position, Sci_Positio
 				if (IsDBCSTrailByteNoExcept(trailByte)) {
 					bytesInCharacter = 2;
 					character = (leadByte << 8) | trailByte;
-				} else {
-					character = leadByte;
 				}
-			} else {
-				character = leadByte;
 			}
 		}
-	} else {
-		character = leadByte;
 	}
 	if (pWidth) {
 		*pWidth = bytesInCharacter;
@@ -1135,51 +1124,12 @@ bool Document::IsDBCSLeadByteInvalid(char ch) const noexcept {
 	return false;
 }
 
-bool Document::IsDBCSTrailByteInvalid(char ch) const noexcept {
-	const unsigned char trail = ch;
-	switch (dbcsCodePage) {
-	case 932:
-		// Shift_jis
-		return
-			(trail <= 0x3F) ||
-			(trail == 0x7F) ||
-			(trail >= 0xFD);
-	case 936:
-		// GBK
-		return
-			(trail <= 0x3F) ||
-			(trail == 0x7F) ||
-			(trail == 0xFF);
-	case 949:
-		// Korean Wansung KS C-5601-1987
-		return
-			(trail <= 0x40) ||
-			((trail >= 0x5B) && (trail <= 0x60)) ||
-			((trail >= 0x7B) && (trail <= 0x80)) ||
-			(trail == 0xFF);
-	case 950:
-		// Big5
-		return
-			(trail <= 0x3F) ||
-			((trail >= 0x7F) && (trail <= 0xA0)) ||
-			(trail == 0xFF);
-	case 1361:
-		// Korean Johab KS C-5601-1992
-		return
-			(trail <= 0x30) ||
-			(trail == 0x7F) ||
-			(trail == 0x80) ||
-			(trail == 0xFF);
-	}
-	return false;
-}
-
 int Document::DBCSDrawBytes(std::string_view text) const noexcept {
 	if (text.length() <= 1) {
 		return static_cast<int>(text.length());
 	}
 	if (IsDBCSLeadByteNoExcept(text[0])) {
-		return IsDBCSTrailByteInvalid(text[1]) ? 1 : 2;
+		return IsDBCSTrailByteNoExcept(text[1]) ? 2 : 1;
 	} else {
 		return 1;
 	}
