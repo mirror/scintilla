@@ -894,7 +894,7 @@ Document::CharacterExtracted Document::CharacterAfter(Sci::Position position) co
 	} else {
 		if (IsDBCSLeadByteNoExcept(leadByte)) {
 			const unsigned char trailByte = cb.UCharAt(position + 1);
-			if (!IsDBCSTrailByteInvalid(trailByte)) {
+			if (IsDBCSTrailByteNoExcept(trailByte)) {
 				return CharacterExtracted::DBCS(leadByte, trailByte);
 			}
 		}
@@ -1010,7 +1010,7 @@ int SCI_METHOD Document::GetCharacterAndWidth(Sci_Position position, Sci_Positio
 		} else {
 			if (IsDBCSLeadByteNoExcept(leadByte)) {
 				const unsigned char trailByte = cb.UCharAt(position + 1);
-				if (!IsDBCSTrailByteInvalid(trailByte)) {
+				if (IsDBCSTrailByteNoExcept(trailByte)) {
 					bytesInCharacter = 2;
 					character = (leadByte << 8) | trailByte;
 				} else {
@@ -1063,6 +1063,37 @@ bool Document::IsDBCSLeadByteNoExcept(char ch) const noexcept {
 				((uch >= 0x84) && (uch <= 0xD3)) ||
 				((uch >= 0xD8) && (uch <= 0xDE)) ||
 				((uch >= 0xE0) && (uch <= 0xF9));
+	}
+	return false;
+}
+
+bool Document::IsDBCSTrailByteNoExcept(char ch) const noexcept {
+	const unsigned char trail = ch;
+	switch (dbcsCodePage) {
+	case 932:
+		// Shift_jis
+		return (trail != 0x7F) &&
+			((trail >= 0x40) && (trail <= 0xFC));
+	case 936:
+		// GBK
+		return (trail != 0x7F) &&
+			((trail >= 0x40) && (trail <= 0xFE));
+	case 949:
+		// Korean Wansung KS C-5601-1987
+		return
+			((trail >= 0x41) && (trail <= 0x5A)) ||
+			((trail >= 0x61) && (trail <= 0x7A)) ||
+			((trail >= 0x81) && (trail <= 0xFE));
+	case 950:
+		// Big5
+		return
+			((trail >= 0x40) && (trail <= 0x7E)) ||
+			((trail >= 0xA1) && (trail <= 0xFE));
+	case 1361:
+		// Korean Johab KS C-5601-1992
+		return
+			((trail >= 0x31) && (trail <= 0x7E)) ||
+			((trail >= 0x81) && (trail <= 0xFE));
 	}
 	return false;
 }

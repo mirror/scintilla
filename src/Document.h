@@ -329,6 +329,7 @@ public:
 	int SCI_METHOD CodePage() const override;
 	bool SCI_METHOD IsDBCSLeadByte(char ch) const override;
 	bool IsDBCSLeadByteNoExcept(char ch) const noexcept;
+	bool IsDBCSTrailByteNoExcept(char ch) const noexcept;
 	bool IsDBCSLeadByteInvalid(char ch) const noexcept;
 	bool IsDBCSTrailByteInvalid(char ch) const noexcept;
 	int DBCSDrawBytes(std::string_view text) const noexcept;

@@ -120,4 +120,16 @@ TEST_CASE("Document") {
 		REQUIRE(width == 1);
 		REQUIRE(ch == '=');
 	}
+
+	SECTION("CheckTrailBytes") {
+		Document doc(DocumentOption::Default);
+		const int pages[] = { 932, 936, 949, 950, 1361 };
+		for (const int page : pages) {
+			doc.SetDBCSCodePage(page);
+			for (int byteVal = 0; byteVal < 0x100; byteVal++) {
+				char ch = static_cast<char>(byteVal);
+				REQUIRE(doc.IsDBCSTrailByteNoExcept(ch) != doc.IsDBCSTrailByteInvalid(ch));
+			}
+		}
+	}
 }
