@@ -247,8 +247,8 @@ void Editor::SetRepresentations() {
 	if (IsUnicodeMode()) {
 		for (int k=0x80; k < 0x100; k++) {
 			const char hiByte[2] = {  static_cast<char>(k), 0 };
-			char hexits[5];	// Really only needs 4 but that causes warning from gcc 7.1
-			sprintf(hexits, "x%2X", k);
+			char hexits[4];
+			Hexits(hexits, k);
 			reprs.SetRepresentation(hiByte, hexits);
 		}
 	} else if (pdoc->dbcsCodePage) {
@@ -257,8 +257,8 @@ void Editor::SetRepresentations() {
 			const char ch = static_cast<char>(k);
 			if (pdoc->IsDBCSLeadByteNoExcept(ch)  || pdoc->IsDBCSLeadByteInvalid(ch)) {
 				const char hiByte[2] = { ch, 0 };
-				char hexits[5];	// Really only needs 4 but that causes warning from gcc 7.1
-				sprintf(hexits, "x%2X", k);
+				char hexits[4];
+				Hexits(hexits, k);
 				reprs.SetRepresentation(hiByte, hexits);
 			}
 		}
