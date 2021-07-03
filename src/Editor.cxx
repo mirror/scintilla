@@ -55,6 +55,7 @@
 #include "CaseFolder.h"
 #include "Document.h"
 #include "UniConversion.h"
+#include "DBCS.h"
 #include "Selection.h"
 #include "PositionCache.h"
 #include "EditModel.h"
@@ -226,9 +227,10 @@ void Editor::SetRepresentations() {
 	}
 	reprs.SetRepresentation("\x7f", "DEL");
 
+	const int dbcsCodePage = pdoc->dbcsCodePage;
 	// C1 control set
 	// As well as Unicode mode, ISO-8859-1 should use these
-	if (IsUnicodeMode()) {
+	if (CpUtf8 == dbcsCodePage) {
 		const char *const repsC1[] = {
 			"PAD", "HOP", "BPH", "NBH", "IND", "NEL", "SSA", "ESA",
 			"HTS", "HTJ", "VTS", "PLD", "PLU", "RI", "SS2", "SS3",
@@ -243,20 +245,11 @@ void Editor::SetRepresentations() {
 		reprs.SetRepresentation("\xe2\x80\xa9", "PS");
 	}
 
-	// UTF-8 invalid bytes
-	if (IsUnicodeMode()) {
-		for (int k=0x80; k < 0x100; k++) {
-			const char hiByte[2] = {  static_cast<char>(k), 0 };
-			char hexits[4];
-			Hexits(hexits, k);
-			reprs.SetRepresentation(hiByte, hexits);
-		}
-	} else if (pdoc->dbcsCodePage) {
-		// DBCS invalid single lead bytes
+	// Invalid as single bytes in multi-byte encodings
+	if (dbcsCodePage) {
 		for (int k = 0x80; k < 0x100; k++) {
-			const char ch = static_cast<char>(k);
-			if (pdoc->IsDBCSLeadByteNoExcept(ch)  || pdoc->IsDBCSLeadByteInvalid(ch)) {
-				const char hiByte[2] = { ch, 0 };
+			if ((CpUtf8 == dbcsCodePage) || !IsDBCSValidSingleByte(dbcsCodePage, k)) {
+				const char hiByte[2] = { static_cast<char>(k), 0 };
 				char hexits[4];
 				Hexits(hexits, k);
 				reprs.SetRepresentation(hiByte, hexits);
