@@ -316,25 +316,78 @@ TEST_CASE("Document") {
 		// Can not test case mapping of double byte text as folder available here does not implement this 
 	}
 
-	SECTION("GetCharacterAndWidth") {
+	SECTION("GetCharacterAndWidth DBCS") {
 		Document doc(DocumentOption::Default);
 		doc.SetDBCSCodePage(932);
 		REQUIRE(doc.CodePage() == 932);
-		const Sci::Position length = doc.InsertString(0, "\x84\xff=", 3);
-		REQUIRE(3 == length);
-		REQUIRE(3 == doc.Length());
+		const Sci::Position length = doc.InsertString(0, "H\x84\xff\x84H", 5);
+		// This text is invalid in code page 932.
+		// A reasonable interpretation is as 4 items: 2 characters and 2 character fragments
+		// The last item is a 2-byte CYRILLIC CAPITAL LETTER ZE character 
+		// H [84] [FF] ZE
+		REQUIRE(5 == length);
+		REQUIRE(5 == doc.Length());
 		Sci::Position width = 0;
+		// test GetCharacterAndWidth()
 		int ch = doc.GetCharacterAndWidth(0, &width);
+		REQUIRE(width == 1);
+		REQUIRE(ch == 'H');
+		ch = doc.GetCharacterAndWidth(1, &width);
 		REQUIRE(width == 1);
 		REQUIRE(ch == 0x84);
 		width = 0;
-		ch = doc.GetCharacterAndWidth(1, &width);
+		ch = doc.GetCharacterAndWidth(2, &width);
 		REQUIRE(width == 1);
 		REQUIRE(ch == 0xff);
 		width = 0;
-		ch = doc.GetCharacterAndWidth(2, &width);
+		ch = doc.GetCharacterAndWidth(3, &width);
+		REQUIRE(width == 2);
+		REQUIRE(ch == 0x8448);
+		// test LenChar()
+		width = doc.LenChar(0);
 		REQUIRE(width == 1);
-		REQUIRE(ch == '=');
+		width = doc.LenChar(1);
+		REQUIRE(width == 1);
+		width = doc.LenChar(2);
+		REQUIRE(width == 1);
+		width = doc.LenChar(3);
+		REQUIRE(width == 2);
+		// test MovePositionOutsideChar()
+		Sci::Position pos = doc.MovePositionOutsideChar(1, 1);
+		REQUIRE(pos == 1);
+		pos = doc.MovePositionOutsideChar(2, 1);
+		REQUIRE(pos == 2);
+		pos = doc.MovePositionOutsideChar(3, 1);
+		REQUIRE(pos == 3);
+		pos = doc.MovePositionOutsideChar(4, 1);
+		REQUIRE(pos == 5);
+		pos = doc.MovePositionOutsideChar(1, -1);
+		REQUIRE(pos == 1);
+		pos = doc.MovePositionOutsideChar(2, -1);
+		REQUIRE(pos == 2);
+		pos = doc.MovePositionOutsideChar(3, -1);
+		REQUIRE(pos == 3);
+		pos = doc.MovePositionOutsideChar(4, -1);
+		REQUIRE(pos == 3);
+		// test NextPosition()
+		pos = doc.NextPosition(0, 1);
+		REQUIRE(pos == 1);
+		pos = doc.NextPosition(1, 1);
+		REQUIRE(pos == 2);
+		pos = doc.NextPosition(2, 1);
+		REQUIRE(pos == 3);
+		pos = doc.NextPosition(3, 1);
+		REQUIRE(pos == 5);
+		pos = doc.NextPosition(1, -1);
+		REQUIRE(pos == 0);
+		// The next two tests are commented out because the implementation of NextPosition
+		// cannot yet handle character fragments correctly when moving backwards.
+		//pos = doc.NextPosition(2, -1);
+		//REQUIRE(pos == 1);
+		//pos = doc.NextPosition(3, -1);
+		//REQUIRE(pos == 2);
+		pos = doc.NextPosition(5, -1);
+		REQUIRE(pos == 3);
 	}
 
 }

@@ -674,7 +674,7 @@ int Document::LenChar(Sci::Position pos) const noexcept {
 			return utf8status & UTF8MaskWidth;
 		}
 	} else {
-		if (IsDBCSLeadByteNoExcept(leadByte) && ((pos + 1) < LengthNoExcept())) {
+		if (IsDBCSLeadByteNoExcept(leadByte) && IsDBCSTrailByteNoExcept(cb.CharAt(pos + 1))) {
 			return 2;
 		} else {
 			return 1;
@@ -709,7 +709,7 @@ bool Document::InGoodUTF8(Sci::Position pos, Sci::Position &start, Sci::Position
 	}
 }
 
-// Normalise a position so that it is not halfway through a two byte character.
+// Normalise a position so that it is not part way through a multi-byte character.
 // This can occur in two situations -
 // When lines are terminated with \r\n pairs which should be treated as one character.
 // When displaying DBCS text such as Japanese.
@@ -760,7 +760,7 @@ Sci::Position Document::MovePositionOutsideChar(Sci::Position pos, Sci::Position
 
 			// Check from known start of character.
 			while (posCheck < pos) {
-				const int mbsize = IsDBCSLeadByteNoExcept(cb.CharAt(posCheck)) ? 2 : 1;
+				const int mbsize = IsDBCSDualByteAt(posCheck) ? 2 : 1;
 				if (posCheck + mbsize == pos) {
 					return pos;
 				} else if (posCheck + mbsize > pos) {
@@ -825,7 +825,7 @@ Sci::Position Document::NextPosition(Sci::Position pos, int moveDir) const noexc
 			}
 		} else {
 			if (moveDir > 0) {
-				const int mbsize = IsDBCSLeadByteNoExcept(cb.CharAt(pos)) ? 2 : 1;
+				const int mbsize = IsDBCSDualByteAt(pos) ? 2 : 1;
 				pos += mbsize;
 				if (pos > cb.Length())
 					pos = cb.Length();
@@ -1096,6 +1096,11 @@ int Document::DBCSDrawBytes(std::string_view text) const noexcept {
 	} else {
 		return 1;
 	}
+}
+
+bool Document::IsDBCSDualByteAt(Sci::Position pos) const noexcept {
+	return IsDBCSLeadByteNoExcept(cb.CharAt(pos))
+		&& IsDBCSTrailByteNoExcept(cb.CharAt(pos + 1));
 }
 
 static constexpr bool IsSpaceOrTab(int ch) noexcept {
