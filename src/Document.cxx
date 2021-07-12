@@ -1969,6 +1969,42 @@ Document::CharacterExtracted Document::ExtractCharacter(Sci::Position position) 
 	}
 }
 
+namespace {
+
+struct SplitView {
+	const char *segment1 = nullptr;
+	size_t length1 = 0;
+	const char *segment2 = nullptr;
+	size_t length = 0;
+
+	SplitView() = default;
+	SplitView(CellBuffer &cb) noexcept {
+		segment1 = cb.RangePointer(0, 0);
+		length1 = cb.GapPosition();
+		segment2 = cb.RangePointer(length1, 0) - length1;
+		length = cb.Length();
+	}
+	bool operator==(const SplitView &other) const noexcept {
+		return segment1 == other.segment1 && length1 == other.length1 &&
+			segment2 == other.segment2 && length == other.length;
+	}
+	bool operator!=(const SplitView &other) const noexcept {
+		return !(*this == other);
+	}
+
+	char CharAt(size_t position) const noexcept {
+		if (position < length1) {
+			return segment1[position];
+		}
+		if (position < length) {
+			return segment2[position];
+		}
+		return 0;
+	}
+};
+
+}
+
 /**
  * Find text in document, supporting both forward and backward
  * searches (just pass minPos > maxPos to do a backward search)
@@ -2005,15 +2041,16 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 			// Back all of a character
 			pos = NextPosition(pos, increment);
 		}
+		const SplitView cbView(cb);
 		if (caseSensitive) {
 			const Sci::Position endSearch = (startPos <= endPos) ? endPos - lengthFind + 1 : endPos;
 			const unsigned char charStartSearch =  search[0];
 			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				const unsigned char leadByte = cb.UCharAt(pos);
+				const unsigned char leadByte = cbView.CharAt(pos);
 				if (leadByte == charStartSearch) {
 					bool found = (pos + lengthFind) <= limitPos;
 					for (int indexSearch = 1; (indexSearch < lengthFind) && found; indexSearch++) {
-						found = CharAt(pos + indexSearch) == search[indexSearch];
+						found = cbView.CharAt(pos + indexSearch) == search[indexSearch];
 					}
 					if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
 						return pos;
@@ -2042,14 +2079,14 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 				size_t indexSearch = 0;
 				bool characterMatches = true;
 				for (;;) {
-					const unsigned char leadByte = cb.UCharAt(posIndexDocument);
+					const unsigned char leadByte = cbView.CharAt(posIndexDocument);
 					char bytes[UTF8MaxBytes + 1];
 					int widthChar = 1;
 					if (!UTF8IsAscii(leadByte)) {
 						const int widthCharBytes = UTF8BytesOfLead[leadByte];
 						bytes[0] = leadByte;
 						for (int b=1; b<widthCharBytes; b++) {
-							bytes[b] = cb.CharAt(posIndexDocument+b);
+							bytes[b] = cbView.CharAt(posIndexDocument+b);
 						}
 						widthChar = UTF8Classify(reinterpret_cast<const unsigned char *>(bytes), widthCharBytes) & UTF8MaskWidth;
 					}
@@ -2105,7 +2142,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 				bool characterMatches = true;
 				while (((pos + indexDocument) < limitPos) &&
 					(indexSearch < lenSearch)) {
-					const unsigned char leadByte = cb.UCharAt(pos + indexDocument);
+					const unsigned char leadByte = cbView.CharAt(pos + indexDocument);
 					const int widthChar = (!UTF8IsAscii(leadByte) && IsDBCSLeadByteNoExcept(leadByte)) ? 2 : 1;
 					if (!widthFirstCharacter) {
 						widthFirstCharacter = widthChar;
@@ -2119,7 +2156,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 					} else {
 						char bytes[maxBytesCharacter + 1];
 						bytes[0] = leadByte;
-						bytes[1] = cb.CharAt(pos + indexDocument + 1);
+						bytes[1] = cbView.CharAt(pos + indexDocument + 1);
 						char folded[maxBytesCharacter * maxFoldingExpansion + 1];
 						lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
 						// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
@@ -2154,7 +2191,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
 				bool found = (pos + lengthFind) <= limitPos;
 				for (int indexSearch = 0; (indexSearch < lengthFind) && found; indexSearch++) {
-					const char ch = CharAt(pos + indexSearch);
+					const char ch = cbView.CharAt(pos + indexSearch);
 					const char chTest = searchThing[indexSearch];
 					if (UTF8IsAscii(ch)) {
 						found = chTest == MakeLowerCase(ch);
