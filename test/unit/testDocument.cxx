@@ -10,6 +10,9 @@
 #include <optional>
 #include <algorithm>
 #include <memory>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
 #include "ScintillaTypes.h"
 
@@ -52,6 +55,30 @@ Folding foldings1252[] = {
 	{0xd8, 0xf8, 0x07},
 };
 
+// Table of case folding for non-ASCII bytes in Windows Russian code page 1251
+Folding foldings1251[] = {
+	{0x80, 0x90, 0x01},
+	{0x81, 0x83, 0x01},
+	{0x8a, 0x9a, 0x01},
+	{0x8c, 0x9c, 0x04},
+	{0xa1, 0xa2, 0x01},
+	{0xa3, 0xbc, 0x01},
+	{0xa5, 0xb4, 0x01},
+	{0xa8, 0xb8, 0x01},
+	{0xaa, 0xba, 0x01},
+	{0xaf, 0xbf, 0x01},
+	{0xb2, 0xb3, 0x01},
+	{0xbd, 0xbe, 0x01},
+	{0xc0, 0xe0, 0x20},
+};
+
+std::string ReadFile(std::string path) {
+	std::ifstream ifs(path, std::ios::binary);
+	std::string content((std::istreambuf_iterator<char>(ifs)),
+		(std::istreambuf_iterator<char>()));
+	return content;
+}
+
 struct DocPlus {
 	Document document;
 
@@ -93,6 +120,10 @@ struct DocPlus {
 		return document.FindText(document.Length(), 0, needle.c_str(), options, length);
 	}
 };
+
+void TimeTrace(std::string_view sv, const Catch::Timer &tikka) {
+	std::cout << sv << std::setw(5) << tikka.getElapsedMilliseconds() << " milliseconds" << std::endl;
+}
 
 TEST_CASE("Document") {
 
