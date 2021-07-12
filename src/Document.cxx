@@ -2035,10 +2035,10 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 				bool characterMatches = true;
 				for (;;) {
 					const unsigned char leadByte = cb.UCharAt(posIndexDocument);
-					bytes[0] = leadByte;
 					int widthChar = 1;
 					if (!UTF8IsAscii(leadByte)) {
 						const int widthCharBytes = UTF8BytesOfLead[leadByte];
+						bytes[0] = leadByte;
 						for (int b=1; b<widthCharBytes; b++) {
 							bytes[b] = cb.CharAt(posIndexDocument+b);
 						}
@@ -2048,11 +2048,16 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 						widthFirstCharacter = widthChar;
 					if ((posIndexDocument + widthChar) > limitPos)
 						break;
-					const size_t lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
-					// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
-					assert((indexSearch + lenFlat) <= searchThing.size());
-					// Does folded match the buffer
-					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
+					size_t lenFlat = 1;
+					if (widthChar == 1) {
+						characterMatches = searchThing[indexSearch] == MakeLowerCase(leadByte);
+					} else {
+						lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
+						// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
+						assert((indexSearch + lenFlat) <= searchThing.size());
+						// Does folded match the buffer
+						characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
+					}
 					if (!characterMatches)
 						break;
 					posIndexDocument += widthChar;
@@ -2079,25 +2084,35 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 			std::vector<char> searchThing((lengthFind+1) * maxBytesCharacter * maxFoldingExpansion + 1);
 			const size_t lenSearch = pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
 			while (forward ? (pos < endPos) : (pos >= endPos)) {
+				int widthFirstCharacter = 0;
 				Sci::Position indexDocument = 0;
 				size_t indexSearch = 0;
 				bool characterMatches = true;
-				while (characterMatches &&
-					((pos + indexDocument) < limitPos) &&
+				while (((pos + indexDocument) < limitPos) &&
 					(indexSearch < lenSearch)) {
 					char bytes[maxBytesCharacter + 1];
-					bytes[0] = cb.CharAt(pos + indexDocument);
-					const Sci::Position widthChar = IsDBCSLeadByteNoExcept(bytes[0]) ? 2 : 1;
-					if (widthChar == 2)
-						bytes[1] = cb.CharAt(pos + indexDocument + 1);
+					const unsigned char leadByte = cb.UCharAt(pos + indexDocument);
+					const int widthChar = IsDBCSLeadByteNoExcept(leadByte) ? 2 : 1;
+					if (!widthFirstCharacter) {
+						widthFirstCharacter = widthChar;
+					}
 					if ((pos + indexDocument + widthChar) > limitPos)
 						break;
-					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
-					const size_t lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
-					// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
-					assert((indexSearch + lenFlat) <= searchThing.size());
-					// Does folded match the buffer
-					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
+					size_t lenFlat = 1;
+					if (widthChar == 1) {
+						characterMatches = searchThing[indexSearch] == MakeLowerCase(leadByte);
+					} else {
+						bytes[0] = leadByte;
+						bytes[1] = cb.CharAt(pos + indexDocument + 1);
+						char folded[maxBytesCharacter * maxFoldingExpansion + 1];
+						lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
+						// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
+						assert((indexSearch + lenFlat) <= searchThing.size());
+						// Does folded match the buffer
+						characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
+					}
+					if (!characterMatches)
+						break;
 					indexDocument += widthChar;
 					indexSearch += lenFlat;
 				}
@@ -2107,8 +2122,12 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 						return pos;
 					}
 				}
-				if (!NextCharacter(pos, increment))
-					break;
+				if (forward) {
+					pos += widthFirstCharacter;
+				} else {
+					if (!NextCharacter(pos, increment))
+						break;
+				}
 			}
 		} else {
 			const Sci::Position endSearch = (startPos <= endPos) ? endPos - lengthFind + 1 : endPos;
@@ -2118,15 +2137,19 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 				bool found = (pos + lengthFind) <= limitPos;
 				for (int indexSearch = 0; (indexSearch < lengthFind) && found; indexSearch++) {
 					const char ch = CharAt(pos + indexSearch);
-					char folded[2];
-					pcf->Fold(folded, sizeof(folded), &ch, 1);
-					found = folded[0] == searchThing[indexSearch];
+					const char chTest = searchThing[indexSearch];
+					if (UTF8IsAscii(ch)) {
+						found = chTest == MakeLowerCase(ch);
+					} else {
+						char folded[2];
+						pcf->Fold(folded, sizeof(folded), &ch, 1);
+						found = folded[0] == chTest;
+					}
 				}
 				if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
 					return pos;
 				}
-				if (!NextCharacter(pos, increment))
-					break;
+				pos += increment;
 			}
 		}
 	}
