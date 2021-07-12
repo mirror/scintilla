@@ -2003,6 +2003,36 @@ struct SplitView {
 	}
 };
 
+// Equivalent of memchr over the split view
+ptrdiff_t SplitFindChar(const SplitView &view, size_t start, size_t length, int ch) noexcept {
+	size_t range1Length = 0;
+	if (start < view.length1) {
+		range1Length = std::min(length, view.length1 - start);
+		const char *match = static_cast<const char *>(memchr(view.segment1 + start, ch, range1Length));
+		if (match) {
+			return match - view.segment1;
+		}
+		start += range1Length;
+	}
+	const char *match2 = static_cast<const char *>(memchr(view.segment2 + start, ch, length - range1Length));
+	if (match2) {
+		return match2 - view.segment2 + view.length1;
+	}
+	return PTRDIFF_MAX;
+}
+
+// Equivalent of memcmp over the split view
+// This does not call memcmp as search texts are commonly too short to overcome the
+// call overhead.
+bool SplitMatch(const SplitView &view, size_t start, std::string_view text) noexcept {
+	for (size_t i = 0; i < text.length(); i++) {
+		if (view.CharAt(i + start) != text[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
 }
 
 /**
@@ -2045,26 +2075,44 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 		if (caseSensitive) {
 			const Sci::Position endSearch = (startPos <= endPos) ? endPos - lengthFind + 1 : endPos;
 			const unsigned char charStartSearch =  search[0];
-			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				const unsigned char leadByte = cbView.CharAt(pos);
-				if (leadByte == charStartSearch) {
-					bool found = (pos + lengthFind) <= limitPos;
-					for (int indexSearch = 1; (indexSearch < lengthFind) && found; indexSearch++) {
-						found = cbView.CharAt(pos + indexSearch) == search[indexSearch];
+			if (forward && ((0 == dbcsCodePage) || (CpUtf8 == dbcsCodePage && !UTF8IsTrailByte(charStartSearch)))) {
+				// This is a fast case where there is no need to test byte values to iterate
+				// so becomes the equivalent of a memchr+memcmp loop. 
+				// UTF-8 search will not be self-synchronizing when starts with trail byte
+				const std::string_view suffix = search + 1;
+				while (pos < endSearch) {
+					pos = SplitFindChar(cbView, pos, limitPos - pos, charStartSearch);
+					if (pos == PTRDIFF_MAX) {
+						break;
 					}
-					if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
+					if (SplitMatch(cbView, pos + 1, suffix) && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
 						return pos;
 					}
-				}
-				if (forward && UTF8IsAscii(leadByte)) {
 					pos++;
-				} else {
-					if (dbcsCodePage) {
-						if (!NextCharacter(pos, increment)) {
-							break;
+				}
+			} else {
+				while (forward ? (pos < endSearch) : (pos >= endSearch)) {
+					const unsigned char leadByte = cbView.CharAt(pos);
+					if (leadByte == charStartSearch) {
+						bool found = (pos + lengthFind) <= limitPos;
+						// SplitMatch could be called here but it is slower with g++ -O2
+						for (int indexSearch = 1; (indexSearch < lengthFind) && found; indexSearch++) {
+							found = cbView.CharAt(pos + indexSearch) == search[indexSearch];
 						}
+						if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
+							return pos;
+						}
+					}
+					if (forward && UTF8IsAscii(leadByte)) {
+						pos++;
 					} else {
-						pos += increment;
+						if (dbcsCodePage) {
+							if (!NextCharacter(pos, increment)) {
+								break;
+							}
+						} else {
+							pos += increment;
+						}
 					}
 				}
 			}
