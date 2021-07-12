@@ -2007,9 +2007,10 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 		}
 		if (caseSensitive) {
 			const Sci::Position endSearch = (startPos <= endPos) ? endPos - lengthFind + 1 : endPos;
-			const char charStartSearch =  search[0];
+			const unsigned char charStartSearch =  search[0];
 			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				if (CharAt(pos) == charStartSearch) {
+				const unsigned char leadByte = cb.UCharAt(pos);
+				if (leadByte == charStartSearch) {
 					bool found = (pos + lengthFind) <= limitPos;
 					for (int indexSearch = 1; (indexSearch < lengthFind) && found; indexSearch++) {
 						found = CharAt(pos + indexSearch) == search[indexSearch];
@@ -2018,8 +2019,16 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 						return pos;
 					}
 				}
-				if (!NextCharacter(pos, increment))
-					break;
+				if (forward && UTF8IsAscii(leadByte)) {
+					pos++;
+				} else {
+					if (dbcsCodePage) {
+						if (!NextCharacter(pos, increment))
+							break;
+					} else {
+						pos += increment;
+					}
+				}
 			}
 		} else if (CpUtf8 == dbcsCodePage) {
 			constexpr size_t maxFoldingExpansion = 4;
