@@ -2106,7 +2106,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 				while (((pos + indexDocument) < limitPos) &&
 					(indexSearch < lenSearch)) {
 					const unsigned char leadByte = cb.UCharAt(pos + indexDocument);
-					const int widthChar = IsDBCSLeadByteNoExcept(leadByte) ? 2 : 1;
+					const int widthChar = (!UTF8IsAscii(leadByte) && IsDBCSLeadByteNoExcept(leadByte)) ? 2 : 1;
 					if (!widthFirstCharacter) {
 						widthFirstCharacter = widthChar;
 					}
