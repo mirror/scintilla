@@ -1707,7 +1707,7 @@ Sci::Position Document::ParaDown(Sci::Position pos) const {
 }
 
 CharacterClass Document::WordCharacterClass(unsigned int ch) const {
-	if (dbcsCodePage && (!UTF8IsAscii(ch))) {
+	if (dbcsCodePage && (ch >= 0x80)) {
 		if (CpUtf8 == dbcsCodePage) {
 			// Use hard coded Unicode class
 			const CharacterCategory cc = charMap.CategoryFor(ch);
