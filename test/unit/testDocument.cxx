@@ -380,14 +380,59 @@ TEST_CASE("Document") {
 		REQUIRE(pos == 5);
 		pos = doc.NextPosition(1, -1);
 		REQUIRE(pos == 0);
-		// The next two tests are commented out because the implementation of NextPosition
-		// cannot yet handle character fragments correctly when moving backwards.
-		//pos = doc.NextPosition(2, -1);
-		//REQUIRE(pos == 1);
-		//pos = doc.NextPosition(3, -1);
-		//REQUIRE(pos == 2);
+		pos = doc.NextPosition(2, -1);
+		REQUIRE(pos == 1);
+		pos = doc.NextPosition(3, -1);
+		REQUIRE(pos == 2);
 		pos = doc.NextPosition(5, -1);
 		REQUIRE(pos == 3);
+	}
+
+	SECTION("NextPosition Valid DBCS") {
+		Document doc(DocumentOption::Default);
+		doc.SetDBCSCodePage(932);
+		REQUIRE(doc.CodePage() == 932);
+		// This text is valid in code page 932.
+		// O p e n = U+958B Ku ( O ) U+7DE8 -
+		// U+958B open
+		// U+7DE8 arrange
+		const std::string japaneseText = "Open=\x8aJ\x82\xad(O)\x95\xd2-";
+		const Sci::Position length = doc.InsertString(0, japaneseText.c_str(), japaneseText.length());
+		REQUIRE(length == 15);
+		// Forwards
+		REQUIRE(doc.NextPosition( 0, 1) == 1);
+		REQUIRE(doc.NextPosition( 1, 1) == 2);
+		REQUIRE(doc.NextPosition( 2, 1) == 3);
+		REQUIRE(doc.NextPosition( 3, 1) == 4);
+		REQUIRE(doc.NextPosition( 4, 1) == 5);
+		REQUIRE(doc.NextPosition( 5, 1) == 7);	// Double byte
+		REQUIRE(doc.NextPosition( 6, 1) == 7);
+		REQUIRE(doc.NextPosition( 7, 1) == 9);	// Double byte
+		REQUIRE(doc.NextPosition( 8, 1) == 9);
+		REQUIRE(doc.NextPosition( 9, 1) == 10);
+		REQUIRE(doc.NextPosition(10, 1) == 11);
+		REQUIRE(doc.NextPosition(11, 1) == 12);
+		REQUIRE(doc.NextPosition(12, 1) == 14);	// Double byte
+		REQUIRE(doc.NextPosition(13, 1) == 14);
+		REQUIRE(doc.NextPosition(14, 1) == 15);
+		REQUIRE(doc.NextPosition(15, 1) == 15);
+		// Backwards
+		REQUIRE(doc.NextPosition( 0, -1) == 0);
+		REQUIRE(doc.NextPosition( 1, -1) == 0);
+		REQUIRE(doc.NextPosition( 2, -1) == 1);
+		REQUIRE(doc.NextPosition( 3, -1) == 2);
+		REQUIRE(doc.NextPosition( 4, -1) == 3);
+		REQUIRE(doc.NextPosition( 5, -1) == 4);
+		REQUIRE(doc.NextPosition( 6, -1) == 5);	// Double byte
+		REQUIRE(doc.NextPosition( 7, -1) == 5);
+		REQUIRE(doc.NextPosition( 8, -1) == 7);	// Double byte
+		REQUIRE(doc.NextPosition( 9, -1) == 7);
+		REQUIRE(doc.NextPosition(10, -1) == 9);
+		REQUIRE(doc.NextPosition(11, -1) == 10);
+		REQUIRE(doc.NextPosition(12, -1) == 11);
+		REQUIRE(doc.NextPosition(13, -1) == 12);	// Double byte
+		REQUIRE(doc.NextPosition(14, -1) == 12);
+		REQUIRE(doc.NextPosition(15, -1) == 14);
 	}
 
 }

@@ -838,8 +838,13 @@ Sci::Position Document::NextPosition(Sci::Position pos, int moveDir) const noexc
 				if ((pos - 1) <= posStartLine) {
 					return pos - 1;
 				} else if (IsDBCSLeadByteNoExcept(cb.CharAt(pos - 1))) {
-					// Must actually be trail byte
-					return pos - 2;
+					// Should actually be trail byte
+					if (IsDBCSDualByteAt(pos - 2)) {
+						return pos - 2;
+					} else {
+						// Invalid byte pair so treat as one byte wide
+						return pos - 1;
+					}
 				} else {
 					// Otherwise, step back until a non-lead-byte is found.
 					Sci::Position posTemp = pos - 1;
@@ -848,7 +853,12 @@ Sci::Position Document::NextPosition(Sci::Position pos, int moveDir) const noexc
 					// Now posTemp+1 must point to the beginning of a character,
 					// so figure out whether we went back an even or an odd
 					// number of bytes and go back 1 or 2 bytes, respectively.
-					return (pos - 1 - ((pos - posTemp) & 1));
+					const Sci::Position widthLast = ((pos - posTemp) & 1) + 1;
+					if ((widthLast == 2) && (IsDBCSDualByteAt(pos - widthLast))) {
+						return pos - widthLast;
+					}
+					// Byte before pos may be valid character or may be an invalid second byte
+					return pos - 1;
 				}
 			}
 		}
