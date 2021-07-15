@@ -2001,7 +2001,7 @@ ptrdiff_t SplitFindChar(const SplitView &view, size_t start, size_t length, int 
 	if (match2) {
 		return match2 - view.segment2 + view.length1;
 	}
-	return PTRDIFF_MAX;
+	return -1;
 }
 
 // Equivalent of memcmp over the split view
@@ -2062,10 +2062,10 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 				// This is a fast case where there is no need to test byte values to iterate
 				// so becomes the equivalent of a memchr+memcmp loop. 
 				// UTF-8 search will not be self-synchronizing when starts with trail byte
-				const std::string_view suffix = search + 1;
+				const std::string_view suffix(search + 1, lengthFind - 1);
 				while (pos < endSearch) {
 					pos = SplitFindChar(cbView, pos, limitPos - pos, charStartSearch);
-					if (pos == PTRDIFF_MAX) {
+					if (pos < 0) {
 						break;
 					}
 					if (SplitMatch(cbView, pos + 1, suffix) && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
