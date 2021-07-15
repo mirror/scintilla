@@ -119,6 +119,12 @@ struct DocPlus {
 		assert(*length == static_cast<Sci::Position>(needle.length()));
 		return document.FindText(document.Length(), 0, needle.c_str(), options, length);
 	}
+	void MoveGap(Sci::Position gapNew) {
+		// Move gap to gapNew by inserting
+		document.InsertString(gapNew, "!", 1);
+		// Remove insertion
+		document.DeleteChars(gapNew, 1);
+	}
 };
 
 void TimeTrace(std::string_view sv, const Catch::Timer &tikka) {
@@ -159,6 +165,19 @@ TEST_CASE("Document") {
 		REQUIRE(location == 1);
 		location = doc.document.FindText(0, 1, finding.c_str(), FindOption::MatchCase, &lengthFinding);
 		REQUIRE(location == -1);
+	}
+
+	SECTION("SearchInBothSegments") {
+		DocPlus doc("ab-ab", 0);	// a b - a b
+		std::string finding = "ab";
+		for (int gapPos = 0; gapPos <= 5; gapPos++) {
+			doc.MoveGap(gapPos);
+			Sci::Position lengthFinding = finding.length();
+			Sci::Position location = doc.document.FindText(0, doc.document.Length(), finding.c_str(), FindOption::MatchCase, &lengthFinding);
+			REQUIRE(location == 0);
+			location = doc.document.FindText(2, doc.document.Length(), finding.c_str(), FindOption::MatchCase, &lengthFinding);
+			REQUIRE(location == 3);
+		}
 	}
 
 	SECTION("InsensitiveSearchInLatin") {

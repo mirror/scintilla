@@ -1999,7 +1999,7 @@ ptrdiff_t SplitFindChar(const SplitView &view, size_t start, size_t length, int 
 	}
 	const char *match2 = static_cast<const char *>(memchr(view.segment2 + start, ch, length - range1Length));
 	if (match2) {
-		return match2 - view.segment2 + view.length1;
+		return match2 - view.segment2;
 	}
 	return -1;
 }
