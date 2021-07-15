@@ -328,6 +328,16 @@ public:
 		}
 	}
 
+	/// Return a pointer to a single element.
+	/// Does not rearrange the buffer.
+	const T *ElementPointer(ptrdiff_t position) const noexcept {
+		if (position < part1Length) {
+			return body.data() + position;
+		} else {
+			return body.data() + position + gapLength;
+		}
+	}
+
 	/// Return the position of the gap within the buffer.
 	ptrdiff_t GapPosition() const noexcept {
 		return part1Length;

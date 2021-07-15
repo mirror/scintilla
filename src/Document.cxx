@@ -1986,38 +1986,6 @@ Document::CharacterExtracted Document::ExtractCharacter(Sci::Position position) 
 
 namespace {
 
-struct SplitView {
-	const char *segment1 = nullptr;
-	size_t length1 = 0;
-	const char *segment2 = nullptr;
-	size_t length = 0;
-
-	SplitView() = default;
-	SplitView(CellBuffer &cb) noexcept {
-		segment1 = cb.RangePointer(0, 0);
-		length1 = cb.GapPosition();
-		segment2 = cb.RangePointer(length1, 0) - length1;
-		length = cb.Length();
-	}
-	bool operator==(const SplitView &other) const noexcept {
-		return segment1 == other.segment1 && length1 == other.length1 &&
-			segment2 == other.segment2 && length == other.length;
-	}
-	bool operator!=(const SplitView &other) const noexcept {
-		return !(*this == other);
-	}
-
-	char CharAt(size_t position) const noexcept {
-		if (position < length1) {
-			return segment1[position];
-		}
-		if (position < length) {
-			return segment2[position];
-		}
-		return 0;
-	}
-};
-
 // Equivalent of memchr over the split view
 ptrdiff_t SplitFindChar(const SplitView &view, size_t start, size_t length, int ch) noexcept {
 	size_t range1Length = 0;
@@ -2086,7 +2054,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 			// Back all of a character
 			pos = NextPosition(pos, increment);
 		}
-		const SplitView cbView(cb);
+		const SplitView cbView = cb.AllView();
 		if (caseSensitive) {
 			const Sci::Position endSearch = (startPos <= endPos) ? endPos - lengthFind + 1 : endPos;
 			const unsigned char charStartSearch =  search[0];

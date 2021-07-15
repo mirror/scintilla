@@ -642,6 +642,21 @@ Sci::Position CellBuffer::GapPosition() const noexcept {
 	return substance.GapPosition();
 }
 
+SplitView CellBuffer::AllView() const noexcept {
+	const size_t length = substance.Length();
+	size_t length1 = substance.GapPosition();
+	if (length1 == 0) {
+		// Assign segment2 to segment1 / length1 to avoid useless test against 0 length1
+		length1 = length;
+	}
+	return SplitView {
+		substance.ElementPointer(0),
+		length1,
+		substance.ElementPointer(length1) - length1,
+		length
+	};
+}
+
 // The char* returned is to an allocation owned by the undo history
 const char *CellBuffer::InsertString(Sci::Position position, const char *s, Sci::Position insertLength, bool &startSequence) {
 	// InsertString and DeleteChars are the bottleneck though which all changes occur
