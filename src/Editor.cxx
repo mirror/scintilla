@@ -5988,6 +5988,10 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		else
 			return pdoc->LinesTotal();
 
+	case Message::AllocateLines:
+		pdoc->AllocateLines(wParam);
+		break;
+
 	case Message::GetModify:
 		return !pdoc->IsSavePoint();
 

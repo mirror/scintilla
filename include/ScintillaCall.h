@@ -320,6 +320,7 @@ public:
 	Position GetLine(Line line, char *text);
 	std::string GetLine(Line line);
 	Line LineCount();
+	void AllocateLines(Line lines);
 	void SetMarginLeft(int pixelWidth);
 	int MarginLeft();
 	void SetMarginRight(int pixelWidth);

@@ -255,6 +255,7 @@ enum class Message {
 	GetFirstVisibleLine = 2152,
 	GetLine = 2153,
 	GetLineCount = 2154,
+	AllocateLines = 2089,
 	SetMarginLeft = 2155,
 	GetMarginLeft = 2156,
 	SetMarginRight = 2157,

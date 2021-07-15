@@ -1120,6 +1120,10 @@ Line ScintillaCall::LineCount() {
 	return Call(Message::GetLineCount);
 }
 
+void ScintillaCall::AllocateLines(Line lines) {
+	Call(Message::AllocateLines, lines);
+}
+
 void ScintillaCall::SetMarginLeft(int pixelWidth) {
 	Call(Message::SetMarginLeft, 0, pixelWidth);
 }

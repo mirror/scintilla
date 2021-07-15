@@ -2266,6 +2266,10 @@ Sci::Line Document::LinesTotal() const noexcept {
 	return cb.Lines();
 }
 
+void Document::AllocateLines(Sci::Line lines) {
+	cb.AllocateLines(lines);
+}
+
 void Document::SetDefaultCharClasses(bool includeWordClass) {
     charClass.SetDefaultCharClasses(includeWordClass);
 }

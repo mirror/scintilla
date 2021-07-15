@@ -445,6 +445,7 @@ public:
 	void AllocateLineCharacterIndex(Scintilla::LineCharacterIndexType lineCharacterIndex);
 	void ReleaseLineCharacterIndex(Scintilla::LineCharacterIndexType lineCharacterIndex);
 	Sci::Line LinesTotal() const noexcept;
+	void AllocateLines(Sci::Line lines);
 
 	void SetDefaultCharClasses(bool includeWordClass);
 	void SetCharClasses(const unsigned char *chars, CharacterClass newCharClass);

@@ -531,6 +531,7 @@
      <a class="message" href="#SCI_GETREADONLY">SCI_GETREADONLY &rarr; bool</a><br />
      <a class="message" href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE(&lt;unused&gt;, Sci_TextRange *tr) &rarr; position</a><br />
      <a class="message" href="#SCI_ALLOCATE">SCI_ALLOCATE(position bytes)</a><br />
+     <a class="message" href="#SCI_ALLOCATELINES">SCI_ALLOCATELINES(line lines)</a><br />
      <a class="message" href="#SCI_ADDTEXT">SCI_ADDTEXT(position length, const char *text)</a><br />
      <a class="message" href="#SCI_ADDSTYLEDTEXT">SCI_ADDSTYLEDTEXT(position length, cell *c)</a><br />
      <a class="message" href="#SCI_APPENDTEXT">SCI_APPENDTEXT(position length, const char *text)</a><br />
@@ -644,6 +645,12 @@
     <p><b id="SCI_ALLOCATE">SCI_ALLOCATE(position bytes)</b><br />
      Allocate a document buffer large enough to store a given number of bytes.
      The document will not be made smaller than its current contents.</p>
+
+    <p><b id="SCI_ALLOCATELINES">SCI_ALLOCATELINES(line lines)</b><br />
+     Allocate line indices to match the <code class="parameter">lines</code> argument.
+     This is an optimization that can prevent multiple reallocations of the indices as text is inserted
+     if the application can estimate the number of lines in the document.
+     The number of lines will not be reduced by this call.</p>
 
     <p><b id="SCI_ADDTEXT">SCI_ADDTEXT(position length, const char *text)</b><br />
      This inserts the first <code class="parameter">length</code> characters from the string
