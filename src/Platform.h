@@ -313,6 +313,7 @@ struct ListOptions {
 	std::optional<ColourRGBA> back;
 	std::optional<ColourRGBA> foreSelected;
 	std::optional<ColourRGBA> backSelected;
+	AutoCompleteOption options=AutoCompleteOption::Normal;
 };
 
 class ListBox : public Window {
