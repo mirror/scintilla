@@ -1907,6 +1907,15 @@ Sci::Position Document::NextWordEnd(Sci::Position pos, int delta) const {
 	return pos;
 }
 
+namespace {
+
+constexpr bool IsWordEdge(CharacterClass cc, CharacterClass ccNext) noexcept {
+	return (cc != ccNext) &&
+		(cc == CharacterClass::word || cc == CharacterClass::punctuation);
+}
+
+}
+
 /**
  * Check that the character at the given position is a word or punctuation character and that
  * the previous character is of a different character class.
@@ -1916,11 +1925,8 @@ bool Document::IsWordStartAt(Sci::Position pos) const {
 		return false;
 	if (pos > 0) {
 		const CharacterExtracted cePos = CharacterAfter(pos);
-		const CharacterClass ccPos = WordCharacterClass(cePos.character);
 		const CharacterExtracted cePrev = CharacterBefore(pos);
-		const CharacterClass ccPrev = WordCharacterClass(cePrev.character);
-		return (ccPos == CharacterClass::word || ccPos == CharacterClass::punctuation) &&
-			(ccPos != ccPrev);
+		return IsWordEdge(WordCharacterClass(cePos.character), WordCharacterClass(cePrev.character));
 	}
 	return true;
 }
@@ -1934,11 +1940,8 @@ bool Document::IsWordEndAt(Sci::Position pos) const {
 		return false;
 	if (pos < LengthNoExcept()) {
 		const CharacterExtracted cePos = CharacterAfter(pos);
-		const CharacterClass ccPos = WordCharacterClass(cePos.character);
 		const CharacterExtracted cePrev = CharacterBefore(pos);
-		const CharacterClass ccPrev = WordCharacterClass(cePrev.character);
-		return (ccPrev == CharacterClass::word || ccPrev == CharacterClass::punctuation) &&
-			(ccPrev != ccPos);
+		return IsWordEdge(WordCharacterClass(cePrev.character), WordCharacterClass(cePos.character));
 	}
 	return true;
 }

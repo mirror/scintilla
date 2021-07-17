@@ -455,3 +455,26 @@ TEST_CASE("Document") {
 	}
 
 }
+
+TEST_CASE("Words") {
+
+	SECTION("WordsInText") {
+		const DocPlus doc(" abc ", 0);
+		REQUIRE(doc.document.IsWordAt(1, 4));
+		REQUIRE(!doc.document.IsWordAt(0, 1));
+		REQUIRE(!doc.document.IsWordAt(1, 2));
+		const DocPlus docPunct(" [!] ", 0);
+		REQUIRE(docPunct.document.IsWordAt(1, 4));
+		REQUIRE(!docPunct.document.IsWordAt(0, 1));
+		REQUIRE(!docPunct.document.IsWordAt(1, 2));
+		const DocPlus docMixed(" -ab ", 0);	// '-' is punctuation, 'ab' is word
+		REQUIRE(docMixed.document.IsWordAt(2, 4));
+		REQUIRE(docMixed.document.IsWordAt(1, 4));
+		REQUIRE(docMixed.document.IsWordAt(1, 2));
+		REQUIRE(!docMixed.document.IsWordAt(1, 3));	// 3 is between a and b so not word edge
+		// Scintilla's word definition just examines the ends
+		const DocPlus docOverSpace(" a b ", 0);
+		REQUIRE(docOverSpace.document.IsWordAt(1, 4));
+	}
+
+}
