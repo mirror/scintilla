@@ -1923,23 +1923,27 @@ constexpr bool IsWordEdge(CharacterClass cc, CharacterClass ccNext) noexcept {
 bool Document::IsWordStartAt(Sci::Position pos) const {
 	if (pos >= LengthNoExcept())
 		return false;
-	if (pos > 0) {
+	if (pos >= 0) {
 		const CharacterExtracted cePos = CharacterAfter(pos);
-		const CharacterExtracted cePrev = CharacterBefore(pos);
+		// At start of document, treat as if space before so can be word start
+		const CharacterExtracted cePrev = (pos > 0) ?
+			CharacterBefore(pos) : CharacterExtracted(' ', 1);
 		return IsWordEdge(WordCharacterClass(cePos.character), WordCharacterClass(cePrev.character));
 	}
 	return true;
 }
 
 /**
- * Check that the character at the given position is a word or punctuation character and that
+ * Check that the character before the given position is a word or punctuation character and that
  * the next character is of a different character class.
  */
 bool Document::IsWordEndAt(Sci::Position pos) const {
 	if (pos <= 0)
 		return false;
-	if (pos < LengthNoExcept()) {
-		const CharacterExtracted cePos = CharacterAfter(pos);
+	if (pos <= LengthNoExcept()) {
+		// At end of document, treat as if space after so can be word end
+		const CharacterExtracted cePos = (pos < LengthNoExcept()) ?
+			CharacterAfter(pos) : CharacterExtracted(' ', 1);
 		const CharacterExtracted cePrev = CharacterBefore(pos);
 		return IsWordEdge(WordCharacterClass(cePrev.character), WordCharacterClass(cePos.character));
 	}

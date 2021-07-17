@@ -477,4 +477,12 @@ TEST_CASE("Words") {
 		REQUIRE(docOverSpace.document.IsWordAt(1, 4));
 	}
 
+	SECTION("WordsAtEnds") {
+		const DocPlus doc("a c", 0);
+		REQUIRE(doc.document.IsWordAt(0, 1));
+		REQUIRE(doc.document.IsWordAt(2, 3));
+		const DocPlus docEndSpace(" a c ", 0);
+		REQUIRE(!docEndSpace.document.IsWordAt(0, 2));
+		REQUIRE(!docEndSpace.document.IsWordAt(3, 5));
+	}
 }
