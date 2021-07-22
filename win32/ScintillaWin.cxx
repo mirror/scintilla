@@ -456,6 +456,7 @@ class ScintillaWin :
 	bool IsCompatibleDC(HDC hOtherDC) noexcept;
 	DWORD EffectFromState(DWORD grfKeyState) const noexcept;
 
+	bool IsVisible() const noexcept;
 	int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw) noexcept;
 	bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi) noexcept;
 	void ChangeScrollPos(int barType, Sci::Position pos);
@@ -2020,6 +2021,15 @@ sptr_t ScintillaWin::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		case WM_ERASEBKGND:
 			return 1;   // Avoid any background erasure as whole window painted.
 
+		case WM_SETREDRAW:
+			::DefWindowProc(MainHWND(), msg, wParam, lParam);
+			if (wParam) {
+				SetScrollBars();
+				SetVerticalScrollPos();
+				SetHorizontalScrollPos();
+			}
+			return 0;
+
 		case WM_CAPTURECHANGED:
 			capturedMouse = false;
 			return 0;
@@ -2255,6 +2265,10 @@ void ScintillaWin::UpdateSystemCaret() {
 	}
 }
 
+bool ScintillaWin::IsVisible() const noexcept {
+	return GetWindowStyle(MainHWND()) & WS_VISIBLE;
+}
+
 int ScintillaWin::SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw) noexcept {
 	return ::SetScrollInfo(MainHWND(), nBar, lpsi, bRedraw);
 }
@@ -2265,6 +2279,10 @@ bool ScintillaWin::GetScrollInfo(int nBar, LPSCROLLINFO lpsi) noexcept {
 
 // Change the scroll position but avoid repaint if changing to same value
 void ScintillaWin::ChangeScrollPos(int barType, Sci::Position pos) {
+	if (!IsVisible()) {
+		return;
+	}
+
 	SCROLLINFO sci = {
 		sizeof(sci), 0, 0, 0, 0, 0, 0
 	};
@@ -2286,6 +2304,10 @@ void ScintillaWin::SetHorizontalScrollPos() {
 }
 
 bool ScintillaWin::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
+	if (!IsVisible()) {
+		return false;
+	}
+
 	bool modified = false;
 	SCROLLINFO sci = {
 		sizeof(sci), 0, 0, 0, 0, 0, 0
