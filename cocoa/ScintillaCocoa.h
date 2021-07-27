@@ -87,11 +87,11 @@ namespace Scintilla::Internal {
  */
 class ScintillaCocoa : public ScintillaBase {
 private:
-	ScintillaView *sciView;
+	__weak ScintillaView *sciView;
 	TimerTarget *timerTarget;
 	NSEvent *lastMouseEvent;
 
-	id<ScintillaNotificationProtocol> delegate;
+	__weak id<ScintillaNotificationProtocol> delegate;
 
 	SciNotifyFunc	notifyProc;
 	intptr_t notifyObj;
