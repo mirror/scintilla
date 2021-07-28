@@ -554,7 +554,7 @@ constexpr unsigned int representationKeyCrLf = KeyFromString("\r\n");
 void SpecialRepresentations::SetRepresentation(std::string_view charBytes, std::string_view value) {
 	if ((charBytes.length() <= 4) && (value.length() <= Representation::maxLength)) {
 		const unsigned int key = KeyFromString(charBytes);
-		MapRepresentation::iterator it = mapReprs.find(key);
+		const MapRepresentation::iterator it = mapReprs.find(key);
 		if (it == mapReprs.end()) {
 			// New entry so increment for first byte
 			const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
@@ -570,7 +570,7 @@ void SpecialRepresentations::SetRepresentation(std::string_view charBytes, std::
 void SpecialRepresentations::SetRepresentationAppearance(std::string_view charBytes, RepresentationAppearance appearance) {
 	if (charBytes.length() <= 4) {
 		const unsigned int key = KeyFromString(charBytes);
-		MapRepresentation::iterator it = mapReprs.find(key);
+		const MapRepresentation::iterator it = mapReprs.find(key);
 		if (it == mapReprs.end()) {
 			// Not present so fail
 			return;
@@ -582,7 +582,7 @@ void SpecialRepresentations::SetRepresentationAppearance(std::string_view charBy
 void SpecialRepresentations::SetRepresentationColour(std::string_view charBytes, ColourRGBA colour) {
 	if (charBytes.length() <= 4) {
 		const unsigned int key = KeyFromString(charBytes);
-		MapRepresentation::iterator it = mapReprs.find(key);
+		const MapRepresentation::iterator it = mapReprs.find(key);
 		if (it == mapReprs.end()) {
 			// Not present so fail
 			return;
@@ -595,7 +595,7 @@ void SpecialRepresentations::SetRepresentationColour(std::string_view charBytes,
 void SpecialRepresentations::ClearRepresentation(std::string_view charBytes) {
 	if (charBytes.length() <= 4) {
 		const unsigned int key = KeyFromString(charBytes);
-		MapRepresentation::iterator it = mapReprs.find(key);
+		const MapRepresentation::iterator it = mapReprs.find(key);
 		if (it != mapReprs.end()) {
 			mapReprs.erase(it);
 			const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
@@ -608,7 +608,7 @@ void SpecialRepresentations::ClearRepresentation(std::string_view charBytes) {
 }
 
 const Representation *SpecialRepresentations::GetRepresentation(std::string_view charBytes) const {
-	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
+	const MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
 	if (it != mapReprs.end()) {
 		return &(it->second);
 	}
@@ -630,7 +630,7 @@ bool SpecialRepresentations::Contains(std::string_view charBytes) const {
 	const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
 	if (!startByteHasReprs[ucStart])
 		return false;
-	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
+	const MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
 	return it != mapReprs.end();
 }
 
