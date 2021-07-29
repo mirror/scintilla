@@ -2291,17 +2291,13 @@ static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewSt
 		if ((expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeExpanded)))
 			||
 			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeContracted)))) {
-			PRectangle rcFoldLine = rcLine;
-			rcFoldLine.bottom = rcFoldLine.top + 1;
-			surface->FillRectangleAligned(rcFoldLine, Fill(vsDraw.styles[StyleDefault].fore));
+			surface->FillRectangleAligned(Side(rcLine, Edge::top, 1.0), Fill(vsDraw.styles[StyleDefault].fore));
 		}
 		// Paint the line below the fold
 		if ((expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterExpanded)))
 			||
 			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterContracted)))) {
-			PRectangle rcFoldLine = rcLine;
-			rcFoldLine.top = rcFoldLine.bottom - 1;
-			surface->FillRectangleAligned(rcFoldLine, Fill(vsDraw.styles[StyleDefault].fore));
+			surface->FillRectangleAligned(Side(rcLine, Edge::bottom, 1.0), Fill(vsDraw.styles[StyleDefault].fore));
 		}
 	}
 }
