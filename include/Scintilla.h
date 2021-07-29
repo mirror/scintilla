@@ -292,6 +292,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SC_ELEMENT_HOT_SPOT_ACTIVE 70
 #define SC_ELEMENT_HOT_SPOT_ACTIVE_BACK 71
 #define SC_ELEMENT_FOLD_LINE 80
+#define SC_ELEMENT_HIDDEN_LINE 81
 #define SCI_SETELEMENTCOLOUR 2753
 #define SCI_GETELEMENTCOLOUR 2754
 #define SCI_RESETELEMENTCOLOUR 2755

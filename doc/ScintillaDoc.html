@@ -3504,6 +3504,14 @@ struct Sci_TextToFind {
            <td></td>
            <td>Colour of fold lines</td>
          </tr>
+         <tr>
+           <th align="left"><code>SC_ELEMENT_HIDDEN_LINE</code></th>
+           <td>81</td>
+           <td>Translucent</td>
+           <td>All</td>
+           <td></td>
+           <td>Colour of line drawn to show there are lines hidden at that point</td>
+         </tr>
        </tbody>
      </table>
 
@@ -7008,6 +7016,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_DOCLINEFROMVISIBLE">SCI_DOCLINEFROMVISIBLE(line displayLine) &rarr; line</a><br />
      <a class="message" href="#SCI_SHOWLINES">SCI_SHOWLINES(line lineStart, line lineEnd)</a><br />
      <a class="message" href="#SCI_HIDELINES">SCI_HIDELINES(line lineStart, line lineEnd)</a><br />
+     <a class="element" href="#SC_ELEMENT_HIDDEN_LINE">SC_ELEMENT_HIDDEN_LINE : colouralpha</a><br />
      <a class="message" href="#SCI_GETLINEVISIBLE">SCI_GETLINEVISIBLE(line line) &rarr; bool</a><br />
      <a class="message" href="#SCI_GETALLLINESVISIBLE">SCI_GETALLLINESVISIBLE &rarr; bool</a><br />
      <a class="message" href="#SCI_SETFOLDLEVEL">SCI_SETFOLDLEVEL(line line, int level)</a><br />
@@ -7059,10 +7068,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><b id="SCI_SHOWLINES">SCI_SHOWLINES(line lineStart, line lineEnd)</b><br />
      <b id="SCI_HIDELINES">SCI_HIDELINES(line lineStart, line lineEnd)</b><br />
+     <b id="SC_ELEMENT_HIDDEN_LINE">SC_ELEMENT_HIDDEN_LINE : colouralpha</b><br />
      <b id="SCI_GETLINEVISIBLE">SCI_GETLINEVISIBLE(line line) &rarr; bool</b><br />
      <b id="SCI_GETALLLINESVISIBLE">SCI_GETALLLINESVISIBLE &rarr; bool</b><br />
      The first two messages mark a range of lines as visible or invisible and then redraw the
     display.
+    If <a class="element" href="#SCI_SETELEMENTCOLOUR"><code>SC_ELEMENT_HIDDEN_LINE</code></a>
+    is set then a horizontal line is drawn in that colour to indicate that there are hidden lines.
+    A fold line drawn in that position overrides the hidden line indicator.
     <code>SCI_GETLINEVISIBLE</code> reports on the visible state of a line and returns 1 if it is
     visible and 0 if it is not visible.
     <code>SCI_GETALLLINESVISIBLE</code> returns 1 if all lines are visible and 0

@@ -2304,6 +2304,17 @@ static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewSt
 			||
 			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterContracted))))) {
 			surface->FillRectangleAligned(Side(rcLine, Edge::bottom, 1.0), foldLineColour);
+			// If contracted fold line drawn then don't overwrite with hidden line
+			// as fold lines are more specific then hidden lines.
+			if (!expanded) {
+				return;
+			}
+		}
+	}
+	if (lastSubLine && model.pcs->GetVisible(line) && !model.pcs->GetVisible(line + 1)) {
+		std::optional<ColourRGBA> hiddenLineColour = vsDraw.ElementColour(Element::HiddenLine);
+		if (hiddenLineColour) {
+			surface->FillRectangleAligned(Side(rcLine, Edge::bottom, 1.0), *hiddenLineColour);
 		}
 	}
 }
