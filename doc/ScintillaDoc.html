@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 17 July 2021 NH</p>
+    <p>Last edited 29 July 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -2395,8 +2395,8 @@ struct Sci_TextToFind {
      <b id="SCI_SETWHITESPACEBACK">SCI_SETWHITESPACEBACK(bool useSetting, <a class="jump" href="#colour">colour</a> back)</b><br />
      By default, the colour of visible white space is determined by the lexer in use. The
     foreground and/or background colour of all visible white space can be set globally, overriding
-    the lexer's colours with <a href="#SCI_SETELEMENTCOLOUR"><code>SC_ELEMENT_WHITE_SPACE</code></a>
-    and <a href="#SCI_SETELEMENTCOLOUR"><code>SC_ELEMENT_WHITE_SPACE_BACK</code></a>.
+    the lexer's colours with <a class="element" href="#SCI_SETELEMENTCOLOUR"><code>SC_ELEMENT_WHITE_SPACE</code></a>
+    and <a class="element" href="#SCI_SETELEMENTCOLOUR"><code>SC_ELEMENT_WHITE_SPACE_BACK</code></a>.
     .<br />
     <code>SCI_SETWHITESPACEFORE</code> and <code>SCI_SETWHITESPACEBACK</code> also
     change the white space colours but the element APIs are preferred with <code>SC_ELEMENT_WHITE_SPACE</code>
@@ -3495,6 +3495,14 @@ struct Sci_TextToFind {
            <td>All</td>
            <td></td>
            <td>Background colour of active hot spot</td>
+         </tr>
+         <tr class="section">
+           <th align="left"><code>SC_ELEMENT_FOLD_LINE</code></th>
+           <td>80</td>
+           <td>Translucent</td>
+           <td>All</td>
+           <td></td>
+           <td>Colour of fold lines</td>
          </tr>
        </tbody>
      </table>
@@ -7007,6 +7015,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETAUTOMATICFOLD">SCI_SETAUTOMATICFOLD(int automaticFold)</a><br />
      <a class="message" href="#SCI_GETAUTOMATICFOLD">SCI_GETAUTOMATICFOLD &rarr; int</a><br />
      <a class="message" href="#SCI_SETFOLDFLAGS">SCI_SETFOLDFLAGS(int flags)</a><br />
+     <a class="element" href="#SC_ELEMENT_FOLD_LINE">SC_ELEMENT_FOLD_LINE : colouralpha</a><br />
      <a class="message" href="#SCI_GETLASTCHILD">SCI_GETLASTCHILD(line line, int level) &rarr; line</a><br />
      <a class="message" href="#SCI_GETFOLDPARENT">SCI_GETFOLDPARENT(line line) &rarr; line</a><br />
      <a class="message" href="#SCI_SETFOLDEXPANDED">SCI_SETFOLDEXPANDED(line line, bool
@@ -7086,9 +7095,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     update to match your changes.
 
     <p><b id="SCI_SETFOLDFLAGS">SCI_SETFOLDFLAGS(int flags)</b><br />
+     <b id="SC_ELEMENT_FOLD_LINE">SC_ELEMENT_FOLD_LINE : colouralpha</b><br />
      In addition to showing markers in the folding margin, you can indicate folds to the user by
-    drawing lines in the text area. The lines are drawn in the foreground colour set for <a
-    class="message" href="#StyleDefinition"><code>STYLE_DEFAULT</code></a>. Bits set in
+    drawing lines in the text area.
+    The lines are drawn in the <a class="element" href="#SCI_SETELEMENTCOLOUR"><code>SC_ELEMENT_FOLD_LINE</code></a>
+    colour if set.
+    If it is not set then the foreground colour set for <a
+    class="message" href="#StyleDefinition"><code>STYLE_DEFAULT</code></a> is used.
+    Bits set in
     <code class="parameter">flags</code> determine where folding lines are drawn:<br />
     </p>
 

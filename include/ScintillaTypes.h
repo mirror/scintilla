@@ -180,6 +180,7 @@ enum class Element {
 	WhiteSpaceBack = 61,
 	HotSpotActive = 70,
 	HotSpotActiveBack = 71,
+	FoldLine = 80,
 };
 
 enum class Layer {

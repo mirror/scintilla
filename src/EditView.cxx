@@ -2289,19 +2289,21 @@ static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewSt
 	const FoldLevel levelNext = model.pdoc->GetFoldLevel(line + 1);
 	if (LevelIsHeader(level) &&
 		(LevelNumber(level) < LevelNumber(levelNext))) {
+		const ColourRGBA foldLineColour = vsDraw.ElementColour(Element::FoldLine).value_or(
+			vsDraw.styles[StyleDefault].fore);
 		// Paint the line above the fold
 		if ((subLine == 0) &&
 			((expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeExpanded)))
 			||
 			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeContracted))))) {
-			surface->FillRectangleAligned(Side(rcLine, Edge::top, 1.0), Fill(vsDraw.styles[StyleDefault].fore));
+			surface->FillRectangleAligned(Side(rcLine, Edge::top, 1.0), foldLineColour);
 		}
 		// Paint the line below the fold
 		if (lastSubLine &&
 			((expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterExpanded)))
 			||
 			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterContracted))))) {
-			surface->FillRectangleAligned(Side(rcLine, Edge::bottom, 1.0), Fill(vsDraw.styles[StyleDefault].fore));
+			surface->FillRectangleAligned(Side(rcLine, Edge::bottom, 1.0), foldLineColour);
 		}
 	}
 }
