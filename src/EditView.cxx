@@ -2281,22 +2281,26 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 }
 
-static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, Sci::Line line, PRectangle rcLine) {
+static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
+	Sci::Line line, PRectangle rcLine, int subLine) {
+	const bool lastSubLine = subLine == (ll->lines - 1);
 	const bool expanded = model.pcs->GetExpanded(line);
 	const FoldLevel level = model.pdoc->GetFoldLevel(line);
 	const FoldLevel levelNext = model.pdoc->GetFoldLevel(line + 1);
 	if (LevelIsHeader(level) &&
 		(LevelNumber(level) < LevelNumber(levelNext))) {
 		// Paint the line above the fold
-		if ((expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeExpanded)))
+		if ((subLine == 0) &&
+			((expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeExpanded)))
 			||
-			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeContracted)))) {
+			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineBeforeContracted))))) {
 			surface->FillRectangleAligned(Side(rcLine, Edge::top, 1.0), Fill(vsDraw.styles[StyleDefault].fore));
 		}
 		// Paint the line below the fold
-		if ((expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterExpanded)))
+		if (lastSubLine &&
+			((expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterExpanded)))
 			||
-			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterContracted)))) {
+			(!expanded && (FlagSet(model.foldFlags, FoldFlag::LineAfterContracted))))) {
 			surface->FillRectangleAligned(Side(rcLine, Edge::bottom, 1.0), Fill(vsDraw.styles[StyleDefault].fore));
 		}
 	}
@@ -2428,7 +2432,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 					ll->RestoreBracesHighlight(rangeLine, model.braces, bracesIgnoreStyle);
 
 					if (FlagSet(phase, DrawPhase::foldLines)) {
-						DrawFoldLines(surface, model, vsDraw, lineDoc, rcLine);
+						DrawFoldLines(surface, model, vsDraw, ll.get(), lineDoc, rcLine, subLine);
 					}
 
 					if (FlagSet(phase, DrawPhase::carets)) {
