@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 29 July 2021 NH</p>
+    <p>Last edited 30 July 2021 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -7869,7 +7869,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     in <code>SciLexer.h</code>. Some lexers may not have a lexer ID, just a lexer name in which case 0 is returned.</p>
 
     <p><b id="SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *language NUL-terminated) &rarr; int</b><br />
-     <code>SCI_GETLEXERLANGUAGE</code>returns the name of the current lexer which must be set with <code>SCI_SETILEXER</code>.
+     <code>SCI_GETLEXERLANGUAGE</code> returns the name of the current lexer which must be set with <code>SCI_SETILEXER</code>.
     To locate the name for a lexer, open the relevant
     <code>lexilla/lexers/Lex*.cxx</code> file and search for <code>LexerModule</code>. The third argument in the
     <code>LexerModule</code> constructor is the name to use.</p>
@@ -7916,10 +7916,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     without modification; extra spaces at the beginning or end of <code class="parameter">key</code> are
     significant.</p>
 
-    <p>The <code class="parameter">value</code> string can refer to other keywords. For example,
-    <code>SCI_SETPROPERTY("foldTimes10", "$(fold)0")</code> stores the string
-    <code>"$(fold)0"</code>, but when this is accessed, the <code>$(fold)</code> is replaced by the
-    value of the <code>"fold"</code> keyword (or by nothing if this keyword does not exist).</p>
+    <p>The <code class="parameter">value</code> string can no longer refer to other keywords
+    as was possible in older releases of Scintilla.</p>
+
+    <p>Lexers may only store values for keywords they support.</p>
 
     <p>Currently the "fold" property is defined for most of the lexers to set the fold structure if
     set to "1". <code>SCLEX_PYTHON</code> understands <code>"tab.timmy.whinge.level"</code> as a
@@ -7932,8 +7932,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     lexer or start with "lexer." or "fold." if they apply to multiple lexers.</p>
 
     <p>Applications may discover the set of properties used by searching the source code of lexers for lines that contain
-    <code>GetProperty</code> and a double quoted string and extract the value of the double quoted string as the property name.
-    The <code>scintilla/scripts/LexGen.py</code> script does this and can be used as an example.
+    <code>GetProperty</code> or <code>DefineProperty</code> and a double quoted string and extract the value of
+    the double quoted string as the property name.
+    The <code>lexilla/scripts/LexillaData.py</code> script does this and can be used as an example.
     Documentation for the property may be located above the call as a multi-line comment starting with
     <br/><code>// property &lt;property-name&gt;</code></p>
 
@@ -7942,30 +7943,24 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     buffer and return the length (not including the terminating 0).  If not found, copy an empty string
     to the buffer and return 0.</p>
 
-    <p>Note that  "keyword replacement" as described in <a class="message" href="#SCI_SETPROPERTY">
-    <code>SCI_SETPROPERTY</code></a> will not be performed.</p>
-
     <p>If the value argument is 0 then the length that should be allocated to store the value is returned;
     again, the terminating 0 is not included.</p>
 
     <p><b id="SCI_GETPROPERTYEXPANDED">SCI_GETPROPERTYEXPANDED(const char *key, char *value) &rarr; int</b><br />
-    Lookup a keyword:value pair using the specified key; if found, copy the value to the user-supplied
+    This is now the same as <a class="message" href="#SCI_GETPROPERTY"><code>SCI_GETPROPERTY</code></a>
+    - no expansion is performed.</p>
+
+    <p>Lookup a keyword:value pair using the specified key; if found, copy the value to the user-supplied
     buffer and return the length (not including the terminating 0).  If not found, copy an empty string
     to the buffer and return 0.</p>
 
-    <p>Note that  "keyword replacement" as described in <a class="message" href="#SCI_SETPROPERTY">
-    <code>SCI_SETPROPERTY</code></a> will be performed.</p>
-
-    <p>If the value argument is 0 then the length that should be allocated to store the value (including any indicated keyword replacement)
-    is returned; again, the terminating 0 is not included.</p>
+    <p>If the value argument is 0 then the length that should be allocated to store the value is returned;
+    again, the terminating 0 is not included.</p>
 
     <p><b id="SCI_GETPROPERTYINT">SCI_GETPROPERTYINT(const char *key, int defaultValue) &rarr; int</b><br />
     Lookup a keyword:value pair using the specified key; if found, interpret the value as an integer and return it.
     If not found (or the value is an empty string) then return the supplied default.  If the keyword:value pair is found but is not
     a number, then return 0.</p>
-
-    <p>Note that  "keyword replacement" as described in <a class="message" href="#SCI_SETPROPERTY">
-    <code>SCI_SETPROPERTY</code></a> will be performed before any numeric interpretation.</p>
 
     <p><b id="SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, const char *keyWords)</b><br />
      You can set up to 9 lists of keywords for use by the current lexer.
