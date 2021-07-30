@@ -377,6 +377,14 @@ constexpr size_t AlignUp(size_t value, size_t alignment) noexcept {
 
 constexpr size_t alignmentLLC = 20;
 
+constexpr bool GraphicASCII(char ch) noexcept {
+	return ch >= ' ' && ch <= '~';
+}
+
+bool AllGraphicASCII(std::string_view text) noexcept {
+	return std::all_of(text.cbegin(), text.cend(), GraphicASCII);
+}
+
 }
 
 
@@ -893,6 +901,14 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 		// Not found. Choose the oldest of the two slots to replace
 		if (pces[probe].NewerThan(pces[probe2])) {
 			probe = probe2;
+		}
+	}
+	if (vstyle.styles[styleNumber].monospaceASCII) {
+		if (AllGraphicASCII(sv)) {
+			for (size_t i = 0; i < sv.length(); i++) {
+				positions[i] = vstyle.styles[styleNumber].aveCharWidth * (i+1);
+			}
+			return;
 		}
 	}
 	const Font *fontStyle = vstyle.styles[styleNumber].font.get();

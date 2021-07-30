@@ -3021,6 +3021,9 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_STYLESETHOTSPOT">SCI_STYLESETHOTSPOT(int style, bool
     hotspot)</a><br />
     <a class="message" href="#SCI_STYLEGETHOTSPOT">SCI_STYLEGETHOTSPOT(int style) &rarr; bool</a><br />
+     <a class="message" href="#SCI_STYLESETCHECKMONOSPACED">SCI_STYLESETCHECKMONOSPACED(int style, bool
+    checkMonospaced)</a><br />
+    <a class="message" href="#SCI_STYLEGETCHECKMONOSPACED">SCI_STYLEGETCHECKMONOSPACED(int style) &rarr; bool</a><br />
     <a class="message" href="#SCI_SETFONTLOCALE">SCI_SETFONTLOCALE(&lt;unused&gt;, const char *localeName)</a><br />
     <a class="message" href="#SCI_GETFONTLOCALE">SCI_GETFONTLOCALE(&lt;unused&gt;, char *localeName) &rarr; int</a><br />
     </code>
@@ -3264,6 +3267,28 @@ struct Sci_TextToFind {
     The cursor changes to a hand over hotspots, and the foreground, and background colours
     may change and an underline appear to indicate that these areas are sensitive to clicking.
     This may be used to allow hyperlinks to other documents.</p>
+
+    <p><b id="SCI_STYLESETCHECKMONOSPACED">SCI_STYLESETCHECKMONOSPACED(int style, bool
+    checkMonospaced)</b><br />
+    <b id="SCI_STYLEGETCHECKMONOSPACED">SCI_STYLEGETCHECKMONOSPACED(int style) &rarr; bool</b><br />
+    This attribute indicates that the font may be monospaced over the ASCII graphics characters (' ' &hellip; '~',
+    including letters ('a'&hellip;'z', 'A'&hellip;'Z') and numbers ('0'&hellip;'9')).
+    This allows optimizing speed and memory use for some common scenarios where documents are mostly composed from ASCII
+    characters.</p>
+    <p>
+    Fonts are rarely monospaced over all possible characters.
+    Emoji '&#x1F603;', Arabic characters '&#x0634;' and Chinese ideographs '&#x6F22;' are often different widths to Roman letters.
+    Even when a font is designed as monospaced, not all characters may be present
+    and platforms may substitute other fonts for any missing characters with the substitute characters taking more or less space.
+    However, fonts are often reliably monospaced over ASCII text (disregarding control characters) and many documents contain
+    mostly ASCII characters.
+    This setting allows simplified position calculations for text runs that are purely ASCII graphics characters.
+    </p>
+    <p>
+    Before treating the font as monospaced, it is first checked over the ' ' &hellip; '~' range and for some known combinations of characters
+    that may have different spacings because of kerning or ligatures.
+    Applications may apply the 'check monospaced' attribute just to fonts known to be monospaced or on all fonts, leaving it to Scintilla to
+    reject fonts that are proportional.</p>
 
     <p><b id="SCI_SETFONTLOCALE">SCI_SETFONTLOCALE(&lt;unused&gt;, const char *localeName)</b><br />
     <b id="SCI_GETFONTLOCALE">SCI_GETFONTLOCALE(&lt;unused&gt;, char *localeName NUL-terminated) &rarr; int</b><br />

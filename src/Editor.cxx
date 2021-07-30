@@ -117,7 +117,7 @@ static constexpr bool IsAllSpacesOrTabs(std::string_view sv) noexcept {
 	return true;
 }
 
-Editor::Editor() : durationWrapOneByte(0.000001, 0.0000001, 0.00001) {
+Editor::Editor() : durationWrapOneByte(0.000001, 0.00000001, 0.00001) {
 	ctrlID = 0;
 
 	stylesValid = false;
@@ -5748,6 +5748,9 @@ void Editor::StyleSetMessage(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::StyleSetHotSpot:
 		vs.styles[wParam].hotspot = lParam != 0;
 		break;
+	case Message::StyleSetCheckMonospaced:
+		vs.styles[wParam].checkMonospaced = lParam != 0;
+		break;
 	default:
 		break;
 	}
@@ -5787,6 +5790,8 @@ sptr_t Editor::StyleGetMessage(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.styles[wParam].changeable ? 1 : 0;
 	case Message::StyleGetHotSpot:
 		return vs.styles[wParam].hotspot ? 1 : 0;
+	case Message::StyleGetCheckMonospaced:
+		return vs.styles[wParam].checkMonospaced ? 1 : 0;
 	default:
 		break;
 	}
@@ -7202,6 +7207,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::StyleSetVisible:
 	case Message::StyleSetChangeable:
 	case Message::StyleSetHotSpot:
+	case Message::StyleSetCheckMonospaced:
 		StyleSetMessage(iMessage, wParam, lParam);
 		break;
 
@@ -7220,6 +7226,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::StyleGetVisible:
 	case Message::StyleGetChangeable:
 	case Message::StyleGetHotSpot:
+	case Message::StyleGetCheckMonospaced:
 		return StyleGetMessage(iMessage, wParam, lParam);
 
 	case Message::StyleResetDefault:

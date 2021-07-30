@@ -1985,6 +1985,11 @@ class TestStyleAttributes(unittest.TestCase):
 		self.ed.FontLocale = testLocale
 		self.assertEquals(self.ed.GetFontLocale(), testLocale)
 
+	def testCheckMonospaced(self):
+		self.assertEquals(self.ed.StyleGetCheckMonospaced(self.ed.STYLE_DEFAULT), 0)
+		self.ed.StyleSetCheckMonospaced(self.ed.STYLE_DEFAULT, 1)
+		self.assertEquals(self.ed.StyleGetCheckMonospaced(self.ed.STYLE_DEFAULT), 1)
+
 class TestElements(unittest.TestCase):
 	""" These tests are just to ensure that the calls set and retrieve values.
 	They do not check the visual appearance of the style attributes.

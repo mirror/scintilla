@@ -17,6 +17,7 @@ struct FontSpecification {
 	int size;
 	Scintilla::CharacterSet characterSet;
 	Scintilla::FontQuality extraFontFlag;
+	bool checkMonospaced = false;
 	FontSpecification() noexcept :
 		fontName(nullptr),
 		weight(Scintilla::FontWeight::Normal),
@@ -35,6 +36,7 @@ struct FontMeasurements {
 	XYPOSITION capitalHeight;	// Top of capital letter to baseline: ascent - internal leading
 	XYPOSITION aveCharWidth;
 	XYPOSITION spaceWidth;
+	bool monospaceASCII = false;
 	int sizeZoomed;
 	FontMeasurements() noexcept;
 	void ClearMeasurements() noexcept;

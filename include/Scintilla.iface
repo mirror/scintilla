@@ -677,6 +677,12 @@ set void StyleSetCharacterSet=2066(int style, CharacterSet characterSet)
 # Set a style to be a hotspot or not.
 set void StyleSetHotSpot=2409(int style, bool hotspot)
 
+# Indicate that a style may be monospaced over ASCII graphics characters which enables optimizations.
+set void StyleSetCheckMonospaced=2254(int style, bool checkMonospaced)
+
+# Get whether a style may be monospaced.
+get bool StyleGetCheckMonospaced=2255(int style,)
+
 enu Element=SC_ELEMENT_
 val SC_ELEMENT_LIST=0
 val SC_ELEMENT_LIST_BACK=1
