@@ -1232,11 +1232,19 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 
 		NSString *path = [bundle pathForResource: @"mac_cursor_busy" ofType: @"tiff" inDirectory: nil];
 		NSImage *image = [[NSImage alloc] initWithContentsOfFile: path];
-		waitCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(2, 2)];
+		if (image) {
+			waitCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(2, 2)];
+		} else {
+			NSLog(@"Wait cursor is invalid.");
+		}
 
 		path = [bundle pathForResource: @"mac_cursor_flipped" ofType: @"tiff" inDirectory: nil];
 		image = [[NSImage alloc] initWithContentsOfFile: path];
-		reverseArrowCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(15, 2)];
+		if (image) {
+			reverseArrowCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(15, 2)];
+		} else {
+			NSLog(@"Reverse arrow cursor is invalid.");
+		}
 	}
 }
 
