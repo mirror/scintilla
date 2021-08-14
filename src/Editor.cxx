@@ -479,11 +479,16 @@ void Editor::DiscardOverdraw() {
 }
 
 void Editor::Redraw() {
+	if (redrawPendingText) {
+		return;
+	}
 	//Platform::DebugPrintf("Redraw all\n");
 	const PRectangle rcClient = GetClientRectangle();
 	wMain.InvalidateRectangle(rcClient);
 	if (wMargin.GetID())
 		wMargin.InvalidateAll();
+	else
+		redrawPendingText = true;
 	//wMain.InvalidateAll();
 }
 
@@ -498,11 +503,15 @@ void Editor::RedrawSelMargin(Sci::Line line, bool allAfter) {
 		Redraw();
 		return;
 	}
+	if (redrawPendingMargin) {
+		return;
+	}
 	PRectangle rcMarkers = GetClientRectangle();
 	if (!markersInText) {
 		// Normal case: just draw the margin
 		rcMarkers.right = rcMarkers.left + vs.fixedColumnWidth;
 	}
+	const PRectangle rcMarkersFull = rcMarkers;
 	if (line != -1) {
 		PRectangle rcLine = RectangleFromRange(Range(pdoc->LineStart(line)), 0);
 
@@ -529,6 +538,9 @@ void Editor::RedrawSelMargin(Sci::Line line, bool allAfter) {
 		wMargin.InvalidateRectangle(rcMarkers);
 	} else {
 		wMain.InvalidateRectangle(rcMarkers);
+		if (rcMarkers == rcMarkersFull) {
+			redrawPendingMargin = true;
+		}
 	}
 }
 
@@ -552,6 +564,9 @@ PRectangle Editor::RectangleFromRange(Range r, int overlap) {
 }
 
 void Editor::InvalidateRange(Sci::Position start, Sci::Position end) {
+	if (redrawPendingText) {
+		return;
+	}
 	RedrawRect(RectangleFromRange(Range(start, end), view.LinesOverlap() ? vs.lineOverlap : 0));
 }
 
@@ -1717,6 +1732,9 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 }
 
 void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
+	redrawPendingText = false;
+	redrawPendingMargin = false;
+
 	//Platform::DebugPrintf("Paint:%1d (%3d,%3d) ... (%3d,%3d)\n",
 	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
 
