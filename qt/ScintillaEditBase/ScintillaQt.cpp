@@ -665,7 +665,7 @@ void ScintillaQt::StartDrag()
 		QDrag *dragon = new QDrag(scrollArea);
 		dragon->setMimeData(mimeData);
 
-		Qt::DropAction dropAction = dragon->exec(Qt::CopyAction|Qt::MoveAction);
+		Qt::DropAction dropAction = dragon->exec(static_cast<Qt::DropActions>(Qt::CopyAction|Qt::MoveAction));
 		if ((dropAction == Qt::MoveAction) && dropWentOutside) {
 			// Remove dragged out text
 			ClearSelection();

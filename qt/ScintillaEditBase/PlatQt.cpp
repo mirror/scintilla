@@ -1000,7 +1000,7 @@ void ListBoxImpl::Create(Window &parent,
 	// keyboard stops working. Qt::ToolTip works but its only really
 	// documented for tooltips.
 	// On Linux / X this setting allows clicking on list items.
-	list->setParent(nullptr, Qt::ToolTip | Qt::FramelessWindowHint);
+	list->setParent(nullptr, static_cast<Qt::WindowFlags>(Qt::ToolTip | Qt::FramelessWindowHint));
 #endif
 	list->setAttribute(Qt::WA_ShowWithoutActivating);
 	list->setFocusPolicy(Qt::NoFocus);
