@@ -609,7 +609,6 @@ class CaseConverter : public ICaseConverter {
 public:
 	CaseConverter() noexcept {
 	}
-	virtual ~CaseConverter() = default;
 	bool Initialised() const noexcept {
 		return !characters.empty();
 	}

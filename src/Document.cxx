@@ -2812,11 +2812,6 @@ Sci::Position Document::BraceMatch(Sci::Position position, Sci::Position /*maxRe
 class BuiltinRegex : public RegexSearchBase {
 public:
 	explicit BuiltinRegex(CharClassify *charClassTable) : search(charClassTable) {}
-	BuiltinRegex(const BuiltinRegex &) = delete;
-	BuiltinRegex(BuiltinRegex &&) = delete;
-	BuiltinRegex &operator=(const BuiltinRegex &) = delete;
-	BuiltinRegex &operator=(BuiltinRegex &&) = delete;
-	~BuiltinRegex() override = default;
 
 	Sci::Position FindText(Document *doc, Sci::Position minPos, Sci::Position maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, FindOption flags,

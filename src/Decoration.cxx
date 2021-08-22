@@ -39,8 +39,6 @@ public:
 
 	explicit Decoration(int indicator_) : indicator(indicator_) {
 	}
-	~Decoration() override {
-	}
 
 	bool Empty() const noexcept override {
 		return (rs.Runs() == 1) && (rs.AllSameAs(0));
@@ -75,7 +73,7 @@ template <typename POS>
 class DecorationList : public IDecorationList {
 	int currentIndicator;
 	int currentValue;
-	Decoration<POS> *current;	// Cached so FillRange doesn't have to search for each call.
+	Decoration<POS> *current;	// Non-owning. Cached so FillRange doesn't have to search for each call.
 	Sci::Position lengthDocument;
 	// Ordered by indicator
 	std::vector<std::unique_ptr<Decoration<POS>>> decorationList;

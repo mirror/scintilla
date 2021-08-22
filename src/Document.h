@@ -90,7 +90,7 @@ public:
  */
 class RegexSearchBase {
 public:
-	virtual ~RegexSearchBase() {}
+	virtual ~RegexSearchBase() = default;
 
 	virtual Sci::Position FindText(Document *doc, Sci::Position minPos, Sci::Position maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, Scintilla::FindOption flags, Sci::Position *length) = 0;
