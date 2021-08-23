@@ -485,11 +485,11 @@ void Editor::Redraw() {
 	//Platform::DebugPrintf("Redraw all\n");
 	const PRectangle rcClient = GetClientRectangle();
 	wMain.InvalidateRectangle(rcClient);
-	if (wMargin.GetID())
+	if (wMargin.GetID()) {
 		wMargin.InvalidateAll();
-	else
+	} else if (paintState == PaintState::notPainting) {
 		redrawPendingText = true;
-	//wMain.InvalidateAll();
+	}
 }
 
 void Editor::RedrawSelMargin(Sci::Line line, bool allAfter) {
