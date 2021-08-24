@@ -265,6 +265,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	elementColours.erase(Element::CaretLineBack);
 	elementAllowsTranslucent.insert(Element::CaretLineBack);
 	caretLine.alwaysShow = false;
+	caretLine.subLine = false;
 	caretLine.layer = Layer::Base;
 	caretLine.frame = 0;
 

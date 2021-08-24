@@ -2028,6 +2028,14 @@ class TestElements(unittest.TestCase):
 		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_LIST_BACK), self.testColourAlpha)
 		self.assertTrue(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_LIST_BACK))
 
+	def testSubline(self):
+		# Default is false
+		self.assertEquals(self.ed.CaretLineHighlightSubLine, False)
+		self.ed.CaretLineHighlightSubLine = True
+		self.assertEquals(self.ed.CaretLineHighlightSubLine, True)
+		self.ed.CaretLineHighlightSubLine = False
+		self.assertEquals(self.ed.CaretLineHighlightSubLine, False)
+
 	def testReset(self):
 		self.ed.SetElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT, self.testColourAlpha)
 		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_SELECTION_ADDITIONAL_TEXT), self.testColourAlpha)

@@ -214,6 +214,8 @@ public:
 	void SetSelectionLayer(Scintilla::Layer layer);
 	Scintilla::Layer CaretLineLayer();
 	void SetCaretLineLayer(Scintilla::Layer layer);
+	bool CaretLineHighlightSubLine();
+	void SetCaretLineHighlightSubLine(bool subLine);
 	void SetCaretFore(Colour fore);
 	void AssignCmdKey(int keyDefinition, int sciCommand);
 	void ClearCmdKey(int keyDefinition);

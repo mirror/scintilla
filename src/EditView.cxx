@@ -951,19 +951,19 @@ static void DrawCaretLineFramed(Surface *surface, const ViewStyle &vsDraw, const
 	// Avoid double drawing the corners by removing the left and right sides when drawing top and bottom borders
 	const PRectangle rcWithoutLeftRight = rcLine.Inset(Point(width, 0.0));
 
-	if (subLine == 0 || ll->wrapIndent == 0 || vsDraw.caretLine.layer != Layer::Base) {
+	if (subLine == 0 || ll->wrapIndent == 0 || vsDraw.caretLine.layer != Layer::Base || vsDraw.caretLine.subLine) {
 		// Left
 		surface->FillRectangleAligned(Side(rcLine, Edge::left, width), colourFrame);
 	}
-	if (subLine == 0) {
+	if (subLine == 0 || vsDraw.caretLine.subLine) {
 		// Top
 		surface->FillRectangleAligned(Side(rcWithoutLeftRight, Edge::top, width), colourFrame);
 	}
-	if (subLine == ll->lines - 1 || vsDraw.caretLine.layer != Layer::Base) {
+	if (subLine == ll->lines - 1 || vsDraw.caretLine.layer != Layer::Base || vsDraw.caretLine.subLine) {
 		// Right
 		surface->FillRectangleAligned(Side(rcLine, Edge::right, width), colourFrame);
 	}
-	if (subLine == ll->lines - 1) {
+	if (subLine == ll->lines - 1 || vsDraw.caretLine.subLine) {
 		// Bottom
 		surface->FillRectangleAligned(Side(rcWithoutLeftRight, Edge::bottom, width), colourFrame);
 	}
@@ -2340,10 +2340,9 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		const int screenLinePaintFirst = static_cast<int>(rcArea.top) / vsDraw.lineHeight;
 		const int xStart = vsDraw.textStart - model.xOffset + static_cast<int>(ptOrigin.x);
 
-		SelectionPosition posCaret = model.sel.RangeMain().caret;
-		if (model.posDrag.IsValid())
-			posCaret = model.posDrag;
+		const SelectionPosition posCaret = model.posDrag.IsValid() ? model.posDrag : model.sel.RangeMain().caret;
 		const Sci::Line lineCaret = model.pdoc->SciLineFromPosition(posCaret.Position());
+		const int caretOffset = static_cast<int>(posCaret.Position() - model.pdoc->LineStart(lineCaret));
 
 		PRectangle rcTextArea = rcClient;
 		if (vsDraw.marginInside) {
@@ -2410,7 +2409,8 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				durLayout += ep.Duration(true);
 #endif
 				if (ll) {
-					ll->containsCaret = !hideSelection && (lineDoc == lineCaret);
+					ll->containsCaret = !hideSelection && (lineDoc == lineCaret)
+						&& (ll->lines == 1 || !vsDraw.caretLine.subLine || ll->InLine(caretOffset, subLine));
 					ll->hotspot = model.GetHotSpotRange();
 
 					PRectangle rcLine = rcTextArea;

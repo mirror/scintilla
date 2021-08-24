@@ -3586,6 +3586,8 @@ struct Sci_TextToFind {
     <a class="message" href="#SCI_GETCARETLINEFRAME">SCI_GETCARETLINEFRAME &rarr; int</a><br />
     <a class="message" href="#SCI_SETCARETLINEVISIBLEALWAYS">SCI_SETCARETLINEVISIBLEALWAYS(bool alwaysVisible)</a><br />
     <a class="message" href="#SCI_GETCARETLINEVISIBLEALWAYS">SCI_GETCARETLINEVISIBLEALWAYS &rarr; bool</a><br />
+    <a class="message" href="#SCI_SETCARETLINEHIGHLIGHTSUBLINE">SCI_SETCARETLINEHIGHLIGHTSUBLINE(bool subLine)</a><br />
+    <a class="message" href="#SCI_GETCARETLINEHIGHLIGHTSUBLINE">SCI_GETCARETLINEHIGHLIGHTSUBLINE &rarr; bool</a><br />
     <br />
     <a class="message" href="#SCI_SETCARETPERIOD">SCI_SETCARETPERIOD(int periodMilliseconds)</a><br />
     <a class="message" href="#SCI_GETCARETPERIOD">SCI_GETCARETPERIOD &rarr; int</a><br />
@@ -3773,6 +3775,12 @@ struct Sci_TextToFind {
      <b id="SCI_GETCARETLINEVISIBLEALWAYS">SCI_GETCARETLINEVISIBLEALWAYS &rarr; bool</b><br />
      Choose to make the caret line always visible even when the window is not in focus.
      Default behaviour <code>SCI_SETCARETLINEVISIBLEALWAYS(false)</code> the caret line is only visible when the window is in focus.
+          </p>
+
+    <p><b id="SCI_SETCARETLINEHIGHLIGHTSUBLINE">SCI_SETCARETLINEHIGHLIGHTSUBLINE(bool subLine)</b><br />
+     <b id="SCI_GETCARETLINEHIGHLIGHTSUBLINE">SCI_GETCARETLINEHIGHLIGHTSUBLINE &rarr; bool</b><br />
+     Choose to highlight only the subline containing the caret instead of the whole line.
+     Default behaviour <code>SCI_SETCARETLINEHIGHLIGHTSUBLINE(false)</code> the whole caret line is highlighted.
           </p>
 
     <p><b id="SCI_SETCARETPERIOD">SCI_SETCARETPERIOD(int periodMilliseconds)</b><br />

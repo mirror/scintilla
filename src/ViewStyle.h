@@ -63,6 +63,8 @@ struct CaretLineAppearance {
 	Scintilla::Layer layer;
 	// Also show when non-focused
 	bool alwaysShow;
+	// highlight sub line instead of whole line
+	bool subLine;
 	// Non-0: draw a rectangle around line instead of filling line. Value is pixel width of frame
 	int frame;
 };
