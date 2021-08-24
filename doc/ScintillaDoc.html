@@ -313,7 +313,7 @@
     As the protocol only supports object lexers, an additional function <code>CreateLexer(const char *name)</code>
     is exposed which will create a lexer object (ILexer5 *) for any object lexer or function lexer.
     </p>
-   
+
     <p>Lexer libraries that provide the same functions as Lexilla may provide lexers for use by Scintilla,
     augmenting or replacing those provided by Lexilla.</p>
 
@@ -3337,14 +3337,14 @@ struct Sci_TextToFind {
     <b id="SCI_GETELEMENTALLOWSTRANSLUCENT">SCI_GETELEMENTALLOWSTRANSLUCENT(int element) &rarr; bool</b><br />
      Returns true when the element currently allows translucent drawing when an alpha component is included.
      This may change based on circumstances - different platforms or graphics technologies may implement translucency
-     and newer versions of Scintilla may implement translucency for elements that did not previously support it. 
+     and newer versions of Scintilla may implement translucency for elements that did not previously support it.
      </p>
-     
+
     <p>
     <b id="SCI_GETELEMENTBASECOLOUR">SCI_GETELEMENTBASECOLOUR(int element) &rarr; colouralpha</b><br />
      Returns the default colour of an element.
      This may be a value defined by Scintilla or it may be derived from the operating system or platform.
-     Which values are set from the operating system may differ between operating systems and operating system versions. 
+     Which values are set from the operating system may differ between operating systems and operating system versions.
      When undefined the return value is 0 which is equivalent to completely transparent black.
      These colours may be useful when defining styles with similarities such as synthesizing dark
      mode styles that use the same colours as the system</p>
@@ -3664,7 +3664,7 @@ struct Sci_TextToFind {
 
      <p><b id="SCI_SETSELALPHA">SCI_SETSELALPHA(<a class="jump" href="#alpha">alpha</a> alpha)</b><br />
      <b id="SCI_GETSELALPHA">SCI_GETSELALPHA &rarr; int</b><br />
-     These APIs are now discouraged and should be replaced with 
+     These APIs are now discouraged and should be replaced with
      a combination of setting the layer with SCI_SETSELECTIONLAYER and
      setting translucency through the SC_ELEMENT_SELECTION_BACK element.</p>
 
@@ -5614,7 +5614,7 @@ struct Sci_TextToFind {
      <code>INDIC_STRIKE</code>, <code>INDIC_BOX</code>, <code>INDIC_ROUNDBOX</code>, <code>INDIC_STRAIGHTBOX</code>,
      <code>INDIC_FULLBOX</code>, <code>INDIC_DASH</code>, <code>INDIC_DOTS</code>, <code>INDIC_SQUIGGLELOW</code>.
      </p>
-     <p>Fractional pixel widths are possible such as 50 for half a pixel wide. 
+     <p>Fractional pixel widths are possible such as 50 for half a pixel wide.
      On many systems a half pixel value will appear as a fainter line but it allows drawing very thin lines on systems with multiple physical pixels
      per logical pixel.
      Half (logical) pixel lines are available on macOS with 'retina' displays,
@@ -9517,7 +9517,7 @@ EM_FORMATRANGE
      Any use of these symbols should be removed and replaced with <a href="#Indicators">standard indicators</a>.
     <code>SCI_GETSTYLEBITS</code> and <code>SCI_GETSTYLEBITSNEEDED</code> always return 8,
     indicating that 8 bits are used for styling and there are 256 styles.</p>
-    
+
     <p>Discouraged APIs are a step before deprecation. A new preferred API has been implemented that new code should use
     but the old API is unlikely to be removed.
     Discouraged APIs are marked with a <span class="discouraged">orange strikethrough</span> and their documentation mentions the preferred API.

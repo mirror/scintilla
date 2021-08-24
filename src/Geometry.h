@@ -260,7 +260,7 @@ class Stroke {
 public:
 	ColourRGBA colour;
 	XYPOSITION width;
-	constexpr Stroke(ColourRGBA colour_, XYPOSITION width_=1.0) noexcept : 
+	constexpr Stroke(ColourRGBA colour_, XYPOSITION width_=1.0) noexcept :
 		colour(colour_), width(width_) {
 	}
 	constexpr float WidthF() const noexcept {
@@ -274,7 +274,7 @@ public:
 class Fill {
 public:
 	ColourRGBA colour;
-	constexpr Fill(ColourRGBA colour_) noexcept : 
+	constexpr Fill(ColourRGBA colour_) noexcept :
 		colour(colour_) {
 	}
 };
@@ -286,10 +286,10 @@ class FillStroke {
 public:
 	Fill fill;
 	Stroke stroke;
-	constexpr FillStroke(ColourRGBA colourFill_, ColourRGBA colourStroke_, XYPOSITION widthStroke_=1.0) noexcept : 
+	constexpr FillStroke(ColourRGBA colourFill_, ColourRGBA colourStroke_, XYPOSITION widthStroke_=1.0) noexcept :
 		fill(colourFill_), stroke(colourStroke_, widthStroke_) {
 	}
-	constexpr FillStroke(ColourRGBA colourBoth, XYPOSITION widthStroke_=1.0) noexcept : 
+	constexpr FillStroke(ColourRGBA colourBoth, XYPOSITION widthStroke_=1.0) noexcept :
 		fill(colourBoth), stroke(colourBoth, widthStroke_) {
 	}
 };

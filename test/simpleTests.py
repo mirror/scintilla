@@ -2005,7 +2005,7 @@ class TestElements(unittest.TestCase):
 
 	def tearDown(self):
 		pass
-		
+
 	def ElementColour(self, element):
 		# & 0xffffffff prevents sign extension issues
 		return self.ed.GetElementColour(element) & 0xffffffff
@@ -2062,14 +2062,14 @@ class TestElements(unittest.TestCase):
 		self.assertEquals(self.ed.SelectionLayer, self.ed.SC_LAYER_OVER_TEXT)
 		self.ed.SelectionLayer = self.ed.SC_LAYER_BASE
 		self.assertEquals(self.ed.SelectionLayer, self.ed.SC_LAYER_BASE)
-		
+
 	def testCaretLine(self):
 		# Newer Layer / ElementColour API
 		self.assertEquals(self.ed.CaretLineLayer, 0)
 		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_CARET_LINE_BACK))
 		self.assertEquals(self.ed.CaretLineFrame, 0)
 		self.assertFalse(self.ed.CaretLineVisibleAlways)
-		
+
 		self.ed.CaretLineLayer = 2
 		self.assertEquals(self.ed.CaretLineLayer, 2)
 		self.ed.CaretLineFrame = 2
@@ -2078,7 +2078,7 @@ class TestElements(unittest.TestCase):
 		self.assertTrue(self.ed.CaretLineVisibleAlways)
 		self.ed.SetElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK, self.testColourAlpha)
 		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK), self.testColourAlpha)
-		
+
 		self.RestoreCaretLine()
 
 	def testCaretLineLayerDiscouraged(self):
@@ -2104,13 +2104,13 @@ class TestElements(unittest.TestCase):
 		backColourTranslucent = backColour | (alpha << 24)
 		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_CARET_LINE_BACK), backColourTranslucent)
 		self.assertEquals(self.ed.CaretLineLayer, 2)
-		
+
 		self.ed.CaretLineBackAlpha = 0x100
 		self.assertEquals(self.ed.CaretLineBackAlpha, 0x100)
 		self.assertEquals(self.ed.CaretLineLayer, 0)	# SC_ALPHA_NOALPHA moved to base layer
-		
+
 		self.RestoreCaretLine()
-		
+
 		# Try other orders
 
 		self.ed.CaretLineBackAlpha = 0x100
@@ -2135,7 +2135,7 @@ class TestElements(unittest.TestCase):
 		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE_BACK))
 		self.assertEquals(self.ed.HotspotActiveFore, 0)
 		self.assertEquals(self.ed.HotspotActiveBack, 0)
-		
+
 		testColour = 0x804020
 		resetColour = 0x112233	# Doesn't get set
 		self.ed.SetHotspotActiveFore(1, testColour)
@@ -2146,7 +2146,7 @@ class TestElements(unittest.TestCase):
 		self.assertEquals(self.ed.HotspotActiveFore, 0)
 		self.assertFalse(self.ed.GetElementIsSet(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE))
 		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE), 0)
-		
+
 		translucentColour = 0x50403020
 		self.ed.SetElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE, translucentColour)
 		self.assertEquals(self.ElementColour(self.ed.SC_ELEMENT_HOT_SPOT_ACTIVE), translucentColour)

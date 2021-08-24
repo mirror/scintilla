@@ -70,7 +70,7 @@ struct CaretLineAppearance {
 };
 
 struct CaretAppearance {
-	// Line, block, over-strike bar ... 
+	// Line, block, over-strike bar ...
 	Scintilla::CaretStyle style;
 	// Width in pixels
 	int width;

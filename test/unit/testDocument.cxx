@@ -332,7 +332,7 @@ TEST_CASE("Document") {
 		REQUIRE(location == 2);
 		location = doc.document.FindText(0, 2, finding932.c_str(), FindOption::None, &lengthFinding);
 		REQUIRE(location == -1);
-		// Can not test case mapping of double byte text as folder available here does not implement this 
+		// Can not test case mapping of double byte text as folder available here does not implement this
 	}
 
 	SECTION("GetCharacterAndWidth DBCS") {
@@ -342,7 +342,7 @@ TEST_CASE("Document") {
 		const Sci::Position length = doc.InsertString(0, "H\x84\xff\x84H", 5);
 		// This text is invalid in code page 932.
 		// A reasonable interpretation is as 4 items: 2 characters and 2 character fragments
-		// The last item is a 2-byte CYRILLIC CAPITAL LETTER ZE character 
+		// The last item is a 2-byte CYRILLIC CAPITAL LETTER ZE character
 		// H [84] [FF] ZE
 		REQUIRE(5 == length);
 		REQUIRE(5 == doc.Length());

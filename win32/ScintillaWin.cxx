@@ -1895,7 +1895,7 @@ sptr_t ScintillaWin::SciMessage(Message iMessage, uptr_t wParam, sptr_t lParam) 
 	case Message::EncodedFromUTF8:
 		return EncodedFromUTF8(ConstCharPtrFromUPtr(wParam),
 			CharPtrFromSPtr(lParam));
-	
+
 	default:
 		break;
 

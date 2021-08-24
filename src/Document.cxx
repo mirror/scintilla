@@ -2081,7 +2081,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 			const unsigned char charStartSearch =  search[0];
 			if (forward && ((0 == dbcsCodePage) || (CpUtf8 == dbcsCodePage && !UTF8IsTrailByte(charStartSearch)))) {
 				// This is a fast case where there is no need to test byte values to iterate
-				// so becomes the equivalent of a memchr+memcmp loop. 
+				// so becomes the equivalent of a memchr+memcmp loop.
 				// UTF-8 search will not be self-synchronizing when starts with trail byte
 				const std::string_view suffix(search + 1, lengthFind - 1);
 				while (pos < endSearch) {
