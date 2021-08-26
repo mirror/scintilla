@@ -4798,10 +4798,6 @@ void Editor::SetHotSpotRange(const Point *pt) {
 	}
 }
 
-Range Editor::GetHotSpotRange() const noexcept {
-	return hotspot;
-}
-
 void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, KeyMod modifiers) {
 	if (ptMouseLast != pt) {
 		DwellEnd(true);

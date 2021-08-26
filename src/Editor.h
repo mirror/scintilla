@@ -585,7 +585,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool PositionIsHotspot(Sci::Position position) const;
 	bool PointIsHotspot(Point pt);
 	void SetHotSpotRange(const Point *pt);
-	Range GetHotSpotRange() const noexcept override;
 	void SetHoverIndicatorPosition(Sci::Position position);
 	void SetHoverIndicatorPoint(Point pt);
 
