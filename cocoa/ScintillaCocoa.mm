@@ -1964,7 +1964,7 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 		CGFloat docWidth = scrollWidth;
 		bool showHorizontalScroll = horizontalScrollBarVisible &&
 					    !Wrapping();
-		if (!showHorizontalScroll)
+		if (Wrapping())
 			docWidth = clipRect.size.width;
 		NSRect contentRect = {{0, 0}, {docWidth, docHeight}};
 		NSRect contentRectNow = inner.frame;
