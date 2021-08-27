@@ -88,7 +88,6 @@ class DecorationList : public IDecorationList {
 public:
 
 	DecorationList();
-	~DecorationList() override;
 
 	const std::vector<const IDecoration*> &View() const noexcept override {
 		return decorationView;
@@ -124,11 +123,6 @@ public:
 template <typename POS>
 DecorationList<POS>::DecorationList() : currentIndicator(0), currentValue(1), current(nullptr),
 	lengthDocument(0), clickNotified(false) {
-}
-
-template <typename POS>
-DecorationList<POS>::~DecorationList() {
-	current = nullptr;
 }
 
 template <typename POS>
