@@ -1944,32 +1944,34 @@ bool ScintillaCocoa::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 	return SetScrollingSize();
 }
 
-bool ScintillaCocoa::SetScrollingSize(void) {
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Adjust both scrollers to reflect the current scroll ranges and position in the editor.
+ * Called when size changes or when scroll ranges change.
+ */
+
+bool ScintillaCocoa::SetScrollingSize() {
 	bool changes = false;
 	SCIContentView *inner = ContentView();
 	if (!enteredSetScrollingSize) {
 		enteredSetScrollingSize = true;
 		NSScrollView *scrollView = ScrollContainer();
-		NSClipView *clipView = ScrollContainer().contentView;
-		NSRect clipRect = clipView.bounds;
+		const NSRect clipRect = scrollView.contentView.bounds;
 		CGFloat docHeight = pcs->LinesDisplayed() * vs.lineHeight;
 		if (!endAtLastLine)
 			docHeight += (int(scrollView.bounds.size.height / vs.lineHeight)-3) * vs.lineHeight;
 		// Allow extra space so that last scroll position places whole line at top
-		int clipExtra = int(clipRect.size.height) % vs.lineHeight;
+		const int clipExtra = int(clipRect.size.height) % vs.lineHeight;
 		docHeight += clipExtra;
 		// Ensure all of clipRect covered by Scintilla drawing
 		if (docHeight < clipRect.size.height)
 			docHeight = clipRect.size.height;
-		CGFloat docWidth = scrollWidth;
-		bool showHorizontalScroll = horizontalScrollBarVisible &&
+		const bool showHorizontalScroll = horizontalScrollBarVisible &&
 					    !Wrapping();
-		if (Wrapping())
-			docWidth = clipRect.size.width;
-		NSRect contentRect = {{0, 0}, {docWidth, docHeight}};
-		NSRect contentRectNow = inner.frame;
-		changes = (contentRect.size.width != contentRectNow.size.width) ||
-			  (contentRect.size.height != contentRectNow.size.height);
+		const CGFloat docWidth = Wrapping() ? clipRect.size.width : scrollWidth;
+		const NSRect contentRect = NSMakeRect(0, 0, docWidth, docHeight);
+		changes = !CGSizeEqualToSize(contentRect.size, inner.frame.size);
 		if (changes) {
 			inner.frame = contentRect;
 		}

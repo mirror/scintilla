@@ -159,7 +159,7 @@ public:
 	void SetVerticalScrollPos() override;
 	void SetHorizontalScrollPos() override;
 	bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override;
-	bool SetScrollingSize(void);
+	bool SetScrollingSize();
 	void Resize();
 	void UpdateForScroll();
 
