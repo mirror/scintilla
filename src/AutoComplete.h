@@ -84,7 +84,7 @@ public:
 	std::string GetValue(int item) const;
 
 	void Show(bool show);
-	void Cancel();
+	void Cancel() noexcept;
 
 	/// Move the current list element by delta, scrolling appropriately
 	void Move(int delta);
