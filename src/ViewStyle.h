@@ -28,16 +28,10 @@ public:
  */
 
 
-class FontRealised : public FontMeasurements {
+class FontRealised {
 public:
+	FontMeasurements measurements;
 	std::shared_ptr<Font> font;
-	FontRealised() noexcept;
-	// FontRealised objects can not be copied.
-	FontRealised(const FontRealised &) = delete;
-	FontRealised(FontRealised &&) = delete;
-	FontRealised &operator=(const FontRealised &) = delete;
-	FontRealised &operator=(FontRealised &&) = delete;
-	virtual ~FontRealised();
 	void Realise(Surface &surface, int zoomLevel, Scintilla::Technology technology, const FontSpecification &fs, const char *localeName);
 };
 
