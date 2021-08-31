@@ -26,6 +26,10 @@
 #import "ScintillaView.h"
 #import "ScintillaCocoa.h"
 
+#if !__has_feature(objc_arc)
+#error ARC must be enabled
+#endif
+
 using namespace Scintilla;
 using namespace Scintilla::Internal;
 
