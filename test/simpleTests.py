@@ -1236,6 +1236,28 @@ class TestSearch(unittest.TestCase):
 		self.assertEquals(10, self.ed.FindBytes(0, self.ed.Length, b"\t$", flags))
 		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"([a]).*\0", flags))
 
+	def testCxx11REFind(self):
+		flags = self.ed.SCFIND_REGEXP | self.ed.SCFIND_CXX11REGEX
+		self.assertEquals(-1, self.ed.FindBytes(0, self.ed.Length, b"b.g", 0))
+		self.assertEquals(2, self.ed.FindBytes(0, self.ed.Length, b"b.g", flags))
+		self.assertEquals(2, self.ed.FindBytes(0, self.ed.Length, rb"\bb.g\b", flags))
+		self.assertEquals(-1, self.ed.FindBytes(0, self.ed.Length, b"b[A-Z]g",
+			flags | self.ed.SCFIND_MATCHCASE))
+		self.assertEquals(2, self.ed.FindBytes(0, self.ed.Length, b"b[a-z]g", flags))
+		self.assertEquals(6, self.ed.FindBytes(0, self.ed.Length, b"b[a-z]*t", flags))
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"^a", flags))
+		self.assertEquals(10, self.ed.FindBytes(0, self.ed.Length, b"\t$", flags))
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"([a]).*\0", flags))
+
+	def testCxx11RETooMany(self):
+		# For bug #2281
+		self.ed.InsertText(0, b"3ringsForTheElvenKing")
+		flags = self.ed.SCFIND_REGEXP | self.ed.SCFIND_CXX11REGEX
+		# Only MAXTAG (10) matches allocated, but doesn't modify a vulnerable address until 15
+		pattern = b"(.)" * 15
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, pattern, flags))
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, pattern, flags))
+
 	def testPhilippeREFind(self):
 		# Requires 1.,72
 		flags = self.ed.SCFIND_REGEXP
