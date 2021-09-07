@@ -213,7 +213,7 @@ void MarginView::PaintOneMargin(Surface *surface, Sci::Line topLine, PRectangle 
 
 		PLATFORM_ASSERT(visibleLine < model.pcs->LinesDisplayed());
 		const Sci::Line lineDoc = model.pcs->DocFromDisplay(visibleLine);
-		PLATFORM_ASSERT(model.pcs->GetVisible(lineDoc));
+		PLATFORM_ASSERT((lineDoc == 0) || model.pcs->GetVisible(lineDoc));
 		const Sci::Line firstVisibleLine = model.pcs->DisplayFromDoc(lineDoc);
 		const Sci::Line lastVisibleLine = model.pcs->DisplayLastFromDoc(lineDoc);
 		const bool firstSubLine = visibleLine == firstVisibleLine;
