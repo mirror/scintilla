@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cassert>
 #include <cstring>
+#include <cmath>
 
 #include <stdexcept>
 #include <string>
@@ -48,16 +49,20 @@ bool MarginStyle::ShowsFolding() const noexcept {
 void FontRealised::Realise(Surface &surface, int zoomLevel, Technology technology, const FontSpecification &fs, const char *localeName) {
 	PLATFORM_ASSERT(fs.fontName);
 	measurements.sizeZoomed = fs.size + zoomLevel * FontSizeMultiplier;
-	if (measurements.sizeZoomed <= 2 * FontSizeMultiplier)	// Hangs if sizeZoomed <= 1
-		measurements.sizeZoomed = 2 * FontSizeMultiplier;
+	if (measurements.sizeZoomed <= FontSizeMultiplier)	// May fail if sizeZoomed < 1
+		measurements.sizeZoomed = FontSizeMultiplier;
 
 	const float deviceHeight = static_cast<float>(surface.DeviceHeightFont(measurements.sizeZoomed));
 	const FontParameters fp(fs.fontName, deviceHeight / FontSizeMultiplier, fs.weight,
 		fs.italic, fs.extraFontFlag, technology, fs.characterSet, localeName);
 	font = Font::Allocate(fp);
 
-	measurements.ascent = static_cast<unsigned int>(surface.Ascent(font.get()));
-	measurements.descent = static_cast<unsigned int>(surface.Descent(font.get()));
+	// floor here is historical as platform layers have tweaked their values to match.
+	// ceil would likely be better to ensure (nearly) all of the ink of a character is seen
+	// but that would require platform layer changes.
+	measurements.ascent = std::floor(surface.Ascent(font.get()));
+	measurements.descent = std::floor(surface.Descent(font.get()));
+
 	measurements.capitalHeight = surface.Ascent(font.get()) - surface.InternalLeading(font.get());
 	measurements.aveCharWidth = surface.AverageCharWidth(font.get());
 	measurements.spaceWidth = surface.WidthText(font.get(), " ");
@@ -356,9 +361,10 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	maxAscent = 1;
 	maxDescent = 1;
 	FindMaxAscentDescent();
-	maxAscent += extraAscent;
-	maxDescent += extraDescent;
-	lineHeight = maxAscent + maxDescent;
+	// Ensure reasonable values: lines less than 1 pixel high will not work 
+	maxAscent = std::max(1.0, maxAscent + extraAscent);
+	maxDescent = std::max(0.0, maxDescent + extraDescent);
+	lineHeight = lround(maxAscent + maxDescent);
 	lineOverlap = lineHeight / 10;
 	if (lineOverlap < 2)
 		lineOverlap = 2;

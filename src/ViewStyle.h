@@ -122,8 +122,8 @@ public:
 	Scintilla::Technology technology;
 	int lineHeight;
 	int lineOverlap;
-	unsigned int maxAscent;
-	unsigned int maxDescent;
+	XYPOSITION maxAscent;
+	XYPOSITION maxDescent;
 	XYPOSITION aveCharWidth;
 	XYPOSITION spaceWidth;
 	XYPOSITION tabWidth;
