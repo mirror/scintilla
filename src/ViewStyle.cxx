@@ -400,9 +400,6 @@ int ViewStyle::AllocateExtendedStyles(int numberStyles) {
 	const int startRange = nextExtendedStyle;
 	nextExtendedStyle += numberStyles;
 	EnsureStyle(nextExtendedStyle);
-	for (int i=startRange; i<nextExtendedStyle; i++) {
-		styles[i] = styles[StyleDefault];
-	}
 	return startRange;
 }
 
