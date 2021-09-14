@@ -36,7 +36,7 @@ public:
 
 	void DropGraphics() noexcept;
 	void RefreshPixMaps(Surface *surfaceWindow, const ViewStyle &vsDraw);
-	void PaintOneMargin(Surface *surface, Sci::Line topLine, PRectangle rc, PRectangle rcMargin, size_t margin,
+	void PaintOneMargin(Surface *surface, PRectangle rc, PRectangle rcMargin, const MarginStyle &marginStyle,
 		const EditModel &model, const ViewStyle &vs);
 	void PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc, PRectangle rcMargin,
 		const EditModel &model, const ViewStyle &vs);
