@@ -11,6 +11,7 @@
 namespace Scintilla::Internal {
 
 struct FontSpecification {
+	// fontName is allocated by a ViewStyle container object and may be null
 	const char *fontName;
 	int size;
 	Scintilla::FontWeight weight = Scintilla::FontWeight::Normal;
