@@ -7930,7 +7930,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case Message::MultiEdgeAddLine:
-		vs.AddMultiEdge(wParam, lParam);
+		vs.AddMultiEdge(static_cast<int>(wParam), ColourRGBA::FromIpRGB(lParam));
 		InvalidateStyleRedraw();
 		break;
 

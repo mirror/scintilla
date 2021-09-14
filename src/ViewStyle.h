@@ -89,9 +89,6 @@ struct EdgeProperties {
 	EdgeProperties(int column_ = 0, ColourRGBA colour_ = ColourRGBA::FromRGB(0)) noexcept :
 		column(column_), colour(colour_) {
 	}
-	EdgeProperties(Scintilla::uptr_t wParam, Scintilla::sptr_t lParam) noexcept :
-		column(static_cast<int>(wParam)), colour(ColourRGBA::FromIpRGB(lParam)) {
-	}
 };
 
 // This is an old style enum so that its members can be used directly as indices without casting
@@ -216,7 +213,7 @@ public:
 	bool WhitespaceBackgroundDrawn() const;
 	ColourRGBA WrapColour() const;
 
-	void AddMultiEdge(Scintilla::uptr_t wParam, Scintilla::sptr_t lParam);
+	void AddMultiEdge(int column, ColourRGBA colour);
 
 	std::optional<ColourRGBA> ElementColour(Scintilla::Element element) const;
 	bool ElementAllowsTranslucent(Scintilla::Element element) const;

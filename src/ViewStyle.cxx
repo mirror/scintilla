@@ -442,14 +442,13 @@ int ViewStyle::ExternalMarginWidth() const noexcept {
 }
 
 int ViewStyle::MarginFromLocation(Point pt) const noexcept {
-	int margin = -1;
-	int x = marginInside ? 0 : -fixedColumnWidth;
+	XYPOSITION x = marginInside ? 0 : -fixedColumnWidth;
 	for (size_t i = 0; i < ms.size(); i++) {
 		if ((pt.x >= x) && (pt.x < x + ms[i].width))
-			margin = static_cast<int>(i);
+			return static_cast<int>(i);
 		x += ms[i].width;
 	}
-	return margin;
+	return -1;
 }
 
 bool ViewStyle::ValidStyle(size_t styleIndex) const noexcept {
@@ -552,14 +551,13 @@ ColourRGBA ViewStyle::WrapColour() const {
 }
 
 // Insert new edge in sorted order.
-void ViewStyle::AddMultiEdge(uptr_t wParam, sptr_t lParam) {
-	const int column = static_cast<int>(wParam);
+void ViewStyle::AddMultiEdge(int column, ColourRGBA colour) {
 	theMultiEdge.insert(
 		std::upper_bound(theMultiEdge.begin(), theMultiEdge.end(), column,
 			[](const EdgeProperties &a, const EdgeProperties &b) {
 				return a.column < b.column;
 			}),
-		EdgeProperties(column, lParam));
+		EdgeProperties(column, colour));
 }
 
 std::optional<ColourRGBA> ViewStyle::ElementColour(Element element) const {
