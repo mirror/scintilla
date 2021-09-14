@@ -187,7 +187,7 @@ public:
 
 	std::string localeName;
 
-	ViewStyle();
+	ViewStyle(size_t stylesSize_=256);
 	ViewStyle(const ViewStyle &source);
 	ViewStyle(ViewStyle &&) = delete;
 	// Can only be copied through copy constructor which ensures font names initialised correctly
@@ -195,7 +195,6 @@ public:
 	ViewStyle &operator=(ViewStyle &&) = delete;
 	~ViewStyle();
 	void CalculateMarginWidthAndMask() noexcept;
-	void Init(size_t stylesSize_=256);
 	void Refresh(Surface &surface, int tabInChars);
 	void ReleaseAllExtendedStyles() noexcept;
 	int AllocateExtendedStyles(int numberStyles);

@@ -87,14 +87,140 @@ void FontRealised::Realise(Surface &surface, int zoomLevel, Technology technolog
 	}
 }
 
-ViewStyle::ViewStyle() : markers(MarkerMax + 1), indicators(static_cast<size_t>(IndicatorNumbers::Max) + 1) {
-	Init();
+ViewStyle::ViewStyle(size_t stylesSize_) :
+	styles(stylesSize_),
+	markers(MarkerMax + 1),
+	indicators(static_cast<size_t>(IndicatorNumbers::Max) + 1) {
+
+	nextExtendedStyle = 256;
+	fontNames.Clear();
+	ResetDefaultStyle();
+
+	// There are no image markers by default, so no need for calling CalcLargestMarkerHeight()
+	largestMarkerHeight = 0;
+
+	indicators[0] = Indicator(IndicatorStyle::Squiggle, ColourRGBA(0, 0x7f, 0));
+	indicators[1] = Indicator(IndicatorStyle::TT, ColourRGBA(0, 0, 0xff));
+	indicators[2] = Indicator(IndicatorStyle::Plain, ColourRGBA(0xff, 0, 0));
+
+	technology = Technology::Default;
+	indicatorsDynamic = false;
+	indicatorsSetFore = false;
+	lineHeight = 1;
+	lineOverlap = 0;
+	maxAscent = 1;
+	maxDescent = 1;
+	aveCharWidth = 8;
+	spaceWidth = 8;
+	tabWidth = spaceWidth * 8;
+
+	// Default is for no selection foregrounds
+	elementColours.erase(Element::SelectionText);
+	elementColours.erase(Element::SelectionAdditionalText);
+	elementColours.erase(Element::SelectionSecondaryText);
+	elementColours.erase(Element::SelectionInactiveText);
+	// Shades of grey for selection backgrounds
+	elementBaseColours[Element::SelectionBack] = ColourRGBA(0xc0, 0xc0, 0xc0, 0xff);
+	elementBaseColours[Element::SelectionAdditionalBack] = ColourRGBA(0xd7, 0xd7, 0xd7, 0xff);
+	elementBaseColours[Element::SelectionSecondaryBack] = ColourRGBA(0xb0, 0xb0, 0xb0, 0xff);
+	elementBaseColours[Element::SelectionInactiveBack] = ColourRGBA(0x80, 0x80, 0x80, 0x3f);
+	elementAllowsTranslucent.insert({
+		Element::SelectionText,
+		Element::SelectionBack,
+		Element::SelectionAdditionalText,
+		Element::SelectionAdditionalBack,
+		Element::SelectionSecondaryText,
+		Element::SelectionSecondaryBack,
+		Element::SelectionInactiveText,
+		Element::SelectionBack,
+		Element::SelectionInactiveBack,
+		});
+	selection.layer = Layer::Base;
+	selection.eolFilled = false;
+
+	foldmarginColour.reset();
+	foldmarginHighlightColour.reset();
+
+	controlCharSymbol = 0;	/* Draw the control characters */
+	controlCharWidth = 0;
+	selbar = Platform::Chrome();
+	selbarlight = Platform::ChromeHighlight();
+	styles[StyleLineNumber].fore = ColourRGBA(0, 0, 0);
+	styles[StyleLineNumber].back = Platform::Chrome();
+
+	elementBaseColours[Element::Caret] = ColourRGBA(0, 0, 0);
+	elementBaseColours[Element::CaretAdditional] = ColourRGBA(0x7f, 0x7f, 0x7f);
+	elementAllowsTranslucent.insert({
+		Element::Caret,
+		Element::CaretAdditional,
+		});
+	caret.style = CaretStyle::Line;
+	caret.width = 1;
+
+	elementColours.erase(Element::CaretLineBack);
+	elementAllowsTranslucent.insert(Element::CaretLineBack);
+	caretLine.alwaysShow = false;
+	caretLine.subLine = false;
+	caretLine.layer = Layer::Base;
+	caretLine.frame = 0;
+
+	someStylesProtected = false;
+	someStylesForceCase = false;
+
+	hotspotUnderline = true;
+	elementColours.erase(Element::HotSpotActive);
+	elementAllowsTranslucent.insert(Element::HotSpotActive);
+
+	leftMarginWidth = 1;
+	rightMarginWidth = 1;
+	ms.resize(MaxMargin + 1);
+	ms[0] = MarginStyle(MarginType::Number);
+	ms[1] = MarginStyle(MarginType::Symbol, 16, ~MaskFolders);
+	ms[2] = MarginStyle(MarginType::Symbol);
+	marginInside = true;
+	CalculateMarginWidthAndMask();
+	textStart = marginInside ? fixedColumnWidth : leftMarginWidth;
+	zoomLevel = 0;
+	viewWhitespace = WhiteSpace::Invisible;
+	tabDrawMode = TabDrawMode::LongArrow;
+	whitespaceSize = 1;
+	elementColours.erase(Element::WhiteSpace);
+	elementAllowsTranslucent.insert(Element::WhiteSpace);
+
+	viewIndentationGuides = IndentView::None;
+	viewEOL = false;
+	extraFontFlag = FontQuality::QualityDefault;
+	extraAscent = 0;
+	extraDescent = 0;
+	marginStyleOffset = 0;
+	annotationVisible = AnnotationVisible::Hidden;
+	annotationStyleOffset = 0;
+	eolAnnotationVisible = EOLAnnotationVisible::Hidden;
+	eolAnnotationStyleOffset = 0;
+	braceHighlightIndicatorSet = false;
+	braceHighlightIndicator = 0;
+	braceBadLightIndicatorSet = false;
+	braceBadLightIndicator = 0;
+
+	edgeState = EdgeVisualStyle::None;
+	theEdge = EdgeProperties(0, ColourRGBA(0xc0, 0xc0, 0xc0));
+
+	marginNumberPadding = 3;
+	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
+	lastSegItalicsOffset = 2;
+
+	wrap.state = Wrap::None;
+	wrap.visualFlags = WrapVisualFlag::None;
+	wrap.visualFlagsLocation = WrapVisualLocation::Default;
+	wrap.visualStartIndent = 0;
+	wrap.indentMode = WrapIndentMode::Fixed;
+
+	localeName = localeNameDefault;
 }
 
 // Copy constructor only called when printing copies the screen ViewStyle so it can be
 // modified for printing styles.
-ViewStyle::ViewStyle(const ViewStyle &source) : markers(MarkerMax + 1), indicators(static_cast<size_t>(IndicatorNumbers::Max) + 1) {
-	Init(source.styles.size());
+ViewStyle::ViewStyle(const ViewStyle &source) : ViewStyle(source.styles.size()) {
 	styles = source.styles;
 	for (Style &style : styles) {
 		// Can't just copy fontName as its lifetime is relative to its owning ViewStyle
@@ -195,134 +321,6 @@ void ViewStyle::CalculateMarginWidthAndMask() noexcept {
 			break;
 		}
 	}
-}
-
-void ViewStyle::Init(size_t stylesSize_) {
-	AllocStyles(stylesSize_);
-	nextExtendedStyle = 256;
-	fontNames.Clear();
-	ResetDefaultStyle();
-
-	// There are no image markers by default, so no need for calling CalcLargestMarkerHeight()
-	largestMarkerHeight = 0;
-
-	indicators[0] = Indicator(IndicatorStyle::Squiggle, ColourRGBA(0, 0x7f, 0));
-	indicators[1] = Indicator(IndicatorStyle::TT, ColourRGBA(0, 0, 0xff));
-	indicators[2] = Indicator(IndicatorStyle::Plain, ColourRGBA(0xff, 0, 0));
-
-	technology = Technology::Default;
-	indicatorsDynamic = false;
-	indicatorsSetFore = false;
-	lineHeight = 1;
-	lineOverlap = 0;
-	maxAscent = 1;
-	maxDescent = 1;
-	aveCharWidth = 8;
-	spaceWidth = 8;
-	tabWidth = spaceWidth * 8;
-
-	// Default is for no selection foregrounds
-	elementColours.erase(Element::SelectionText);
-	elementColours.erase(Element::SelectionAdditionalText);
-	elementColours.erase(Element::SelectionSecondaryText);
-	elementColours.erase(Element::SelectionInactiveText);
-	// Shades of grey for selection backgrounds
-	elementBaseColours[Element::SelectionBack] = ColourRGBA(0xc0, 0xc0, 0xc0, 0xff);
-	elementBaseColours[Element::SelectionAdditionalBack] = ColourRGBA(0xd7, 0xd7, 0xd7, 0xff);
-	elementBaseColours[Element::SelectionSecondaryBack] = ColourRGBA(0xb0, 0xb0, 0xb0, 0xff);
-	elementBaseColours[Element::SelectionInactiveBack] = ColourRGBA(0x80, 0x80, 0x80, 0x3f);
-	elementAllowsTranslucent.insert({
-		Element::SelectionText,
-		Element::SelectionBack,
-		Element::SelectionAdditionalText,
-		Element::SelectionAdditionalBack,
-		Element::SelectionSecondaryText,
-		Element::SelectionSecondaryBack,
-		Element::SelectionInactiveText,
-		Element::SelectionBack,
-		Element::SelectionInactiveBack,
-	});
-	selection.layer = Layer::Base;
-	selection.eolFilled = false;
-
-	foldmarginColour.reset();
-	foldmarginHighlightColour.reset();
-
-	controlCharSymbol = 0;	/* Draw the control characters */
-	controlCharWidth = 0;
-	selbar = Platform::Chrome();
-	selbarlight = Platform::ChromeHighlight();
-	styles[StyleLineNumber].fore = ColourRGBA(0, 0, 0);
-	styles[StyleLineNumber].back = Platform::Chrome();
-
-	elementBaseColours[Element::Caret] = ColourRGBA(0, 0, 0);
-	elementBaseColours[Element::CaretAdditional] = ColourRGBA(0x7f, 0x7f, 0x7f);
-	elementAllowsTranslucent.insert({
-		Element::Caret,
-		Element::CaretAdditional,
-	});
-	caret.style = CaretStyle::Line;
-	caret.width = 1;
-
-	elementColours.erase(Element::CaretLineBack);
-	elementAllowsTranslucent.insert(Element::CaretLineBack);
-	caretLine.alwaysShow = false;
-	caretLine.subLine = false;
-	caretLine.layer = Layer::Base;
-	caretLine.frame = 0;
-
-	someStylesProtected = false;
-	someStylesForceCase = false;
-
-	hotspotUnderline = true;
-	elementColours.erase(Element::HotSpotActive);
-	elementAllowsTranslucent.insert(Element::HotSpotActive);
-
-	leftMarginWidth = 1;
-	rightMarginWidth = 1;
-	ms.resize(MaxMargin + 1);
-	ms[0] = MarginStyle(MarginType::Number);
-	ms[1] = MarginStyle(MarginType::Symbol, 16, ~MaskFolders);
-	ms[2] = MarginStyle(MarginType::Symbol);
-	marginInside = true;
-	CalculateMarginWidthAndMask();
-	textStart = marginInside ? fixedColumnWidth : leftMarginWidth;
-	zoomLevel = 0;
-	viewWhitespace = WhiteSpace::Invisible;
-	tabDrawMode = TabDrawMode::LongArrow;
-	whitespaceSize = 1;
-	elementColours.erase(Element::WhiteSpace);
-	elementAllowsTranslucent.insert(Element::WhiteSpace);
-
-	viewIndentationGuides = IndentView::None;
-	viewEOL = false;
-	extraFontFlag = FontQuality::QualityDefault;
-	extraAscent = 0;
-	extraDescent = 0;
-	marginStyleOffset = 0;
-	annotationVisible = AnnotationVisible::Hidden;
-	annotationStyleOffset = 0;
-	eolAnnotationVisible = EOLAnnotationVisible::Hidden;
-	eolAnnotationStyleOffset = 0;
-	braceHighlightIndicatorSet = false;
-	braceHighlightIndicator = 0;
-	braceBadLightIndicatorSet = false;
-	braceBadLightIndicator = 0;
-
-	edgeState = EdgeVisualStyle::None;
-	theEdge = EdgeProperties(0, ColourRGBA(0xc0, 0xc0, 0xc0));
-
-	marginNumberPadding = 3;
-	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
-	lastSegItalicsOffset = 2;
-
-	wrap.state = Wrap::None;
-	wrap.visualFlags = WrapVisualFlag::None;
-	wrap.visualFlagsLocation = WrapVisualLocation::Default;
-	wrap.visualStartIndent = 0;
-	wrap.indentMode = WrapIndentMode::Fixed;
-
-	localeName = localeNameDefault;
 }
 
 void ViewStyle::Refresh(Surface &surface, int tabInChars) {
