@@ -721,7 +721,7 @@ FontRealised *ViewStyle::Find(const FontSpecification &fs) {
 	return nullptr;
 }
 
-void ViewStyle::FindMaxAscentDescent() {
+void ViewStyle::FindMaxAscentDescent() noexcept {
 	for (const auto &font : fonts) {
 		if (maxAscent < font.second->measurements.ascent)
 			maxAscent = font.second->measurements.ascent;

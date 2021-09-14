@@ -246,7 +246,7 @@ private:
 	void AllocStyles(size_t sizeNew);
 	void CreateAndAddFont(const FontSpecification &fs);
 	FontRealised *Find(const FontSpecification &fs);
-	void FindMaxAscentDescent();
+	void FindMaxAscentDescent() noexcept;
 };
 
 }
