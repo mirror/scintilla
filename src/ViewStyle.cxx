@@ -14,6 +14,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <array>
 #include <map>
 #include <set>
 #include <optional>
@@ -68,12 +69,12 @@ void FontRealised::Realise(Surface &surface, int zoomLevel, Technology technolog
 	measurements.spaceWidth = surface.WidthText(font.get(), " ");
 
 	if (fs.checkMonospaced) {
-		std::string allASCIIGraphic("Ayfi");	// "Ay" is normally strongly kerned and "fi" may be a ligature
-		for (unsigned char ch = 0x20; ch <= 0x7E; ch++) {
-			allASCIIGraphic.push_back(ch);
-		}
-		std::vector<XYPOSITION> positions(allASCIIGraphic.length());
-		surface.MeasureWidths(font.get(), allASCIIGraphic, positions.data());
+		// "Ay" is normally strongly kerned and "fi" may be a ligature
+		constexpr std::string_view allASCIIGraphic("Ayfi"
+		// python: ''.join(chr(ch) for ch in range(32, 127))
+		" !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+		std::array<XYPOSITION, allASCIIGraphic.length()> positions;
+		surface.MeasureWidthsUTF8(font.get(), allASCIIGraphic, positions.data());
 		std::adjacent_difference(positions.begin(), positions.end(), positions.begin());
 		const XYPOSITION maxWidth = *std::max_element(positions.begin(), positions.end());
 		const XYPOSITION minWidth = *std::min_element(positions.begin(), positions.end());
