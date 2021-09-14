@@ -96,9 +96,9 @@ ViewStyle::ViewStyle() : markers(MarkerMax + 1), indicators(static_cast<size_t>(
 ViewStyle::ViewStyle(const ViewStyle &source) : markers(MarkerMax + 1), indicators(static_cast<size_t>(IndicatorNumbers::Max) + 1) {
 	Init(source.styles.size());
 	styles = source.styles;
-	for (size_t sty=0; sty<source.styles.size(); sty++) {
+	for (Style &style : styles) {
 		// Can't just copy fontName as its lifetime is relative to its owning ViewStyle
-		styles[sty].fontName = fontNames.Save(source.styles[sty].fontName);
+		style.fontName = fontNames.Save(style.fontName);
 	}
 	nextExtendedStyle = source.nextExtendedStyle;
 	markers = source.markers;
