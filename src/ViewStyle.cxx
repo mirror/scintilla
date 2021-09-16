@@ -363,7 +363,7 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	// Ensure reasonable values: lines less than 1 pixel high will not work 
 	maxAscent = std::max(1.0, maxAscent + extraAscent);
 	maxDescent = std::max(0.0, maxDescent + extraDescent);
-	lineHeight = lround(maxAscent + maxDescent);
+	lineHeight = static_cast<int>(std::lround(maxAscent + maxDescent));
 	lineOverlap = lineHeight / 10;
 	if (lineOverlap < 2)
 		lineOverlap = 2;
