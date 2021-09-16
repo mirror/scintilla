@@ -554,7 +554,7 @@ ColourRGBA ViewStyle::WrapColour() const {
 void ViewStyle::AddMultiEdge(int column, ColourRGBA colour) {
 	theMultiEdge.insert(
 		std::upper_bound(theMultiEdge.begin(), theMultiEdge.end(), column,
-			[](const EdgeProperties &a, const EdgeProperties &b) {
+			[](const EdgeProperties &a, const EdgeProperties &b) noexcept {
 				return a.column < b.column;
 			}),
 		EdgeProperties(column, colour));
