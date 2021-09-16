@@ -93,7 +93,6 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	indicators(static_cast<size_t>(IndicatorNumbers::Max) + 1) {
 
 	nextExtendedStyle = 256;
-	fontNames.Clear();
 	ResetDefaultStyle();
 
 	// There are no image markers by default, so no need for calling CalcLargestMarkerHeight()
@@ -290,10 +289,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) : ViewStyle(source.styles.size()) 
 	localeName = source.localeName;
 }
 
-ViewStyle::~ViewStyle() {
-	styles.clear();
-	fonts.clear();
-}
+ViewStyle::~ViewStyle() = default;
 
 void ViewStyle::CalculateMarginWidthAndMask() noexcept {
 	fixedColumnWidth = marginInside ? leftMarginWidth : 0;
