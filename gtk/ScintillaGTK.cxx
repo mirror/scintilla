@@ -231,6 +231,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	im_context(nullptr),
 	lastNonCommonScript(G_UNICODE_SCRIPT_INVALID_CODE),
 	settings(nullptr),
+	settingsHandlerId(0),
 	lastWheelMouseTime(0),
 	lastWheelMouseDirection(0),
 	wheelMouseIntensity(0),
@@ -277,6 +278,9 @@ ScintillaGTK::~ScintillaGTK() {
 	}
 	ClearPrimarySelection();
 	wPreedit.Destroy();
+	if (settingsHandlerId) {
+		g_signal_handler_disconnect(settings, settingsHandlerId);
+	}
 	if (settings) {
 		g_object_unref(settings);
 	}
@@ -357,6 +361,15 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	cursor = gdk_cursor_new_for_display(pdisplay, GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
 	UnRefCursor(cursor);
+
+	using NotifyLambda = void (*)(GObject *, GParamSpec *, ScintillaGTK *);
+	if (settings) {
+		settingsHandlerId = g_signal_connect(settings, "notify::gtk-xft-dpi",
+			G_CALLBACK(static_cast<NotifyLambda>([](GObject *, GParamSpec *, ScintillaGTK *sciThis) {
+				sciThis->InvalidateStyleRedraw();
+			})),
+			this);
+	}
 }
 
 void ScintillaGTK::Realize(GtkWidget *widget) {
