@@ -356,7 +356,7 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	maxAscent = 1;
 	maxDescent = 1;
 	FindMaxAscentDescent();
-	// Ensure reasonable values: lines less than 1 pixel high will not work 
+	// Ensure reasonable values: lines less than 1 pixel high will not work
 	maxAscent = std::max(1.0, maxAscent + extraAscent);
 	maxDescent = std::max(0.0, maxDescent + extraDescent);
 	lineHeight = static_cast<int>(std::lround(maxAscent + maxDescent));
