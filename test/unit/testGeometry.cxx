@@ -1,4 +1,4 @@
-/** @file testDocument.cxx
+/** @file testGeometry.cxx
  ** Unit Tests for Scintilla internal data structures
  **/
 
