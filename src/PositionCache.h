@@ -172,9 +172,9 @@ public:
 };
 
 class PositionCacheEntry {
-	unsigned int styleNumber:8;
-	unsigned int len:8;
-	unsigned int clock:16;
+	uint16_t styleNumber;
+	uint16_t len;
+	uint16_t clock;
 	std::unique_ptr<XYPOSITION []> positions;
 public:
 	PositionCacheEntry() noexcept;
@@ -185,7 +185,7 @@ public:
 	void operator=(const PositionCacheEntry &) = delete;
 	void operator=(PositionCacheEntry &&) = delete;
 	~PositionCacheEntry();
-	void Set(unsigned int styleNumber_, std::string_view sv, const XYPOSITION *positions_, unsigned int clock_);
+	void Set(unsigned int styleNumber_, std::string_view sv, const XYPOSITION *positions_, uint16_t clock_);
 	void Clear() noexcept;
 	bool Retrieve(unsigned int styleNumber_, std::string_view sv, XYPOSITION *positions_) const noexcept;
 	static size_t Hash(unsigned int styleNumber_, std::string_view sv) noexcept;
@@ -273,7 +273,7 @@ public:
 
 class PositionCache {
 	std::vector<PositionCacheEntry> pces;
-	unsigned int clock;
+	uint16_t clock;
 	bool allClear;
 public:
 	PositionCache();

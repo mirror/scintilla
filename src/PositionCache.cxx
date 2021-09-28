@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <cstdint>
 #include <cstring>
 #include <cmath>
 
@@ -801,10 +802,10 @@ PositionCacheEntry::PositionCacheEntry(const PositionCacheEntry &other) :
 }
 
 void PositionCacheEntry::Set(unsigned int styleNumber_, std::string_view sv,
-	const XYPOSITION *positions_, unsigned int clock_) {
+	const XYPOSITION *positions_, uint16_t clock_) {
 	Clear();
-	styleNumber = styleNumber_;
-	len = static_cast<unsigned int>(sv.length());
+	styleNumber = static_cast<uint16_t>(styleNumber_);
+	len = static_cast<uint16_t>(sv.length());
 	clock = clock_;
 	if (sv.data() && positions_) {
 		positions = std::make_unique<XYPOSITION[]>(len + (len / sizeof(XYPOSITION)) + 1);
