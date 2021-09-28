@@ -906,7 +906,7 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 	if (vstyle.styles[styleNumber].monospaceASCII) {
 		if (AllGraphicASCII(sv)) {
 			for (size_t i = 0; i < sv.length(); i++) {
-				positions[i] = vstyle.styles[styleNumber].aveCharWidth * (i+1);
+				positions[i] = vstyle.styles[styleNumber].monospaceCharacterWidth * (i+1);
 			}
 			return;
 		}
