@@ -133,6 +133,6 @@ $(LIBSCI): $(COMPONENT_OBJS)
 # Automatically generate dependencies for most files with "make deps"
 include deps.mak
 
-ScintRes.o:	ScintRes.rc
-	$(WINDRES) ScintRes.rc $@
+ScintRes.o: ScintRes.rc
+	$(WINDRES) $< $@
 
