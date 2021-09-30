@@ -266,7 +266,7 @@ public:
 	BreakFinder(BreakFinder &&) = delete;
 	void operator=(const BreakFinder &) = delete;
 	void operator=(BreakFinder &&) = delete;
-	~BreakFinder();
+	~BreakFinder() noexcept;
 	TextSegment Next();
 	bool More() const noexcept;
 };

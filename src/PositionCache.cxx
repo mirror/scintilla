@@ -713,8 +713,7 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 	saeNext = (!selAndEdge.empty()) ? selAndEdge[0] : -1;
 }
 
-BreakFinder::~BreakFinder() {
-}
+BreakFinder::~BreakFinder() noexcept = default;
 
 TextSegment BreakFinder::Next() {
 	if (subBreak == -1) {
