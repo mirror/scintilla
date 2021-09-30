@@ -1142,9 +1142,7 @@ static constexpr bool IsSpaceOrTab(int ch) noexcept {
 //   2) Break before punctuation
 //   3) Break after whole character
 
-int Document::SafeSegment(const char *text, int length, int lengthSegment) const noexcept {
-	if (length <= lengthSegment)
-		return length;
+int Document::SafeSegment(const char *text, int lengthSegment) const noexcept {
 	int lastSpaceBreak = -1;
 	int lastPunctuationBreak = -1;
 	int lastEncodingAllowedBreak = 0;
