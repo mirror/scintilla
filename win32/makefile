@@ -117,11 +117,13 @@ COMPONENT_OBJS = \
 	HanjaDic.o \
 	PlatWin.o \
 	ScintillaBase.o \
+	ScintillaWin.o
+
+SHARED_OBJS = \
 	ScintillaDLL.o \
-	ScintillaWin.o \
 	ScintRes.o
 
-$(COMPONENT): $(COMPONENT_OBJS)
+$(COMPONENT): $(COMPONENT_OBJS) $(SHARED_OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) $^ $(CXXFLAGS) $(LIBS)
 
 $(LIBSCI): $(COMPONENT_OBJS)
