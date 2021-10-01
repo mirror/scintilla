@@ -282,9 +282,6 @@ ScintillaGTK::~ScintillaGTK() {
 	if (settingsHandlerId) {
 		g_signal_handler_disconnect(settings, settingsHandlerId);
 	}
-	if (settings) {
-		g_object_unref(settings);
-	}
 }
 
 void ScintillaGTK::RealizeThis(GtkWidget *widget) {
