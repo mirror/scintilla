@@ -20,6 +20,10 @@ constexpr bool IsASpaceOrTab(int ch) noexcept {
 	return (ch == ' ') || (ch == '\t');
 }
 
+constexpr bool IsControl(int ch) noexcept {
+	return ((ch >= 0) && (ch <= 0x1F)) || (ch == 0x7F);
+}
+
 constexpr bool IsADigit(int ch) noexcept {
 	return (ch >= '0') && (ch <= '9');
 }

@@ -5,7 +5,7 @@
 from __future__ import with_statement
 from __future__ import unicode_literals
 
-import codecs, ctypes, os, sys, unittest
+import ctypes, string, sys, unittest
 
 if sys.platform == "win32":
 	import XiteWin as Xite
@@ -2815,7 +2815,6 @@ class TestWordChars(unittest.TestCase):
 
 	def testDefaultWordChars(self):
 		# check that the default word chars are as expected
-		import string
 		data = self.ed.GetWordChars(None)
 		expected = set(string.digits + string.ascii_letters + '_') | \
 			set(chr(x) for x in range(0x80, 0x100))
@@ -2823,18 +2822,16 @@ class TestWordChars(unittest.TestCase):
 
 	def testDefaultWhitespaceChars(self):
 		# check that the default whitespace chars are as expected
-		import string
 		data = self.ed.GetWhitespaceChars(None)
-		expected = (set(chr(x) for x in (range(0, 0x20))) | set(' ')) - \
+		expected = (set(chr(x) for x in (range(0, 0x20))) | set(' ') | set('\x7f')) - \
 			set(['\r', '\n'])
 		self.assertCharSetsEqual(data, expected)
 
 	def testDefaultPunctuationChars(self):
 		# check that the default punctuation chars are as expected
-		import string
 		data = self.ed.GetPunctuationChars(None)
 		expected = set(chr(x) for x in range(0x20, 0x80)) - \
-			set(string.ascii_letters + string.digits + "\r\n_ ")
+			set(string.ascii_letters + string.digits + "\r\n\x7f_ ")
 		self.assertCharSetsEqual(data, expected)
 
 	def testCustomWordChars(self):
