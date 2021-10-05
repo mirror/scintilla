@@ -1127,10 +1127,6 @@ bool Document::IsDBCSDualByteAt(Sci::Position pos) const noexcept {
 		&& IsDBCSTrailByteNoExcept(cb.CharAt(pos + 1));
 }
 
-static constexpr bool IsSpaceOrTab(int ch) noexcept {
-	return ch == ' ' || ch == '\t';
-}
-
 // Need to break text into segments near lengthSegment but taking into
 // account the encoding to not break inside a UTF-8 or DBCS character
 // and also trying to avoid breaking inside a pair of combining characters.
@@ -2598,49 +2594,8 @@ void Document::NotifyModified(DocModification mh) {
 	}
 }
 
-// Used for word part navigation.
-static bool IsASCIIPunctuationCharacter(unsigned int ch) noexcept {
-	switch (ch) {
-	case '!':
-	case '"':
-	case '#':
-	case '$':
-	case '%':
-	case '&':
-	case '\'':
-	case '(':
-	case ')':
-	case '*':
-	case '+':
-	case ',':
-	case '-':
-	case '.':
-	case '/':
-	case ':':
-	case ';':
-	case '<':
-	case '=':
-	case '>':
-	case '?':
-	case '@':
-	case '[':
-	case '\\':
-	case ']':
-	case '^':
-	case '_':
-	case '`':
-	case '{':
-	case '|':
-	case '}':
-	case '~':
-		return true;
-	default:
-		return false;
-	}
-}
-
 bool Document::IsWordPartSeparator(unsigned int ch) const {
-	return (WordCharacterClass(ch) == CharacterClass::word) && IsASCIIPunctuationCharacter(ch);
+	return (WordCharacterClass(ch) == CharacterClass::word) && IsPunctuation(ch);
 }
 
 Sci::Position Document::WordPartLeft(Sci::Position pos) const {
@@ -2670,15 +2625,15 @@ Sci::Position Document::WordPartLeft(Sci::Position pos) const {
 					pos -= CharacterBefore(pos).widthBytes;
 				if (!IsADigit(CharacterAfter(pos).character))
 					pos += CharacterAfter(pos).widthBytes;
-			} else if (IsASCIIPunctuationCharacter(ceStart.character)) {
-				while (pos > 0 && IsASCIIPunctuationCharacter(CharacterAfter(pos).character))
+			} else if (IsPunctuation(ceStart.character)) {
+				while (pos > 0 && IsPunctuation(CharacterAfter(pos).character))
 					pos -= CharacterBefore(pos).widthBytes;
-				if (!IsASCIIPunctuationCharacter(CharacterAfter(pos).character))
+				if (!IsPunctuation(CharacterAfter(pos).character))
 					pos += CharacterAfter(pos).widthBytes;
-			} else if (isspacechar(ceStart.character)) {
-				while (pos > 0 && isspacechar(CharacterAfter(pos).character))
+			} else if (IsASpace(ceStart.character)) {
+				while (pos > 0 && IsASpace(CharacterAfter(pos).character))
 					pos -= CharacterBefore(pos).widthBytes;
-				if (!isspacechar(CharacterAfter(pos).character))
+				if (!IsASpace(CharacterAfter(pos).character))
 					pos += CharacterAfter(pos).widthBytes;
 			} else if (!IsASCII(ceStart.character)) {
 				while (pos > 0 && !IsASCII(CharacterAfter(pos).character))
@@ -2721,11 +2676,11 @@ Sci::Position Document::WordPartRight(Sci::Position pos) const {
 	} else if (IsADigit(ceStart.character)) {
 		while (pos < length && IsADigit(CharacterAfter(pos).character))
 			pos += CharacterAfter(pos).widthBytes;
-	} else if (IsASCIIPunctuationCharacter(ceStart.character)) {
-		while (pos < length && IsASCIIPunctuationCharacter(CharacterAfter(pos).character))
+	} else if (IsPunctuation(ceStart.character)) {
+		while (pos < length && IsPunctuation(CharacterAfter(pos).character))
 			pos += CharacterAfter(pos).widthBytes;
-	} else if (isspacechar(ceStart.character)) {
-		while (pos < length && isspacechar(CharacterAfter(pos).character))
+	} else if (IsASpace(ceStart.character)) {
+		while (pos < length && IsASpace(CharacterAfter(pos).character))
 			pos += CharacterAfter(pos).widthBytes;
 	} else {
 		pos += CharacterAfter(pos).widthBytes;
@@ -2733,18 +2688,14 @@ Sci::Position Document::WordPartRight(Sci::Position pos) const {
 	return pos;
 }
 
-static constexpr bool IsLineEndChar(char c) noexcept {
-	return (c == '\n' || c == '\r');
-}
-
 Sci::Position Document::ExtendStyleRange(Sci::Position pos, int delta, bool singleLine) noexcept {
 	const int sStart = cb.StyleAt(pos);
 	if (delta < 0) {
-		while (pos > 0 && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsLineEndChar(cb.CharAt(pos))))
+		while (pos > 0 && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsEOLCharacter(cb.CharAt(pos))))
 			pos--;
 		pos++;
 	} else {
-		while (pos < (LengthNoExcept()) && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsLineEndChar(cb.CharAt(pos))))
+		while (pos < (LengthNoExcept()) && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsEOLCharacter(cb.CharAt(pos))))
 			pos++;
 	}
 	return pos;

@@ -2193,10 +2193,10 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, Sci::Posit
 	sel.RangeMain().caret = RealizeVirtualSpace(sel.RangeMain().caret);
 	const int xInsert = XFromPosition(sel.RangeMain().caret);
 	bool prevCr = false;
-	while ((len > 0) && IsEOLChar(ptr[len-1]))
+	while ((len > 0) && IsEOLCharacter(ptr[len-1]))
 		len--;
 	for (Sci::Position i = 0; i < len; i++) {
-		if (IsEOLChar(ptr[i])) {
+		if (IsEOLCharacter(ptr[i])) {
 			if ((ptr[i] == '\r') || (!prevCr))
 				line++;
 			if (line >= pdoc->LinesTotal()) {

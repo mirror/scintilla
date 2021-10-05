@@ -31,6 +31,7 @@
 #include "Geometry.h"
 #include "Platform.h"
 
+#include "CharacterType.h"
 #include "CharacterCategoryMap.h"
 #include "Position.h"
 #include "UniqueString.h"

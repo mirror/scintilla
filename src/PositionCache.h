@@ -10,14 +10,6 @@
 
 namespace Scintilla::Internal {
 
-inline constexpr bool IsEOLChar(int ch) noexcept {
-	return (ch == '\r') || (ch == '\n');
-}
-
-inline constexpr bool IsSpaceOrTab(int ch) noexcept {
-	return ch == ' ' || ch == '\t';
-}
-
 /**
 * A point in document space.
 * Uses double for sufficient resolution in large (>20,000,000 line) documents.
