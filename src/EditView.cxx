@@ -368,12 +368,6 @@ inline char CaseForce(Style::CaseForce caseForce, char chDoc, char chPrevious) n
 	}
 }
 
-constexpr bool IsControlCharacter(int ch) noexcept {
-	// iscntrl returns true for lots of chars > 127 which are displayable,
-	// currently only check C0 control characters.
-	return (ch >= 0 && ch < ' ') || (ch == 127);
-}
-
 bool ViewIsASCII(std::string_view text) {
 	return std::all_of(text.cbegin(), text.cend(), IsASCII);
 }
@@ -1673,7 +1667,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 				} else if ((caretShape == ViewStyle::CaretShape::block) || imeCaretBlockOverride) {
 					/* Block caret */
 					rcCaret.left = xposCaret;
-					if (canDrawBlockCaret && !(IsControlCharacter(ll->chars[offset]))) {
+					if (canDrawBlockCaret && !(IsControl(ll->chars[offset]))) {
 						drawBlockCaret = true;
 						rcCaret.right = xposCaret + widthOverstrikeCaret;
 					} else {
