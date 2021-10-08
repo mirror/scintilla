@@ -3044,9 +3044,7 @@ void ScintillaGTK::SetDocPointer(Document *document) {
 		sciAccessible = ScintillaGTKAccessible::FromAccessible(accessible);
 		if (sciAccessible && pdoc) {
 			oldDoc = pdoc;
-			if (oldDoc) {
-				oldDoc->AddRef();
-			}
+			oldDoc->AddRef();
 		}
 	}
 
