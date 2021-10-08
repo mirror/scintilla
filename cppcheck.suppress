@@ -22,6 +22,9 @@ shiftTooManyBitsSigned:scintilla/src/MarginView.cxx
 // DLL entry points are unused inside Scintilla
 unusedFunction:scintilla\win32\ScintillaDLL.cxx
 
+// DLLMain is defined exactly as specified by Win32
+constParameter:scintilla\win32\ScintillaDLL.cxx
+
 // The styler parameter is not const as LexAccessor::operator[] is not const
 constParameter:scintilla/lexlib/StyleContext.cxx
 
