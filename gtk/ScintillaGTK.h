@@ -92,7 +92,7 @@ public:
 	ScintillaGTK(ScintillaGTK &&) = delete;
 	ScintillaGTK &operator=(const ScintillaGTK &) = delete;
 	ScintillaGTK &operator=(ScintillaGTK &&) = delete;
-	virtual ~ScintillaGTK();
+	~ScintillaGTK() override;
 	static ScintillaGTK *FromWidget(GtkWidget *widget) noexcept;
 	static void ClassInit(OBJECT_CLASS *object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class);
 private:
