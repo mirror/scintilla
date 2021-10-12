@@ -772,9 +772,9 @@ void Editor::MultipleSelectAdd(AddNumber addNumber) {
 			searchRanges.push_back(rangeTarget);
 		}
 
-		for (std::vector<Range>::const_iterator it = searchRanges.begin(); it != searchRanges.end(); ++it) {
-			Sci::Position searchStart = it->start;
-			const Sci::Position searchEnd = it->end;
+		for (const Range range : searchRanges) {
+			Sci::Position searchStart = range.start;
+			const Sci::Position searchEnd = range.end;
 			for (;;) {
 				Sci::Position lengthFound = selectedText.length();
 				const Sci::Position pos = pdoc->FindText(searchStart, searchEnd,

@@ -548,10 +548,8 @@ namespace {
 constexpr unsigned int KeyFromString(std::string_view charBytes) noexcept {
 	PLATFORM_ASSERT(charBytes.length() <= 4);
 	unsigned int k=0;
-	for (size_t i=0; i < charBytes.length(); i++) {
-		k = k * 0x100;
-		const unsigned char uc = charBytes[i];
-		k += uc;
+	for (const unsigned char uc : charBytes) {
+		k = k * 0x100 + uc;
 	}
 	return k;
 }
