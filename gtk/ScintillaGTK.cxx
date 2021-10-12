@@ -1300,7 +1300,7 @@ struct CaseMapper {
 }
 
 std::string ScintillaGTK::CaseMapString(const std::string &s, CaseMapping caseMapping) {
-	if ((s.size() == 0) || (caseMapping == CaseMapping::same))
+	if (s.empty() || (caseMapping == CaseMapping::same))
 		return s;
 
 	if (IsUnicodeMode()) {
@@ -1650,7 +1650,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	std::unique_ptr<SelectionText> newline_normalized;
 	{
 		std::string tmpstr = Document::TransformLineEnds(text->Data(), text->Length(), EndOfLine::Lf);
-		newline_normalized.reset(new SelectionText());
+		newline_normalized = std::make_unique<SelectionText>();
 		newline_normalized->Copy(tmpstr, CpUtf8, CharacterSet::Ansi, text->rectangular, false);
 		text = newline_normalized.get();
 	}
@@ -2446,7 +2446,7 @@ std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str) {
 void ScintillaGTK::SetCandidateWindowPos() {
 	// Composition box accompanies candidate box.
 	const Point pt = PointMainCaret();
-	GdkRectangle imeBox = {0}; // No need to set width
+	GdkRectangle imeBox {};
 	imeBox.x = static_cast<gint>(pt.x);
 	imeBox.y = static_cast<gint>(pt.y + std::max(4, vs.lineHeight/4));
 	// prevent overlapping with current line
@@ -3008,7 +3008,7 @@ gboolean ScintillaGTK::IdleCallback(gpointer pSci) {
 	// Idler will be automatically stopped, if there is nothing
 	// to do while idle.
 	const bool ret = sciThis->Idle();
-	if (ret == false) {
+	if (!ret) {
 		// FIXME: This will remove the idler from GTK, we don't want to
 		// remove it as it is removed automatically when this function
 		// returns false (although, it should be harmless).
