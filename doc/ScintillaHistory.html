@@ -564,6 +564,7 @@
       </tr><tr>
 	<td>Michael Neuroth</td>
 	<td>Arne Scheffler</td>
+	<td>Derek</td>
     </tr>
     </table>
     <h2>Releases</h2>
@@ -579,6 +580,12 @@
 	</li>
 	<li>
 	On GTK, fix potential crash when closing Scintilla instances due to releasing global settings object.
+	</li>
+	<li>
+	On Win32, when window is wider than scroll width,
+	use correct values when checking whether to change horizontal scroll bar so
+	only update and notify dwell end when needed.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2288/">Bug #2288</a>.
 	</li>
     </ul>
     <h3>
