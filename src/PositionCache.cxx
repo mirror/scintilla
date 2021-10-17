@@ -632,15 +632,6 @@ const Representation *SpecialRepresentations::RepresentationFromCharacter(std::s
 	return nullptr;
 }
 
-bool SpecialRepresentations::Contains(std::string_view charBytes) const {
-	PLATFORM_ASSERT(charBytes.length() <= 4);
-	const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
-	if (!startByteHasReprs[ucStart])
-		return false;
-	const MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
-	return it != mapReprs.end();
-}
-
 void SpecialRepresentations::Clear() {
 	mapReprs.clear();
 	constexpr short none = 0;

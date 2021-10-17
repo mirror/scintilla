@@ -209,7 +209,6 @@ public:
 	void ClearRepresentation(std::string_view charBytes);
 	const Representation *GetRepresentation(std::string_view charBytes) const;
 	const Representation *RepresentationFromCharacter(std::string_view charBytes) const;
-	bool Contains(std::string_view charBytes) const;
 	bool ContainsCrLf() const noexcept {
 		return crlf;
 	}
