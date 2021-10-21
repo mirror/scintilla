@@ -201,6 +201,7 @@ typedef std::map<unsigned int, Representation> MapRepresentation;
 class SpecialRepresentations {
 	MapRepresentation mapReprs;
 	unsigned short startByteHasReprs[0x100] {};
+	unsigned int maxKey = 0;
 	bool crlf = false;
 public:
 	void SetRepresentation(std::string_view charBytes, std::string_view value);

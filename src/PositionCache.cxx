@@ -561,16 +561,18 @@ constexpr unsigned int representationKeyCrLf = KeyFromString("\r\n");
 void SpecialRepresentations::SetRepresentation(std::string_view charBytes, std::string_view value) {
 	if ((charBytes.length() <= 4) && (value.length() <= Representation::maxLength)) {
 		const unsigned int key = KeyFromString(charBytes);
-		const MapRepresentation::iterator it = mapReprs.find(key);
-		if (it == mapReprs.end()) {
+		const bool inserted = mapReprs.insert_or_assign(key, Representation(value)).second;
+		if (inserted) {
 			// New entry so increment for first byte
 			const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
 			startByteHasReprs[ucStart]++;
+			if (key > maxKey) {
+				maxKey = key;
+			}
 			if (key == representationKeyCrLf) {
 				crlf = true;
 			}
 		}
-		mapReprs[key] = Representation(value);
 	}
 }
 
@@ -607,6 +609,9 @@ void SpecialRepresentations::ClearRepresentation(std::string_view charBytes) {
 			mapReprs.erase(it);
 			const unsigned char ucStart = charBytes.empty() ? 0 : charBytes[0];
 			startByteHasReprs[ucStart]--;
+			if (key == maxKey && startByteHasReprs[ucStart] == 0) {
+				maxKey = mapReprs.empty() ? 0 : mapReprs.crbegin()->first;
+			}
 			if (key == representationKeyCrLf) {
 				crlf = false;
 			}
@@ -615,7 +620,11 @@ void SpecialRepresentations::ClearRepresentation(std::string_view charBytes) {
 }
 
 const Representation *SpecialRepresentations::GetRepresentation(std::string_view charBytes) const {
-	const MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes));
+	const unsigned int key = KeyFromString(charBytes);
+	if (key > maxKey) {
+		return nullptr;
+	}
+	const MapRepresentation::const_iterator it = mapReprs.find(key);
 	if (it != mapReprs.end()) {
 		return &(it->second);
 	}
@@ -636,6 +645,7 @@ void SpecialRepresentations::Clear() {
 	mapReprs.clear();
 	constexpr unsigned short none = 0;
 	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
+	maxKey = 0;
 	crlf = false;
 }
 
