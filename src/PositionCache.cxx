@@ -634,7 +634,7 @@ const Representation *SpecialRepresentations::RepresentationFromCharacter(std::s
 
 void SpecialRepresentations::Clear() {
 	mapReprs.clear();
-	constexpr short none = 0;
+	constexpr unsigned short none = 0;
 	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
 	crlf = false;
 }
