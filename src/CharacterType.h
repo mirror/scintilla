@@ -32,6 +32,13 @@ constexpr bool IsEOLCharacter(int ch) noexcept {
 	return ch == '\r' || ch == '\n';
 }
 
+constexpr bool IsBreakSpace(int ch) noexcept {
+	// used for text breaking, treat C0 control character as space.
+	// by default C0 control character is handled as special representation,
+	// so not appears in normal text. 0x7F DEL is omitted to simplify the code.
+	return ch >= 0 && ch <= ' ';
+}
+
 constexpr bool IsADigit(int ch) noexcept {
 	return (ch >= '0') && (ch <= '9');
 }
