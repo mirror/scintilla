@@ -128,7 +128,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 12 September 2021 NH</p>
+    <p>Last edited 21 October 2021 ZL</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -3941,6 +3941,8 @@ struct Sci_TextToFind {
 
     <p>The NUL (0) character is a special case since the <code class="parameter">encodedCharacter</code> parameter is NUL terminated, the NUL
     character is specified as an empty string.</p>
+
+    <p>For UTF-8 and DBCS code pages, clear representation for single byte &ge; 128 may cause unexpected behaviour.</p>
 
     <p><b id="SCI_CLEARALLREPRESENTATIONS">SCI_CLEARALLREPRESENTATIONS</b><br />
     Reset representations to defaults with <code>SCI_CLEARALLREPRESENTATIONS</code>.</p>
