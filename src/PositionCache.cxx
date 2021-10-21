@@ -706,8 +706,9 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 BreakFinder::~BreakFinder() noexcept = default;
 
 TextSegment BreakFinder::Next() {
-	if (subBreak == -1) {
+	if (subBreak < 0) {
 		const int prev = nextBreak;
+		const Representation *repr = nullptr;
 		while (nextBreak < lineRange.end) {
 			int charWidth = 1;
 			const char * const chars = &ll->chars[nextBreak];
@@ -719,7 +720,7 @@ TextSegment BreakFinder::Next() {
 					charWidth = pdoc->DBCSDrawBytes(std::string_view(chars, lineRange.end - nextBreak));
 				}
 			}
-			const Representation *repr = nullptr;
+			repr = nullptr;
 			if (preprs->MayContain(ch)) {
 				// Special case \r\n line ends if there is a representation
 				if (ch == '\r' && preprs->ContainsCrLf() && chars[1] == '\n') {
@@ -741,17 +742,15 @@ TextSegment BreakFinder::Next() {
 					} else {
 						repr = nullptr;	// Optimize -> should remember repr
 					}
-					if ((nextBreak - prev) < lengthStartSubdivision) {
-						return TextSegment(prev, nextBreak - prev, repr);
-					} else {
-						break;
-					}
+					break;
 				}
 			}
 			nextBreak += charWidth;
 		}
-		if ((nextBreak - prev) < lengthStartSubdivision) {
-			return TextSegment(prev, nextBreak - prev);
+
+		const int lengthSegment = nextBreak - prev;
+		if (lengthSegment < lengthStartSubdivision) {
+			return TextSegment(prev, lengthSegment, repr);
 		}
 		subBreak = prev;
 	}
