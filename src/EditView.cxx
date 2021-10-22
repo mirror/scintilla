@@ -1639,7 +1639,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 			}
 			const bool caretBlinkState = (model.caret.active && model.caret.on) || (!additionalCaretsBlink && !mainCaret);
 			const bool caretVisibleState = additionalCaretsVisible || mainCaret;
-			if ((xposCaret >= 0) && vsDraw.IsCaretVisible() &&
+			if ((xposCaret >= 0) && vsDraw.IsCaretVisible(mainCaret) &&
 				(drawDrag || (caretBlinkState && caretVisibleState))) {
 				bool canDrawBlockCaret = true;
 				bool drawBlockCaret = false;
@@ -1663,7 +1663,8 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 				if (xposCaret > 0)
 					caretWidthOffset = 0.51f;	// Move back so overlaps both character cells.
 				xposCaret += xStart;
-				const ViewStyle::CaretShape caretShape = drawDrag ? ViewStyle::CaretShape::line : vsDraw.CaretShapeForMode(model.inOverstrike);
+				const ViewStyle::CaretShape caretShape = drawDrag ? ViewStyle::CaretShape::line :
+					vsDraw.CaretShapeForMode(model.inOverstrike, mainCaret);
 				if (drawDrag) {
 					/* Dragging text, use a line caret */
 					rcCaret.left = std::round(xposCaret - caretWidthOffset);
@@ -1736,6 +1737,21 @@ static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, c
 	}
 }
 
+// On the curses platform, the terminal is drawing its own caret, so if the caret is within
+// the main selection, do not draw the selection at that position.
+// Use iDoc from DrawBackground and DrawForeground here because TextSegment has been adjusted
+// such that, if the caret is inside the main selection, the beginning or end of that selection
+// is at the end of a text segment.
+// This function should only be called if iDoc is within the main selection.
+static InSelection CharacterInCursesSelection(Sci::Position iDoc, const EditModel &model, const ViewStyle &vsDraw) {
+	const SelectionPosition &posCaret = model.sel.RangeMain().caret;
+	const bool caretAtStart = posCaret < model.sel.RangeMain().anchor && posCaret.Position() == iDoc;
+	const bool caretAtEnd = posCaret > model.sel.RangeMain().anchor &&
+		vsDraw.DrawCaretInsideSelection(false, false) &&
+		model.pdoc->MovePositionOutsideChar(posCaret.Position() - 1, -1) == iDoc;
+	return (caretAtStart || caretAtEnd) ? InSelection::inNone : InSelection::inMain;
+}
+
 void EditView::DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 	PRectangle rcLine, Range lineRange, Sci::Position posLineStart, int xStart,
 	int subLine, std::optional<ColourRGBA> background) const {
@@ -1746,7 +1762,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 	// Does not take margin into account but not significant
 	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
 
-	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, nullptr);
+	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, &vsDraw);
 
 	const bool drawWhitespaceBackground = vsDraw.WhitespaceBackgroundDrawn() && !background;
 
@@ -1769,7 +1785,9 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 			if (rcSegment.right > rcLine.right)
 				rcSegment.right = rcLine.right;
 
-			const InSelection inSelection = hideSelection ? InSelection::inNone : model.sel.CharacterInSelection(iDoc);
+			InSelection inSelection = hideSelection ? InSelection::inNone : model.sel.CharacterInSelection(iDoc);
+			if (FlagSet(vsDraw.caret.style, CaretStyle::Curses) && (inSelection == InSelection::inMain))
+				inSelection = CharacterInCursesSelection(iDoc, model, vsDraw);
 			const bool inHotspot = model.hotspot.Valid() && model.hotspot.ContainsCharacter(iDoc);
 			ColourRGBA textBack = TextBackground(model, vsDraw, ll, background, inSelection,
 				inHotspot, ll->styles[i], i);
@@ -2013,7 +2031,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					}
 				}
 			}
-			const InSelection inSelection = hideSelection ? InSelection::inNone : model.sel.CharacterInSelection(iDoc);
+			InSelection inSelection = hideSelection ? InSelection::inNone : model.sel.CharacterInSelection(iDoc);
+			if (FlagSet(vsDraw.caret.style, CaretStyle::Curses) && (inSelection == InSelection::inMain))
+				inSelection = CharacterInCursesSelection(iDoc, model, vsDraw);
 			const std::optional<ColourRGBA> selectionFore = SelectionForeground(model, vsDraw, inSelection);
 			if (selectionFore) {
 				textFore = *selectionFore;

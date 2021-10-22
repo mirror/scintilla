@@ -696,6 +696,21 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 					Insert(portion.end.Position() - posLineStart);
 			}
 		}
+		// On the curses platform, the terminal is drawing its own caret, so add breaks around the
+		// caret in the main selection in order to help prevent the selection from being drawn in
+		// the caret's cell.
+		if (pvsDraw && FlagSet(pvsDraw->caret.style, CaretStyle::Curses) && !psel->RangeMain().Empty()) {
+			const Sci::Position caretPos = psel->RangeMain().caret.Position();
+			const Sci::Position anchorPos = psel->RangeMain().anchor.Position();
+			if (caretPos < anchorPos) {
+				const Sci::Position nextPos = pdoc->MovePositionOutsideChar(caretPos + 1, 1);
+				Insert(nextPos - posLineStart);
+			} else if (caretPos > anchorPos && pvsDraw->DrawCaretInsideSelection(false, false)) {
+				const Sci::Position prevPos = pdoc->MovePositionOutsideChar(caretPos - 1, -1);
+				if (prevPos > anchorPos)
+					Insert(prevPos - posLineStart);
+			}
+		}
 	}
 	if (pvsDraw && pvsDraw->indicatorsSetFore) {
 		for (const IDecoration *deco : pdoc->decorations->View()) {

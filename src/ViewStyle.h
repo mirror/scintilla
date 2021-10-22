@@ -235,9 +235,9 @@ public:
 
 	enum class CaretShape { invisible, line, block, bar };
 	bool IsBlockCaretStyle() const noexcept;
-	bool IsCaretVisible() const noexcept;
+	bool IsCaretVisible(bool isMainSelection) const noexcept;
 	bool DrawCaretInsideSelection(bool inOverstrike, bool imeCaretBlockOverride) const noexcept;
-	CaretShape CaretShapeForMode(bool inOverstrike) const noexcept;
+	CaretShape CaretShapeForMode(bool inOverstrike, bool isMainSelection) const noexcept;
 
 private:
 	void AllocStyles(size_t sizeNew);
