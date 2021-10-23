@@ -34,6 +34,7 @@ class ScintillaGTK : public ScintillaBase {
 	int horizontalScrollBarHeight;
 
 	SelectionText primary;
+	SelectionPosition posPrimary;
 
 	GdkEvent *evbtn;
 	guint buttonMouse;

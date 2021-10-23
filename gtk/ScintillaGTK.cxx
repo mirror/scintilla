@@ -1563,8 +1563,8 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 
 void ScintillaGTK::InsertSelection(GtkClipboard *clipBoard, GtkSelectionData *selectionData) {
 	const gint length = gtk_selection_data_get_length(selectionData);
+	const GdkAtom selection = gtk_selection_data_get_selection(selectionData);
 	if (length >= 0) {
-		GdkAtom selection = gtk_selection_data_get_selection(selectionData);
 		SelectionText selText;
 		GetGtkSelectionText(selectionData, selText);
 
@@ -1572,11 +1572,17 @@ void ScintillaGTK::InsertSelection(GtkClipboard *clipBoard, GtkSelectionData *se
 		if (selection == GDK_SELECTION_CLIPBOARD) {
 			ClearSelection(multiPasteMode == MultiPaste::Each);
 		}
+		if (selection == GDK_SELECTION_PRIMARY) {
+			SetSelection(posPrimary, posPrimary);
+		}
 
 		InsertPasteShape(selText.Data(), selText.Length(),
 				 selText.rectangular ? PasteShape::rectangular : PasteShape::stream);
 		EnsureCaretVisible();
 	} else {
+		if (selection == GDK_SELECTION_PRIMARY) {
+			SetSelection(posPrimary, posPrimary);
+		}
 		GdkAtom target = gtk_selection_data_get_target(selectionData);
 		if (target == atomUTF8) {
 			// In case data is actually only stored as text/plain;charset=utf-8 not UTF8_STRING
@@ -1877,12 +1883,11 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			ButtonDownWithModifiers(pt, event->time, ModifierFlags(shift, ctrl, alt, meta));
 		} else if (event->button == 2) {
 			// Grab the primary selection if it exists
-			const SelectionPosition pos = SPositionFromLocation(pt, false, false, UserVirtualSpace());
+			posPrimary = SPositionFromLocation(pt, false, false, UserVirtualSpace());
 			if (OwnPrimarySelection() && primary.Empty())
 				CopySelectionRange(&primary);
 
 			sel.Clear();
-			SetSelection(pos, pos);
 			RequestSelection(GDK_SELECTION_PRIMARY);
 		} else if (event->button == 3) {
 			if (!PointInSelection(pt))
