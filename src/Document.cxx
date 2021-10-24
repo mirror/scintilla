@@ -1163,7 +1163,7 @@ size_t Document::SafeSegment(std::string_view text) const noexcept {
 
 		it = text.end() - 1;
 		if (dbcsCodePage) {
-			// for UTF-8 go back the start of last character.
+			// for UTF-8 go back to the start of last character.
 			for (int trail = 0; trail < UTF8MaxBytes - 1 && UTF8IsTrailByte(*it); trail++) {
 				--it;
 			}
