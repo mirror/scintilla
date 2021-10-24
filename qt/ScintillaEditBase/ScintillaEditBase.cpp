@@ -87,11 +87,11 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 	connect(sqt, SIGNAL(notifyChange()),
 	        this, SIGNAL(notifyChange()));
 
-	connect(sqt, SIGNAL(command(Scintilla::uptr_t, Scintilla::sptr_t)),
-		this, SLOT(event_command(Scintilla::uptr_t, Scintilla::sptr_t)));
+	connect(sqt, SIGNAL(command(Scintilla::uptr_t,Scintilla::sptr_t)),
+		this, SLOT(event_command(Scintilla::uptr_t,Scintilla::sptr_t)));
 
-	connect(sqt, SIGNAL(aboutToCopy(QMimeData *)),
-	        this, SIGNAL(aboutToCopy(QMimeData *)));
+	connect(sqt, SIGNAL(aboutToCopy(QMimeData*)),
+		this, SIGNAL(aboutToCopy(QMimeData*)));
 }
 
 ScintillaEditBase::~ScintillaEditBase() {}

@@ -728,8 +728,8 @@ void ScintillaQt::AddToPopUp(const char *label,
 
 	// Make sure the menu's signal is connected only once.
 	menu->disconnect();
-	connect(menu, SIGNAL(triggered(QAction *)),
-	        this, SLOT(execCommand(QAction *)));
+	connect(menu, SIGNAL(triggered(QAction*)),
+		this, SLOT(execCommand(QAction*)));
 }
 
 sptr_t ScintillaQt::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam)
