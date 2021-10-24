@@ -464,7 +464,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 		ll->positions[0] = 0;
 		bool lastSegItalics = false;
 
-		BreakFinder bfLayout(ll, nullptr, Range(0, numCharsInLine), posLineStart, 0, false, model.pdoc, &model.reprs, nullptr);
+		BreakFinder bfLayout(ll, nullptr, Range(0, numCharsInLine), posLineStart, 0, BreakFinder::BreakFor::Text, model.pdoc, &model.reprs, nullptr);
 		while (bfLayout.More()) {
 
 			const TextSegment ts = bfLayout.Next();
@@ -1762,7 +1762,8 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 	// Does not take margin into account but not significant
 	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
 
-	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, &vsDraw);
+	const BreakFinder::BreakFor breakFor = selBackDrawn ? BreakFinder::BreakFor::Selection : BreakFinder::BreakFor::Text;
+	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, breakFor, model.pdoc, &model.reprs, &vsDraw);
 
 	const bool drawWhitespaceBackground = vsDraw.WhitespaceBackgroundDrawn() && !background;
 
@@ -1980,8 +1981,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
 
 	// Foreground drawing loop
-	BreakFinder bfFore(ll, &model.sel, lineRange, posLineStart, xStartVisible,
-		(((phasesDraw == PhasesDraw::One) && selBackDrawn) || vsDraw.SelectionTextDrawn()), model.pdoc, &model.reprs, &vsDraw);
+	const BreakFinder::BreakFor breakFor = (((phasesDraw == PhasesDraw::One) && selBackDrawn) || vsDraw.SelectionTextDrawn())
+		? BreakFinder::BreakFor::ForegroundAndSelection : BreakFinder::BreakFor::Foreground;
+	BreakFinder bfFore(ll, &model.sel, lineRange, posLineStart, xStartVisible, breakFor, model.pdoc, &model.reprs, &vsDraw);
 
 	while (bfFore.More()) {
 
