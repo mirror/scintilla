@@ -613,7 +613,7 @@ std::unique_ptr<CaseFolder> ScintillaQt::CaseFolderForEncoding()
 
 std::string ScintillaQt::CaseMapString(const std::string &s, CaseMapping caseMapping)
 {
-	if ((s.size() == 0) || (caseMapping == CaseMapping::same))
+	if (s.empty() || (caseMapping == CaseMapping::same))
 		return s;
 
 	if (IsUnicodeMode()) {
