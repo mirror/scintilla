@@ -944,7 +944,7 @@ public:
 	PRectangle GetDesiredRect() override;
 	int CaretFromEdge() override;
 	void Clear() noexcept override;
-	void Append(char *s, int type = -1) override;
+	void Append(char *s, int type) override;
 	int Length() override;
 	void Select(int n) override;
 	int GetSelection() override;
