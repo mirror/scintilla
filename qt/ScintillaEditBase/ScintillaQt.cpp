@@ -677,7 +677,7 @@ void ScintillaQt::StartDrag()
 
 class CallTipImpl : public QWidget {
 public:
-	CallTipImpl(CallTip *pct_)
+	explicit CallTipImpl(CallTip *pct_)
 		: QWidget(nullptr, Qt::ToolTip),
 		  pct(pct_)
 	{

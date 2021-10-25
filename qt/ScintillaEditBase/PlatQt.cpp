@@ -116,9 +116,9 @@ static QFont::StyleStrategy ChooseStrategy(FontQuality eff)
 class FontAndCharacterSet : public Font {
 public:
 	CharacterSet characterSet = CharacterSet::Ansi;
-	QFont *pfont = nullptr;
-	FontAndCharacterSet(const FontParameters &fp) {
-		pfont = new QFont;
+	std::unique_ptr<QFont> pfont;
+	explicit FontAndCharacterSet(const FontParameters &fp) {
+		pfont = std::make_unique<QFont>();
 		pfont->setStyleStrategy(ChooseStrategy(fp.extraFontFlag));
 		pfont->setFamily(QString::fromUtf8(fp.faceName));
 		pfont->setPointSizeF(fp.size);
@@ -126,10 +126,6 @@ public:
 		pfont->setItalic(fp.italic);
 
 		characterSet = fp.characterSet;
-	}
-	~FontAndCharacterSet() {
-		delete pfont;
-		pfont = nullptr;
 	}
 };
 
@@ -148,7 +144,7 @@ const FontAndCharacterSet *AsFontAndCharacterSet(const Font *f) {
 
 QFont *FontPointer(const Font *f)
 {
-	return AsFontAndCharacterSet(f)->pfont;
+	return AsFontAndCharacterSet(f)->pfont.get();
 }
 
 }
@@ -921,7 +917,6 @@ PRectangle Window::GetMonitorRect(Point pt)
 class ListWidget : public QListWidget {
 public:
 	explicit ListWidget(QWidget *parent);
-	virtual ~ListWidget();
 
 	void setDelegate(IListBoxDelegate *lbDelegate);
 
@@ -939,7 +934,6 @@ private:
 class ListBoxImpl : public ListBox {
 public:
 	ListBoxImpl() noexcept;
-	~ListBoxImpl() noexcept override = default;
 
 	void SetFont(const Font *font) override;
 	void Create(Window &parent, int ctrlID, Point location,
@@ -1220,7 +1214,6 @@ std::unique_ptr<ListBox> ListBox::Allocate()
 ListWidget::ListWidget(QWidget *parent)
 : QListWidget(parent), delegate(nullptr)
 {}
-ListWidget::~ListWidget() {}
 
 void ListWidget::setDelegate(IListBoxDelegate *lbDelegate)
 {
