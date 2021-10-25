@@ -109,7 +109,7 @@ sptr_t ScintillaEditBase::sends(
     uptr_t wParam,
     const char *s) const
 {
-	return sqt->WndProc(static_cast<Message>(iMessage), wParam, (sptr_t)s);
+	return sqt->WndProc(static_cast<Message>(iMessage), wParam, reinterpret_cast<sptr_t>(s));
 }
 
 void ScintillaEditBase::scrollHorizontal(int value)
@@ -656,7 +656,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 		{
 			char fontName[64];
 			int style = send(SCI_GETSTYLEAT, pos);
-			int len = send(SCI_STYLEGETFONT, style, (sptr_t)fontName);
+			int len = sends(SCI_STYLEGETFONT, style, fontName);
 			int size = send(SCI_STYLEGETSIZE, style);
 			bool italic = send(SCI_STYLEGETITALIC, style);
 			int weight = send(SCI_STYLEGETBOLD, style) ? QFont::Bold : -1;
@@ -683,7 +683,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 			textRange.chrg = charRange;
 			textRange.lpstrText = buffer.data();
 
-			send(SCI_GETTEXTRANGE, 0, (sptr_t)&textRange);
+			send(SCI_GETTEXTRANGE, 0, reinterpret_cast<sptr_t>(&textRange));
 
 			return sqt->StringFromDocument(buffer.constData());
 		}
@@ -691,7 +691,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 		case Qt::ImCurrentSelection:
 		{
 			QVarLengthArray<char,1024> buffer(send(SCI_GETSELTEXT));
-			send(SCI_GETSELTEXT, 0, (sptr_t)buffer.data());
+			sends(SCI_GETSELTEXT, 0, buffer.data());
 
 			return sqt->StringFromDocument(buffer.constData());
 		}
