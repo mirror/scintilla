@@ -37,7 +37,7 @@ struct CountWidths {
 	// from the Base Multilingual Plane and those from other planes.
 	Sci::Position countBasePlane;
 	Sci::Position countOtherPlanes;
-	CountWidths(Sci::Position countBasePlane_=0, Sci::Position countOtherPlanes_=0) noexcept :
+	explicit CountWidths(Sci::Position countBasePlane_=0, Sci::Position countOtherPlanes_=0) noexcept :
 		countBasePlane(countBasePlane_),
 		countOtherPlanes(countOtherPlanes_) {
 	}
