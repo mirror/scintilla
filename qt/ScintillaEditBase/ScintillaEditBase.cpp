@@ -675,11 +675,11 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 			int paraEnd = sqt->pdoc->ParaDown(pos);
 			QVarLengthArray<char,1024> buffer(paraEnd - paraStart + 1);
 
-			Sci_CharacterRange charRange;
+			Sci_CharacterRange charRange{};
 			charRange.cpMin = paraStart;
 			charRange.cpMax = paraEnd;
 
-			Sci_TextRange textRange;
+			Sci_TextRange textRange{};
 			textRange.chrg = charRange;
 			textRange.lpstrText = buffer.data();
 

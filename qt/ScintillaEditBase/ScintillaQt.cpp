@@ -27,7 +27,8 @@ using namespace Scintilla::Internal;
 
 ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 : QObject(parent), scrollArea(parent), vMax(0),  hMax(0), vPage(0), hPage(0),
- haveMouseCapture(false), dragWasDropped(false)
+ haveMouseCapture(false), dragWasDropped(false),
+ rectangularSelectionModifier(SCMOD_ALT)
 {
 
 	wMain = scrollArea->viewport();
@@ -490,12 +491,11 @@ void ScintillaQt::onIdle()
 
 bool ScintillaQt::ChangeIdle(bool on)
 {
-	QTimer *qIdle;
 	if (on) {
 		// Start idler, if it's not running.
 		if (!idler.state) {
 			idler.state = true;
-			qIdle = new QTimer;
+			QTimer *qIdle = new QTimer;
 			connect(qIdle, SIGNAL(timeout()), this, SLOT(onIdle()));
 			qIdle->start(0);
 			idler.idlerID = qIdle;
@@ -504,7 +504,7 @@ bool ScintillaQt::ChangeIdle(bool on)
 		// Stop idler, if it's running
 		if (idler.state) {
 			idler.state = false;
-			qIdle = static_cast<QTimer *>(idler.idlerID);
+			QTimer *qIdle = static_cast<QTimer *>(idler.idlerID);
 			qIdle->stop();
 			disconnect(qIdle, SIGNAL(timeout()), nullptr, nullptr);
 			delete qIdle;

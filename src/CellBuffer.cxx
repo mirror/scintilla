@@ -1286,7 +1286,7 @@ void CellBuffer::EndUndoAction() {
 }
 
 void CellBuffer::AddUndoAction(Sci::Position token, bool mayCoalesce) {
-	bool startSequence;
+	bool startSequence = false;
 	uh.AppendAction(ActionType::container, token, nullptr, 0, startSequence, mayCoalesce);
 }
 

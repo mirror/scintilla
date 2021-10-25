@@ -128,7 +128,7 @@ private:
 	void NotifyFocus(bool focus) override;
 	void NotifyParent(Scintilla::NotificationData scn) override;
 	void NotifyURIDropped(const char *uri);
-	int timers[static_cast<size_t>(TickReason::dwell)+1];
+	int timers[static_cast<size_t>(TickReason::dwell)+1]{};
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
 	void CancelTimers();
