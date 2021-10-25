@@ -21,12 +21,10 @@
 #include <QScrollBar>
 #include <QTextFormat>
 
-#define INDIC_INPUTMETHOD 24
-
-#define SC_INDICATOR_INPUT INDICATOR_IME
-#define SC_INDICATOR_TARGET INDICATOR_IME+1
-#define SC_INDICATOR_CONVERTED INDICATOR_IME+2
-#define SC_INDICATOR_UNKNOWN INDICATOR_IME_MAX
+constexpr int IndicatorInput = static_cast<int>(Scintilla::IndicatorNumbers::Ime);
+constexpr int IndicatorTarget = IndicatorInput + 1;
+constexpr int IndicatorConverted = IndicatorInput + 2;
+constexpr int IndicatorUnknown = IndicatorInput + 3;
 
 // Q_WS_MAC and Q_WS_X11 aren't defined in Qt5
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -60,10 +58,10 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 	setAttribute(Qt::WA_KeyCompression);
 	setAttribute(Qt::WA_InputMethodEnabled);
 
-	sqt->vs.indicators[SC_INDICATOR_UNKNOWN] = Indicator(IndicatorStyle::Hidden, ColourRGBA(0, 0, 0xff));
-	sqt->vs.indicators[SC_INDICATOR_INPUT] = Indicator(IndicatorStyle::Dots, ColourRGBA(0, 0, 0xff));
-	sqt->vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(IndicatorStyle::CompositionThick, ColourRGBA(0, 0, 0xff));
-	sqt->vs.indicators[SC_INDICATOR_TARGET] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(0, 0, 0xff));
+	sqt->vs.indicators[IndicatorUnknown] = Indicator(IndicatorStyle::Hidden, ColourRGBA(0, 0, 0xff));
+	sqt->vs.indicators[IndicatorInput] = Indicator(IndicatorStyle::Dots, ColourRGBA(0, 0, 0xff));
+	sqt->vs.indicators[IndicatorConverted] = Indicator(IndicatorStyle::CompositionThick, ColourRGBA(0, 0, 0xff));
+	sqt->vs.indicators[IndicatorTarget] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(0, 0, 0xff));
 
 	connect(sqt, SIGNAL(notifyParent(Scintilla::NotificationData)),
 		this, SLOT(notifyParent(Scintilla::NotificationData)));
@@ -493,40 +491,40 @@ static int GetImeCaretPos(QInputMethodEvent *event)
 
 static std::vector<int> MapImeIndicators(QInputMethodEvent *event)
 {
-	std::vector<int> imeIndicator(event->preeditString().size(), SC_INDICATOR_UNKNOWN);
+	std::vector<int> imeIndicator(event->preeditString().size(), IndicatorUnknown);
 	foreach (QInputMethodEvent::Attribute attr, event->attributes()) {
 		if (attr.type == QInputMethodEvent::TextFormat) {
 			QTextFormat format = attr.value.value<QTextFormat>();
 			QTextCharFormat charFormat = format.toCharFormat();
 
-			int indicator = SC_INDICATOR_UNKNOWN;
+			int indicator = IndicatorUnknown;
 			switch (charFormat.underlineStyle()) {
 				case QTextCharFormat::NoUnderline: // win32, linux
-					indicator = SC_INDICATOR_TARGET;
+					indicator = IndicatorTarget;
 					break;
 				case QTextCharFormat::SingleUnderline: // osx
 				case QTextCharFormat::DashUnderline: // win32, linux
-					indicator = SC_INDICATOR_INPUT;
+					indicator = IndicatorInput;
 					break;
 				case QTextCharFormat::DotLine:
 				case QTextCharFormat::DashDotLine:
 				case QTextCharFormat::WaveUnderline:
 				case QTextCharFormat::SpellCheckUnderline:
-					indicator = SC_INDICATOR_CONVERTED;
+					indicator = IndicatorConverted;
 					break;
 
 				default:
-					indicator = SC_INDICATOR_UNKNOWN;
+					indicator = IndicatorUnknown;
 			}
 
 			if (format.hasProperty(QTextFormat::BackgroundBrush)) // win32, linux
-				indicator = SC_INDICATOR_TARGET;
+				indicator = IndicatorTarget;
 
 #ifdef Q_OS_OSX
 			if (charFormat.underlineStyle() == QTextCharFormat::SingleUnderline) {
 				QColor uc = charFormat.underlineColor();
 				if (uc.lightness() < 2) { // osx
-					indicator = SC_INDICATOR_TARGET;
+					indicator = IndicatorTarget;
 				}
 			}
 #endif
