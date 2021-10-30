@@ -99,7 +99,7 @@ void XPM::Init(const char *textForm) {
 		// Build the lines form out of the text form
 		std::vector<const char *> linesForm = LinesFormFromTextForm(textForm);
 		if (!linesForm.empty()) {
-			Init(&linesForm[0]);
+			Init(linesForm.data());
 		}
 	} else {
 		// It is really in line form
@@ -143,7 +143,7 @@ void XPM::Init(const char *const *linesForm) {
 		colourCodeTable[static_cast<unsigned char>(code)] = colour;
 	}
 
-	for (int y=0; y<height; y++) {
+	for (ptrdiff_t y=0; y<height; y++) {
 		const char *lform = linesForm[y+nColours+1];
 		const size_t len = MeasureLength(lform);
 		for (size_t x = 0; x<len; x++)
@@ -243,11 +243,11 @@ int RGBAImage::CountBytes() const noexcept {
 }
 
 const unsigned char *RGBAImage::Pixels() const noexcept {
-	return &pixelBytes[0];
+	return pixelBytes.data();
 }
 
 void RGBAImage::SetPixel(int x, int y, ColourRGBA colour) noexcept {
-	unsigned char *pixel = &pixelBytes[0] + (y * width + x) * 4;
+	unsigned char *pixel = pixelBytes.data() + (y * width + x) * 4;
 	// RGBA
 	pixel[0] = colour.GetRed();
 	pixel[1] = colour.GetGreen();
@@ -261,9 +261,9 @@ void RGBAImage::BGRAFromRGBA(unsigned char *pixelsBGRA, const unsigned char *pix
 	for (size_t i = 0; i < count; i++) {
 		const unsigned char alpha = pixelsRGBA[3];
 		// Input is RGBA, output is BGRA with premultiplied alpha
-		pixelsBGRA[2] = pixelsRGBA[0] * alpha / 255;
-		pixelsBGRA[1] = pixelsRGBA[1] * alpha / 255;
-		pixelsBGRA[0] = pixelsRGBA[2] * alpha / 255;
+		pixelsBGRA[2] = pixelsRGBA[0] * alpha / UCHAR_MAX;
+		pixelsBGRA[1] = pixelsRGBA[1] * alpha / UCHAR_MAX;
+		pixelsBGRA[0] = pixelsRGBA[2] * alpha / UCHAR_MAX;
 		pixelsBGRA[3] = alpha;
 		pixelsRGBA += bytesPerPixel;
 		pixelsBGRA += bytesPerPixel;
@@ -297,7 +297,7 @@ RGBAImage *RGBAImageSet::Get(int ident) {
 }
 
 /// Give the largest height of the set.
-int RGBAImageSet::GetHeight() const {
+int RGBAImageSet::GetHeight() const noexcept {
 	if (height < 0) {
 		for (const std::pair<const int, std::unique_ptr<RGBAImage>> &image : images) {
 			if (height < image.second->GetHeight()) {
@@ -309,7 +309,7 @@ int RGBAImageSet::GetHeight() const {
 }
 
 /// Give the largest width of the set.
-int RGBAImageSet::GetWidth() const {
+int RGBAImageSet::GetWidth() const noexcept {
 	if (width < 0) {
 		for (const std::pair<const int, std::unique_ptr<RGBAImage>> &image : images) {
 			if (width < image.second->GetWidth()) {
