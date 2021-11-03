@@ -71,7 +71,6 @@ HEADERS  += \
     ../../src/KeyMap.h \
     ../../src/Indicator.h \
     ../../src/Geometry.h \
-    ../../src/FontQuality.h \
     ../../src/Editor.h \
     ../../src/Document.h \
     ../../src/Decoration.h \
