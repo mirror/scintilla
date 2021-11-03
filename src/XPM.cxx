@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <climits>
 
 #include <stdexcept>
 #include <string_view>
