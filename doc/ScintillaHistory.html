@@ -568,6 +568,23 @@
     </table>
     <h2>Releases</h2>
     <h3>
+       <a href="https://www.scintilla.org/scintilla515.zip">Release 5.1.5</a>
+    </h3>
+    <ul>
+	<li>
+	Released 8 November 2021.
+	</li>
+	<li>
+	When calling SCI_GETTEXT, SCI_GETSELTEXT, and SCI_GETCURLINE with a NULL buffer argument
+	to discover the length that should be allocated, do not include the terminating NUL in the returned value.
+	The value returned is 1 less than previous versions of Scintilla.
+	Applications should allocate a buffer 1 more than this to accommodate the NUL.
+	The wParam (length) argument to SCI_GETTEXT and SCI_GETCURLINE also omits the NUL.
+	This is more consistent with other APIs.
+	</li>
+    <ul>
+    <h2>Releases</h2>
+    <h3>
        <a href="https://www.scintilla.org/scintilla514.zip">Release 5.1.4</a>
     </h3>
     <ul>

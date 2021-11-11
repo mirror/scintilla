@@ -5888,11 +5888,9 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case Message::GetText: {
 			if (lParam == 0)
-				return pdoc->Length() + 1;
-			if (wParam == 0)
-				return 0;
+				return pdoc->Length();
 			char *ptr = CharPtrFromSPtr(lParam);
-			const Sci_Position len = std::min<Sci_Position>(wParam - 1, pdoc->Length());
+			const Sci_Position len = std::min<Sci_Position>(wParam, pdoc->Length());
 			pdoc->GetCharRange(ptr, 0, len);
 			ptr[len] = '\0';
 			return len;
@@ -6033,20 +6031,16 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::GetSelText: {
 			SelectionText selectedText;
 			CopySelectionRange(&selectedText);
-			if (lParam == 0) {
-				return selectedText.LengthWithTerminator();
-			} else {
+			if (lParam) {
 				char *ptr = CharPtrFromSPtr(lParam);
 				size_t iChar = selectedText.Length();
 				if (iChar) {
 					memcpy(ptr, selectedText.Data(), iChar);
-					ptr[iChar++] = '\0';
-				} else {
-					ptr[0] = '\0';
 				}
-				return iChar;
+				ptr[iChar] = '\0';
 			}
-		}
+			return selectedText.Length();
+	}
 
 	case Message::LineFromPosition:
 		if (PositionFromUPtr(wParam) < 0)
@@ -6554,11 +6548,10 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 			const Sci::Position lineStart = pdoc->LineStart(lineCurrentPos);
 			const Sci::Position lineEnd = pdoc->LineStart(lineCurrentPos + 1);
 			if (lParam == 0) {
-				return 1 + lineEnd - lineStart;
+				return lineEnd - lineStart;
 			}
-			PLATFORM_ASSERT(wParam > 0);
 			char *ptr = CharPtrFromSPtr(lParam);
-			const Sci::Position len = std::min<uptr_t>(lineEnd - lineStart, wParam - 1);
+			const Sci::Position len = std::min<uptr_t>(lineEnd - lineStart, wParam);
 			pdoc->GetCharRange(ptr, lineStart, len);
 			ptr[len] = '\0';
 			return sel.MainCaret() - lineStart;
