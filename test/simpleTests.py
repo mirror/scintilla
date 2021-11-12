@@ -7,10 +7,7 @@ from __future__ import unicode_literals
 
 import ctypes, string, sys, unittest
 
-if sys.platform == "win32":
-	import XiteWin as Xite
-else:
-	import XiteQt as Xite
+import XiteWin as Xite
 
 # Unicode line ends are only available for lexers that support the feature so requires lexers
 lexersAvailable = Xite.lexillaAvailable or Xite.scintillaIncludesLexers
