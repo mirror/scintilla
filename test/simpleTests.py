@@ -2734,6 +2734,46 @@ class TestAutoComplete(unittest.TestCase):
 
 		self.assertEquals(self.ed.AutoCActive(), 0)
 
+	def testAutoCustomSort(self):
+		# Checks bug #2294 where SC_ORDER_CUSTOM with an empty list asserts
+		# https://sourceforge.net/p/scintilla/bugs/2294/
+		self.assertEquals(self.ed.AutoCGetOrder(), self.ed.SC_ORDER_PRESORTED)
+
+		self.ed.AutoCSetOrder(self.ed.SC_ORDER_CUSTOM)
+		self.assertEquals(self.ed.AutoCGetOrder(), self.ed.SC_ORDER_CUSTOM)
+
+		#~ self.ed.AutoCShow(0, b"")
+		#~ self.ed.AutoCComplete()
+		#~ self.assertEquals(self.ed.Contents(), b"xxx\n")
+
+		self.ed.AutoCShow(0, b"a")
+		self.ed.AutoCComplete()
+		self.assertEquals(self.ed.Contents(), b"xxx\na")
+
+		self.ed.AutoCSetOrder(self.ed.SC_ORDER_PERFORMSORT)
+		self.assertEquals(self.ed.AutoCGetOrder(), self.ed.SC_ORDER_PERFORMSORT)
+
+		self.ed.AutoCShow(0, b"")
+		self.ed.AutoCComplete()
+		self.assertEquals(self.ed.Contents(), b"xxx\na")
+
+		self.ed.AutoCShow(0, b"b a")
+		self.ed.AutoCComplete()
+		self.assertEquals(self.ed.Contents(), b"xxx\naa")
+
+		self.ed.AutoCSetOrder(self.ed.SC_ORDER_PRESORTED)
+		self.assertEquals(self.ed.AutoCGetOrder(), self.ed.SC_ORDER_PRESORTED)
+
+		self.ed.AutoCShow(0, b"")
+		self.ed.AutoCComplete()
+		self.assertEquals(self.ed.Contents(), b"xxx\naa")
+
+		self.ed.AutoCShow(0, b"a b")
+		self.ed.AutoCComplete()
+		self.assertEquals(self.ed.Contents(), b"xxx\naaa")
+
+		self.assertEquals(self.ed.AutoCActive(), 0)
+
 	def testWriteOnly(self):
 		""" Checks that setting attributes doesn't crash or change tested behaviour
 		but does not check that the changed attributes are effective. """

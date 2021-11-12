@@ -588,8 +588,12 @@
 	The wParam (length) argument to SCI_GETTEXT and SCI_GETCURLINE also omits the NUL.
 	This is more consistent with other APIs.
 	</li>
-    <ul>
-    <h2>Releases</h2>
+	<li>
+	Fix assertion failure with autocompletion list when order is SC_ORDER_CUSTOM
+	or SC_ORDER_PERFORMSORT and the list is empty.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2294/">Bug #2294</a>.
+	</li>
+    </ul>
     <h3>
        <a href="https://www.scintilla.org/scintilla514.zip">Release 5.1.4</a>
     </h3>
