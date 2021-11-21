@@ -55,6 +55,7 @@
 #include "UniConversion.h"
 #include "DBCS.h"
 
+#include "WinTypes.h"
 #include "PlatWin.h"
 
 #ifndef SPI_GETFONTSMOOTHINGCONTRAST

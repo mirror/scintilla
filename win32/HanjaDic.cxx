@@ -14,22 +14,10 @@
 #include <windows.h>
 #include <ole2.h>
 
+#include "WinTypes.h"
 #include "HanjaDic.h"
 
 namespace Scintilla::Internal::HanjaDict {
-
-struct UnknownReleaser {
-	// Called by unique_ptr to destroy/free the resource
-	template <class T>
-	void operator()(T *pUnknown) noexcept {
-		// same as ReleaseUnknown() in PlatWin.h
-		try {
-			pUnknown->Release();
-		} catch (...) {
-			// IUnknown::Release must not throw, ignore if it does.
-		}
-	}
-};
 
 struct BSTRDeleter {
 	void operator()(BSTR bstr) const noexcept {
