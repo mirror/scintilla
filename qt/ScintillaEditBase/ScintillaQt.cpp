@@ -172,7 +172,7 @@ static QString StringFromSelectedText(const SelectionText &selectedText)
 	}
 }
 
-static void AddRectangularToMime(QMimeData *mimeData, [[maybe_unused]] QString su)
+static void AddRectangularToMime(QMimeData *mimeData, [[maybe_unused]] const QString &su)
 {
 #if defined(Q_OS_WIN)
 	// Add an empty marker

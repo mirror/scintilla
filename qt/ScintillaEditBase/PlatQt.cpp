@@ -117,15 +117,13 @@ class FontAndCharacterSet : public Font {
 public:
 	CharacterSet characterSet = CharacterSet::Ansi;
 	std::unique_ptr<QFont> pfont;
-	explicit FontAndCharacterSet(const FontParameters &fp) {
+	explicit FontAndCharacterSet(const FontParameters &fp) : characterSet(fp.characterSet) {
 		pfont = std::make_unique<QFont>();
 		pfont->setStyleStrategy(ChooseStrategy(fp.extraFontFlag));
 		pfont->setFamily(QString::fromUtf8(fp.faceName));
 		pfont->setPointSizeF(fp.size);
 		pfont->setBold(static_cast<int>(fp.weight) > 500);
 		pfont->setItalic(fp.italic);
-
-		characterSet = fp.characterSet;
 	}
 };
 
@@ -154,8 +152,7 @@ std::shared_ptr<Font> Font::Allocate(const FontParameters &fp)
 	return std::make_shared<FontAndCharacterSet>(fp);
 }
 
-SurfaceImpl::SurfaceImpl()
-{}
+SurfaceImpl::SurfaceImpl() = default;
 
 SurfaceImpl::SurfaceImpl(int width, int height, SurfaceMode mode_)
 {
@@ -456,8 +453,8 @@ void SurfaceImpl::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 
 	QPainterPath path;
 
-	const Ends leftSide = static_cast<Ends>(static_cast<int>(ends) & 0xf);
-	const Ends rightSide = static_cast<Ends>(static_cast<int>(ends) & 0xf0);
+	const Ends leftSide = static_cast<Ends>(static_cast<unsigned int>(ends) & 0xfu);
+	const Ends rightSide = static_cast<Ends>(static_cast<unsigned int>(ends) & 0xf0u);
 	switch (leftSide) {
 		case Ends::leftFlat:
 			path.moveTo(rc.left + halfStroke, rc.top + halfStroke);
@@ -806,7 +803,7 @@ QRect ScreenRectangleForPoint(QPoint posGlobal)
 
 }
 
-Window::~Window() noexcept {}
+Window::~Window() noexcept = default;
 
 void Window::Destroy() noexcept
 {
@@ -959,15 +956,13 @@ public:
 	void SetList(const char *list, char separator, char typesep) override;
 	void SetOptions(ListOptions options_) override;
 
-	ListWidget *GetWidget() const noexcept;
+	[[nodiscard]] ListWidget *GetWidget() const noexcept;
 private:
-	bool unicodeMode;
-	int visibleRows;
+	bool unicodeMode{false};
+	int visibleRows{5};
 	QMap<int,QPixmap> images;
 };
-ListBoxImpl::ListBoxImpl() noexcept
-: unicodeMode(false), visibleRows(5)
-{}
+ListBoxImpl::ListBoxImpl() noexcept = default;
 
 void ListBoxImpl::Create(Window &parent,
                          int /*ctrlID*/,
@@ -1204,8 +1199,8 @@ ListWidget *ListBoxImpl::GetWidget() const noexcept
 	return static_cast<ListWidget *>(wid);
 }
 
-ListBox::ListBox() noexcept {}
-ListBox::~ListBox() noexcept {}
+ListBox::ListBox() noexcept = default;
+ListBox::~ListBox() noexcept = default;
 
 std::unique_ptr<ListBox> ListBox::Allocate()
 {

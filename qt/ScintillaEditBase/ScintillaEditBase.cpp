@@ -41,10 +41,8 @@ using namespace Scintilla;
 using namespace Scintilla::Internal;
 
 ScintillaEditBase::ScintillaEditBase(QWidget *parent)
-: QAbstractScrollArea(parent), sqt(nullptr), preeditPos(-1), wheelDelta(0)
+: QAbstractScrollArea(parent), sqt(new ScintillaQt(this)), preeditPos(-1), wheelDelta(0)
 {
-	sqt = new ScintillaQt(this);
-
 	time.start();
 
 	// Set Qt defaults.
@@ -92,7 +90,7 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 		this, SIGNAL(aboutToCopy(QMimeData*)));
 }
 
-ScintillaEditBase::~ScintillaEditBase() {}
+ScintillaEditBase::~ScintillaEditBase() = default;
 
 sptr_t ScintillaEditBase::send(
 	unsigned int iMessage,
@@ -559,7 +557,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 	sqt->view.imeCaretBlockOverride = false;
 
 	if (!event->commitString().isEmpty()) {
-		const QString commitStr = event->commitString();
+		const QString &commitStr = event->commitString();
 		const unsigned int commitStrLen = commitStr.length();
 
 		for (unsigned int i = 0; i < commitStrLen;) {
@@ -831,7 +829,7 @@ void ScintillaEditBase::event_command(uptr_t wParam, sptr_t lParam)
 	emit command(wParam, lParam);
 }
 
-KeyMod ScintillaEditBase::ModifiersOfKeyboard() const
+KeyMod ScintillaEditBase::ModifiersOfKeyboard()
 {
 	const bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
 	const bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
