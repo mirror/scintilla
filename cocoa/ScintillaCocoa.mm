@@ -416,7 +416,7 @@ ScintillaCocoa::ScintillaCocoa(ScintillaView *sciView_, SCIContentView *viewCont
 	notifyProc = NULL;
 	capturedMouse = false;
 	isFirstResponder = false;
-	isActive = false;
+	isActive = NSApp.isActive;
 	enteredSetScrollingSize = false;
 	scrollSpeed = 1;
 	scrollTicks = 2000;
