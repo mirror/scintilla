@@ -203,7 +203,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 }
 
 - (void) drawRect: (NSRect) rect {
-	owner.backend->PaintMargin(rect);
+	[super drawRect:rect];
 }
 
 @end
