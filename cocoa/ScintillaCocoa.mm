@@ -1449,6 +1449,8 @@ void ScintillaCocoa::StartDrag() {
 
 	// Prepare drag image.
 	NSRect selectionRectangle = PRectangleToNSRect(rcSel);
+	if (NSIsEmptyRect(selectionRectangle))
+		return;
 
 	SCIContentView *content = ContentView();
 
