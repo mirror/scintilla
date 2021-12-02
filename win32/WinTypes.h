@@ -30,7 +30,6 @@ struct UnknownReleaser {
 	// Called by unique_ptr to destroy/free the resource
 	template <class T>
 	void operator()(T *pUnknown) noexcept {
-		// same as ReleaseUnknown() in PlatWin.h
 		try {
 			pUnknown->Release();
 		} catch (...) {
