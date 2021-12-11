@@ -343,8 +343,8 @@ void ScintillaEditBase::mouseReleaseEvent(QMouseEvent *event)
 	if (event->button() == Qt::LeftButton)
 		sqt->ButtonUpWithModifiers(point, time.elapsed(), ModifiersOfKeyboard());
 
-	int pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
-	sptr_t line = send(SCI_LINEFROMPOSITION, pos);
+	const sptr_t pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
+	const sptr_t line = send(SCI_LINEFROMPOSITION, pos);
 	int modifiers = QApplication::keyboardModifiers();
 
 	emit textAreaClicked(line, modifiers);
@@ -452,11 +452,11 @@ bool ScintillaEditBase::IsHangul(const QChar qchar)
 				HangulJamoExtendedA || HangulJamoExtendedB;
 }
 
-void ScintillaEditBase::MoveImeCarets(int offset)
+void ScintillaEditBase::MoveImeCarets(Scintilla::Position offset)
 {
 	// Move carets relatively by bytes
 	for (size_t r=0; r < sqt->sel.Count(); r++) {
-		int positionInsert = sqt->sel.Range(r).Start().Position();
+		const Sci::Position positionInsert = sqt->sel.Range(r).Start().Position();
 		sqt->sel.Range(r).caret.SetPosition(positionInsert + offset);
 		sqt->sel.Range(r).anchor.SetPosition(positionInsert + offset);
  	}
@@ -473,7 +473,7 @@ void ScintillaEditBase::DrawImeIndicator(int indicator, int len)
 	}
 	sqt->pdoc->DecorationSetCurrentIndicator(indicator);
 	for (size_t r=0; r< sqt-> sel.Count(); r++) {
-		int positionInsert = sqt->sel.Range(r).Start().Position();
+		const Sci::Position positionInsert = sqt->sel.Range(r).Start().Position();
 		sqt->pdoc->DecorationFillRange(positionInsert - len, 1, len);
 	}
 }
@@ -598,7 +598,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 		// Move IME carets.
 		int imeCaretPos = GetImeCaretPos(event);
 		int imeEndToImeCaretU16 = imeCaretPos - preeditStrLen;
-		int imeCaretPosDoc = sqt->pdoc->GetRelativePositionUTF16(sqt->CurrentPosition(), imeEndToImeCaretU16);
+		const Sci::Position imeCaretPosDoc = sqt->pdoc->GetRelativePositionUTF16(sqt->CurrentPosition(), imeEndToImeCaretU16);
 
 		MoveImeCarets(- sqt->CurrentPosition() + imeCaretPosDoc);
 
@@ -622,8 +622,8 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 
 QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 {
-	int pos = send(SCI_GETCURRENTPOS);
-	int line = send(SCI_LINEFROMPOSITION, pos);
+	const Scintilla::Position pos = send(SCI_GETCURRENTPOS);
+	const Scintilla::Position line = send(SCI_LINEFROMPOSITION, pos);
 
 	switch (query) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
@@ -631,7 +631,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 		// ImMicroFocus. Its the same value (2) and same description.
 		case Qt::ImCursorRectangle:
 		{
-			int startPos = (preeditPos >= 0) ? preeditPos : pos;
+			const Scintilla::Position startPos = (preeditPos >= 0) ? preeditPos : pos;
 			Point pt = sqt->LocationFromPosition(startPos);
 			int width = send(SCI_GETCARETWIDTH);
 			int height = send(SCI_TEXTHEIGHT, line);
@@ -640,7 +640,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 #else
 		case Qt::ImMicroFocus:
 		{
-			int startPos = (preeditPos >= 0) ? preeditPos : pos;
+			const Scintilla::Position startPos = (preeditPos >= 0) ? preeditPos : pos;
 			Point pt = sqt->LocationFromPosition(startPos);
 			int width = send(SCI_GETCARETWIDTH);
 			int height = send(SCI_TEXTHEIGHT, line);
@@ -661,14 +661,14 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 
 		case Qt::ImCursorPosition:
 		{
-			int paraStart = sqt->pdoc->ParaUp(pos);
+			Scintilla::Position paraStart = sqt->pdoc->ParaUp(pos);
 			return pos - paraStart;
 		}
 
 		case Qt::ImSurroundingText:
 		{
-			int paraStart = sqt->pdoc->ParaUp(pos);
-			int paraEnd = sqt->pdoc->ParaDown(pos);
+			const Scintilla::Position paraStart = sqt->pdoc->ParaUp(pos);
+			const Scintilla::Position paraEnd = sqt->pdoc->ParaDown(pos);
 			QVarLengthArray<char,1024> buffer(paraEnd - paraStart + 1);
 
 			Sci_CharacterRange charRange{};
@@ -738,7 +738,7 @@ void ScintillaEditBase::notifyParent(NotificationData scn)
 			const bool added = FlagSet(scn.modificationType, ModificationFlags::InsertText);
 			const bool deleted = FlagSet(scn.modificationType, ModificationFlags::DeleteText);
 
-			int length = send(SCI_GETTEXTLENGTH);
+			const Scintilla::Position length = send(SCI_GETTEXTLENGTH);
 			bool firstLineAdded = (added && length == 1) ||
 			                      (deleted && length == 0);
 
