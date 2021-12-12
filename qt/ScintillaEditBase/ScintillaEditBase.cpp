@@ -669,20 +669,8 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 		{
 			const Scintilla::Position paraStart = sqt->pdoc->ParaUp(pos);
 			const Scintilla::Position paraEnd = sqt->pdoc->ParaDown(pos);
-			QVarLengthArray<char,1024> buffer(paraEnd - paraStart + 1);
-
-			// This is limited to first 2GB of a document on Windows
-			Sci_CharacterRange charRange{};
-			charRange.cpMin = paraStart;
-			charRange.cpMax = paraEnd;
-
-			Sci_TextRange textRange{};
-			textRange.chrg = charRange;
-			textRange.lpstrText = buffer.data();
-
-			send(SCI_GETTEXTRANGE, 0, reinterpret_cast<sptr_t>(&textRange));
-
-			return sqt->StringFromDocument(buffer.constData());
+			const std::string buffer = sqt->RangeText(paraStart, paraEnd);
+			return sqt->StringFromDocument(buffer.c_str());
 		}
 
 		case Qt::ImCurrentSelection:
