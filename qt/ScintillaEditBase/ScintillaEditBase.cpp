@@ -56,10 +56,12 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 	setAttribute(Qt::WA_KeyCompression);
 	setAttribute(Qt::WA_InputMethodEnabled);
 
-	sqt->vs.indicators[IndicatorUnknown] = Indicator(IndicatorStyle::Hidden, ColourRGBA(0, 0, 0xff));
-	sqt->vs.indicators[IndicatorInput] = Indicator(IndicatorStyle::Dots, ColourRGBA(0, 0, 0xff));
-	sqt->vs.indicators[IndicatorConverted] = Indicator(IndicatorStyle::CompositionThick, ColourRGBA(0, 0, 0xff));
-	sqt->vs.indicators[IndicatorTarget] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(0, 0, 0xff));
+	// All IME indicators drawn in same colour, blue, with different patterns
+	const ColourRGBA colourIME(0, 0, UCHAR_MAX);
+	sqt->vs.indicators[IndicatorUnknown] = Indicator(IndicatorStyle::Hidden, colourIME);
+	sqt->vs.indicators[IndicatorInput] = Indicator(IndicatorStyle::Dots, colourIME);
+	sqt->vs.indicators[IndicatorConverted] = Indicator(IndicatorStyle::CompositionThick, colourIME);
+	sqt->vs.indicators[IndicatorTarget] = Indicator(IndicatorStyle::StraightBox, colourIME);
 
 	connect(sqt, SIGNAL(notifyParent(Scintilla::NotificationData)),
 		this, SLOT(notifyParent(Scintilla::NotificationData)));
@@ -468,7 +470,7 @@ void ScintillaEditBase::DrawImeIndicator(int indicator, int len)
 	// Draw an indicator on the character before caret by the character bytes of len
 	// so it should be called after InsertCharacter().
 	// It does not affect caret positions.
-	if (indicator < 8 || indicator > INDICATOR_MAX) {
+	if (indicator < INDICATOR_CONTAINER || indicator > INDICATOR_MAX) {
 		return;
 	}
 	sqt->pdoc->DecorationSetCurrentIndicator(indicator);
