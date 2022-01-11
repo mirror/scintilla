@@ -361,7 +361,6 @@ SurfaceImpl::SurfaceImpl() {
 	gc = NULL;
 
 	textLayout.reset(new QuartzTextLayout());
-	verticalDeviceResolution = 0;
 
 	bitmapData.reset(); // Release will try and delete bitmapData if != nullptr
 	bitmapWidth = 0;

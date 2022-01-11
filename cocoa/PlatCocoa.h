@@ -49,7 +49,6 @@ private:
 
 	/** The text layout instance */
 	std::unique_ptr<QuartzTextLayout> textLayout;
-	int verticalDeviceResolution;
 
 	/** If the surface is a bitmap context, contains a reference to the bitmap data. */
 	std::unique_ptr<uint8_t[]> bitmapData;
