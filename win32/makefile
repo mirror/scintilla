@@ -131,7 +131,7 @@ $(LIBSCI): $(COMPONENT_OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
 
-# Automatically generate dependencies for most files with "make deps"
+# Automatically generate dependencies for most files with "make depend"
 include deps.mak
 
 $(DIR_O)/ScintRes.o: ScintRes.rc

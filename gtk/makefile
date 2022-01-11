@@ -167,5 +167,5 @@ $(COMPLIB): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEX_OBJS)
 $(COMPONENT): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER)
 	$(CXX) $(CXX_ALL_FLAGS) $(CXXFLAGS) $(LDFLAGS) $^ -o $@ $(CONFIGLIB)
 
-# Automatically generate header dependencies with "make deps"
+# Automatically generate header dependencies with "make depend"
 include deps.mak
