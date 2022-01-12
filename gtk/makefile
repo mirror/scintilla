@@ -119,8 +119,6 @@ analyze:
 depend deps.mak:
 	$(PYTHON) DepGen.py
 
-LEX_OBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(basedir)/lexers/Lex*.cxx)))))
-
 # Required for base Scintilla
 SRC_OBJS = \
 	AutoComplete.o \
@@ -160,7 +158,7 @@ GTK_OBJS = \
 	ScintillaGTK.o \
 	ScintillaGTKAccessible.o
 
-$(COMPLIB): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER) $(LEX_OBJS)
+$(COMPLIB): $(SRC_OBJS) $(GTK_OBJS) $(MARSHALLER)
 	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
 
