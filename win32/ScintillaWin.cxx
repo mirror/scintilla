@@ -619,7 +619,7 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 		DropRenderTarget();
 		renderTargetValid = true;
 	}
-	if (pD2DFactory && !pRenderTarget) {
+	if (!pRenderTarget) {
 		HWND hw = MainHWND();
 		RECT rc;
 		::GetClientRect(hw, &rc);

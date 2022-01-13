@@ -215,7 +215,7 @@ void LoadDpiForWindow() noexcept {
 
 HINSTANCE hinstPlatformRes {};
 
-const Supports SupportsGDI[] = {
+constexpr Supports SupportsGDI[] = {
 	Supports::PixelModification,
 };
 
@@ -468,9 +468,9 @@ class SurfaceGDI : public Surface {
 
 	int logPixelsY = USER_DEFAULT_SCREEN_DPI;
 
-	int maxWidthMeasure = INT_MAX;
+	static constexpr int maxWidthMeasure = INT_MAX;
 	// There appears to be a 16 bit string length limit in GDI on NT.
-	int maxLenText = 65535;
+	static constexpr int maxLenText = 65535;
 
 	void PenColour(ColourRGBA fore, XYPOSITION widthStroke) noexcept;
 
@@ -1261,7 +1261,7 @@ constexpr D2D1_POINT_2F DPointFromPoint(Point point) noexcept {
 	return { static_cast<FLOAT>(point.x), static_cast<FLOAT>(point.y) };
 }
 
-const Supports SupportsD2D[] = {
+constexpr Supports SupportsD2D[] = {
 	Supports::LineDrawsFinal,
 	Supports::FractionalStrokeWidth,
 	Supports::TranslucentStroke,
@@ -2145,7 +2145,7 @@ ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) {
 	// Get textFormat
 	const FontDirectWrite *pfm = dynamic_cast<const FontDirectWrite *>(screenLine->FontOfPosition(0));
 
-	if (!pIDWriteFactory || !pfm || !pfm->pTextFormat) {
+	if (!pfm || !pfm->pTextFormat) {
 		return;
 	}
 
@@ -2381,7 +2381,7 @@ void SurfaceD2D::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITIO
 
 void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	SetFont(font_);
-	if (!pIDWriteFactory || !pTextFormat) {
+	if (!pTextFormat) {
 		// SetFont failed or no access to DirectWrite so give up.
 		return;
 	}
@@ -2460,7 +2460,7 @@ XYPOSITION SurfaceD2D::WidthText(const Font *font_, std::string_view text) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	const TextWide tbuf(text, codePageText);
-	if (pIDWriteFactory && pTextFormat) {
+	if (pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = nullptr;
 		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 1000.0, 1000.0, &pTextLayout);
@@ -2508,7 +2508,7 @@ void SurfaceD2D::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOS
 
 void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	SetFont(font_);
-	if (!pIDWriteFactory || !pTextFormat) {
+	if (!pTextFormat) {
 		// SetFont failed or no access to DirectWrite so give up.
 		return;
 	}
@@ -2563,7 +2563,7 @@ XYPOSITION SurfaceD2D::WidthTextUTF8(const Font * font_, std::string_view text) 
 	FLOAT width = 1.0;
 	SetFont(font_);
 	const TextWide tbuf(text, CpUtf8);
-	if (pIDWriteFactory && pTextFormat) {
+	if (pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = nullptr;
 		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 1000.0, 1000.0, &pTextLayout);
@@ -2599,10 +2599,10 @@ XYPOSITION SurfaceD2D::Height(const Font *font_) {
 XYPOSITION SurfaceD2D::AverageCharWidth(const Font *font_) {
 	FLOAT width = 1.0;
 	SetFont(font_);
-	if (pIDWriteFactory && pTextFormat) {
+	if (pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = nullptr;
-		static const WCHAR wszAllAlpha[] = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		static constexpr WCHAR wszAllAlpha[] = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		const size_t lenAllAlpha = wcslen(wszAllAlpha);
 		const HRESULT hr = pIDWriteFactory->CreateTextLayout(wszAllAlpha, static_cast<UINT32>(lenAllAlpha),
 			pTextFormat, 1000.0, 1000.0, &pTextLayout);
