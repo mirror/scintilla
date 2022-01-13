@@ -13,8 +13,6 @@
 #include <cstring>
 #include <cstdio>
 
-#include <sys/time.h>
-
 #include <Cocoa/Cocoa.h>
 
 #include "ScintillaTypes.h"

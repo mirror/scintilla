@@ -28,9 +28,6 @@
 #include <memory>
 #include <numeric>
 
-#include <dlfcn.h>
-#include <sys/time.h>
-
 #import <Foundation/NSGeometry.h>
 
 #import "ScintillaTypes.h"
