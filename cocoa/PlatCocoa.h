@@ -45,9 +45,6 @@ private:
 
 	CGContextRef gc;
 
-	/** The text layout instance */
-	std::unique_ptr<QuartzTextLayout> textLayout;
-
 	/** If the surface is a bitmap context, contains a reference to the bitmap data. */
 	std::unique_ptr<uint8_t[]> bitmapData;
 	/** If the surface is a bitmap context, stores the dimensions of the bitmap. */
