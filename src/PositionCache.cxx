@@ -799,6 +799,48 @@ bool BreakFinder::More() const noexcept {
 	return (subBreak >= 0) || (nextBreak < lineRange.end);
 }
 
+class PositionCacheEntry {
+	uint16_t styleNumber;
+	uint16_t len;
+	uint16_t clock;
+	std::unique_ptr<XYPOSITION[]> positions;
+public:
+	PositionCacheEntry() noexcept;
+	// Copy constructor not currently used, but needed for being element in std::vector.
+	PositionCacheEntry(const PositionCacheEntry &);
+	PositionCacheEntry(PositionCacheEntry &&) noexcept = default;
+	// Deleted so PositionCacheEntry objects can not be assigned.
+	void operator=(const PositionCacheEntry &) = delete;
+	void operator=(PositionCacheEntry &&) = delete;
+	~PositionCacheEntry();
+	void Set(unsigned int styleNumber_, std::string_view sv, const XYPOSITION *positions_, uint16_t clock_);
+	void Clear() noexcept;
+	bool Retrieve(unsigned int styleNumber_, std::string_view sv, XYPOSITION *positions_) const noexcept;
+	static size_t Hash(unsigned int styleNumber_, std::string_view sv) noexcept;
+	bool NewerThan(const PositionCacheEntry &other) const noexcept;
+	void ResetClock() noexcept;
+};
+
+class PositionCache : public IPositionCache {
+	std::vector<PositionCacheEntry> pces;
+	uint16_t clock;
+	bool allClear;
+public:
+	PositionCache();
+	// Deleted so LineAnnotation objects can not be copied.
+	PositionCache(const PositionCache &) = delete;
+	PositionCache(PositionCache &&) = delete;
+	void operator=(const PositionCache &) = delete;
+	void operator=(PositionCache &&) = delete;
+	~PositionCache() override = default;
+
+	void Clear() noexcept override;
+	void SetSize(size_t size_) override;
+	size_t GetSize() const noexcept override;
+	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
+		std::string_view sv, XYPOSITION *positions) override;
+};
+
 PositionCacheEntry::PositionCacheEntry() noexcept :
 	styleNumber(0), len(0), clock(0) {
 }
@@ -942,4 +984,8 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 		allClear = false;
 		pces[probe].Set(styleNumber, sv, positions, clock);
 	}
+}
+
+std::unique_ptr<IPositionCache> Scintilla::Internal::CreatePositionCache() {
+	return std::make_unique<PositionCache>();
 }

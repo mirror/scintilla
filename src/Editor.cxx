@@ -269,7 +269,7 @@ void Editor::InvalidateStyleData() {
 	vs.technology = technology;
 	DropGraphics();
 	view.llc.Invalidate(LineLayout::ValidLevel::invalid);
-	view.posCache.Clear();
+	view.posCache->Clear();
 }
 
 void Editor::InvalidateStyleRedraw() {
@@ -6801,11 +6801,11 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		return static_cast<sptr_t>(view.llc.GetLevel());
 
 	case Message::SetPositionCache:
-		view.posCache.SetSize(wParam);
+		view.posCache->SetSize(wParam);
 		break;
 
 	case Message::GetPositionCache:
-		return view.posCache.GetSize();
+		return view.posCache->GetSize();
 
 	case Message::SetScrollWidth:
 		PLATFORM_ASSERT(wParam > 0);

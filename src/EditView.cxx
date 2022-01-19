@@ -191,7 +191,8 @@ EditView::EditView() {
 	additionalCaretsVisible = true;
 	imeCaretBlockOverride = false;
 	llc.SetLevel(LineCache::Caret);
-	posCache.SetSize(0x400);
+	posCache = CreatePositionCache();
+	posCache->SetSize(0x400);
 	tabArrowHeight = 4;
 	customDrawTabArrow = nullptr;
 	customDrawWrapMarker = nullptr;
@@ -484,7 +485,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 							// ts.representation->stringRep is UTF-8 which only matches cache if document is UTF-8
 							// or it only contains ASCII which is a subset of all currently supported encodings.
 							if ((CpUtf8 == model.pdoc->dbcsCodePage) || ViewIsASCII(ts.representation->stringRep)) {
-								posCache.MeasureWidths(surface, vstyle, StyleControlChar, ts.representation->stringRep,
+								posCache->MeasureWidths(surface, vstyle, StyleControlChar, ts.representation->stringRep,
 									positionsRepr);
 							} else {
 								surface->MeasureWidthsUTF8(vstyle.styles[StyleControlChar].font.get(), ts.representation->stringRep, positionsRepr);
@@ -502,7 +503,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 						// Over half the segments are single characters and of these about half are space characters.
 						ll->positions[ts.start + 1] = vstyle.styles[ll->styles[ts.start]].spaceWidth;
 					} else {
-						posCache.MeasureWidths(surface, vstyle, ll->styles[ts.start],
+						posCache->MeasureWidths(surface, vstyle, ll->styles[ts.start],
 							std::string_view(&ll->chars[ts.start], ts.length), &ll->positions[ts.start + 1]);
 					}
 				}
@@ -2587,7 +2588,7 @@ static ColourRGBA InvertedLight(ColourRGBA orig) noexcept {
 Sci::Position EditView::FormatRange(bool draw, const RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
 	const EditModel &model, const ViewStyle &vs) {
 	// Can't use measurements cached for screen
-	posCache.Clear();
+	posCache->Clear();
 
 	ViewStyle vsPrint(vs);
 	vsPrint.technology = Technology::Default;
@@ -2756,7 +2757,7 @@ Sci::Position EditView::FormatRange(bool draw, const RangeToFormat *pfr, Surface
 	}
 
 	// Clear cache so measurements are not used for screen
-	posCache.Clear();
+	posCache->Clear();
 
 	return nPrintPos;
 }

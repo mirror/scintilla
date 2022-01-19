@@ -163,28 +163,6 @@ public:
 		Sci::Line linesOnScreen, Sci::Line linesInDoc);
 };
 
-class PositionCacheEntry {
-	uint16_t styleNumber;
-	uint16_t len;
-	uint16_t clock;
-	std::unique_ptr<XYPOSITION []> positions;
-public:
-	PositionCacheEntry() noexcept;
-	// Copy constructor not currently used, but needed for being element in std::vector.
-	PositionCacheEntry(const PositionCacheEntry &);
-	PositionCacheEntry(PositionCacheEntry &&) noexcept = default;
-	// Deleted so PositionCacheEntry objects can not be assigned.
-	void operator=(const PositionCacheEntry &) = delete;
-	void operator=(PositionCacheEntry &&) = delete;
-	~PositionCacheEntry();
-	void Set(unsigned int styleNumber_, std::string_view sv, const XYPOSITION *positions_, uint16_t clock_);
-	void Clear() noexcept;
-	bool Retrieve(unsigned int styleNumber_, std::string_view sv, XYPOSITION *positions_) const noexcept;
-	static size_t Hash(unsigned int styleNumber_, std::string_view sv) noexcept;
-	bool NewerThan(const PositionCacheEntry &other) const noexcept;
-	void ResetClock() noexcept;
-};
-
 class Representation {
 public:
 	static constexpr size_t maxLength = 200;
@@ -269,18 +247,17 @@ public:
 	bool More() const noexcept;
 };
 
-class PositionCache {
-	std::vector<PositionCacheEntry> pces;
-	uint16_t clock;
-	bool allClear;
+class IPositionCache {
 public:
-	PositionCache();
-	void Clear() noexcept;
-	void SetSize(size_t size_);
-	size_t GetSize() const noexcept;
-	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-		std::string_view sv, XYPOSITION *positions);
+	virtual ~IPositionCache() = default;
+	virtual void Clear() noexcept = 0;
+	virtual void SetSize(size_t size_) = 0;
+	virtual size_t GetSize() const noexcept = 0;
+	virtual void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
+		std::string_view sv, XYPOSITION *positions) = 0;
 };
+
+std::unique_ptr<IPositionCache> CreatePositionCache();
 
 }
 
