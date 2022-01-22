@@ -115,7 +115,7 @@ public:
 
 	std::shared_ptr<LineLayout> RetrieveLineLayout(Sci::Line lineNumber, const EditModel &model);
 	void LayoutLine(const EditModel &model, Surface *surface, const ViewStyle &vstyle,
-		LineLayout *ll, int width = LineLayout::wrapWidthInfinite);
+		LineLayout *ll, int width);
 
 	static void UpdateBidiData(const EditModel &model, const ViewStyle &vstyle, LineLayout *ll);
 

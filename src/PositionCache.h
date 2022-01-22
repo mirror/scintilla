@@ -212,8 +212,7 @@ struct TextSegment {
 // Class to break a line of text into shorter runs at sensible places.
 class BreakFinder {
 	const LineLayout *ll;
-	Range lineRange;
-	Sci::Position posLineStart;
+	const Range lineRange;
 	int nextBreak;
 	std::vector<int> selAndEdge;
 	unsigned int saeCurrentPos;
@@ -235,7 +234,7 @@ public:
 		Foreground = 2,
 		ForegroundAndSelection = 3,
 	};
-	BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart_,
+	BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart,
 		XYPOSITION xStart, BreakFor breakFor, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw);
 	// Deleted so BreakFinder objects can not be copied.
 	BreakFinder(const BreakFinder &) = delete;

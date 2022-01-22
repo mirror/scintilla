@@ -661,11 +661,10 @@ void BreakFinder::Insert(Sci::Position val) {
 	}
 }
 
-BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart_,
+BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart,
 	XYPOSITION xStart, BreakFor breakFor, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw) :
 	ll(ll_),
 	lineRange(lineRange_),
-	posLineStart(posLineStart_),
 	nextBreak(static_cast<int>(lineRange_.start)),
 	saeCurrentPos(0),
 	saeNext(0),

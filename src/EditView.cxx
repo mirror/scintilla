@@ -462,7 +462,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 
 		// Layout the line, determining the position of each character,
 		// with an extra element at the end for the end of the line.
-		ll->positions[0] = 0;
+		std::fill(&ll->positions[0], &ll->positions[lineLength + 1], 0.0);
 		bool lastSegItalics = false;
 
 		BreakFinder bfLayout(ll, nullptr, Range(0, numCharsInLine), posLineStart, 0, BreakFinder::BreakFor::Text, model.pdoc, &model.reprs, nullptr);
@@ -470,7 +470,6 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 
 			const TextSegment ts = bfLayout.Next();
 
-			std::fill(&ll->positions[ts.start + 1], &ll->positions[ts.end() + 1], 0.0f);
 			if (vstyle.styles[ll->styles[ts.start]].visible) {
 				if (ts.representation) {
 					XYPOSITION representationWidth = vstyle.controlCharWidth;
@@ -510,7 +509,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 				lastSegItalics = (!ts.representation) && ((ll->chars[ts.end() - 1] != ' ') && vstyle.styles[ll->styles[ts.start]].italic);
 			}
 
-			for (Sci::Position posToIncrease = ts.start + 1; posToIncrease <= ts.end(); posToIncrease++) {
+			for (int posToIncrease = ts.start + 1; posToIncrease <= ts.end(); posToIncrease++) {
 				ll->positions[posToIncrease] += ll->positions[ts.start];
 			}
 		}
