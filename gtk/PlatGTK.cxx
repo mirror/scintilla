@@ -55,17 +55,6 @@ constexpr double kPi = 3.14159265358979323846;
 
 constexpr double degrees = kPi / 180.0;
 
-// The Pango version guard for pango_units_from_double and pango_units_to_double
-// is more complex than simply implementing these here.
-
-constexpr int pangoUnitsFromDouble(double d) noexcept {
-	return static_cast<int>(d * PANGO_SCALE + 0.5);
-}
-
-constexpr float floatFromPangoUnits(int pu) noexcept {
-	return static_cast<float>(pu) / PANGO_SCALE;
-}
-
 struct IntegerRectangle {
 	int left;
 	int top;
@@ -112,7 +101,7 @@ public:
 		if (pfd) {
 			pango_font_description_set_family(pfd,
 				(fp.faceName[0] == '!') ? fp.faceName + 1 : fp.faceName);
-			pango_font_description_set_size(pfd, pangoUnitsFromDouble(fp.size));
+			pango_font_description_set_size(pfd, pango_units_from_double(fp.size));
 			pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
 			pango_font_description_set_style(pfd, fp.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
 		}
@@ -861,11 +850,11 @@ public:
 		positionStart = position;
 		if (pango_layout_iter_next_cluster(iter)) {
 			pango_layout_iter_get_cluster_extents(iter, nullptr, &pos);
-			position = floatFromPangoUnits(pos.x);
+			position = pango_units_to_double(pos.x);
 			curIndex = pango_layout_iter_get_index(iter);
 		} else {
 			finished = true;
-			position = floatFromPangoUnits(pos.x + pos.width);
+			position = pango_units_to_double(pos.x + pos.width);
 			curIndex = lenPositions;
 		}
 		distance = position - positionStart;
@@ -949,7 +938,7 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 						// Something has gone wrong: exit quickly but pretend all the characters are equally spaced:
 						int widthLayout = 0;
 						pango_layout_get_size(layout, &widthLayout, nullptr);
-						const XYPOSITION widthTotal = floatFromPangoUnits(widthLayout);
+						const XYPOSITION widthTotal = pango_units_to_double(widthLayout);
 						for (size_t bytePos=0; bytePos<lenPositions; bytePos++) {
 							positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
 						}
@@ -993,7 +982,7 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
 		PangoRectangle pos {};
 		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
-		return floatFromPangoUnits(pos.width);
+		return pango_units_to_double(pos.width);
 	}
 	return 1;
 }
@@ -1073,7 +1062,7 @@ XYPOSITION SurfaceImpl::WidthTextUTF8(const Font *font_, std::string_view text) 
 		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
 		PangoRectangle pos{};
 		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
-		return floatFromPangoUnits(pos.width);
+		return pango_units_to_double(pos.width);
 	}
 	return 1;
 }
@@ -1085,7 +1074,7 @@ XYPOSITION SurfaceImpl::Ascent(const Font *font_) {
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 					    PFont(font_)->pfd, pango_context_get_language(pcontext));
-		ascent = std::ceil(floatFromPangoUnits(
+		ascent = std::ceil(pango_units_to_double(
 					    pango_font_metrics_get_ascent(metrics)));
 		pango_font_metrics_unref(metrics);
 	}
@@ -1099,7 +1088,7 @@ XYPOSITION SurfaceImpl::Descent(const Font *font_) {
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 					    PFont(font_)->pfd, pango_context_get_language(pcontext));
-		const XYPOSITION descent = std::ceil(floatFromPangoUnits(
+		const XYPOSITION descent = std::ceil(pango_units_to_double(
 				pango_font_metrics_get_descent(metrics)));
 		pango_font_metrics_unref(metrics);
 		return descent;
