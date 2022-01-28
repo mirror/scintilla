@@ -48,9 +48,11 @@ GTK_VERSION = $(if $(GTK3),gtk+-3.0,gtk+-2.0)
 # Enable Position Independent Code except on Windows where it is the default so the flag produces a warning
 ifndef windir
 BASE_FLAGS += -fPIC
+ifeq ($(shell uname),Darwin)
+LDFLAGS += -dynamiclib
+endif
 endif
 
-LDFLAGS += -dynamiclib
 LDFLAGS += -shared
 
 # Take care of changing Unix style '/' directory separator to '\' on Windows
