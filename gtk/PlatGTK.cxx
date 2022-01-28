@@ -88,6 +88,12 @@ GtkWidget *PWidget(WindowID wid) noexcept {
 	return static_cast<GtkWidget *>(wid);
 }
 
+void SetFractionalPositions([[maybe_unused]] PangoContext *pcontext) {
+#if PANGO_VERSION_CHECK(1,44,3)
+	pango_context_set_round_glyph_positions(pcontext, FALSE);
+#endif
+}
+
 enum class EncodingType { singleByte, utf8, dbcs };
 
 // Holds a PangoFontDescription*.
@@ -316,6 +322,7 @@ SurfaceImpl::SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode m
 		context = cairo_create(psurf);
 		pcontext = gtk_widget_create_pango_context(PWidget(wid));
 		PLATFORM_ASSERT(pcontext);
+		SetFractionalPositions(pcontext);
 		layout = pango_layout_new(pcontext);
 		PLATFORM_ASSERT(layout);
 		cairo_rectangle(context, 0, 0, width, height);
@@ -388,6 +395,7 @@ void SurfaceImpl::Init(WindowID wid) {
 	createdGC = false;
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	PLATFORM_ASSERT(pcontext);
+	SetFractionalPositions(pcontext);
 	layout = pango_layout_new(pcontext);
 	PLATFORM_ASSERT(layout);
 	inited = true;
@@ -400,6 +408,7 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
 	PLATFORM_ASSERT(wid);
 	context = cairo_reference(static_cast<cairo_t *>(sid));
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
+	SetFractionalPositions(pcontext);
 	// update the Pango context in case sid isn't the widget's surface
 	pango_cairo_update_context(context, pcontext);
 	layout = pango_layout_new(pcontext);
