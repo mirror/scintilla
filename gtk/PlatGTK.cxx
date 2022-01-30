@@ -95,6 +95,10 @@ void SetFractionalPositions([[maybe_unused]] PangoContext *pcontext) {
 #endif
 }
 
+void LayoutSetText(PangoLayout *layout, std::string_view text) noexcept {
+	pango_layout_set_text(layout, text.data(), static_cast<int>(text.length()));
+}
+
 enum class EncodingType { singleByte, utf8, dbcs };
 
 // Holds a PangoFontDescription*.
@@ -822,14 +826,14 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybas
 		if (PFont(font_)->pfd) {
 			std::string utfForm;
 			if (et == EncodingType::utf8) {
-				pango_layout_set_text(layout.get(), text.data(), text.length());
+				LayoutSetText(layout.get(), text);
 			} else {
 				SetConverter(PFont(font_)->characterSet);
 				utfForm = UTF8FromIconv(conv, text);
 				if (utfForm.empty()) {	// iconv failed so treat as Latin1
 					utfForm = UTF8FromLatin1(text);
 				}
-				pango_layout_set_text(layout.get(), utfForm.c_str(), utfForm.length());
+				LayoutSetText(layout.get(), utfForm);
 			}
 			pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
 			pango_cairo_update_layout(context, layout.get());
@@ -914,7 +918,7 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 		if (et == EncodingType::utf8) {
 			// Simple and direct as UTF-8 is native Pango encoding
 			int i = 0;
-			pango_layout_set_text(layoutMeasure.get(), text.data(), text.length());
+			LayoutSetText(layoutMeasure.get(), text);
 			ClusterIterator iti(layoutMeasure.get(), text.length());
 			while (!iti.finished) {
 				iti.Next();
@@ -939,10 +943,10 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 					// Loop through UTF-8 and DBCS forms, taking account of different
 					// character byte lengths.
 					Converter convMeasure("UCS-2", CharacterSetID(characterSet), false);
-					pango_layout_set_text(layoutMeasure.get(), utfForm.c_str(), strlen(utfForm.c_str()));
+					LayoutSetText(layoutMeasure.get(), utfForm);
 					int i = 0;
 					int clusterStart = 0;
-					ClusterIterator iti(layoutMeasure.get(), strlen(utfForm.c_str()));
+					ClusterIterator iti(layoutMeasure.get(), utfForm.length());
 					while (!iti.finished) {
 						iti.Next();
 						const int clusterEnd = iti.curIndex;
@@ -971,7 +975,7 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 				if (utfForm.empty()) {
 					utfForm = UTF8FromLatin1(text);
 				}
-				pango_layout_set_text(layoutMeasure.get(), utfForm.c_str(), utfForm.length());
+				LayoutSetText(layoutMeasure.get(), utfForm);
 				size_t i = 0;
 				int clusterStart = 0;
 				// Each 8-bit input character may take 1 or 2 bytes in UTF-8
@@ -1017,14 +1021,14 @@ XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 		std::string utfForm;
 		pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
 		if (et == EncodingType::utf8) {
-			pango_layout_set_text(layout.get(), text.data(), text.length());
+			LayoutSetText(layout.get(), text);
 		} else {
 			SetConverter(PFont(font_)->characterSet);
 			utfForm = UTF8FromIconv(conv, text);
 			if (utfForm.empty()) {	// iconv failed so treat as Latin1
 				utfForm = UTF8FromLatin1(text);
 			}
-			pango_layout_set_text(layout.get(), utfForm.c_str(), utfForm.length());
+			LayoutSetText(layout.get(), utfForm);
 		}
 		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout.get(), 0);
 		PangoRectangle pos {};
@@ -1040,7 +1044,7 @@ void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION 
 		PenColourAlpha(fore);
 		const XYPOSITION xText = rc.left;
 		if (PFont(font_)->pfd) {
-			pango_layout_set_text(layout.get(), text.data(), text.length());
+			LayoutSetText(layout.get(), text);
 			pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
 			pango_cairo_update_layout(context, layout.get());
 			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout.get(), 0);
@@ -1083,7 +1087,7 @@ void SurfaceImpl::MeasureWidthsUTF8(const Font *font_, std::string_view text, XY
 		pango_layout_set_font_description(layoutMeasure.get(), PFont(font_)->pfd);
 		// Simple and direct as UTF-8 is native Pango encoding
 		int i = 0;
-		pango_layout_set_text(layoutMeasure.get(), text.data(), text.length());
+		LayoutSetText(layoutMeasure.get(), text);
 		ClusterIterator iti(layoutMeasure.get(), text.length());
 		while (!iti.finished) {
 			iti.Next();
@@ -1109,7 +1113,7 @@ void SurfaceImpl::MeasureWidthsUTF8(const Font *font_, std::string_view text, XY
 XYPOSITION SurfaceImpl::WidthTextUTF8(const Font *font_, std::string_view text) {
 	if (PFont(font_)->pfd) {
 		pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
-		pango_layout_set_text(layout.get(), text.data(), text.length());
+		LayoutSetText(layout.get(), text);
 		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout.get(), 0);
 		PangoRectangle pos{};
 		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
