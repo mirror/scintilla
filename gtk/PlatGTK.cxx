@@ -603,8 +603,8 @@ static void PathRoundRectangle(cairo_t *context, double left, double top, double
 
 void SurfaceImpl::AlphaRectangle(PRectangle rc, XYPOSITION cornerSize, FillStroke fillStroke) {
 	if (context && rc.Width() > 0) {
-		const float halfStroke = fillStroke.stroke.width / 2.0f;
-		const float doubleStroke = fillStroke.stroke.width * 2.0f;
+		const XYPOSITION halfStroke = fillStroke.stroke.width / 2.0;
+		const XYPOSITION doubleStroke = fillStroke.stroke.width * 2.0;
 		PenColourAlpha(fillStroke.fill.colour);
 		if (cornerSize > 0)
 			PathRoundRectangle(context, rc.left + fillStroke.stroke.width, rc.top + fillStroke.stroke.width,
@@ -871,14 +871,14 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITI
 class ClusterIterator {
 	PangoLayoutIter *iter;
 	PangoRectangle pos;
-	size_t lenPositions;
+	int lenPositions;
 public:
 	bool finished;
 	XYPOSITION positionStart;
 	XYPOSITION position;
 	XYPOSITION distance;
 	int curIndex;
-	ClusterIterator(PangoLayout *layout, size_t len) noexcept : lenPositions(len), finished(false),
+	ClusterIterator(PangoLayout *layout, size_t len) noexcept : lenPositions(static_cast<int>(len)), finished(false),
 		positionStart(0), position(0), distance(0), curIndex(0) {
 		iter = pango_layout_get_iter(layout);
 		pango_layout_iter_get_cluster_extents(iter, nullptr, &pos);
@@ -1011,7 +1011,7 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 	} else {
 		// No font so return an ascending range of values
 		for (size_t i = 0; i < text.length(); i++) {
-			positions[i] = i + 1;
+			positions[i] = i + 1.0;
 		}
 	}
 }
@@ -1105,7 +1105,7 @@ void SurfaceImpl::MeasureWidthsUTF8(const Font *font_, std::string_view text, XY
 	} else {
 		// No font so return an ascending range of values
 		for (size_t i = 0; i < text.length(); i++) {
-			positions[i] = i + 1;
+			positions[i] = i + 1.0;
 		}
 	}
 }
@@ -1369,7 +1369,7 @@ PRectangle Window::GetMonitorRect(Point pt) {
 #else
 	GdkScreen *screen = gtk_widget_get_screen(PWidget(wid));
 	const gint monitor_num = gdk_screen_get_monitor_at_point(screen,
-				 pt.x + x_offset, pt.y + y_offset);
+				 static_cast<gint>(pt.x) + x_offset, static_cast<gint>(pt.y) + y_offset);
 	gdk_screen_get_monitor_geometry(screen, monitor_num, &rect);
 #endif
 	rect.x -= x_offset;
@@ -1831,9 +1831,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 #endif
 		rc.bottom = height;
 
-		int width = maxItemCharacters;
-		if (width < 12)
-			width = 12;
+		const unsigned int width = std::max(maxItemCharacters, 12U);
 		rc.right = width * (aveCharWidth + aveCharWidth / 3);
 		// Add horizontal padding and borders
 		int horizontal_separator=0;
@@ -1930,7 +1928,7 @@ void ListBoxX::Append(char *s, int type) {
 		gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 				   TEXT_COLUMN, s, -1);
 	}
-	const size_t len = strlen(s);
+	const unsigned int len = static_cast<unsigned int>(strlen(s));
 	if (maxItemCharacters < len)
 		maxItemCharacters = len;
 }
@@ -1966,7 +1964,7 @@ void ListBoxX::Select(int n) {
 		GtkAdjustment *adj =
 			gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(list));
 #endif
-		gfloat value = (static_cast<gfloat>(n) / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
+		gdouble value = (static_cast<gdouble>(n) / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
 			       + gtk_adjustment_get_lower(adj) - gtk_adjustment_get_page_size(adj) / 2;
 		// Get cell height
 		const int row_height = GetRowHeight();
@@ -2140,7 +2138,7 @@ void Menu::Destroy() noexcept {
 
 #if !GTK_CHECK_VERSION(3,22,0)
 static void MenuPositionFunc(GtkMenu *, gint *x, gint *y, gboolean *, gpointer userData) noexcept {
-	sptr_t intFromPointer = GPOINTER_TO_INT(userData);
+	const gint intFromPointer = GPOINTER_TO_INT(userData);
 	*x = intFromPointer & 0xffff;
 	*y = intFromPointer >> 16;
 }
