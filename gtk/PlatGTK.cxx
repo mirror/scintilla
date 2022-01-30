@@ -156,12 +156,12 @@ class SurfaceImpl : public Surface {
 	cairo_surface_t *psurf = nullptr;
 	bool inited = false;
 	bool createdGC = false;
-	PangoContext *pcontext = nullptr;
+	UniquePangoContext pcontext;
 	double resolution = 1.0;
 	PangoDirection direction = PANGO_DIRECTION_LTR;
 	const cairo_font_options_t *fontOptions = nullptr;
 	PangoLanguage *language = nullptr;
-	PangoLayout *layout = nullptr;
+	UniquePangoLayout layout;
 	Converter conv;
 	CharacterSet characterSet = static_cast<CharacterSet>(-1);
 	void PenColourAlpha(ColourRGBA fore) noexcept;
@@ -328,11 +328,11 @@ SurfaceImpl::SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode m
 			psurfContext,
 			CAIRO_CONTENT_COLOR_ALPHA, width, height);
 		context = cairo_create(psurf);
-		pcontext = gtk_widget_create_pango_context(PWidget(wid));
+		pcontext.reset(gtk_widget_create_pango_context(PWidget(wid)));
 		PLATFORM_ASSERT(pcontext);
-		SetFractionalPositions(pcontext);
+		SetFractionalPositions(pcontext.get());
 		GetContextState();
-		layout = pango_layout_new(pcontext);
+		layout.reset(pango_layout_new(pcontext.get()));
 		PLATFORM_ASSERT(layout);
 		cairo_rectangle(context, 0, 0, width, height);
 		cairo_set_source_rgb(context, 1.0, 0, 0);
@@ -358,15 +358,11 @@ void SurfaceImpl::Clear() noexcept {
 	if (psurf)
 		cairo_surface_destroy(psurf);
 	psurf = nullptr;
-	if (layout)
-		g_object_unref(layout);
-	layout = nullptr;
+	layout.reset();
 	// fontOptions and language are owned by original context and don't need to be freed
 	fontOptions = nullptr;
 	language = nullptr;
-	if (pcontext)
-		g_object_unref(pcontext);
-	pcontext = nullptr;
+	pcontext.reset();
 	conv.Close();
 	characterSet = static_cast<CharacterSet>(-1);
 	inited = false;
@@ -398,10 +394,10 @@ bool SurfaceImpl::Initialised() {
 }
 
 void SurfaceImpl::GetContextState() {
-	resolution = pango_cairo_context_get_resolution(pcontext);
-	direction = pango_context_get_base_dir(pcontext);
-	fontOptions = pango_cairo_context_get_font_options(pcontext);
-	language = pango_context_get_language(pcontext);
+	resolution = pango_cairo_context_get_resolution(pcontext.get());
+	direction = pango_context_get_base_dir(pcontext.get());
+	fontOptions = pango_cairo_context_get_font_options(pcontext.get());
+	language = pango_context_get_language(pcontext.get());
 }
 
 UniquePangoContext SurfaceImpl::MeasuringContext() {
@@ -427,11 +423,11 @@ void SurfaceImpl::Init(WindowID wid) {
 	psurf = nullptr;
 	context = nullptr;
 	createdGC = false;
-	pcontext = gtk_widget_create_pango_context(PWidget(wid));
+	pcontext.reset(gtk_widget_create_pango_context(PWidget(wid)));
 	PLATFORM_ASSERT(pcontext);
-	SetFractionalPositions(pcontext);
+	SetFractionalPositions(pcontext.get());
 	GetContextState();
-	layout = pango_layout_new(pcontext);
+	layout.reset(pango_layout_new(pcontext.get()));
 	PLATFORM_ASSERT(layout);
 	inited = true;
 }
@@ -442,12 +438,12 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
 	Release();
 	PLATFORM_ASSERT(wid);
 	context = cairo_reference(static_cast<cairo_t *>(sid));
-	pcontext = gtk_widget_create_pango_context(PWidget(wid));
-	SetFractionalPositions(pcontext);
+	pcontext.reset(gtk_widget_create_pango_context(PWidget(wid)));
+	SetFractionalPositions(pcontext.get());
 	// update the Pango context in case sid isn't the widget's surface
-	pango_cairo_update_context(context, pcontext);
+	pango_cairo_update_context(context, pcontext.get());
 	GetContextState();
-	layout = pango_layout_new(pcontext);
+	layout.reset(pango_layout_new(pcontext.get()));
 	cairo_set_line_width(context, 1);
 	createdGC = true;
 	inited = true;
@@ -826,18 +822,18 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybas
 		if (PFont(font_)->pfd) {
 			std::string utfForm;
 			if (et == EncodingType::utf8) {
-				pango_layout_set_text(layout, text.data(), text.length());
+				pango_layout_set_text(layout.get(), text.data(), text.length());
 			} else {
 				SetConverter(PFont(font_)->characterSet);
 				utfForm = UTF8FromIconv(conv, text);
 				if (utfForm.empty()) {	// iconv failed so treat as Latin1
 					utfForm = UTF8FromLatin1(text);
 				}
-				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
+				pango_layout_set_text(layout.get(), utfForm.c_str(), utfForm.length());
 			}
-			pango_layout_set_font_description(layout, PFont(font_)->pfd);
-			pango_cairo_update_layout(context, layout);
-			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout, 0);
+			pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
+			pango_cairo_update_layout(context, layout.get());
+			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout.get(), 0);
 			cairo_move_to(context, xText, ybase);
 			pango_cairo_show_layout_line(context, pll);
 		}
@@ -1019,18 +1015,18 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 	if (PFont(font_)->pfd) {
 		std::string utfForm;
-		pango_layout_set_font_description(layout, PFont(font_)->pfd);
+		pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
 		if (et == EncodingType::utf8) {
-			pango_layout_set_text(layout, text.data(), text.length());
+			pango_layout_set_text(layout.get(), text.data(), text.length());
 		} else {
 			SetConverter(PFont(font_)->characterSet);
 			utfForm = UTF8FromIconv(conv, text);
 			if (utfForm.empty()) {	// iconv failed so treat as Latin1
 				utfForm = UTF8FromLatin1(text);
 			}
-			pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
+			pango_layout_set_text(layout.get(), utfForm.c_str(), utfForm.length());
 		}
-		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
+		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout.get(), 0);
 		PangoRectangle pos {};
 		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
 		return pango_units_to_double(pos.width);
@@ -1044,10 +1040,10 @@ void SurfaceImpl::DrawTextBaseUTF8(PRectangle rc, const Font *font_, XYPOSITION 
 		PenColourAlpha(fore);
 		const XYPOSITION xText = rc.left;
 		if (PFont(font_)->pfd) {
-			pango_layout_set_text(layout, text.data(), text.length());
-			pango_layout_set_font_description(layout, PFont(font_)->pfd);
-			pango_cairo_update_layout(context, layout);
-			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout, 0);
+			pango_layout_set_text(layout.get(), text.data(), text.length());
+			pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
+			pango_cairo_update_layout(context, layout.get());
+			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout.get(), 0);
 			cairo_move_to(context, xText, ybase);
 			pango_cairo_show_layout_line(context, pll);
 		}
@@ -1112,9 +1108,9 @@ void SurfaceImpl::MeasureWidthsUTF8(const Font *font_, std::string_view text, XY
 
 XYPOSITION SurfaceImpl::WidthTextUTF8(const Font *font_, std::string_view text) {
 	if (PFont(font_)->pfd) {
-		pango_layout_set_font_description(layout, PFont(font_)->pfd);
-		pango_layout_set_text(layout, text.data(), text.length());
-		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
+		pango_layout_set_font_description(layout.get(), PFont(font_)->pfd);
+		pango_layout_set_text(layout.get(), text.data(), text.length());
+		PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout.get(), 0);
 		PangoRectangle pos{};
 		pango_layout_line_get_extents(pangoLine, nullptr, &pos);
 		return pango_units_to_double(pos.width);
@@ -1127,7 +1123,7 @@ XYPOSITION SurfaceImpl::WidthTextUTF8(const Font *font_, std::string_view text) 
 XYPOSITION SurfaceImpl::Ascent(const Font *font_) {
 	XYPOSITION ascent = 0;
 	if (PFont(font_)->pfd) {
-		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
+		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext.get(),
 					    PFont(font_)->pfd, language);
 		ascent = std::ceil(pango_units_to_double(
 					    pango_font_metrics_get_ascent(metrics)));
@@ -1141,7 +1137,7 @@ XYPOSITION SurfaceImpl::Ascent(const Font *font_) {
 
 XYPOSITION SurfaceImpl::Descent(const Font *font_) {
 	if (PFont(font_)->pfd) {
-		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
+		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext.get(),
 					    PFont(font_)->pfd, language);
 		const XYPOSITION descent = std::ceil(pango_units_to_double(
 				pango_font_metrics_get_descent(metrics)));
