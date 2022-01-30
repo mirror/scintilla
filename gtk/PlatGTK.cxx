@@ -89,7 +89,7 @@ using UniquePangoContext = std::unique_ptr<PangoContext, GObjectReleaser>;
 using UniquePangoLayout = std::unique_ptr<PangoLayout, GObjectReleaser>;
 using UniquePangoFontMap = std::unique_ptr<PangoFontMap, GObjectReleaser>;
 
-void SetFractionalPositions([[maybe_unused]] PangoContext *pcontext) {
+void SetFractionalPositions([[maybe_unused]] PangoContext *pcontext) noexcept {
 #if PANGO_VERSION_CHECK(1,44,3)
 	pango_context_set_round_glyph_positions(pcontext, FALSE);
 #endif
@@ -181,7 +181,7 @@ public:
 	SurfaceImpl&operator=(SurfaceImpl&&) = delete;
 	~SurfaceImpl() override;
 
-	void GetContextState();
+	void GetContextState() noexcept;
 	UniquePangoContext MeasuringContext();
 
 	void Init(WindowID wid) override;
@@ -397,7 +397,7 @@ bool SurfaceImpl::Initialised() {
 	return inited;
 }
 
-void SurfaceImpl::GetContextState() {
+void SurfaceImpl::GetContextState() noexcept {
 	resolution = pango_cairo_context_get_resolution(pcontext.get());
 	direction = pango_context_get_base_dir(pcontext.get());
 	fontOptions = pango_cairo_context_get_font_options(pcontext.get());
@@ -1559,7 +1559,7 @@ static void small_scroller_class_init(SmallScrollerClass *klass) {
 
 static void small_scroller_init(SmallScroller *) {}
 
-static gboolean ButtonPress(GtkWidget *, GdkEventButton *ev, gpointer p) {
+static gboolean ButtonPress(GtkWidget *, const GdkEventButton *ev, gpointer p) {
 	try {
 		ListBoxX *lb = static_cast<ListBoxX *>(p);
 		if (ev->type == GDK_2BUTTON_PRESS && lb->delegate) {
@@ -1574,7 +1574,7 @@ static gboolean ButtonPress(GtkWidget *, GdkEventButton *ev, gpointer p) {
 	return FALSE;
 }
 
-static gboolean ButtonRelease(GtkWidget *, GdkEventButton *ev, gpointer p) {
+static gboolean ButtonRelease(GtkWidget *, const GdkEventButton *ev, gpointer p) {
 	try {
 		ListBoxX *lb = static_cast<ListBoxX *>(p);
 		if (ev->type != GDK_2BUTTON_PRESS && lb->delegate) {
