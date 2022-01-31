@@ -153,6 +153,7 @@
 #include "ScintillaWin.h"
 
 // gtk
+#include "Wrappers.h"
 #include "ScintillaGTK.h"
 #include "scintilla-marshal.h"
 #include "ScintillaGTKAccessible.h"
