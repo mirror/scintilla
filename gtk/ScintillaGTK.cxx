@@ -1187,6 +1187,8 @@ const char *ScintillaGTK::CharacterSetID() const {
 	return ::CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
 }
 
+namespace {
+
 class CaseFolderDBCS : public CaseFolderTable {
 	const char *charSet;
 public:
@@ -1217,6 +1219,8 @@ public:
 		return 1;
 	}
 };
+
+}
 
 std::unique_ptr<CaseFolder> ScintillaGTK::CaseFolderForEncoding() {
 	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
