@@ -2119,7 +2119,7 @@ void Platform::DebugDisplay(const char *s) noexcept {
 	fprintf(stderr, "%s", s);
 }
 
-#define TRACE
+//#define TRACE
 
 #ifdef TRACE
 void Platform::DebugPrintf(const char *format, ...) noexcept {
