@@ -348,6 +348,7 @@ const Supports SupportsCocoa[] = {
 	Supports::FractionalStrokeWidth,
 	Supports::TranslucentStroke,
 	Supports::PixelModification,
+	Supports::ThreadSafeMeasureWidths,
 };
 
 }

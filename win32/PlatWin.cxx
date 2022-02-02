@@ -1282,6 +1282,7 @@ constexpr Supports SupportsD2D[] = {
 	Supports::FractionalStrokeWidth,
 	Supports::TranslucentStroke,
 	Supports::PixelModification,
+	Supports::ThreadSafeMeasureWidths,
 };
 
 constexpr D2D_COLOR_F ColorFromColourAlpha(ColourRGBA colour) noexcept {
