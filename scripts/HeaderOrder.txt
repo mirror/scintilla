@@ -57,7 +57,10 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <atomic>
 #include <mutex>
+#include <thread>
+#include <future>
 
 // GTK headers
 #include <glib.h>

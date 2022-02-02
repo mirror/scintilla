@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <mutex>
 
 #include "ScintillaTypes.h"
 #include "ScintillaMessages.h"
@@ -822,6 +823,7 @@ public:
 
 class PositionCache : public IPositionCache {
 	std::vector<PositionCacheEntry> pces;
+	std::mutex mutex;
 	uint16_t clock;
 	bool allClear;
 public:
@@ -837,7 +839,7 @@ public:
 	void SetSize(size_t size_) override;
 	size_t GetSize() const noexcept override;
 	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-		std::string_view sv, XYPOSITION *positions) override;
+		std::string_view sv, XYPOSITION *positions, bool needsLocking) override;
 };
 
 PositionCacheEntry::PositionCacheEntry() noexcept :
@@ -934,7 +936,7 @@ size_t PositionCache::GetSize() const noexcept {
 }
 
 void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-	std::string_view sv, XYPOSITION *positions) {
+	std::string_view sv, XYPOSITION *positions, bool needsLocking) {
 	const Style &style = vstyle.styles[styleNumber];
 	if (style.monospaceASCII) {
 		if (AllGraphicASCII(sv)) {
@@ -954,6 +956,10 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 		// Two way associative: try two probe positions.
 		const size_t hashValue = PositionCacheEntry::Hash(styleNumber, sv);
 		probe = hashValue % pces.size();
+		std::unique_lock<std::mutex> guard(mutex, std::defer_lock);
+		if (needsLocking) {
+			guard.lock();
+		}
 		if (pces[probe].Retrieve(styleNumber, sv, positions)) {
 			return;
 		}
@@ -971,6 +977,10 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 	surface->MeasureWidths(fontStyle, sv, positions);
 	if (probe < pces.size()) {
 		// Store into cache
+		std::unique_lock<std::mutex> guard(mutex, std::defer_lock);
+		if (needsLocking) {
+			guard.lock();
+		}
 		clock++;
 		if (clock > 60000) {
 			// Since there are only 16 bits for the clock, wrap it round and

@@ -83,6 +83,9 @@ public:
 	LineLayoutCache llc;
 	std::unique_ptr<IPositionCache> posCache;
 
+	unsigned int maxLayoutThreads;
+	static constexpr int bytesPerLayoutThread = 1000;
+
 	int tabArrowHeight; // draw arrow heads this many pixels above/below line midpoint
 	/** Some platforms, notably PLAT_CURSES, do not support Scintilla's native
 	 * DrawTabArrow function for drawing tab characters. Allow those platforms to
@@ -102,6 +105,9 @@ public:
 	bool SetTwoPhaseDraw(bool twoPhaseDraw) noexcept;
 	bool SetPhasesDraw(int phases) noexcept;
 	bool LinesOverlap() const noexcept;
+
+	void SetLayoutThreads(unsigned int threads) noexcept;
+	unsigned int GetLayoutThreads() const noexcept;
 
 	void ClearAllTabstops() noexcept;
 	XYPOSITION NextTabstopPos(Sci::Line line, XYPOSITION x, XYPOSITION tabWidth) const noexcept;

@@ -6813,6 +6813,13 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::GetPositionCache:
 		return view.posCache->GetSize();
 
+	case Message::SetLayoutThreads:
+		view.SetLayoutThreads(static_cast<unsigned int>(wParam));
+		break;
+
+	case Message::GetLayoutThreads:
+		return view.GetLayoutThreads();
+
 	case Message::SetScrollWidth:
 		PLATFORM_ASSERT(wParam > 0);
 		if ((wParam > 0) && (wParam != static_cast<unsigned int>(scrollWidth))) {
