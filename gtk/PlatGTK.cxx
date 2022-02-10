@@ -117,7 +117,6 @@ std::shared_ptr<Font> Font::Allocate(const FontParameters &fp) {
 	return std::make_shared<FontHandle>(fp);
 }
 
-// Required on OS X
 namespace Scintilla {
 
 // SurfaceID is a cairo_t*

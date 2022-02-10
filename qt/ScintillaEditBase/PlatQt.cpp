@@ -996,7 +996,7 @@ void ListBoxImpl::Create(Window &parent,
 #endif
 	);
 #else
-	// On OS X, Qt::Tool takes focus so main window loses focus so
+	// On macOS, Qt::Tool takes focus so main window loses focus so
 	// keyboard stops working. Qt::ToolTip works but its only really
 	// documented for tooltips.
 	// On Linux / X this setting allows clicking on list items.
@@ -1068,7 +1068,7 @@ int ListBoxImpl::CaretFromEdge()
 	}
 
 	int extra;
-	// The 12 is from trial and error on OS X and the 7
+	// The 12 is from trial and error on macOS and the 7
 	// is from trial and error on Windows - there may be
 	// a better programmatic way to find any padding factors.
 #ifdef Q_OS_DARWIN

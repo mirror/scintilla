@@ -1965,7 +1965,7 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget, GdkEventScroll *event) {
 		// Compute amount and direction to scroll (even tho on win32 there is
 		// intensity of scrolling info in the native message, gtk doesn't
 		// support this so we simulate similarly adaptive scrolling)
-		// Note that this is disabled on OS X (Darwin) with the X11 backend
+		// Note that this is disabled on macOS (Darwin) with the X11 backend
 		// where the X11 server already has an adaptive scrolling algorithm
 		// that fights with this one
 		int cLineScroll;

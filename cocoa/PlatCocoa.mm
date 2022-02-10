@@ -1,6 +1,6 @@
 /**
  * Scintilla source code edit control
- * @file PlatCocoa.mm - implementation of platform facilities on MacOS X/Cocoa
+ * @file PlatCocoa.mm - implementation of platform facilities on macOS/Cocoa
  *
  * Written by Mike Lischke
  * Based on PlatMacOSX.cxx
@@ -1591,7 +1591,7 @@ void Window::SetPositionRelative(PRectangle rc, const Window *window) {
 //--------------------------------------------------------------------------------------------------
 
 PRectangle Window::GetClientPosition() const {
-	// This means, in MacOS X terms, get the "frame bounds". Call GetPosition, just like on Win32.
+	// This means, in macOS terms, get the "frame bounds". Call GetPosition, just like on Win32.
 	return GetPosition();
 }
 
