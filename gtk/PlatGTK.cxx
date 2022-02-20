@@ -125,7 +125,7 @@ class SurfaceImpl : public Surface {
 	EncodingType et= EncodingType::singleByte;
 	WindowID widSave = nullptr;
 	cairo_t *context = nullptr;
-	UniqueCairo pixmapContext;
+	UniqueCairo cairoOwned;
 	UniqueCairoSurface surf;
 	bool inited = false;
 	UniquePangoContext pcontext;
@@ -303,8 +303,8 @@ SurfaceImpl::SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode m
 		surf.reset(cairo_surface_create_similar(
 			psurfContext,
 			CAIRO_CONTENT_COLOR_ALPHA, width, height));
-		pixmapContext.reset(cairo_create(surf.get()));
-		context = pixmapContext.get();
+		cairoOwned.reset(cairo_create(surf.get()));
+		context = cairoOwned.get();
 		pcontext.reset(gtk_widget_create_pango_context(PWidget(wid)));
 		PLATFORM_ASSERT(pcontext);
 		SetFractionalPositions(pcontext.get());
@@ -322,7 +322,7 @@ SurfaceImpl::SurfaceImpl(cairo_t *context_, int width, int height, SurfaceMode m
 
 void SurfaceImpl::Release() noexcept {
 	et = EncodingType::singleByte;
-	pixmapContext.reset();
+	cairoOwned.reset();
 	context = nullptr;
 	surf.reset();
 	layout.reset();
@@ -397,7 +397,8 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
 	PLATFORM_ASSERT(sid);
 	Release();
 	PLATFORM_ASSERT(wid);
-	context = cairo_reference(static_cast<cairo_t *>(sid));
+	cairoOwned.reset(cairo_reference(static_cast<cairo_t *>(sid)));
+	context = cairoOwned.get();
 	pcontext.reset(gtk_widget_create_pango_context(PWidget(wid)));
 	SetFractionalPositions(pcontext.get());
 	// update the Pango context in case sid isn't the widget's surface
