@@ -28,9 +28,9 @@
 #define NOMINMAX
 #endif
 #undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0A00
 #undef WINVER
-#define WINVER 0x0500
+#define WINVER 0x0A00
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 #include <commctrl.h>
@@ -57,14 +57,6 @@
 
 #include "WinTypes.h"
 #include "PlatWin.h"
-
-#ifndef SPI_GETFONTSMOOTHINGCONTRAST
-#define SPI_GETFONTSMOOTHINGCONTRAST	0x200C
-#endif
-
-#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
-#define LOAD_LIBRARY_SEARCH_SYSTEM32 0x00000800
-#endif
 
 // __uuidof is a Microsoft extension but makes COM code neater, so disable warning
 #if defined(__clang__)
@@ -157,10 +149,6 @@ bool LoadD2D() {
 	return pIDWriteFactory && pD2DFactory;
 }
 
-#endif
-
-#ifndef CLEARTYPE_QUALITY
-#define CLEARTYPE_QUALITY 5
 #endif
 
 void *PointerFromWindow(HWND hWnd) noexcept {
