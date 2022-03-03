@@ -388,7 +388,7 @@ bool ViewIsASCII(std::string_view text) {
 void LayoutSegments(IPositionCache *pCache,
 	Surface *surface,
 	const ViewStyle &vstyle,
-	LineLayout *ll, 
+	LineLayout *ll,
 	const std::vector<TextSegment> &segments,
 	std::atomic<uint32_t> &nextIndex,
 	const bool textUnicode,

@@ -3496,11 +3496,11 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 #endif
 				RECT rc;
 				GetClientRect(hWnd, &rc);
-				// Create a Direct2D render target.
 				if (sciThis->technology == Technology::Default) {
 					surfaceWindow->Init(ps.hdc, hWnd);
 				} else {
 #if defined(USE_D2D)
+					// Create a Direct2D render target.
 					D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp {};
 					dhrtp.hwnd = hWnd;
 					dhrtp.pixelSize = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
