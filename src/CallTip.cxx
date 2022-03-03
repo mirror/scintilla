@@ -340,7 +340,7 @@ bool CallTip::UseStyleCallTip() const noexcept {
 
 // It might be better to have two access functions for this and to use
 // them for all settings of colours.
-void CallTip::SetForeBack(const ColourRGBA &fore, const ColourRGBA &back) noexcept {
+void CallTip::SetForeBack(ColourRGBA fore, ColourRGBA back) noexcept {
 	colourBG = back;
 	colourUnSel = fore;
 }

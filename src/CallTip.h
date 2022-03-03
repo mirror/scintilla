@@ -89,7 +89,7 @@ public:
 	bool UseStyleCallTip() const noexcept;
 
 	// Modify foreground and background colours
-	void SetForeBack(const ColourRGBA &fore, const ColourRGBA &back) noexcept;
+	void SetForeBack(ColourRGBA fore, ColourRGBA back) noexcept;
 };
 
 }
