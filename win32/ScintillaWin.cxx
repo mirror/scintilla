@@ -3527,7 +3527,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 					}
 #endif
 				}
-				surfaceWindow->SetMode(SurfaceMode(sciThis->ct.codePage, sciThis->BidirectionalR2L()));
+				surfaceWindow->SetMode(sciThis->CurrentSurfaceMode());
 				sciThis->ct.PaintCT(surfaceWindow.get());
 #if defined(USE_D2D)
 				if (pCTRenderTarget)

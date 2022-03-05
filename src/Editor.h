@@ -688,14 +688,14 @@ public:
 		if (ed->wMain.GetID()) {
 			surf = Surface::Allocate(ed->technology);
 			surf->Init(ed->wMain.GetID());
-			surf->SetMode(SurfaceMode(ed->CodePage(), ed->BidirectionalR2L()));
+			surf->SetMode(ed->CurrentSurfaceMode());
 		}
 	}
 	AutoSurface(SurfaceID sid, Editor *ed, std::optional<Scintilla::Technology> technology = {}) {
 		if (ed->wMain.GetID()) {
 			surf = Surface::Allocate(technology ? *technology : ed->technology);
 			surf->Init(sid, ed->wMain.GetID());
-			surf->SetMode(SurfaceMode(ed->CodePage(), ed->BidirectionalR2L()));
+			surf->SetMode(ed->CurrentSurfaceMode());
 		}
 	}
 	// Deleted so AutoSurface objects can not be copied.

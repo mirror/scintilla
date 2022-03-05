@@ -2441,7 +2441,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 			surface = pixmapLine.get();
 			PLATFORM_ASSERT(pixmapLine->Initialised());
 		}
-		surface->SetMode(SurfaceMode(model.pdoc->dbcsCodePage, model.BidirectionalR2L()));
+		surface->SetMode(model.CurrentSurfaceMode());
 
 		const Point ptOrigin = model.GetVisibleOriginInMain();
 

@@ -1706,6 +1706,7 @@ void Editor::PaintSelMargin(Surface *surfaceWindow, const PRectangle &rc) {
 	} else {
 		surface = surfaceWindow;
 	}
+	surface->SetMode(CurrentSurfaceMode());
 
 	// Clip vertically to paint area to avoid drawing line numbers
 	if (rcMargin.bottom > rc.bottom)
