@@ -204,7 +204,6 @@ Editor::Editor() : durationWrapOneByte(0.000001, 0.00000001, 0.00001) {
 
 Editor::~Editor() {
 	pdoc->RemoveWatcher(this, nullptr);
-	DropGraphics();
 }
 
 void Editor::Finalise() {

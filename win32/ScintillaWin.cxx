@@ -1837,7 +1837,6 @@ sptr_t ScintillaWin::SciMessage(Message iMessage, uptr_t wParam, sptr_t lParam) 
 				technology = technologyNew;
 				view.bufferedDraw = technologyNew == Technology::Default;
 				// Invalidate all cached information including layout.
-				DropGraphics();
 				InvalidateStyleRedraw();
 			}
 		}
@@ -1850,7 +1849,6 @@ sptr_t ScintillaWin::SciMessage(Message iMessage, uptr_t wParam, sptr_t lParam) 
 			bidirectional = static_cast<Bidirectional>(wParam);
 		}
 		// Invalidate all cached information including layout.
-		DropGraphics();
 		InvalidateStyleRedraw();
 		break;
 
