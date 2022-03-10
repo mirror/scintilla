@@ -1485,7 +1485,9 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	const char *textFoldDisplay = model.GetFoldDisplayText(line);
 	if (textFoldDisplay) {
 		const std::string_view foldDisplayText(textFoldDisplay);
-		rcSegment.left += (static_cast<int>(surface->WidthText(fontText, foldDisplayText)) + vsDraw.aveCharWidth);
+		rcSegment.left += static_cast<int>(
+			surface->WidthText(vsDraw.styles[StyleFoldDisplayText].font.get(), foldDisplayText)) +
+			vsDraw.aveCharWidth;
 	}
 	rcSegment.right = rcSegment.left + static_cast<XYPOSITION>(widthEOLAnnotationText);
 
