@@ -5687,6 +5687,26 @@ int Editor::CodePage() const noexcept {
 		return 0;
 }
 
+std::unique_ptr<Surface> Editor::CreateMeasurementSurface() const {
+	if (!wMain.GetID()) {
+		return {};
+	}
+	std::unique_ptr<Surface> surf = Surface::Allocate(technology);
+	surf->Init(wMain.GetID());
+	surf->SetMode(CurrentSurfaceMode());
+	return surf;
+}
+
+std::unique_ptr<Surface> Editor::CreateDrawingSurface(SurfaceID sid, std::optional<Scintilla::Technology> technologyOpt) const {
+	if (!wMain.GetID()) {
+		return {};
+	}
+	std::unique_ptr<Surface> surf = Surface::Allocate(technologyOpt ? *technologyOpt : technology);
+	surf->Init(sid, wMain.GetID());
+	surf->SetMode(CurrentSurfaceMode());
+	return surf;
+}
+
 Sci::Line Editor::WrapCount(Sci::Line line) {
 	AutoSurface surface(this);
 	std::shared_ptr<LineLayout> ll = view.RetrieveLineLayout(line, *this);
