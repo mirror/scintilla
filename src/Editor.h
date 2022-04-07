@@ -413,7 +413,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void SetHorizontalScrollPos() = 0;
 	virtual bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) = 0;
 	virtual void ReconfigureScrollBars();
-	void SetScrollBars();
+	void ChangeScrollBars();
+	virtual void SetScrollBars();
 	void ChangeSize();
 
 	void FilterSelections();
