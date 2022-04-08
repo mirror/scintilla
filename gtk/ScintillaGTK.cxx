@@ -1220,7 +1220,6 @@ class CaseFolderDBCS : public CaseFolderTable {
 	const char *charSet;
 public:
 	explicit CaseFolderDBCS(const char *charSet_) noexcept : charSet(charSet_) {
-		StandardASCII();
 	}
 	size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) override {
 		if ((lenMixed == 1) && (sizeFolded > 0)) {
@@ -1257,7 +1256,6 @@ std::unique_ptr<CaseFolder> ScintillaGTK::CaseFolderForEncoding() {
 		if (charSetBuffer) {
 			if (pdoc->dbcsCodePage == 0) {
 				std::unique_ptr<CaseFolderTable> pcf = std::make_unique<CaseFolderTable>();
-				pcf->StandardASCII();
 				// Only for single byte encodings
 				for (int i=0x80; i<0x100; i++) {
 					char sCharacter[2] = "A";
