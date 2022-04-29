@@ -582,6 +582,8 @@
 	</li>
 	<li>
 	Fix partial updates and non-responsive scroll bars on Xorg.
+	This defers scroll bar changes to an idle task so could affect applications that depend on
+	the scroll position being updated.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2322/">Bug #2322</a>,
 	<a href="https://sourceforge.net/p/scintilla/bugs/2196/">Bug #2196</a>,
 	<a href="https://sourceforge.net/p/scintilla/bugs/2312/">Bug #2312</a>.
