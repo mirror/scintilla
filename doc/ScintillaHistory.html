@@ -581,6 +581,10 @@
 	Released 31 March 2022.
 	</li>
 	<li>
+	Improve performance of SCI_FOLDALL(SC_FOLDACTION_EXPAND) by not lexing whole document
+	as it does not depend on folding structure.
+	</li>
+	<li>
 	Fix partial updates and non-responsive scroll bars on Xorg.
 	This defers scroll bar changes to an idle task so could affect applications that depend on
 	the scroll position being updated.
