@@ -5536,7 +5536,7 @@ void Editor::FoldAll(FoldAction action) {
 	}
 	if (action == FoldAction::Toggle) {
 		// Discover current state
-		for (int lineSeek = 0; lineSeek < maxLine; lineSeek++) {
+		for (Sci::Line lineSeek = 0; lineSeek < maxLine; lineSeek++) {
 			if (LevelIsHeader(pdoc->GetFoldLevel(lineSeek))) {
 				expanding = !pcs->GetExpanded(lineSeek);
 				break;
@@ -5545,7 +5545,7 @@ void Editor::FoldAll(FoldAction action) {
 	}
 	if (expanding) {
 		pcs->SetVisible(0, maxLine-1, true);
-		for (int line = 0; line < maxLine; line++) {
+		for (Sci::Line line = 0; line < maxLine; line++) {
 			if (!pcs->GetExpanded(line)) {
 				SetFoldExpanded(line, true);
 			}
