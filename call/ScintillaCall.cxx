@@ -51,7 +51,7 @@ intptr_t ScintillaCall::CallString(Message msg, uintptr_t wParam, const char *s)
 }
 
 std::string ScintillaCall::CallReturnString(Message msg, uintptr_t wParam) {
-	size_t len = CallPointer(msg, wParam, nullptr);
+	const size_t len = CallPointer(msg, wParam, nullptr);
 	if (len) {
 		std::string value(len, '\0');
 		CallPointer(msg, wParam, value.data());
