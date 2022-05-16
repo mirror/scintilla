@@ -2694,6 +2694,8 @@ Sci::Position EditView::FormatRange(bool draw, CharacterRangeFull chrg, Rectangl
 	// Don't show the selection when printing
 	vsPrint.elementColours.clear();
 	vsPrint.elementBaseColours.clear();
+	// Transparent:
+	vsPrint.elementBaseColours[Element::SelectionBack] = ColourRGBA(0xc0, 0xc0, 0xc0, 0x0);
 	vsPrint.caretLine.alwaysShow = false;
 	// Don't highlight matching braces using indicators
 	vsPrint.braceHighlightIndicatorSet = false;
