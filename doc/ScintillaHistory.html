@@ -581,6 +581,12 @@
 	Released 31 March 2022.
 	</li>
 	<li>
+	Duplicate APIs to support 64-bit document positions on Win32:
+	SCI_GETTEXTRANGEFULL, SCI_FINDTEXTFULL, and SCI_FORMATRANGEFULL.
+	This adds new types to Scintilla.iface which may impact downstream projects.
+	Applications should move to these APIs from their predecessors as they will be deprecated.
+	</li>
+	<li>
 	Improve performance of SCI_FOLDALL(SC_FOLDACTION_EXPAND) by not lexing whole document
 	as it does not depend on folding structure.
 	</li>
