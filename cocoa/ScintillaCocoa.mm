@@ -1176,7 +1176,7 @@ void ScintillaCocoa::CreateCallTipWindow(PRectangle rc) {
 								styleMask: NSWindowStyleMaskBorderless
 								  backing: NSBackingStoreBuffered
 								    defer: NO];
-		[callTip setLevel: NSFloatingWindowLevel];
+		[callTip setLevel: NSModalPanelWindowLevel+1];
 		[callTip setHasShadow: YES];
 		NSRect ctContent = NSMakeRect(0, 0, rc.Width(), rc.Height());
 		CallTipView *caption = [[CallTipView alloc] initWithFrame: ctContent];
