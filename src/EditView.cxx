@@ -1974,8 +1974,8 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 					model, vsDraw, model.sel.RangeType(r));
 				const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 				if (model.BidirectionalEnabled()) {
-					const int selectionStart = static_cast<int>(portion.start.Position() - posLineStart - lineRange.start);
-					const int selectionEnd = static_cast<int>(portion.end.Position() - posLineStart - lineRange.start);
+					const Sci::Position selectionStart = portion.start.Position() - posLineStart - lineRange.start;
+					const Sci::Position selectionEnd = portion.end.Position() - posLineStart - lineRange.start;
 
 					const ScreenLine screenLine(ll, subLine, vsDraw, rcLine.right, tabWidthMinimumPixels);
 					std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
