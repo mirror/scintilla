@@ -1980,12 +1980,14 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 					const ScreenLine screenLine(ll, subLine, vsDraw, rcLine.right, tabWidthMinimumPixels);
 					std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
 
-					const std::vector<Interval> intervals = slLayout->FindRangeIntervals(selectionStart, selectionEnd);
-					for (const Interval &interval : intervals) {
-						const XYPOSITION rcRight = interval.right + xStart;
-						const XYPOSITION rcLeft = interval.left + xStart;
-						const PRectangle rcSelection(rcLeft, rcLine.top, rcRight, rcLine.bottom);
-						surface->FillRectangleAligned(rcSelection, selectionBack);
+					if (slLayout) {
+						const std::vector<Interval> intervals = slLayout->FindRangeIntervals(selectionStart, selectionEnd);
+						for (const Interval &interval : intervals) {
+							const XYPOSITION rcRight = interval.right + xStart;
+							const XYPOSITION rcLeft = interval.left + xStart;
+							const PRectangle rcSelection(rcLeft, rcLine.top, rcRight, rcLine.bottom);
+							surface->FillRectangleAligned(rcSelection, selectionBack);
+						}
 					}
 
 					if (portion.end.VirtualSpace()) {
