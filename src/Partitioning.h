@@ -70,7 +70,7 @@ private:
 			body->RangeAddDelta(stepPartition+1, partitionUpTo + 1, stepLength);
 		}
 		stepPartition = partitionUpTo;
-		if (stepPartition >= body->Length()-1) {
+		if (stepPartition >= Partitions()) {
 			stepPartition = Partitions();
 			stepLength = 0;
 		}
@@ -149,7 +149,7 @@ public:
 
 	void SetPartitionStartPosition(T partition, T pos) noexcept {
 		ApplyStep(partition+1);
-		if ((partition < 0) || (partition > body->Length())) {
+		if ((partition < 0) || (partition >= body->Length())) {
 			return;
 		}
 		body->SetValueAt(partition, pos);

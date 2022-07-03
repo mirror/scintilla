@@ -348,7 +348,7 @@ Sci::Line Document::MarkerNext(Sci::Line lineStart, int mask) const noexcept {
 }
 
 int Document::AddMark(Sci::Line line, int markerNum) {
-	if (line >= 0 && line <= LinesTotal()) {
+	if (line >= 0 && line < LinesTotal()) {
 		const int prev = Markers()->AddMark(line, markerNum, LinesTotal());
 		const DocModification mh(ModificationFlags::ChangeMarker, LineStart(line), 0, 0, nullptr, line);
 		NotifyModified(mh);
@@ -359,7 +359,7 @@ int Document::AddMark(Sci::Line line, int markerNum) {
 }
 
 void Document::AddMarkSet(Sci::Line line, int valueSet) {
-	if (line < 0 || line > LinesTotal()) {
+	if (line < 0 || line >= LinesTotal()) {
 		return;
 	}
 	unsigned int m = valueSet;
