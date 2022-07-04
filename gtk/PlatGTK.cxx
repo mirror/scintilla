@@ -775,12 +775,11 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, const Font *font_, XYPOSITION ybas
 		PenColourAlpha(fore);
 		const XYPOSITION xText = rc.left;
 		if (PFont(font_)->fd) {
-			std::string utfForm;
 			if (et == EncodingType::utf8) {
 				LayoutSetText(layout.get(), text);
 			} else {
 				SetConverter(PFont(font_)->characterSet);
-				utfForm = UTF8FromIconv(conv, text);
+				std::string utfForm = UTF8FromIconv(conv, text);
 				if (utfForm.empty()) {	// iconv failed so treat as Latin1
 					utfForm = UTF8FromLatin1(text);
 				}
@@ -983,13 +982,12 @@ void SurfaceImpl::MeasureWidths(const Font *font_, std::string_view text, XYPOSI
 
 XYPOSITION SurfaceImpl::WidthText(const Font *font_, std::string_view text) {
 	if (PFont(font_)->fd) {
-		std::string utfForm;
 		pango_layout_set_font_description(layout.get(), PFont(font_)->fd.get());
 		if (et == EncodingType::utf8) {
 			LayoutSetText(layout.get(), text);
 		} else {
 			SetConverter(PFont(font_)->characterSet);
-			utfForm = UTF8FromIconv(conv, text);
+			std::string utfForm = UTF8FromIconv(conv, text);
 			if (utfForm.empty()) {	// iconv failed so treat as Latin1
 				utfForm = UTF8FromLatin1(text);
 			}
@@ -1365,7 +1363,7 @@ class ListBoxX : public ListBox {
 	WindowID frame;
 	WindowID list;
 	WindowID scroller;
-	void *pixhash;
+	GHashTable *pixhash;
 	GtkCellRenderer *pixbuf_renderer;
 	GtkCellRenderer *renderer;
 	RGBAImageSet images;
@@ -1392,8 +1390,8 @@ public:
 	ListBoxX&operator=(ListBoxX&&) = delete;
 	~ListBoxX() noexcept override {
 		if (pixhash) {
-			g_hash_table_foreach((GHashTable *) pixhash, list_image_free, nullptr);
-			g_hash_table_destroy((GHashTable *) pixhash);
+			g_hash_table_foreach(pixhash, list_image_free, nullptr);
+			g_hash_table_destroy(pixhash);
 		}
 		if (widCached) {
 			gtk_widget_destroy(GTK_WIDGET(widCached));
@@ -1846,7 +1844,7 @@ static void init_pixmap(ListImage *list_image) noexcept {
 void ListBoxX::Append(char *s, int type) {
 	ListImage *list_image = nullptr;
 	if ((type >= 0) && pixhash) {
-		list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash,
+		list_image = static_cast<ListImage *>(g_hash_table_lookup(pixhash,
 						      GINT_TO_POINTER(type)));
 	}
 	GtkTreeIter iter {};
@@ -2007,7 +2005,7 @@ void ListBoxX::RegisterRGBA(int type, std::unique_ptr<RGBAImage> image) {
 	if (!pixhash) {
 		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
 	}
-	ListImage *list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash,
+	ListImage *list_image = static_cast<ListImage *>(g_hash_table_lookup(pixhash,
 				GINT_TO_POINTER(type)));
 	if (list_image) {
 		// Drop icon already registered
@@ -2018,7 +2016,7 @@ void ListBoxX::RegisterRGBA(int type, std::unique_ptr<RGBAImage> image) {
 	} else {
 		list_image = g_new0(ListImage, 1);
 		list_image->rgba_data = observe;
-		g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type),
+		g_hash_table_insert(pixhash, GINT_TO_POINTER(type),
 				    (gpointer) list_image);
 	}
 }
