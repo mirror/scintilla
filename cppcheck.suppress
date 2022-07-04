@@ -35,6 +35,10 @@ knownConditionTrueFalse:scintilla/win32/ScintillaWin.cxx
 // This is a weird ABI hack and shouldn't be changed
 unusedStructMember:scintilla/gtk/PlatGTK.cxx
 
+// Have no way of testing ScintillaEdit so don't fix even simple warnings
+cstyleCast:scintilla/qt/ScintillaEdit/ScintillaEdit.cpp
+shadowFunction:scintilla/qt/ScintillaEdit/ScintillaEdit.cpp
+
 // moc_ files show #error as they are not built with standard context
 preprocessorErrorDirective:scintilla/qt/*.cpp
 
