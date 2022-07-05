@@ -589,6 +589,10 @@
 	<a href="https://sourceforge.net/p/scintilla/bugs/2335/">Bug #2335</a>.
 	</li>
 	<li>
+	Fix failures on GTK with non-UTF-8 text when multi-threading due to
+	character set conversion code that was not thread-safe.
+	</li>
+	<li>
 	Fix crash when printing on Win32 in bidirectional mode with a non-empty selection.
 	</li>
     </ul>
