@@ -262,15 +262,13 @@ void LineLevels::ClearLevels() {
 }
 
 int LineLevels::SetLevel(Sci::Line line, int level, Sci::Line lines) {
-	int prev = 0;
+	int prev = level;
 	if ((line >= 0) && (line < lines)) {
 		if (!levels.Length()) {
 			ExpandLevels(lines + 1);
 		}
 		prev = levels[line];
-		if (prev != level) {
-			levels[line] = level;
-		}
+		levels[line] = level;
 	}
 	return prev;
 }
@@ -312,10 +310,13 @@ void LineState::RemoveLine(Sci::Line line) {
 	}
 }
 
-int LineState::SetLineState(Sci::Line line, int state) {
-	lineStates.EnsureLength(line + 1);
-	const int stateOld = lineStates[line];
-	lineStates[line] = state;
+int LineState::SetLineState(Sci::Line line, int state, Sci::Line lines) {
+	int stateOld = state;
+	if ((line >= 0) && (line < lines)) {
+		lineStates.EnsureLength(lines + 1);
+		stateOld = lineStates[line];
+		lineStates[line] = state;
+	}
 	return stateOld;
 }
 

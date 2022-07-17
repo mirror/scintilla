@@ -111,7 +111,7 @@ public:
 	void InsertLines(Sci::Line line, Sci::Line lines) override;
 	void RemoveLine(Sci::Line line) override;
 
-	int SetLineState(Sci::Line line, int state);
+	int SetLineState(Sci::Line line, int state, Sci::Line lines);
 	int GetLineState(Sci::Line line);
 	Sci::Line GetMaxLineState() const noexcept;
 };

@@ -2900,7 +2900,9 @@ struct Sci_TextToFindFull {
     </p>
 
     <p><b id="SCI_GETMAXLINESTATE">SCI_GETMAXLINESTATE &rarr; int</b><br />
-     This returns the last line that has any line state.</p>
+     This returns the last line that has any line state.
+     This has been made less useful by an optimization that always allocates for all lines if any line's state was set.
+     It can still distinguish cases where line state was never set for any lines.</p>
 
     <h2 id="StyleDefinition">Style definition</h2>
 

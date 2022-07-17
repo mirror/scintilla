@@ -2424,7 +2424,7 @@ void Document::SetLexInterface(std::unique_ptr<LexInterface> pLexInterface) noex
 }
 
 int SCI_METHOD Document::SetLineState(Sci_Position line, int state) {
-	const int statePrevious = States()->SetLineState(line, state);
+	const int statePrevious = States()->SetLineState(line, state, LinesTotal());
 	if (state != statePrevious) {
 		const DocModification mh(ModificationFlags::ChangeLineState, LineStart(line), 0, 0, nullptr,
 			static_cast<Sci::Line>(line));

@@ -226,11 +226,11 @@ TEST_CASE("LineState") {
 	}
 
 	SECTION("SetLineState") {
-		REQUIRE(0 == ls.SetLineState(1, 200));
+		REQUIRE(0 == ls.SetLineState(1, 200, 2));
 		REQUIRE(0 == ls.GetLineState(0));
 		REQUIRE(200 == ls.GetLineState(1));
 		REQUIRE(0 == ls.GetLineState(2));
-		REQUIRE(0 == ls.SetLineState(2, 400));
+		REQUIRE(0 == ls.SetLineState(2, 400, 3));
 		REQUIRE(0 == ls.GetLineState(0));
 		REQUIRE(200 == ls.GetLineState(1));
 		REQUIRE(400 == ls.GetLineState(2));
@@ -244,11 +244,11 @@ TEST_CASE("LineState") {
 
 	SECTION("InsertRemoveLine") {
 		REQUIRE(0 == ls.GetMaxLineState());
-		ls.SetLineState(1, 1);
-		ls.SetLineState(2, 2);
-		REQUIRE(3 == ls.GetMaxLineState());
-		ls.InsertLine(2);
+		ls.SetLineState(1, 1, 3);
+		ls.SetLineState(2, 2, 3);
 		REQUIRE(4 == ls.GetMaxLineState());
+		ls.InsertLine(2);
+		REQUIRE(5 == ls.GetMaxLineState());
 		REQUIRE(0 == ls.GetLineState(0));
 		REQUIRE(1 == ls.GetLineState(1));
 		REQUIRE(2 == ls.GetLineState(2));

@@ -574,6 +574,20 @@
     </table>
     <h2>Releases</h2>
     <h3>
+       <a href="https://www.scintilla.org/scintilla525.zip">Release 5.2.5</a>
+    </h3>
+    <ul>
+	<li>
+	Released 10 July 2022.
+	</li>
+	<li>
+	Line state optimized to avoid excess allocations by always allocating for every line.
+	This makes SCI_GETMAXLINESTATE less useful although it can still distinguish cases
+	where line state was never set for any lines.
+	<a href="https://sourceforge.net/p/scintilla/feature-requests/1441/">Feature #1441</a>.
+	</li>
+    </ul>
+    <h3>
        <a href="https://www.scintilla.org/scintilla524.zip">Release 5.2.4</a>
     </h3>
     <ul>
