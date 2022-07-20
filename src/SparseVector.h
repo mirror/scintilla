@@ -147,6 +147,11 @@ public:
 		starts->InsertText(partition, -1);
 		Check();
 	}
+	void DeleteAll() {
+		starts = std::make_unique<Partitioning<Sci::Position>>(8);
+		values = std::make_unique<SplitVector<T>>();
+		values->InsertEmpty(0, 2);
+	}
 	void DeleteRange(Sci::Position position, Sci::Position deleteLength) {
 		// For now, delete elements in range - may want to leave value at start
 		// or combine onto position.

@@ -210,6 +210,9 @@ TEST_CASE("SparseVector") {
 		st.SetValueAt(3, UniqueStringCopy("3"));
 		REQUIRE(5 == st.Elements());
 		REQUIRE("---34--7-9-" == Representation(st));
+		st.DeleteAll();
+		REQUIRE(1 == st.Elements());
+		REQUIRE("-" == Representation(st));
 		st.Check();
 	}
 
