@@ -36,14 +36,7 @@ public:
 	SparseVector(SparseVector &&) = delete;
 	void operator=(const SparseVector &) = delete;
 	void operator=(SparseVector &&) = delete;
-	~SparseVector() {
-		starts.reset();
-		// starts dead here but not used by ClearValue.
-		for (Sci::Position part = 0; part < values->Length(); part++) {
-			ClearValue(part);
-		}
-		values.reset();
-	}
+	~SparseVector() noexcept = default;
 	Sci::Position Length() const noexcept {
 		return starts->Length();
 	}
