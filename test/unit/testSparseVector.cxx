@@ -179,6 +179,10 @@ TEST_CASE("SparseVector") {
 		REQUIRE(1 == st.Elements());
 		REQUIRE("------" == Representation(st));
 		st.Check();
+		st.SetValueAt(5, nullptr);
+		REQUIRE(1 == st.Elements());
+		REQUIRE("------" == Representation(st));
+		st.Check();
 	}
 
 	SECTION("CheckDeletionLeavesOrdered") {

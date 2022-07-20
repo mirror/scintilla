@@ -77,7 +77,7 @@ public:
 		const Sci::Position startPartition = starts->PositionFromPartition(partition);
 		if (value == T()) {
 			// Setting the empty value is equivalent to deleting the position
-			if (position == 0) {
+			if (position == 0 || position == Length()) {
 				ClearValue(partition);
 			} else if (position == startPartition) {
 				// Currently an element at this position, so remove
