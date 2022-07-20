@@ -378,6 +378,7 @@ TEST_CASE("SparseTextInt") {
 		REQUIRE(3 == st.PositionOfElement(1));
 		REQUIRE(2 == st.IndexAfter(3));
 		REQUIRE(5 == st.PositionOfElement(2));
+		REQUIRE(2 == st.IndexAfter(4));
 	}
 }
 
