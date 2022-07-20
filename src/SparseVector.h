@@ -189,6 +189,13 @@ public:
 		}
 		Check();
 	}
+	Sci::Position PositionNext(Sci::Position start) const noexcept {
+		const Sci::Position element = ElementFromPosition(start);
+		if (element < Elements()) {
+			return PositionOfElement(element + 1);
+		}
+		return Length() + 1;	// Out of bounds to terminate
+	}
 	Sci::Position IndexAfter(Sci::Position position) const noexcept {
 		assert(position < Length());
 		if (position < 0)
