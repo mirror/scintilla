@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 15 May 2022 NH</p>
+    <p>Last edited 18 July 2022 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -1382,6 +1382,7 @@ struct Sci_TextToFindFull {
      <a class="message" href="#SCI_POINTXFROMPOSITION">SCI_POINTXFROMPOSITION(&lt;unused&gt;, position pos) &rarr; int</a><br />
      <a class="message" href="#SCI_POINTYFROMPOSITION">SCI_POINTYFROMPOSITION(&lt;unused&gt;, position pos) &rarr; int</a><br />
      <a class="message" href="#SCI_HIDESELECTION">SCI_HIDESELECTION(bool hide)</a><br />
+     <a class="message" href="#SCI_GETSELECTIONHIDDEN">SCI_GETSELECTIONHIDDEN &rarr; bool</a><br />
      <a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT(&lt;unused&gt;, char *text) &rarr; position</a><br />
      <a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE(position length, char *text) &rarr; position</a><br />
      <a class="message" href="#SCI_SELECTIONISRECTANGLE">SCI_SELECTIONISRECTANGLE &rarr; bool</a><br />
@@ -1651,10 +1652,11 @@ struct Sci_TextToFindFull {
     in the document.</p>
 
     <p><b id="SCI_HIDESELECTION">SCI_HIDESELECTION(bool hide)</b><br />
+     <b id="SCI_GETSELECTIONHIDDEN">SCI_GETSELECTIONHIDDEN &rarr; bool</b><br />
      The normal state is to make the selection visible by drawing it as set by <a class="message"
-    href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a> and <a class="message"
-    href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a>. However, if you hide the selection, it
-    is drawn as normal text.</p>
+    href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>, <a class="message"
+    href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a>, and related calls.
+    However, if you hide the selection, it is drawn as normal text.</p>
 
     <p><b id="SCI_CHOOSECARETX">SCI_CHOOSECARETX</b><br />
      Scintilla remembers the x value of the last position horizontally moved to explicitly by the

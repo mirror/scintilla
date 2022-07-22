@@ -185,7 +185,6 @@ void Hexits(char *hexits, int ch) noexcept {
 
 EditView::EditView() {
 	tabWidthMinimumPixels = 2; // needed for calculating tab stops for fractional proportional fonts
-	hideSelection = false;
 	drawOverstrikeCaret = true;
 	bufferedDraw = true;
 	phasesDraw = PhasesDraw::Two;
@@ -1076,7 +1075,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		rcSegment.right = xEol + xStart + virtualSpace;
 		const ColourRGBA backgroundFill = background.value_or(vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
 		surface->FillRectangleAligned(rcSegment, backgroundFill);
-		if (!hideSelection && (vsDraw.selection.layer == Layer::Base)) {
+		if (vsDraw.selection.visible && (vsDraw.selection.layer == Layer::Base)) {
 			const SelectionSegment virtualSpaceRange(SelectionPosition(model.pdoc->LineEnd(line)),
 				SelectionPosition(model.pdoc->LineEnd(line),
 					model.sel.VirtualSpaceFor(model.pdoc->LineEnd(line))));
@@ -1098,7 +1097,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 	}
 
 	InSelection eolInSelection = InSelection::inNone;
-	if (!hideSelection && lastSubLine) {
+	if (vsDraw.selection.visible && lastSubLine) {
 		eolInSelection = model.LineEndInSelection(line);
 	}
 
@@ -1354,7 +1353,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	const int widthFoldDisplayText = static_cast<int>(surface->WidthText(fontText, foldDisplayText));
 
 	InSelection eolInSelection = InSelection::inNone;
-	if (!hideSelection) {
+	if (vsDraw.selection.visible) {
 		eolInSelection = model.LineEndInSelection(line);
 	}
 
@@ -1684,7 +1683,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 	Sci::Line lineDoc, int xStart, PRectangle rcLine, int subLine) const {
 	// When drag is active it is the only caret drawn
 	const bool drawDrag = model.posDrag.IsValid();
-	if (hideSelection && !drawDrag)
+	if (!vsDraw.selection.visible && !drawDrag)
 		return;
 	const Sci::Position posLineStart = model.pdoc->LineStart(lineDoc);
 	// For each selection draw
@@ -1870,7 +1869,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 			if (rcSegment.right > rcLine.right)
 				rcSegment.right = rcLine.right;
 
-			InSelection inSelection = hideSelection ? InSelection::inNone : model.sel.CharacterInSelection(iDoc);
+			InSelection inSelection = vsDraw.selection.visible ? model.sel.CharacterInSelection(iDoc) : InSelection::inNone;
 			if (FlagSet(vsDraw.caret.style, CaretStyle::Curses) && (inSelection == InSelection::inMain))
 				inSelection = CharacterInCursesSelection(iDoc, model, vsDraw);
 			const bool inHotspot = model.hotspot.Valid() && model.hotspot.ContainsCharacter(iDoc);
@@ -2119,7 +2118,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					}
 				}
 			}
-			InSelection inSelection = hideSelection ? InSelection::inNone : model.sel.CharacterInSelection(iDoc);
+			InSelection inSelection = vsDraw.selection.visible ? model.sel.CharacterInSelection(iDoc) : InSelection::inNone;
 			if (FlagSet(vsDraw.caret.style, CaretStyle::Curses) && (inSelection == InSelection::inMain))
 				inSelection = CharacterInCursesSelection(iDoc, model, vsDraw);
 			const std::optional<ColourRGBA> selectionFore = SelectionForeground(model, vsDraw, inSelection);
@@ -2357,7 +2356,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 
 	if (FlagSet(phase, DrawPhase::text)) {
-		if (!hideSelection) {
+		if (vsDraw.selection.visible) {
 			DrawTranslucentSelection(surface, model, vsDraw, ll, line, rcLine, subLine, lineRange, xStart, tabWidthMinimumPixels, Layer::UnderText);
 		}
 		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine, subLine, Layer::UnderText);
@@ -2386,7 +2385,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 		DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
 	}
 
-	if (!hideSelection && FlagSet(phase, DrawPhase::selectionTranslucent)) {
+	if (vsDraw.selection.visible && FlagSet(phase, DrawPhase::selectionTranslucent)) {
 		DrawTranslucentSelection(surface, model, vsDraw, ll, line, rcLine, subLine, lineRange, xStart, tabWidthMinimumPixels, Layer::OverText);
 	}
 
@@ -2523,7 +2522,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				durLayout += ep.Duration(true);
 #endif
 				if (ll) {
-					ll->containsCaret = !hideSelection && (lineDoc == lineCaret)
+					ll->containsCaret = vsDraw.selection.visible && (lineDoc == lineCaret)
 						&& (ll->lines == 1 || !vsDraw.caretLine.subLine || ll->InLine(caretOffset, subLine));
 
 					PRectangle rcLine = rcTextArea;
@@ -2633,7 +2632,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 	Sci::Line line, PRectangle rcArea, int subLine) const {
 		InSelection eolInSelection = InSelection::inNone;
-	if ((!hideSelection) && (subLine == (ll->lines - 1))) {
+	if (vsDraw.selection.visible && (subLine == (ll->lines - 1))) {
 		eolInSelection = model.LineEndInSelection(line);
 	}
 

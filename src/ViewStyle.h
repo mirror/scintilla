@@ -46,6 +46,8 @@ inline std::optional<ColourRGBA> OptionalColour(Scintilla::uptr_t wParam, Scinti
 }
 
 struct SelectionAppearance {
+	// Is the selection visible?
+	bool visible = true;
 	// Whether to draw on base layer or over text
 	Scintilla::Layer layer = Layer::Base;
 	// Draw selection past line end characters up to right border

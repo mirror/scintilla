@@ -342,6 +342,7 @@ public:
 	Position GetTextRange(void *tr);
 	Position GetTextRangeFull(void *tr);
 	void HideSelection(bool hide);
+	bool SelectionHidden();
 	int PointXFromPosition(Position pos);
 	int PointYFromPosition(Position pos);
 	Line LineFromPosition(Position pos);

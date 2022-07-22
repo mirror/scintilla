@@ -275,6 +275,7 @@ enum class Message {
 	GetTextRange = 2162,
 	GetTextRangeFull = 2039,
 	HideSelection = 2163,
+	GetSelectionHidden = 2088,
 	PointXFromPosition = 2164,
 	PointYFromPosition = 2165,
 	LineFromPosition = 2166,

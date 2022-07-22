@@ -6322,8 +6322,12 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case Message::HideSelection:
-		view.hideSelection = wParam != 0;
+		vs.selection.visible = wParam == 0;
 		Redraw();
+		break;
+
+	case Message::GetSelectionHidden:
+		return !vs.selection.visible;
 		break;
 
 	case Message::FormatRange:
