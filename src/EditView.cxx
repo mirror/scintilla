@@ -2695,14 +2695,9 @@ Sci::Position EditView::FormatRange(bool draw, CharacterRangeFull chrg, Rectangl
 	// If this ever gets changed, cached pixmap would need to be recreated if technology != Technology::Default
 	vsPrint.viewIndentationGuides = IndentView::None;
 	// Don't show the selection when printing
+	vsPrint.selection.visible = false;
 	vsPrint.elementColours.clear();
 	vsPrint.elementBaseColours.clear();
-	// Set all selection background colours to be transparent.
-	constexpr ColourRGBA transparent(0xc0, 0xc0, 0xc0, 0x0);
-	vsPrint.elementBaseColours[Element::SelectionBack] = transparent;
-	vsPrint.elementBaseColours[Element::SelectionAdditionalBack] = transparent;
-	vsPrint.elementBaseColours[Element::SelectionSecondaryBack] = transparent;
-	vsPrint.elementBaseColours[Element::SelectionInactiveBack] = transparent;
 	vsPrint.caretLine.alwaysShow = false;
 	// Don't highlight matching braces using indicators
 	vsPrint.braceHighlightIndicatorSet = false;
