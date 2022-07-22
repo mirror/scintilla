@@ -711,10 +711,15 @@ FontRealised *ViewStyle::Find(const FontSpecification &fs) {
 }
 
 void ViewStyle::FindMaxAscentDescent() noexcept {
-	for (const auto &font : fonts) {
-		if (maxAscent < font.second->measurements.ascent)
-			maxAscent = font.second->measurements.ascent;
-		if (maxDescent < font.second->measurements.descent)
-			maxDescent = font.second->measurements.descent;
+	for (size_t i = 0; i < styles.size(); i++) {
+		if (i == StyleCallTip)
+			continue;
+
+		const auto &style = styles[i];
+
+		if (maxAscent < style.ascent)
+			maxAscent = style.ascent;
+		if (maxDescent < style.descent)
+			maxDescent = style.descent;
 	}
 }
