@@ -80,6 +80,7 @@ public:
 
 	bool GetExpanded(Sci::Line lineDoc) const noexcept override;
 	bool SetExpanded(Sci::Line lineDoc, bool isExpanded) override;
+	bool ExpandAll() override;
 	Sci::Line ContractedNext(Sci::Line lineDocStart) const noexcept override;
 
 	int GetHeight(Sci::Line lineDoc) const noexcept override;
@@ -248,23 +249,26 @@ bool ContractionState<LINE>::SetVisible(Sci::Line lineDocStart, Sci::Line lineDo
 		return false;
 	} else {
 		EnsureData();
-		Sci::Line delta = 0;
 		Check();
 		if ((lineDocStart <= lineDocEnd) && (lineDocStart >= 0) && (lineDocEnd < LinesInDoc())) {
+			bool changed = false;
 			for (Sci::Line line = lineDocStart; line <= lineDocEnd; line++) {
 				if (GetVisible(line) != isVisible) {
+					changed = true;
 					const int heightLine = heights->ValueAt(static_cast<LINE>(line));
 					const int difference = isVisible ? heightLine : -heightLine;
-					visible->SetValueAt(static_cast<LINE>(line), isVisible ? 1 : 0);
 					displayLines->InsertText(static_cast<LINE>(line), difference);
-					delta += difference;
 				}
 			}
+			if (changed) {
+				visible->FillRange(static_cast<LINE>(lineDocStart), isVisible ? 1 : 0,
+					static_cast<LINE>(lineDocEnd - lineDocStart) + 1);
+			}
+			Check();
+			return changed;
 		} else {
 			return false;
 		}
-		Check();
-		return delta != 0;
 	}
 }
 
@@ -322,6 +326,18 @@ bool ContractionState<LINE>::SetExpanded(Sci::Line lineDoc, bool isExpanded) {
 			Check();
 			return false;
 		}
+	}
+}
+
+template <typename LINE>
+bool ContractionState<LINE>::ExpandAll() {
+	if (OneToOne()) {
+		return false;
+	} else {
+		const LINE lines = expanded->Length();
+		const bool changed = expanded->FillRange(0, 1, lines).changed;
+		Check();
+		return changed;
 	}
 }
 

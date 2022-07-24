@@ -5414,17 +5414,22 @@ void Editor::SetEOLAnnotationVisible(EOLAnnotationVisible visible) {
 Sci::Line Editor::ExpandLine(Sci::Line line) {
 	const Sci::Line lineMaxSubord = pdoc->GetLastChild(line);
 	line++;
+	Sci::Line lineStart = line;
 	while (line <= lineMaxSubord) {
-		pcs->SetVisible(line, line, true);
 		const FoldLevel level = pdoc->GetFoldLevel(line);
 		if (LevelIsHeader(level)) {
+			pcs->SetVisible(lineStart, line, true);
 			if (pcs->GetExpanded(line)) {
 				line = ExpandLine(line);
 			} else {
 				line = pdoc->GetLastChild(line);
 			}
+			lineStart = line + 1;
 		}
 		line++;
+	}
+	if (lineStart <= lineMaxSubord) {
+		pcs->SetVisible(lineStart, lineMaxSubord, true);
 	}
 	return lineMaxSubord;
 }
@@ -5588,11 +5593,7 @@ void Editor::FoldAll(FoldAction action) {
 	}
 	if (expanding) {
 		pcs->SetVisible(0, maxLine-1, true);
-		for (Sci::Line line = 0; line < maxLine; line++) {
-			if (!pcs->GetExpanded(line)) {
-				SetFoldExpanded(line, true);
-			}
-		}
+		pcs->ExpandAll();
 	} else {
 		for (Sci::Line line = 0; line < maxLine; line++) {
 			const FoldLevel level = pdoc->GetFoldLevel(line);
