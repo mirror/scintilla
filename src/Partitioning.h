@@ -28,21 +28,22 @@ public:
 	void operator=(SplitVectorWithRangeAdd &&) = delete;
 	~SplitVectorWithRangeAdd() {
 	}
-	void RangeAddDelta(ptrdiff_t start, ptrdiff_t end, T delta) noexcept {
+	void RangeAddDelta(T start, T end, T delta) noexcept {
 		// end is 1 past end, so end-start is number of elements to change
+		ptrdiff_t position = start;
 		ptrdiff_t i = 0;
-		const ptrdiff_t rangeLength = end - start;
+		const ptrdiff_t rangeLength = end - position;
 		ptrdiff_t range1Length = rangeLength;
-		const ptrdiff_t part1Left = this->part1Length - start;
+		const ptrdiff_t part1Left = this->part1Length - position;
 		if (range1Length > part1Left)
 			range1Length = part1Left;
 		while (i < range1Length) {
-			this->body[start++] += delta;
+			this->body[position++] += delta;
 			i++;
 		}
-		start += this->gapLength;
+		position += this->gapLength;
 		while (i < rangeLength) {
-			this->body[start++] += delta;
+			this->body[position++] += delta;
 			i++;
 		}
 	}
