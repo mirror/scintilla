@@ -85,6 +85,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(0 == part.PositionFromPartition(0));
 		REQUIRE(1 == part.PositionFromPartition(1));
 		REQUIRE(3 == part.PositionFromPartition(2));
+		part.Check();
 	}
 
 	SECTION("InsertAgain") {
@@ -96,6 +97,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(0 == part.PositionFromPartition(0));
 		REQUIRE(5 == part.PositionFromPartition(1));
 		REQUIRE(8 == part.PositionFromPartition(2));
+		part.Check();
 	}
 
 	SECTION("InsertMultiple") {
@@ -108,6 +110,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(5 == part.PositionFromPartition(2));
 		REQUIRE(7 == part.PositionFromPartition(3));
 		REQUIRE(10 == part.PositionFromPartition(4));
+		part.Check();
 	}
 
 	SECTION("InsertMultipleWithCast") {
@@ -122,6 +125,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(6 == part.PositionFromPartition(3));
 		REQUIRE(8 == part.PositionFromPartition(4));
 		REQUIRE(9 == part.PositionFromPartition(5));
+		part.Check();
 	}
 
 	SECTION("InsertReversed") {
@@ -133,6 +137,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(0 == part.PositionFromPartition(0));
 		REQUIRE(5 == part.PositionFromPartition(1));
 		REQUIRE(8 == part.PositionFromPartition(2));
+		part.Check();
 	}
 
 	SECTION("InverseSearch") {
@@ -150,6 +155,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(1 == part.PartitionFromPosition(2));
 
 		REQUIRE(1 == part.PartitionFromPosition(3));
+		part.Check();
 	}
 
 	SECTION("DeletePartition") {
@@ -159,6 +165,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(1 == part.Partitions());
 		REQUIRE(0 == part.PositionFromPartition(0));
 		REQUIRE(2 == part.PositionFromPartition(1));
+		part.Check();
 	}
 
 	SECTION("DeleteAll") {
@@ -185,6 +192,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(11 == part.PositionFromPartition(2));
 		REQUIRE(18 == part.PositionFromPartition(3));
 		REQUIRE(19 == part.PositionFromPartition(4));
+		part.Check();
 	}
 
 	SECTION("TestMany") {
@@ -214,6 +222,7 @@ TEST_CASE("Partitioning") {
 		REQUIRE(10 == part.PartitionFromPosition(46));
 		REQUIRE(50 == part.PositionFromPartition(11));
 		REQUIRE(11 == part.PartitionFromPosition(50));
+		part.Check();
 	}
 
 }
