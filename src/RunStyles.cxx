@@ -71,7 +71,8 @@ void RunStyles<DISTANCE, STYLE>::RemoveRunIfEmpty(DISTANCE run) {
 template <typename DISTANCE, typename STYLE>
 void RunStyles<DISTANCE, STYLE>::RemoveRunIfSameAsPrevious(DISTANCE run) {
 	if ((run > 0) && (run < starts->Partitions())) {
-		if (styles->ValueAt(run-1) == styles->ValueAt(run)) {
+		const DISTANCE runBefore = run - 1;
+		if (styles->ValueAt(runBefore) == styles->ValueAt(run)) {
 			RemoveRun(run);
 		}
 	}
@@ -251,7 +252,8 @@ DISTANCE RunStyles<DISTANCE, STYLE>::Runs() const noexcept {
 template <typename DISTANCE, typename STYLE>
 bool RunStyles<DISTANCE, STYLE>::AllSame() const noexcept {
 	for (DISTANCE run = 1; run < starts->Partitions(); run++) {
-		if (styles->ValueAt(run) != styles->ValueAt(run - 1))
+		const DISTANCE runBefore = run - 1;
+		if (styles->ValueAt(run) != styles->ValueAt(runBefore))
 			return false;
 	}
 	return true;
