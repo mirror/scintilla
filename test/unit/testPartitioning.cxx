@@ -22,8 +22,6 @@
 
 using namespace Scintilla::Internal;
 
-constexpr int growSize = 4;
-
 constexpr int lengthTestArray = 8;
 static const int testArray[lengthTestArray] = {3, 4, 5, 6, 7, 8, 9, 10};
 
@@ -31,7 +29,7 @@ static const int testArray[lengthTestArray] = {3, 4, 5, 6, 7, 8, 9, 10};
 
 TEST_CASE("SplitVectorWithRangeAdd") {
 
-	SplitVectorWithRangeAdd<int> svwra(growSize);
+	SplitVectorWithRangeAdd<int> svwra;
 
 	SECTION("IsEmptyInitially") {
 		REQUIRE(0 == svwra.Length());
@@ -54,7 +52,7 @@ TEST_CASE("SplitVectorWithRangeAdd") {
 
 TEST_CASE("Partitioning") {
 
-	Partitioning<Sci::Position> part(growSize);
+	Partitioning<Sci::Position> part;
 
 	SECTION("IsEmptyInitially") {
 		REQUIRE(1 == part.Partitions());

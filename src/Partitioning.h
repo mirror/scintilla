@@ -17,7 +17,7 @@ namespace Scintilla::Internal {
 template <typename T>
 class SplitVectorWithRangeAdd : public SplitVector<T> {
 public:
-	explicit SplitVectorWithRangeAdd(ptrdiff_t growSize_) {
+	explicit SplitVectorWithRangeAdd(ptrdiff_t growSize_=8) {
 		this->SetGrowSize(growSize_);
 		this->ReAllocate(growSize_);
 	}
@@ -94,7 +94,7 @@ private:
 	}
 
 public:
-	explicit Partitioning(int growSize) : stepPartition(0), stepLength(0) {
+	explicit Partitioning(size_t growSize=8) : stepPartition(0), stepLength(0) {
 		Allocate(growSize);
 	}
 

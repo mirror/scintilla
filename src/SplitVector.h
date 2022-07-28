@@ -71,7 +71,7 @@ protected:
 
 public:
 	/// Construct a split buffer.
-	SplitVector() : empty(), lengthBody(0), part1Length(0), gapLength(0), growSize(8) {
+	SplitVector(size_t growSize_=8) : empty(), lengthBody(0), part1Length(0), gapLength(0), growSize(growSize_) {
 	}
 
 	// Deleted so SplitVector objects can not be copied.
