@@ -86,10 +86,6 @@ RunStyles<DISTANCE, STYLE>::RunStyles() {
 }
 
 template <typename DISTANCE, typename STYLE>
-RunStyles<DISTANCE, STYLE>::~RunStyles() {
-}
-
-template <typename DISTANCE, typename STYLE>
 DISTANCE RunStyles<DISTANCE, STYLE>::Length() const noexcept {
 	return starts.PositionFromPartition(starts.Partitions());
 }

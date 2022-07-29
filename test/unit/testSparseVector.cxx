@@ -27,6 +27,51 @@ using namespace Scintilla::Internal;
 
 // Test SparseVector.
 
+using UniqueInt = std::unique_ptr<int>;
+
+TEST_CASE("CompileCopying SparseVector") {
+
+	// These are compile-time tests to check that basic copy and move
+	// operations are defined correctly.
+
+	SECTION("CopyingMoving") {
+		SparseVector<int> s;
+		SparseVector<int> s2;
+
+		// Copy constructor
+		SparseVector<int> sa(s);
+		// Copy assignment
+		SparseVector<int> sb;
+		sb = s;
+
+		// Move constructor
+		SparseVector<int> sc(std::move(s));
+		// Move assignment
+		SparseVector<int> sd;
+		sd = (std::move(s2));
+	}
+
+	SECTION("MoveOnly") {
+		SparseVector<UniqueInt> s;
+
+#if defined(SHOW_COPY_BUILD_FAILURES)
+		// Copy is not defined for std::unique_ptr
+		// Copy constructor fails
+		SparseVector<UniqueInt> sa(s);
+		// Copy assignment fails
+		SparseVector<UniqueInt> sb;
+		sb = s;
+#endif
+
+		// Move constructor
+		SparseVector<UniqueInt> sc(std::move(s));
+		// Move assignment
+		SparseVector<UniqueInt> sd;
+		sd = (std::move(s));
+	}
+
+}
+
 // Helper to produce a string representation of a SparseVector<const char *>
 // to simplify checks.
 static std::string Representation(const SparseVector<UniqueString> &st) {

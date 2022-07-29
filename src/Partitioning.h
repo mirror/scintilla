@@ -78,15 +78,6 @@ public:
 		body.Insert(1, 0);	// This is the end of the first partition and will be the start of the second
 	}
 
-	// Deleted so Partitioning objects can not be copied.
-	Partitioning(const Partitioning &) = delete;
-	Partitioning(Partitioning &&) = delete;
-	Partitioning &operator=(const Partitioning &) = delete;
-	Partitioning &operator=(Partitioning &&) = default;
-
-	~Partitioning() {
-	}
-
 	T Partitions() const noexcept {
 		return static_cast<T>(body.Length())-1;
 	}

@@ -31,12 +31,6 @@ public:
 		values = SplitVector<T>();
 		values.InsertEmpty(0, 2);
 	}
-	// Deleted so SparseVector objects can not be copied.
-	SparseVector(const SparseVector &) = delete;
-	SparseVector(SparseVector &&) = delete;
-	void operator=(const SparseVector &) = delete;
-	void operator=(SparseVector &&) = delete;
-	~SparseVector() noexcept = default;
 	Sci::Position Length() const noexcept {
 		return starts.Length();
 	}

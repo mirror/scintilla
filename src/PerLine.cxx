@@ -34,10 +34,6 @@ using namespace Scintilla::Internal;
 MarkerHandleSet::MarkerHandleSet() {
 }
 
-MarkerHandleSet::~MarkerHandleSet() {
-	mhList.clear();
-}
-
 bool MarkerHandleSet::Empty() const noexcept {
 	return mhList.empty();
 }
@@ -91,9 +87,6 @@ bool MarkerHandleSet::RemoveNumber(int markerNum, bool all) {
 
 void MarkerHandleSet::CombineWith(MarkerHandleSet *other) noexcept {
 	mhList.splice_after(mhList.before_begin(), other->mhList);
-}
-
-LineMarkers::~LineMarkers() {
 }
 
 void LineMarkers::Init() {
@@ -219,9 +212,6 @@ void LineMarkers::DeleteMarkFromHandle(int markerHandle) {
 	}
 }
 
-LineLevels::~LineLevels() {
-}
-
 void LineLevels::Init() {
 	levels.DeleteAll();
 }
@@ -279,9 +269,6 @@ int LineLevels::GetLevel(Sci::Line line) const noexcept {
 	} else {
 		return static_cast<int>(Scintilla::FoldLevel::Base);
 	}
-}
-
-LineState::~LineState() {
 }
 
 void LineState::Init() {
@@ -353,9 +340,6 @@ std::unique_ptr<char[]>AllocateAnnotation(size_t length, int style) {
 	return std::make_unique<char[]>(len);
 }
 
-}
-
-LineAnnotation::~LineAnnotation() {
 }
 
 bool LineAnnotation::Empty() const noexcept {
@@ -480,9 +464,6 @@ int LineAnnotation::Lines(Sci::Line line) const noexcept {
 		return reinterpret_cast<AnnotationHeader *>(annotations[line].get())->lines;
 	else
 		return 0;
-}
-
-LineTabstops::~LineTabstops() {
 }
 
 void LineTabstops::Init() {

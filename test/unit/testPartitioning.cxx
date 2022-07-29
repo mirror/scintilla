@@ -27,6 +27,30 @@ static const int testArray[lengthTestArray] = {3, 4, 5, 6, 7, 8, 9, 10};
 
 // Test Partitioning.
 
+TEST_CASE("CompileCopying Partitioning") {
+
+	// These are compile-time tests to check that basic copy and move
+	// operations are defined correctly.
+
+	SECTION("CopyingMoving") {
+		Partitioning<int> s;
+		Partitioning<int> s2;
+
+		// Copy constructor
+		Partitioning<int> sa(s);
+		// Copy assignment
+		Partitioning<int> sb;
+		sb = s;
+
+		// Move constructor
+		Partitioning<int> sc(std::move(s));
+		// Move assignment
+		Partitioning<int> sd;
+		sd = (std::move(s2));
+	}
+
+}
+
 TEST_CASE("Partitioning") {
 
 	Partitioning<Sci::Position> part;

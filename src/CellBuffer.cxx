@@ -329,9 +329,6 @@ Action::Action() noexcept {
 	mayCoalesce = false;
 }
 
-Action::~Action() {
-}
-
 void Action::Create(ActionType at_, Sci::Position position_, const char *data_, Sci::Position lenData_, bool mayCoalesce_) {
 	data = nullptr;
 	position = position_;
@@ -377,9 +374,6 @@ UndoHistory::UndoHistory() {
 	tentativePoint = -1;
 
 	actions[currentAction].Create(ActionType::start);
-}
-
-UndoHistory::~UndoHistory() {
 }
 
 void UndoHistory::EnsureUndoRoom() {
@@ -598,8 +592,7 @@ CellBuffer::CellBuffer(bool hasStyles_, bool largeDocument_) :
 		plv = std::make_unique<LineVector<int>>();
 }
 
-CellBuffer::~CellBuffer() {
-}
+CellBuffer::~CellBuffer() noexcept = default;
 
 char CellBuffer::CharAt(Sci::Position position) const noexcept {
 	return substance.ValueAt(position);

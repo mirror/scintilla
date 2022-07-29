@@ -34,12 +34,6 @@ private:
 	void RemoveRunIfSameAsPrevious(DISTANCE run);
 public:
 	RunStyles();
-	// Deleted so RunStyles objects can not be copied.
-	RunStyles(const RunStyles &) = delete;
-	RunStyles(RunStyles &&) = delete;
-	void operator=(const RunStyles &) = delete;
-	void operator=(RunStyles &&) = delete;
-	~RunStyles();
 	DISTANCE Length() const noexcept;
 	STYLE ValueAt(DISTANCE position) const noexcept;
 	DISTANCE FindNextChange(DISTANCE position, DISTANCE end) const noexcept;

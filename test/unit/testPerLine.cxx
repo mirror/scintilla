@@ -31,6 +31,30 @@ constexpr int FoldBase = static_cast<int>(Scintilla::FoldLevel::Base);
 
 // Test MarkerHandleSet.
 
+TEST_CASE("CompileCopying MarkerHandleSet") {
+
+	// These are compile-time tests to check that basic copy and move
+	// operations are defined correctly.
+
+	SECTION("CopyingMoving") {
+		MarkerHandleSet s;
+		MarkerHandleSet s2;
+
+		// Copy constructor
+		MarkerHandleSet sa(s);
+		// Copy assignment
+		MarkerHandleSet sb;
+		sb = s;
+
+		// Move constructor
+		MarkerHandleSet sc(std::move(s));
+		// Move assignment
+		MarkerHandleSet sd;
+		sd = (std::move(s2));
+	}
+
+}
+
 TEST_CASE("MarkerHandleSet") {
 
 	MarkerHandleSet mhs;

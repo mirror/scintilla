@@ -74,15 +74,6 @@ public:
 	SplitVector(size_t growSize_=8) : empty(), lengthBody(0), part1Length(0), gapLength(0), growSize(growSize_) {
 	}
 
-	// Deleted so SplitVector objects can not be copied.
-	SplitVector(const SplitVector &) = delete;
-	SplitVector(SplitVector &&) = delete;
-	SplitVector &operator=(const SplitVector &) = delete;
-	SplitVector &operator=(SplitVector &&) = default;
-
-	~SplitVector() {
-	}
-
 	size_t GetGrowSize() const noexcept {
 		return growSize;
 	}
