@@ -5582,15 +5582,18 @@ void Editor::EnsureLineVisible(Sci::Line lineDoc, bool enforcePolicy) {
 
 void Editor::FoldAll(FoldAction action) {
 	const Sci::Line maxLine = pdoc->LinesTotal();
+	const bool contractAll = FlagSet(action, FoldAction::ContractEveryLevel);
+	action = static_cast<FoldAction>(static_cast<int>(action) & ~static_cast<int>(FoldAction::ContractEveryLevel));
 	bool expanding = action == FoldAction::Expand;
 	if (!expanding) {
 		pdoc->EnsureStyledTo(pdoc->Length());
 	}
+	Sci::Line line = 0;
 	if (action == FoldAction::Toggle) {
 		// Discover current state
-		for (Sci::Line lineSeek = 0; lineSeek < maxLine; lineSeek++) {
-			if (LevelIsHeader(pdoc->GetFoldLevel(lineSeek))) {
-				expanding = !pcs->GetExpanded(lineSeek);
+		for (; line < maxLine; line++) {
+			if (LevelIsHeader(pdoc->GetFoldLevel(line))) {
+				expanding = !pcs->GetExpanded(line);
 				break;
 			}
 		}
@@ -5599,14 +5602,20 @@ void Editor::FoldAll(FoldAction action) {
 		pcs->SetVisible(0, maxLine-1, true);
 		pcs->ExpandAll();
 	} else {
-		for (Sci::Line line = 0; line < maxLine; line++) {
+		for (; line < maxLine; line++) {
 			const FoldLevel level = pdoc->GetFoldLevel(line);
-			if (LevelIsHeader(level) &&
-					(FoldLevel::Base == LevelNumberPart(level))) {
-				SetFoldExpanded(line, false);
-				const Sci::Line lineMaxSubord = pdoc->GetLastChild(line);
-				if (lineMaxSubord > line) {
-					pcs->SetVisible(line + 1, lineMaxSubord, false);
+			if (LevelIsHeader(level)) {
+				if (FoldLevel::Base == LevelNumberPart(level)) {
+					SetFoldExpanded(line, false);
+					const Sci::Line lineMaxSubord = pdoc->GetLastChild(line);
+					if (lineMaxSubord > line) {
+						pcs->SetVisible(line + 1, lineMaxSubord, false);
+						if (!contractAll) {
+							line = lineMaxSubord;
+						}
+					}
+				} else if (contractAll) {
+					SetFoldExpanded(line, false);
 				}
 			}
 		}

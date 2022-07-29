@@ -302,6 +302,7 @@ enum class FoldAction {
 	Contract = 0,
 	Expand = 1,
 	Toggle = 2,
+	ContractEveryLevel = 4,
 };
 
 enum class AutomaticFold {

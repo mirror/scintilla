@@ -598,6 +598,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SC_FOLDACTION_CONTRACT 0
 #define SC_FOLDACTION_EXPAND 1
 #define SC_FOLDACTION_TOGGLE 2
+#define SC_FOLDACTION_CONTRACT_EVERY_LEVEL 4
 #define SCI_FOLDLINE 2237
 #define SCI_FOLDCHILDREN 2238
 #define SCI_EXPANDCHILDREN 2239

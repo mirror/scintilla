@@ -1563,6 +1563,7 @@ enu FoldAction=SC_FOLDACTION_
 val SC_FOLDACTION_CONTRACT=0
 val SC_FOLDACTION_EXPAND=1
 val SC_FOLDACTION_TOGGLE=2
+val SC_FOLDACTION_CONTRACT_EVERY_LEVEL=4
 
 # Expand or contract a fold header.
 fun void FoldLine=2237(line line, FoldAction action)
