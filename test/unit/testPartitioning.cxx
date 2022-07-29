@@ -25,29 +25,6 @@ using namespace Scintilla::Internal;
 constexpr int lengthTestArray = 8;
 static const int testArray[lengthTestArray] = {3, 4, 5, 6, 7, 8, 9, 10};
 
-// Test SplitVectorWithRangeAdd.
-
-TEST_CASE("SplitVectorWithRangeAdd") {
-
-	SplitVectorWithRangeAdd<int> svwra;
-
-	SECTION("IsEmptyInitially") {
-		REQUIRE(0 == svwra.Length());
-	}
-
-	SECTION("IncrementExceptEnds") {
-		svwra.InsertFromArray(0, testArray, 0, lengthTestArray);
-		svwra.RangeAddDelta(1, lengthTestArray-1, 1);
-		for (int i=0; i<svwra.Length(); i++) {
-			if ((i == 0) || (i == lengthTestArray-1))
-				REQUIRE((i+3) == svwra.ValueAt(i));
-			else
-				REQUIRE((i+4) == svwra.ValueAt(i));
-		}
-	}
-
-}
-
 // Test Partitioning.
 
 TEST_CASE("Partitioning") {

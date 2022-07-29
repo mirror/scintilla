@@ -10,45 +10,6 @@
 
 namespace Scintilla::Internal {
 
-/// A split vector of integers with a method for adding a value to all elements
-/// in a range.
-/// Used by the Partitioning class.
-
-template <typename T>
-class SplitVectorWithRangeAdd : public SplitVector<T> {
-public:
-	explicit SplitVectorWithRangeAdd(ptrdiff_t growSize_=8) {
-		this->SetGrowSize(growSize_);
-		this->ReAllocate(growSize_);
-	}
-	// Deleted so SplitVectorWithRangeAdd objects can not be copied.
-	SplitVectorWithRangeAdd(const SplitVectorWithRangeAdd &) = delete;
-	SplitVectorWithRangeAdd(SplitVectorWithRangeAdd &&) = delete;
-	SplitVectorWithRangeAdd &operator=(const SplitVectorWithRangeAdd &) = delete;
-	SplitVectorWithRangeAdd &operator=(SplitVectorWithRangeAdd &&) = default;
-	~SplitVectorWithRangeAdd() {
-	}
-	void RangeAddDelta(T start, T end, T delta) noexcept {
-		// end is 1 past end, so end-start is number of elements to change
-		ptrdiff_t position = start;
-		ptrdiff_t i = 0;
-		const ptrdiff_t rangeLength = end - position;
-		ptrdiff_t range1Length = rangeLength;
-		const ptrdiff_t part1Left = this->part1Length - position;
-		if (range1Length > part1Left)
-			range1Length = part1Left;
-		while (i < range1Length) {
-			this->body[position++] += delta;
-			i++;
-		}
-		position += this->gapLength;
-		while (i < rangeLength) {
-			this->body[position++] += delta;
-			i++;
-		}
-	}
-};
-
 /// Divide an interval into multiple partitions.
 /// Useful for breaking a document down into sections such as lines.
 /// A 0 length interval has a single 0 length partition, numbered 0
@@ -63,12 +24,38 @@ private:
 	// there may be a step somewhere in the list.
 	T stepPartition;
 	T stepLength;
-	SplitVectorWithRangeAdd<T> body;
+	SplitVector<T> body;
+
+	// Deleted so SplitVectorWithRangeAdd objects can not be copied.
+	void RangeAddDelta(T start, T end, T delta) noexcept {
+		// end is 1 past end, so end-start is number of elements to change
+		const ptrdiff_t position = start;
+		ptrdiff_t i = 0;
+		const ptrdiff_t rangeLength = end - position;
+		ptrdiff_t range1Length = rangeLength;
+		const ptrdiff_t part1Left = body.GapPosition() - position;
+		if (range1Length > part1Left)
+			range1Length = part1Left;
+		T *writer = &body[position];
+		while (i < range1Length) {
+			*writer += delta;
+			writer++;
+			i++;
+		}
+		if (i < rangeLength) {
+			T *writer2 = &body[position + i];
+			while (i < rangeLength) {
+				*writer2 += delta;
+				writer2++;
+				i++;
+			}
+		}
+	}
 
 	// Move step forward
 	void ApplyStep(T partitionUpTo) noexcept {
 		if (stepLength != 0) {
-			body.RangeAddDelta(stepPartition+1, partitionUpTo + 1, stepLength);
+			RangeAddDelta(stepPartition+1, partitionUpTo + 1, stepLength);
 		}
 		stepPartition = partitionUpTo;
 		if (stepPartition >= Partitions()) {
@@ -80,22 +67,15 @@ private:
 	// Move step backward
 	void BackStep(T partitionDownTo) noexcept {
 		if (stepLength != 0) {
-			body.RangeAddDelta(partitionDownTo+1, stepPartition+1, -stepLength);
+			RangeAddDelta(partitionDownTo+1, stepPartition+1, -stepLength);
 		}
 		stepPartition = partitionDownTo;
 	}
 
-	void Allocate(ptrdiff_t growSize) {
-		body = SplitVectorWithRangeAdd<T>(growSize);
-		stepPartition = 0;
-		stepLength = 0;
+public:
+	explicit Partitioning(size_t growSize=8) : stepPartition(0), stepLength(0), body(growSize) {
 		body.Insert(0, 0);	// This value stays 0 for ever
 		body.Insert(1, 0);	// This is the end of the first partition and will be the start of the second
-	}
-
-public:
-	explicit Partitioning(size_t growSize=8) : stepPartition(0), stepLength(0) {
-		Allocate(growSize);
 	}
 
 	// Deleted so Partitioning objects can not be copied.
@@ -224,7 +204,11 @@ public:
 	}
 
 	void DeleteAll() {
-		Allocate(body.GetGrowSize());
+		body.DeleteAll();
+		stepPartition = 0;
+		stepLength = 0;
+		body.Insert(0, 0);	// This value stays 0 for ever
+		body.Insert(1, 0);	// This is the end of the first partition and will be the start of the second
 	}
 
 	void Check() const {
