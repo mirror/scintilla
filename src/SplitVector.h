@@ -77,8 +77,8 @@ public:
 	// Deleted so SplitVector objects can not be copied.
 	SplitVector(const SplitVector &) = delete;
 	SplitVector(SplitVector &&) = delete;
-	void operator=(const SplitVector &) = delete;
-	void operator=(SplitVector &&) = delete;
+	SplitVector &operator=(const SplitVector &) = delete;
+	SplitVector &operator=(SplitVector &&) = default;
 
 	~SplitVector() {
 	}
