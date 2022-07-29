@@ -98,13 +98,6 @@ public:
 	LineStartIndex() : refCount(0), starts(4) {
 		// Minimal initial allocation
 	}
-	// Deleted so LineStartIndex objects can not be copied.
-	LineStartIndex(const LineStartIndex &) = delete;
-	LineStartIndex(LineStartIndex &&) = delete;
-	void operator=(const LineStartIndex &) = delete;
-	void operator=(LineStartIndex &&) = delete;
-	virtual ~LineStartIndex() {
-	}
 	bool Allocate(Sci::Line lines) {
 		refCount++;
 		Sci::Position length = starts.PositionFromPartition(starts.Partitions());
@@ -165,13 +158,6 @@ class LineVector : public ILineVector {
 
 public:
 	LineVector() : starts(256), perLine(nullptr), activeIndices(LineCharacterIndexType::None) {
-	}
-	// Deleted so LineVector objects can not be copied.
-	LineVector(const LineVector &) = delete;
-	LineVector(LineVector &&) = delete;
-	LineVector &operator=(const LineVector &) = delete;
-	LineVector &operator=(LineVector &&) = delete;
-	~LineVector() override {
 	}
 	void Init() override {
 		starts.DeleteAll();
