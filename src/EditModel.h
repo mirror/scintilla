@@ -71,6 +71,7 @@ public:
 	const char *GetDefaultFoldDisplayText() const noexcept;
 	const char *GetFoldDisplayText(Sci::Line lineDoc) const noexcept;
 	InSelection LineEndInSelection(Sci::Line lineDoc) const;
+	[[nodiscard]] int GetMark(Sci::Line line) const;
 };
 
 }

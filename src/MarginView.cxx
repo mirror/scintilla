@@ -283,7 +283,7 @@ void MarginView::PaintOneMargin(Surface *surface, PRectangle rc, PRectangle rcOn
 		const bool firstSubLine = visibleLine == firstVisibleLine;
 		const bool lastSubLine = visibleLine == lastVisibleLine;
 
-		int marks = firstSubLine ? model.pdoc->GetMark(lineDoc) : 0;
+		int marks = firstSubLine ? model.GetMark(lineDoc) : 0;
 
 		bool headWithTail = false;
 
