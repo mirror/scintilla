@@ -385,7 +385,11 @@ ali SC_MARK_RGBAIMAGE=RGBA_IMAGE
 ali SC_MARK_VERTICALBOOKMARK=VERTICAL_BOOKMARK
 
 enu MarkerOutline=SC_MARKNUM_
-# Markers used for outlining column.
+# Markers used for outlining and change history columns.
+val SC_MARKNUM_HISTORY_REVERTED_TO_ORIGIN=21
+val SC_MARKNUM_HISTORY_SAVED=22
+val SC_MARKNUM_HISTORY_MODIFIED=23
+val SC_MARKNUM_HISTORY_REVERTED_TO_MODIFIED=24
 val SC_MARKNUM_FOLDEREND=25
 val SC_MARKNUM_FOLDEROPENMID=26
 val SC_MARKNUM_FOLDERMIDTAIL=27
@@ -855,7 +859,15 @@ enu IndicatorNumbers=INDICATOR_
 val INDICATOR_CONTAINER=8
 val INDICATOR_IME=32
 val INDICATOR_IME_MAX=35
-val INDICATOR_MAX=35
+val INDICATOR_HISTORY_REVERTED_TO_ORIGIN_INSERTION=36
+val INDICATOR_HISTORY_REVERTED_TO_ORIGIN_DELETION=37
+val INDICATOR_HISTORY_SAVED_INSERTION=38
+val INDICATOR_HISTORY_SAVED_DELETION=39
+val INDICATOR_HISTORY_MODIFIED_INSERTION=40
+val INDICATOR_HISTORY_MODIFIED_DELETION=41
+val INDICATOR_HISTORY_REVERTED_TO_MODIFIED_INSERTION=42
+val INDICATOR_HISTORY_REVERTED_TO_MODIFIED_DELETION=43
+val INDICATOR_MAX=43
 
 ali INDIC_TT=T_T
 ali INDIC_ROUNDBOX=ROUND_BOX
@@ -1223,6 +1235,18 @@ fun position FormatRange=2151(bool draw, formatrange fr)
 
 # Draw the document into a display context such as a printer.
 fun position FormatRangeFull=2777(bool draw, formatrangefull fr)
+
+enu ChangeHistoryOption=SC_CHANGE_HISTORY_
+val SC_CHANGE_HISTORY_DISABLED=0
+val SC_CHANGE_HISTORY_ENABLED=1
+val SC_CHANGE_HISTORY_MARKERS=2
+val SC_CHANGE_HISTORY_INDICATORS=4
+
+# Enable or disable change history.
+set void SetChangeHistory=2780(ChangeHistoryOption changeHistory,)
+
+# Report change history status.
+get ChangeHistoryOption GetChangeHistory=2781(,)
 
 # Retrieve the display line at the top of the display.
 get line GetFirstVisibleLine=2152(,)

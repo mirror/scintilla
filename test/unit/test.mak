@@ -15,6 +15,7 @@ TESTEDSRC=\
  ../../src/CaseConvert.cxx \
  ../../src/CaseFolder.cxx \
  ../../src/CellBuffer.cxx \
+ ../../src/ChangeHistory.cxx \
  ../../src/CharacterCategoryMap.cxx \
  ../../src/CharClassify.cxx \
  ../../src/ContractionState.cxx \

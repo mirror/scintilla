@@ -57,6 +57,22 @@ public:
 			return empty;
 		}
 	}
+	T Extract(Sci::Position position) {
+		// Move value currently at position; clear and remove position; return value.
+		// Doesn't remove position at start or end.
+		assert(position <= Length());
+		const Sci::Position partition = ElementFromPosition(position);
+		assert(partition >= 0);
+		assert(partition <= starts.Partitions());
+		assert(starts.PositionFromPartition(partition) == position);
+		T value = std::move(values.operator[](partition));
+		if ((partition > 0) && (partition < starts.Partitions())) {
+			starts.RemovePartition(partition);
+			values.Delete(partition);
+		}
+		Check();
+		return value;
+	}
 	template <typename ParamType>
 	void SetValueAt(Sci::Position position, ParamType &&value) {
 		assert(position <= Length());

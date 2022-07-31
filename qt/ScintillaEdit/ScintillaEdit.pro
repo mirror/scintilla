@@ -47,6 +47,7 @@ SOURCES += \
     ../../src/CharClassify.cxx \
     ../../src/CharacterType.cxx \
     ../../src/CharacterCategoryMap.cxx \
+    ../../src/ChangeHistory.cxx \
     ../../src/CellBuffer.cxx \
     ../../src/CaseFolder.cxx \
     ../../src/CaseConvert.cxx \

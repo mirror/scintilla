@@ -49,6 +49,8 @@ public:
 	bool hotspotSingleLine;
 	Sci::Position hoverIndicatorPos;
 
+	Scintilla::ChangeHistoryOption changeHistoryOption = Scintilla::ChangeHistoryOption::Disabled;
+
 	// Wrapping support
 	int wrapWidth;
 

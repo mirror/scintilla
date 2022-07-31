@@ -261,6 +261,8 @@ enum class Message {
 	FindTextFull = 2196,
 	FormatRange = 2151,
 	FormatRangeFull = 2777,
+	SetChangeHistory = 2780,
+	GetChangeHistory = 2781,
 	GetFirstVisibleLine = 2152,
 	GetLine = 2153,
 	GetLineCount = 2154,

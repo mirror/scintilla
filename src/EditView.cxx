@@ -1326,6 +1326,45 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 			}
 		}
 	}
+
+	if (FlagSet(model.changeHistoryOption, ChangeHistoryOption::Indicators)) {
+		// Draw editions
+		const int indexHistory = static_cast<int>(IndicatorNumbers::HistoryRevertedToOriginInsertion);
+		{
+			// Draw insertions
+			Sci::Position startPos = posLineStart + lineStart;
+			while (startPos < posLineEnd) {
+				const Range rangeRun(startPos, model.pdoc->EditionEndRun(startPos));
+				const Sci::Position endPos = std::min(rangeRun.end, posLineEnd);
+				const int edition = model.pdoc->EditionAt(startPos);
+				if (edition != 0) {
+					const int indicator = (edition - 1) * 2 + indexHistory;
+					const Sci::Position posSecond = model.pdoc->MovePositionOutsideChar(rangeRun.First() + 1, 1);
+					DrawIndicator(indicator, startPos - posLineStart, endPos - posLineStart,
+						surface, vsDraw, ll, xStart, rcLine, posSecond - posLineStart, subLine, Indicator::State::normal,
+						1, model.BidirectionalEnabled(), tabWidthMinimumPixels);
+				}
+				startPos = endPos;
+			}
+		}
+		{
+			// Draw deletions
+			Sci::Position startPos = posLineStart + lineStart;
+			while (startPos <= posLineEnd) {
+				const unsigned int editions = model.pdoc->EditionDeletesAt(startPos);
+				const Sci::Position posSecond = model.pdoc->MovePositionOutsideChar(startPos + 1, 1);
+				for (unsigned int edition=0; edition<4; edition++) {
+					if (editions & (1 << edition)) {
+						const int indicator = edition * 2 + indexHistory + 1;
+						DrawIndicator(indicator, startPos - posLineStart, posSecond - posLineStart,
+							surface, vsDraw, ll, xStart, rcLine, posSecond - posLineStart, subLine, Indicator::State::normal,
+							1, model.BidirectionalEnabled(), tabWidthMinimumPixels);
+					}
+				}
+				startPos = model.pdoc->EditionNextDelete(startPos);
+			}
+		}
+	}
 }
 
 void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,

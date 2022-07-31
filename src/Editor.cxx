@@ -2405,6 +2405,9 @@ void Editor::NotifySavePoint(bool isSavePoint) {
 	NotificationData scn = {};
 	if (isSavePoint) {
 		scn.nmhdr.code = Notification::SavePointReached;
+		if (changeHistoryOption != ChangeHistoryOption::Disabled) {
+			Redraw();
+		}
 	} else {
 		scn.nmhdr.code = Notification::SavePointLeft;
 	}
@@ -2733,6 +2736,9 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 					QueueIdleWork(WorkItems::style, mh.position + mh.length);
 				}
 				InvalidateRange(mh.position, mh.position + mh.length);
+				if (FlagSet(changeHistoryOption, ChangeHistoryOption::Markers)) {
+					RedrawSelMargin(pdoc->SciLineFromPosition(mh.position));
+				}
 			}
 		}
 	}
@@ -8348,6 +8354,14 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case Message::GetGapPosition:
 		return pdoc->GapPosition();
+
+	case Message::SetChangeHistory:
+		changeHistoryOption = static_cast<ChangeHistoryOption>(wParam);
+		pdoc->ChangeHistorySet(wParam & 1);
+		break;
+
+	case Message::GetChangeHistory:
+		return static_cast<sptr_t>(changeHistoryOption);
 
 	case Message::SetExtraAscent:
 		vs.extraAscent = static_cast<int>(wParam);

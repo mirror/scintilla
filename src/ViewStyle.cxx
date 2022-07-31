@@ -104,6 +104,49 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	indicators[1] = Indicator(IndicatorStyle::TT, ColourRGBA(0, 0, 0xff));
 	indicators[2] = Indicator(IndicatorStyle::Plain, ColourRGBA(0xff, 0, 0));
 
+	// Reverted to origin
+	constexpr ColourRGBA revertedToOrigin(0x40, 0xA0, 0xBF);
+	// Saved
+	constexpr ColourRGBA saved(0x0, 0xA0, 0x0);
+	// Modified
+	constexpr ColourRGBA modified(0xA0, 0xA0, 0x0);
+	// Reverted to change
+	constexpr ColourRGBA revertedToChange(0xFF, 0x80, 0x0);
+
+	// Edition indicators
+	constexpr size_t indexHistory = static_cast<size_t>(IndicatorNumbers::HistoryRevertedToOriginInsertion);
+
+	indicators[indexHistory+0] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(revertedToOrigin, 0x40));
+	indicators[indexHistory+1] = Indicator(IndicatorStyle::Point, revertedToOrigin);
+	indicators[indexHistory+2] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(saved, 0x40));
+	indicators[indexHistory+3] = Indicator(IndicatorStyle::Point, saved);
+	indicators[indexHistory+4] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(modified, 0x40));
+	indicators[indexHistory+5] = Indicator(IndicatorStyle::Point, modified);
+	indicators[indexHistory+6] = Indicator(IndicatorStyle::StraightBox, ColourRGBA(revertedToChange, 0x40));
+	indicators[indexHistory+7] = Indicator(IndicatorStyle::Point, revertedToChange);
+
+	// Edition markers
+	// Reverted to origin
+	constexpr size_t indexHistoryRevertedToOrigin = static_cast<size_t>(MarkerOutline::HistoryRevertedToOrigin);
+	markers[indexHistoryRevertedToOrigin].back = revertedToOrigin;
+	markers[indexHistoryRevertedToOrigin].fore = revertedToOrigin;
+	markers[indexHistoryRevertedToOrigin].markType = MarkerSymbol::LeftRect;
+	// Saved
+	constexpr size_t indexHistorySaved = static_cast<size_t>(MarkerOutline::HistorySaved);
+	markers[indexHistorySaved].back = saved;
+	markers[indexHistorySaved].fore = saved;
+	markers[indexHistorySaved].markType = MarkerSymbol::LeftRect;
+	// Modified
+	constexpr size_t indexHistoryModified = static_cast<size_t>(MarkerOutline::HistoryModified);
+	markers[indexHistoryModified].back = ColourRGBA(modified, 0x40);
+	markers[indexHistoryModified].fore = modified;
+	markers[indexHistoryModified].markType = MarkerSymbol::LeftRect;
+	// Reverted to change
+	constexpr size_t indexHistoryRevertedToModified = static_cast<size_t>(MarkerOutline::HistoryRevertedToModified);
+	markers[indexHistoryRevertedToModified].back = revertedToChange;
+	markers[indexHistoryRevertedToModified].fore = revertedToChange;
+	markers[indexHistoryRevertedToModified].markType = MarkerSymbol::LeftRect;
+
 	technology = Technology::Default;
 	indicatorsDynamic = false;
 	indicatorsSetFore = false;

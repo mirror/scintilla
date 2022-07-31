@@ -27,6 +27,9 @@
 #include "Position.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
+#include "RunStyles.h"
+#include "SparseVector.h"
+#include "ChangeHistory.h"
 #include "CellBuffer.h"
 #include "UniConversion.h"
 
@@ -396,6 +399,11 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 	//	actions[currentAction - 1].position, actions[currentAction - 1].lenData);
 	if (currentAction < savePoint) {
 		savePoint = -1;
+		if (!detach) {
+			detach = currentAction;
+		}
+	} else if (detach && (*detach > currentAction)) {
+		detach = currentAction;
 	}
 	int oldCurrentAction = currentAction;
 	if (currentAction >= 1) {
@@ -503,10 +511,27 @@ void UndoHistory::DeleteUndoHistory() {
 
 void UndoHistory::SetSavePoint() noexcept {
 	savePoint = currentAction;
+	detach.reset();
 }
 
 bool UndoHistory::IsSavePoint() const noexcept {
 	return savePoint == currentAction;
+}
+
+bool UndoHistory::BeforeSavePoint() const noexcept {
+	return (savePoint < 0) || (savePoint > currentAction);
+}
+
+bool UndoHistory::BeforeReachableSavePoint() const noexcept {
+	return (savePoint >= 0) && !detach && (savePoint > currentAction);
+}
+
+bool UndoHistory::AfterSavePoint() const noexcept {
+	return (savePoint >= 0) && (savePoint <= currentAction);
+}
+
+bool UndoHistory::AfterDetachPoint() const noexcept {
+	return detach && (*detach < currentAction);
 }
 
 void UndoHistory::TentativeStart() {
@@ -682,6 +707,9 @@ const char *CellBuffer::InsertString(Sci::Position position, const char *s, Sci:
 		}
 
 		BasicInsertString(position, s, insertLength);
+		if (changeHistory) {
+			changeHistory->Insert(position, insertLength, collectingUndo, uh.BeforeReachableSavePoint());
+		}
 	}
 	return data;
 }
@@ -728,6 +756,11 @@ const char *CellBuffer::DeleteChars(Sci::Position position, Sci::Position delete
 			// The gap would be moved to position anyway for the deletion so this doesn't cost extra
 			data = substance.RangePointer(position, deleteLength);
 			data = uh.AppendAction(ActionType::remove, position, data, deleteLength, startSequence);
+		}
+
+		if (changeHistory) {
+			changeHistory->DeleteRangeSavingHistory(position, deleteLength,
+				uh.BeforeReachableSavePoint(), uh.AfterDetachPoint());
 		}
 
 		BasicDeleteChars(position, deleteLength);
@@ -845,6 +878,9 @@ bool CellBuffer::HasStyles() const noexcept {
 
 void CellBuffer::SetSavePoint() {
 	uh.SetSavePoint();
+	if (changeHistory) {
+		changeHistory->SetSavePoint();
+	}
 }
 
 bool CellBuffer::IsSavePoint() const noexcept {
@@ -1304,14 +1340,24 @@ const Action &CellBuffer::GetUndoStep() const {
 
 void CellBuffer::PerformUndoStep() {
 	const Action &actionStep = uh.GetUndoStep();
+	if (changeHistory && uh.BeforeSavePoint()) {
+		changeHistory->StartReversion();
+	}
 	if (actionStep.at == ActionType::insert) {
 		if (substance.Length() < actionStep.lenData) {
 			throw std::runtime_error(
 				"CellBuffer::PerformUndoStep: deletion must be less than document length.");
 		}
+		if (changeHistory) {
+			changeHistory->DeleteRange(actionStep.position, actionStep.lenData,
+				uh.BeforeSavePoint() && !uh.AfterDetachPoint());
+		}
 		BasicDeleteChars(actionStep.position, actionStep.lenData);
 	} else if (actionStep.at == ActionType::remove) {
 		BasicInsertString(actionStep.position, actionStep.data.get(), actionStep.lenData);
+		if (changeHistory) {
+			changeHistory->UndoDeleteStep(actionStep.position, actionStep.lenData, uh.AfterDetachPoint());
+		}
 	}
 	uh.CompletedUndoStep();
 }
@@ -1332,9 +1378,57 @@ void CellBuffer::PerformRedoStep() {
 	const Action &actionStep = uh.GetRedoStep();
 	if (actionStep.at == ActionType::insert) {
 		BasicInsertString(actionStep.position, actionStep.data.get(), actionStep.lenData);
+		if (changeHistory) {
+			changeHistory->Insert(actionStep.position, actionStep.lenData, collectingUndo,
+				uh.BeforeSavePoint() && !uh.AfterDetachPoint());
+		}
 	} else if (actionStep.at == ActionType::remove) {
+		if (changeHistory) {
+			changeHistory->DeleteRangeSavingHistory(actionStep.position, actionStep.lenData,
+				uh.BeforeReachableSavePoint(), uh.AfterDetachPoint());
+		}
 		BasicDeleteChars(actionStep.position, actionStep.lenData);
+	}
+	if (changeHistory && uh.AfterSavePoint()) {
+		changeHistory->EndReversion();
 	}
 	uh.CompletedRedoStep();
 }
 
+void CellBuffer::ChangeHistorySet(bool set) {
+	if (set) {
+		if (!changeHistory) {
+			changeHistory = std::make_unique<ChangeHistory>(Length());
+		}
+	} else {
+		changeHistory.reset();
+	}
+}
+
+int CellBuffer::EditionAt(Sci::Position pos) const noexcept {
+	if (changeHistory) {
+		return changeHistory->EditionAt(pos);
+	}
+	return 0;
+}
+
+Sci::Position CellBuffer::EditionEndRun(Sci::Position pos) const noexcept {
+	if (changeHistory) {
+		return changeHistory->EditionEndRun(pos);
+	}
+	return Length();
+}
+
+unsigned int CellBuffer::EditionDeletesAt(Sci::Position pos) const noexcept {
+	if (changeHistory) {
+		return changeHistory->EditionDeletesAt(pos);
+	}
+	return 0;
+}
+
+Sci::Position CellBuffer::EditionNextDelete(Sci::Position pos) const noexcept {
+	if (changeHistory) {
+		return changeHistory->EditionNextDelete(pos);
+	}
+	return Length() + 1;
+}

@@ -20,6 +20,7 @@ public:
 	virtual void RemoveLine(Sci::Line line)=0;
 };
 
+class ChangeHistory;
 /**
  * The line vector contains information about each of the lines in a cell buffer.
  */
@@ -53,6 +54,7 @@ class UndoHistory {
 	int undoSequenceDepth;
 	int savePoint;
 	int tentativePoint;
+	std::optional<int> detach;
 
 	void EnsureUndoRoom();
 
@@ -70,6 +72,10 @@ public:
 	/// the buffer was saved. Undo and redo can move over the save point.
 	void SetSavePoint() noexcept;
 	bool IsSavePoint() const noexcept;
+	bool BeforeSavePoint() const noexcept;
+	bool BeforeReachableSavePoint() const noexcept;
+	bool AfterSavePoint() const noexcept;
+	bool AfterDetachPoint() const noexcept;
 
 	// Tentative actions are used for input composition so that it can be undone cleanly
 	void TentativeStart();
@@ -132,6 +138,8 @@ private:
 
 	bool collectingUndo;
 	UndoHistory uh;
+
+	std::unique_ptr<ChangeHistory> changeHistory;
 
 	std::unique_ptr<ILineVector> plv;
 
@@ -224,6 +232,12 @@ public:
 	int StartRedo();
 	const Action &GetRedoStep() const;
 	void PerformRedoStep();
+
+	void ChangeHistorySet(bool set);
+	[[nodiscard]] int EditionAt(Sci::Position pos) const noexcept;
+	[[nodiscard]] Sci::Position EditionEndRun(Sci::Position pos) const noexcept;
+	[[nodiscard]] unsigned int EditionDeletesAt(Sci::Position pos) const noexcept;
+	[[nodiscard]] Sci::Position EditionNextDelete(Sci::Position pos) const noexcept;
 };
 
 }

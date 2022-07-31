@@ -326,6 +326,8 @@ public:
 	Position FindTextFull(Scintilla::FindOption searchFlags, void *ft);
 	Position FormatRange(bool draw, void *fr);
 	Position FormatRangeFull(bool draw, void *fr);
+	void SetChangeHistory(Scintilla::ChangeHistoryOption changeHistory);
+	Scintilla::ChangeHistoryOption ChangeHistory();
 	Line FirstVisibleLine();
 	Position GetLine(Line line, char *text);
 	std::string GetLine(Line line);

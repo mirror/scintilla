@@ -44,6 +44,7 @@ SOURCES += \
     ../../src/CharClassify.cxx \
     ../../src/CharacterType.cxx \
     ../../src/CharacterCategoryMap.cxx \
+    ../../src/ChangeHistory.cxx \
     ../../src/CellBuffer.cxx \
     ../../src/CaseFolder.cxx \
     ../../src/CaseConvert.cxx \
@@ -78,6 +79,7 @@ HEADERS  += \
     ../../src/CharClassify.h \
     ../../src/CharacterType.h \
     ../../src/CharacterCategoryMap.h \
+    ../../src/ChangeHistory.h \
     ../../src/CellBuffer.h \
     ../../src/CaseFolder.h \
     ../../src/CaseConvert.h \
