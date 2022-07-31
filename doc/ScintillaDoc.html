@@ -1338,6 +1338,18 @@ struct Sci_TextToFindFull {
 
     <p>Scintilla can display document changes (modified, saved, ...) in the margin or in the text.</p>
 
+    <p><img src="ChangeHistory.png" alt="Change history markers and indicators." /></p>
+
+    <p>The image shows the default visuals which can be altered by the application.
+    In the text, inserted characters appear with coloured underlines and points where characters were deleted are shown with small triangles.
+    The margin shows a block indicating the overall state of the line, prioritising the more consequential modified states.
+    The states are
+    modified (<span style="color:#FF8000">orange</span>),
+    saved (<span style="color:#00A000">green</span>),
+    saved then reverted to modified (<span style="color:#A0C000">green-yellow</span>),
+    and saved then reverted to original (<span style="color:#40A0BF">cyan</span>).
+    </p>
+
     <p>This feature uses a moderate amount of memory proportional to the amount of modifications made.
     On huge documents, this could be significant so could be disabled when it would cause excessive memory use.</p>
 
@@ -1348,8 +1360,12 @@ struct Sci_TextToFindFull {
     <p><b id="SCI_SETCHANGEHISTORY">SCI_SETCHANGEHISTORY(int changeHistory)</b><br />
      <b id="SCI_GETCHANGEHISTORY">SCI_GETCHANGEHISTORY &rarr; int</b><br />
      <code>SCI_SETCHANGEHISTORY</code> turns this feature on and off and determines whether changes are visible in
-     the margin or text or both.
-     The <code class="parameter">changeHistory</code> argument can be a combination of:</p>
+     the margin or text or both.</p>
+     <p>Change history depends on the undo history and can only be enabled when undo history is enabled and empty.
+     It should be enabled once when a file is loaded after calling
+     <a class="seealso" href="#SCI_SETUNDOCOLLECTION">SCI_SETUNDOCOLLECTION(true)</a> and
+     <a class="seealso" href="#SCI_SETSAVEPOINT">SCI_SETSAVEPOINT</a>.</p>
+     <p>The <code class="parameter">changeHistory</code> argument can be a combination of:</p>
 
     <table class="standard" summary="Change history state">
       <tbody valign="top">
