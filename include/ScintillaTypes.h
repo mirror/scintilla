@@ -86,6 +86,7 @@ enum class MarkerSymbol {
 	RgbaImage = 30,
 	Bookmark = 31,
 	VerticalBookmark = 32,
+	Bar = 33,
 	Character = 10000,
 };
 
@@ -217,6 +218,7 @@ enum class IndicatorStyle {
 	PointCharacter = 19,
 	Gradient = 20,
 	GradientCentre = 21,
+	PointTop = 22,
 };
 
 enum class IndicatorNumbers {

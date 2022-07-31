@@ -284,6 +284,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) : ViewStyle(source.styles.size()) 
 	ms = source.ms;
 	maskInLine = source.maskInLine;
 	maskDrawInText = source.maskDrawInText;
+	maskDrawWrapped = source.maskDrawWrapped;
 	fixedColumnWidth = source.fixedColumnWidth;
 	marginInside = source.marginInside;
 	textStart = source.textStart;
@@ -342,6 +343,17 @@ void ViewStyle::CalculateMarginWidthAndMask() noexcept {
 		case MarkerSymbol::Underline:
 			maskInLine &= ~maskBit;
 			maskDrawInText |= maskDefinedMarkers & maskBit;
+			break;
+		default:	// Other marker types do not affect the masks
+			break;
+		}
+	}
+	maskDrawWrapped = 0;
+	for (int markBit = 0; markBit < 32; markBit++) {
+		const int maskBit = 1U << markBit;
+		switch (markers[markBit].markType) {
+		case MarkerSymbol::Bar:
+			maskDrawWrapped |= maskBit;
 			break;
 		default:	// Other marker types do not affect the masks
 			break;
@@ -492,6 +504,9 @@ void ViewStyle::CalcLargestMarkerHeight() noexcept {
 		case MarkerSymbol::RgbaImage:
 			if (marker.image && marker.image->GetHeight() > largestMarkerHeight)
 				largestMarkerHeight = marker.image->GetHeight();
+			break;
+		case MarkerSymbol::Bar:
+			largestMarkerHeight = lineHeight + 2;
 			break;
 		default:	// Only images have their own natural heights
 			break;

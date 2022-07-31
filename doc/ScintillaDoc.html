@@ -5203,8 +5203,9 @@ struct Sci_TextToFindFull {
     <code>SC_MARK_LEFTRECT</code>,
     <code>SC_MARK_FULLRECT</code>,
     <code>SC_MARK_BOOKMARK</code>,
-    <code>SC_MARK_VERTICALBOOKMARK</code>, and
-    <code>SC_MARK_UNDERLINE</code>.
+    <code>SC_MARK_VERTICALBOOKMARK</code>,
+    <code>SC_MARK_UNDERLINE</code>, and
+    <code>SC_MARK_BAR</code>.
     </p>
 
     <p>The <code>SC_MARK_BACKGROUND</code> marker changes the background colour of the line only.
@@ -5770,7 +5771,9 @@ struct Sci_TextToFindFull {
 
           <td>A 2-pixel thick underline located at the bottom of the line to try to avoid touching the character base.
 	  Each side is inset 1 pixel so that different indicators in this style covering a range appear isolated.
-	  This is similar to an appearance used for the target in Asian language input composition.</td>
+	  This is similar to an appearance used for the target in Asian language input composition.
+	  The translucency of this indicator can be changed with
+	  <a class="seealso" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>.</td>
         </tr>
 
         <tr>
@@ -5805,6 +5808,14 @@ struct Sci_TextToFindFull {
           <td align="center">19</td>
 
           <td>Draw a triangle below the centre of the first character of the indicator range.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>INDIC_POINT_TOP</code></td>
+
+          <td align="center">22</td>
+
+          <td>Draw a triangle above the start of the indicator range..</td>
         </tr>
 
       </tbody>

@@ -152,6 +152,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SC_MARK_RGBAIMAGE 30
 #define SC_MARK_BOOKMARK 31
 #define SC_MARK_VERTICALBOOKMARK 32
+#define SC_MARK_BAR 33
 #define SC_MARK_CHARACTER 10000
 #define SC_MARKNUM_HISTORY_REVERTED_TO_ORIGIN 21
 #define SC_MARKNUM_HISTORY_SAVED 22
@@ -357,6 +358,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define INDIC_POINTCHARACTER 19
 #define INDIC_GRADIENT 20
 #define INDIC_GRADIENTCENTRE 21
+#define INDIC_POINT_TOP 22
 #define INDIC_CONTAINER 8
 #define INDIC_IME 32
 #define INDIC_IME_MAX 35
