@@ -596,6 +596,9 @@
 	The translucency of INDIC_COMPOSITIONTHICK can be changed with SCI_INDICSETOUTLINEALPHA.
 	</li>
 	<li>
+	Improve drawing of rounded rectangles on Direct2D.
+	</li>
+	<li>
 	Line state optimized to avoid excess allocations by always allocating for every line.
 	This makes SCI_GETMAXLINESTATE less useful although it can still distinguish cases
 	where line state was never set for any lines.

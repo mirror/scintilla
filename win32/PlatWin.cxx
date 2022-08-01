@@ -1651,17 +1651,27 @@ void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 
 void SurfaceD2D::RoundedRectangle(PRectangle rc, FillStroke fillStroke) {
 	if (pRenderTarget) {
-		D2D1_ROUNDED_RECT roundedRectFill = {
-			RectangleFromPRectangle(rc.Inset(1.0)),
-			4, 4};
-		D2DPenColourAlpha(fillStroke.fill.colour);
-		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
+		const FLOAT minDimension = static_cast<FLOAT>(std::min(rc.Width(), rc.Height())) / 2.0f;
+		const FLOAT radius = std::min(4.0f, minDimension);
+		if (fillStroke.fill.colour == fillStroke.stroke.colour) {
+			D2D1_ROUNDED_RECT roundedRectFill = {
+				RectangleFromPRectangle(rc),
+				radius, radius };
+			D2DPenColourAlpha(fillStroke.fill.colour);
+			pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
+		} else {
+			D2D1_ROUNDED_RECT roundedRectFill = {
+				RectangleFromPRectangle(rc.Inset(1.0)),
+				radius-1, radius-1 };
+			D2DPenColourAlpha(fillStroke.fill.colour);
+			pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
 
-		D2D1_ROUNDED_RECT roundedRect = {
-			RectangleFromPRectangle(rc.Inset(0.5)),
-			4, 4};
-		D2DPenColourAlpha(fillStroke.stroke.colour);
-		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.WidthF());
+			D2D1_ROUNDED_RECT roundedRect = {
+				RectangleFromPRectangle(rc.Inset(0.5)),
+				radius, radius };
+			D2DPenColourAlpha(fillStroke.stroke.colour);
+			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush, fillStroke.stroke.WidthF());
+		}
 	}
 }
 
