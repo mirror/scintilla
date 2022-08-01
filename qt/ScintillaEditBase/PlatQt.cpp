@@ -843,6 +843,8 @@ void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 		ox = rectDesk.right() - sizex;
 	if (oy + sizey > rectDesk.bottom())
 		oy = rectDesk.bottom() - sizey;
+	if (oy < rectDesk.top())
+		oy = rectDesk.top();
 
 	Q_ASSERT(wid);
 	window(wid)->move(ox, oy);
