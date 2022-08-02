@@ -2361,31 +2361,33 @@ void SurfaceD2D::DrawTextTransparent(PRectangle rc, const Font *font_, XYPOSITIO
 	}
 }
 
-void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
-	const FontDirectWrite *pfm = FontDirectWrite::Cast(font_);
-	if (!pfm->pTextFormat) {
-		// SetFont failed or no access to DirectWrite so give up.
-		return;
+namespace {
+
+HRESULT MeasurePositions(TextPositions &poses, const TextWide &tbuf, IDWriteTextFormat *pTextFormat) {
+	if (!pTextFormat) {
+		// Unexpected failure like no access to DirectWrite so give up.
+		return E_FAIL;
 	}
-	const int codePageText = pfm->CodePageText(mode.codePage);
-	const TextWide tbuf(text, codePageText);
-	TextPositions poses(tbuf.tlen);
+
 	// Initialize poses for safety.
 	std::fill(poses.buffer, poses.buffer + tbuf.tlen, 0.0f);
 	// Create a layout
 	IDWriteTextLayout *pTextLayout = nullptr;
-	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pfm->pTextFormat, 10000.0, 1000.0, &pTextLayout);
-	if (!SUCCEEDED(hrCreate) || !pTextLayout) {
-		return;
+	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 10000.0, 1000.0, &pTextLayout);
+	if (!SUCCEEDED(hrCreate)) {
+		return hrCreate;
 	}
-	constexpr int clusters = stackBufferLength;
-	DWRITE_CLUSTER_METRICS clusterMetrics[clusters];
+	if (!pTextLayout) {
+		return E_FAIL;
+	}
+	VarBuffer<DWRITE_CLUSTER_METRICS, stackBufferLength> cm(tbuf.tlen);
 	UINT32 count = 0;
-	const HRESULT hrGetCluster = pTextLayout->GetClusterMetrics(clusterMetrics, clusters, &count);
+	const HRESULT hrGetCluster = pTextLayout->GetClusterMetrics(cm.buffer, tbuf.tlen, &count);
 	ReleaseUnknown(pTextLayout);
 	if (!SUCCEEDED(hrGetCluster)) {
-		return;
+		return hrGetCluster;
 	}
+	const DWRITE_CLUSTER_METRICS * const clusterMetrics = cm.buffer;
 	// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
 	XYPOSITION position = 0.0;
 	int ti=0;
@@ -2396,6 +2398,19 @@ void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSIT
 		position += clusterMetrics[ci].width;
 	}
 	PLATFORM_ASSERT(ti == tbuf.tlen);
+	return S_OK;
+}
+
+}
+
+void SurfaceD2D::MeasureWidths(const Font *font_, std::string_view text, XYPOSITION *positions) {
+	const FontDirectWrite *pfm = FontDirectWrite::Cast(font_);
+	const int codePageText = pfm->CodePageText(mode.codePage);
+	const TextWide tbuf(text, codePageText);
+	TextPositions poses(tbuf.tlen);
+	if (FAILED(MeasurePositions(poses, tbuf, pfm->pTextFormat))) {
+		return;
+	}
 	if (codePageText == CpUtf8) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 		size_t i = 0;
@@ -2491,37 +2506,11 @@ void SurfaceD2D::DrawTextTransparentUTF8(PRectangle rc, const Font *font_, XYPOS
 
 void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYPOSITION *positions) {
 	const FontDirectWrite *pfm = FontDirectWrite::Cast(font_);
-	if (!pfm->pTextFormat) {
-		return;
-	}
 	const TextWide tbuf(text, CpUtf8);
 	TextPositions poses(tbuf.tlen);
-	// Initialize poses for safety.
-	std::fill(poses.buffer, poses.buffer + tbuf.tlen, 0.0f);
-	// Create a layout
-	IDWriteTextLayout *pTextLayout = nullptr;
-	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pfm->pTextFormat, 10000.0, 1000.0, &pTextLayout);
-	if (!SUCCEEDED(hrCreate) || !pTextLayout) {
+	if (FAILED(MeasurePositions(poses, tbuf, pfm->pTextFormat))) {
 		return;
 	}
-	constexpr int clusters = stackBufferLength;
-	DWRITE_CLUSTER_METRICS clusterMetrics[clusters];
-	UINT32 count = 0;
-	const HRESULT hrGetCluster = pTextLayout->GetClusterMetrics(clusterMetrics, clusters, &count);
-	ReleaseUnknown(pTextLayout);
-	if (!SUCCEEDED(hrGetCluster)) {
-		return;
-	}
-	// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
-	XYPOSITION position = 0.0;
-	int ti = 0;
-	for (unsigned int ci = 0; ci < count; ci++) {
-		for (unsigned int inCluster = 0; inCluster < clusterMetrics[ci].length; inCluster++) {
-			poses.buffer[ti++] = position + clusterMetrics[ci].width * (inCluster + 1) / clusterMetrics[ci].length;
-		}
-		position += clusterMetrics[ci].width;
-	}
-	PLATFORM_ASSERT(ti == tbuf.tlen);
 	// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 	size_t i = 0;
 	for (int ui = 0; ui < tbuf.tlen; ui++) {
@@ -2529,7 +2518,7 @@ void SurfaceD2D::MeasureWidthsUTF8(const Font *font_, std::string_view text, XYP
 		const unsigned int byteCount = UTF8BytesOfLead[uch];
 		if (byteCount == 4) {	// Non-BMP
 			ui++;
-			PLATFORM_ASSERT(ui < ti);
+			PLATFORM_ASSERT(ui < tbuf.tlen);
 		}
 		for (unsigned int bytePos=0; (bytePos<byteCount) && (i<text.length()) && (ui < tbuf.tlen); bytePos++) {
 			positions[i++] = poses.buffer[ui];
