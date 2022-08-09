@@ -187,7 +187,7 @@ FillResult<Sci::Position> DecorationList<POS>::FillRange(Sci::Position position,
 	// Converting result from POS to Sci::Position as callers not polymorphic.
 	const FillResult<POS> frInPOS = current->rs.FillRange(static_cast<POS>(position), value, static_cast<POS>(fillLength));
 	const FillResult<Sci::Position> fr { frInPOS.changed, frInPOS.position, frInPOS.fillLength };
-		if (current->Empty()) {
+	if (current->Empty()) {
 		Delete(currentIndicator);
 	}
 	return fr;
