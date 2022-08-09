@@ -383,11 +383,11 @@ public:
 	void TentativeUndo();
 	bool TentativeActive() const noexcept { return cb.TentativeActive(); }
 
-	void ChangeHistorySet(bool set) { cb.ChangeHistorySet(set); };
-	[[nodiscard]] int EditionAt(Sci::Position pos) const noexcept { return cb.EditionAt(pos); };
-	[[nodiscard]] Sci::Position EditionEndRun(Sci::Position pos) const noexcept { return cb.EditionEndRun(pos); };
-	[[nodiscard]] unsigned int EditionDeletesAt(Sci::Position pos) const noexcept { return cb.EditionDeletesAt(pos); };
-	[[nodiscard]] Sci::Position EditionNextDelete(Sci::Position pos) const noexcept { return cb.EditionNextDelete(pos); };
+	void ChangeHistorySet(bool set) { cb.ChangeHistorySet(set); }
+	[[nodiscard]] int EditionAt(Sci::Position pos) const noexcept { return cb.EditionAt(pos); }
+	[[nodiscard]] Sci::Position EditionEndRun(Sci::Position pos) const noexcept { return cb.EditionEndRun(pos); }
+	[[nodiscard]] unsigned int EditionDeletesAt(Sci::Position pos) const noexcept { return cb.EditionDeletesAt(pos); }
+	[[nodiscard]] Sci::Position EditionNextDelete(Sci::Position pos) const noexcept { return cb.EditionNextDelete(pos); }
 
 	const char * SCI_METHOD BufferPointer() override { return cb.BufferPointer(); }
 	const char *RangePointer(Sci::Position position, Sci::Position rangeLength) noexcept { return cb.RangePointer(position, rangeLength); }
