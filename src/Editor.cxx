@@ -2358,15 +2358,6 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 	ShowCaretAtCurrentPosition();
 }
 
-KeyMod Editor::ModifierFlags(bool shift, bool ctrl, bool alt, bool meta, bool super) noexcept {
-	return
-		(shift ? KeyMod::Shift : KeyMod::Norm) |
-		(ctrl ? KeyMod::Ctrl : KeyMod::Norm) |
-		(alt ? KeyMod::Alt : KeyMod::Norm) |
-		(meta ? KeyMod::Meta : KeyMod::Norm) |
-		(super ? KeyMod::Super : KeyMod::Norm);
-}
-
 void Editor::NotifyFocus(bool focus) {
 	NotificationData scn = {};
 	scn.nmhdr.code = focus ? Notification::FocusIn : Notification::FocusOut;

@@ -443,7 +443,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DelCharBack(bool allowLineStartDeletion);
 	virtual void ClaimSelection() = 0;
 
-	static Scintilla::KeyMod ModifierFlags(bool shift, bool ctrl, bool alt, bool meta=false, bool super=false) noexcept;
 	virtual void NotifyChange() = 0;
 	virtual void NotifyFocus(bool focus);
 	virtual void SetCtrlID(int identifier);
