@@ -63,7 +63,7 @@ public:
 	EditModel &operator=(const EditModel &) = delete;
 	EditModel &operator=(EditModel &&) = delete;
 	virtual ~EditModel();
-	virtual Sci::Line TopLineOfMain() const = 0;
+	virtual Sci::Line TopLineOfMain() const noexcept = 0;
 	virtual Point GetVisibleOriginInMain() const = 0;
 	virtual Sci::Line LinesOnScreen() const = 0;
 	bool BidirectionalEnabled() const noexcept;

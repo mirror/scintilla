@@ -711,7 +711,7 @@ void EditView::UpdateBidiData(const EditModel &model, const ViewStyle &vstyle, L
 		ll->bidiData->stylesFonts[ll->numCharsInLine].reset();
 
 		for (int charsInLine = 0; charsInLine < ll->numCharsInLine; charsInLine++) {
-			const int charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(&ll->chars[charsInLine]), ll->numCharsInLine - charsInLine);
+			const int charWidth = UTF8DrawBytes(&ll->chars[charsInLine], ll->numCharsInLine - charsInLine);
 			const Representation *repr = model.reprs.RepresentationFromCharacter(std::string_view(&ll->chars[charsInLine], charWidth));
 
 			ll->bidiData->widthReprs[charsInLine] = 0.0f;
@@ -1328,7 +1328,7 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 
 	if (FlagSet(model.changeHistoryOption, ChangeHistoryOption::Indicators)) {
 		// Draw editions
-		const int indexHistory = static_cast<int>(IndicatorNumbers::HistoryRevertedToOriginInsertion);
+		constexpr int indexHistory = static_cast<int>(IndicatorNumbers::HistoryRevertedToOriginInsertion);
 		{
 			// Draw insertions
 			Sci::Position startPos = posLineStart + lineStart;
@@ -1815,7 +1815,9 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 	}
 }
 
-static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll,
+namespace {
+
+void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll,
 	int xStart, PRectangle rcLine, std::optional<ColourRGBA> background, DrawWrapMarkerFn customDrawWrapMarker,
 	bool caretActive) {
 	// default bgnd here..
@@ -1855,13 +1857,15 @@ static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, c
 // such that, if the caret is inside the main selection, the beginning or end of that selection
 // is at the end of a text segment.
 // This function should only be called if iDoc is within the main selection.
-static InSelection CharacterInCursesSelection(Sci::Position iDoc, const EditModel &model, const ViewStyle &vsDraw) {
+InSelection CharacterInCursesSelection(Sci::Position iDoc, const EditModel &model, const ViewStyle &vsDraw) noexcept {
 	const SelectionPosition &posCaret = model.sel.RangeMain().caret;
 	const bool caretAtStart = posCaret < model.sel.RangeMain().anchor && posCaret.Position() == iDoc;
 	const bool caretAtEnd = posCaret > model.sel.RangeMain().anchor &&
 		vsDraw.DrawCaretInsideSelection(false, false) &&
 		model.pdoc->MovePositionOutsideChar(posCaret.Position() - 1, -1) == iDoc;
 	return (caretAtStart || caretAtEnd) ? InSelection::inNone : InSelection::inMain;
+}
+
 }
 
 void EditView::DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,

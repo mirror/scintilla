@@ -385,7 +385,7 @@ constexpr bool GraphicASCII(char ch) noexcept {
 	return ch >= ' ' && ch <= '~';
 }
 
-bool AllGraphicASCII(std::string_view text) noexcept {
+bool AllGraphicASCII(std::string_view text) {
 	return std::all_of(text.cbegin(), text.cend(), GraphicASCII);
 }
 
@@ -742,7 +742,7 @@ TextSegment BreakFinder::Next() {
 			const unsigned char ch = chars[0];
 			if (!UTF8IsAscii(ch) && encodingFamily != EncodingFamily::eightBit) {
 				if (encodingFamily == EncodingFamily::unicode) {
-					charWidth = UTF8DrawBytes(reinterpret_cast<const unsigned char *>(chars), static_cast<int>(lineRange.end - nextBreak));
+					charWidth = UTF8DrawBytes(chars, lineRange.end - nextBreak);
 				} else {
 					charWidth = pdoc->DBCSDrawBytes(std::string_view(chars, lineRange.end - nextBreak));
 				}
