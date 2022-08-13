@@ -687,8 +687,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 						}
 					}
 					lastLineStart = lastGoodBreak;
-					ll->lines++;
-					ll->SetLineStart(ll->lines, static_cast<int>(lastLineStart));
+					ll->AddLineStart(lastLineStart);
 					startOffset = ll->positions[lastLineStart];
 					// take into account the space for start wrap mark and indent
 					startOffset += width - ll->wrapIndent;

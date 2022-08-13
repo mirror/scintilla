@@ -187,9 +187,10 @@ int LineLayout::SubLineFromPosition(int posInLine, PointEnd pe) const noexcept {
 	return lines - 1;
 }
 
-void LineLayout::SetLineStart(int line, int start) {
-	if ((line >= lenLineStarts) && (line != 0)) {
-		const int newMaxLines = line + 20;
+void LineLayout::AddLineStart(Sci::Position start) {
+	lines++;
+	if (lines >= lenLineStarts) {
+		const int newMaxLines = lines + 20;
 		std::unique_ptr<int[]> newLineStarts = std::make_unique<int[]>(newMaxLines);
 		if (lenLineStarts) {
 			std::copy(lineStarts.get(), lineStarts.get() + lenLineStarts, newLineStarts.get());
@@ -197,7 +198,7 @@ void LineLayout::SetLineStart(int line, int start) {
 		lineStarts = std::move(newLineStarts);
 		lenLineStarts = newMaxLines;
 	}
-	lineStarts[line] = start;
+	lineStarts[lines] = static_cast<int>(start);
 }
 
 void LineLayout::SetBracesHighlight(Range rangeLine, const Sci::Position braces[],
