@@ -86,6 +86,7 @@ public:
 	void Resize(int maxLineLength_);
 	void EnsureBidiData();
 	void Free() noexcept;
+	void ClearPositions();
 	void Invalidate(ValidLevel validity_) noexcept;
 	Sci::Line LineNumber() const noexcept;
 	bool CanHold(Sci::Line lineDoc, int lineLength_) const noexcept;
@@ -103,6 +104,7 @@ public:
 	int FindBefore(XYPOSITION x, Range range) const noexcept;
 	int FindPositionFromX(XYPOSITION x, Range range, bool charPosition) const noexcept;
 	Point PointFromPosition(int posInLine, int lineHeight, PointEnd pe) const noexcept;
+	XYPOSITION XInLine(Sci::Position index) const noexcept;
 	int EndLineStyle() const noexcept;
 };
 

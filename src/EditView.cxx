@@ -536,7 +536,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 			segments.push_back(bfLayout.Next());
 		}
 
-		std::fill(&ll->positions[0], &ll->positions[numCharsInLine], 0.0f);
+		ll->ClearPositions();
 
 		if (!segments.empty()) {
 
@@ -1238,14 +1238,13 @@ static void DrawIndicator(int indicNum, Sci::Position startPos, Sci::Position en
 	int value, bool bidiEnabled, int tabWidthMinimumPixels) {
 
 	const XYPOSITION subLineStart = ll->positions[ll->LineStart(subLine)];
+	const XYPOSITION horizontalOffset = xStart - subLineStart;
 
 	std::vector<PRectangle> rectangles;
 
-	const PRectangle rcIndic(
-		ll->positions[startPos] + xStart - subLineStart,
-		rcLine.top + vsDraw.maxAscent,
-		ll->positions[endPos] + xStart - subLineStart,
-		rcLine.top + vsDraw.maxAscent + 3);
+	const XYPOSITION left = ll->XInLine(startPos) + horizontalOffset;
+	const XYPOSITION right = ll->XInLine(endPos) + horizontalOffset;
+	const PRectangle rcIndic(left, rcLine.top + vsDraw.maxAscent, right, rcLine.top + vsDraw.maxAscent + 3);
 
 	if (bidiEnabled) {
 		ScreenLine screenLine(ll, subLine, vsDraw, rcLine.right - xStart, tabWidthMinimumPixels);
@@ -1269,7 +1268,7 @@ static void DrawIndicator(int indicNum, Sci::Position startPos, Sci::Position en
 		// Allow full descent space for character indicators
 		rcFirstCharacter.bottom = rcLine.top + vsDraw.maxAscent + vsDraw.maxDescent;
 		if (secondCharacter >= 0) {
-			rcFirstCharacter.right = ll->positions[secondCharacter] + xStart - subLineStart;
+			rcFirstCharacter.right = ll->XInLine(secondCharacter) + horizontalOffset;
 		} else {
 			// Indicator continued from earlier line so make an empty box and don't draw
 			rcFirstCharacter.right = rcFirstCharacter.left;

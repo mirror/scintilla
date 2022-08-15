@@ -116,6 +116,10 @@ void LineLayout::Free() noexcept {
 	bidiData.reset();
 }
 
+void LineLayout::ClearPositions() {
+	std::fill(&positions[0], &positions[maxLineLength + 2], 0.0f);
+}
+
 void LineLayout::Invalidate(ValidLevel validity_) noexcept {
 	if (validity > validity_)
 		validity = validity_;
@@ -299,6 +303,15 @@ Point LineLayout::PointFromPosition(int posInLine, int lineHeight, PointEnd pe) 
 		}
 	}
 	return pt;
+}
+
+XYPOSITION LineLayout::XInLine(Sci::Position index) const noexcept {
+	// For positions inside line return value from positions
+	// For positions after line return last position + 1.0
+	if (index <= numCharsInLine) {
+		return positions[index];
+	}
+	return positions[numCharsInLine] + 1.0;
 }
 
 int LineLayout::EndLineStyle() const noexcept {
