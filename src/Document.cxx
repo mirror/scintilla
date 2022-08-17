@@ -341,7 +341,7 @@ void Document::TentativeUndo() {
 
 int Document::GetMark(Sci::Line line, bool includeChangeHistory) const {
 	int marksHistory = 0;
-	if (includeChangeHistory) {
+	if (includeChangeHistory && (line < LinesTotal())) {
 		int marksEdition = 0;
 
 		const Sci::Position start = LineStart(line);
