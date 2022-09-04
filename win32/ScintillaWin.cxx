@@ -2257,7 +2257,7 @@ void ScintillaWin::SetTrackMouseLeaveEvent(bool on) noexcept {
 
 void ScintillaWin::UpdateBaseElements() {
 	struct ElementToIndex { Element element; int nIndex; };
-	ElementToIndex eti[] = {
+	const ElementToIndex eti[] = {
 		{ Element::List, COLOR_WINDOWTEXT },
 		{ Element::ListBack, COLOR_WINDOW },
 		{ Element::ListSelected, COLOR_HIGHLIGHTTEXT },
