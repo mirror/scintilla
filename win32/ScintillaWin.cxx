@@ -1533,6 +1533,7 @@ sptr_t ScintillaWin::MouseMessage(unsigned int iMessage, uptr_t wParam, sptr_t l
 		return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 	case WM_MOUSEWHEEL:
+	case WM_MOUSEHWHEEL:
 		if (!mouseWheelCaptures) {
 			// if the mouse wheel is not captured, test if the mouse
 			// pointer is over the editor window and if not, don't
@@ -1557,33 +1558,40 @@ sptr_t ScintillaWin::MouseMessage(unsigned int iMessage, uptr_t wParam, sptr_t l
 		if (wParam & MK_SHIFT) {
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 		}
-		// Either SCROLL or ZOOM. We handle the wheel steppings calculation
-		wheelDelta -= GET_WHEEL_DELTA_WPARAM(wParam);
-		if (std::abs(wheelDelta) >= WHEEL_DELTA && linesPerScroll > 0) {
-			Sci::Line linesToScroll = linesPerScroll;
-			if (linesPerScroll == WHEEL_PAGESCROLL)
-				linesToScroll = LinesOnScreen() - 1;
-			if (linesToScroll == 0) {
-				linesToScroll = 1;
-			}
-			linesToScroll *= (wheelDelta / WHEEL_DELTA);
-			if (wheelDelta >= 0)
-				wheelDelta = wheelDelta % WHEEL_DELTA;
-			else
-				wheelDelta = -(-wheelDelta % WHEEL_DELTA);
-
-			if (wParam & MK_CONTROL) {
-				// Zoom! We play with the font sizes in the styles.
-				// Number of steps/line is ignored, we just care if sizing up or down
-				if (linesToScroll < 0) {
-					KeyCommand(Message::ZoomIn);
-				} else {
-					KeyCommand(Message::ZoomOut);
+		if (iMessage == WM_MOUSEWHEEL) {
+			// Either SCROLL vertically or ZOOM. We handle the wheel steppings calculation
+			wheelDelta -= GET_WHEEL_DELTA_WPARAM(wParam);
+			if (std::abs(wheelDelta) >= WHEEL_DELTA && linesPerScroll > 0) {
+				Sci::Line linesToScroll = linesPerScroll;
+				if (linesPerScroll == WHEEL_PAGESCROLL)
+					linesToScroll = LinesOnScreen() - 1;
+				if (linesToScroll == 0) {
+					linesToScroll = 1;
 				}
-			} else {
-				// Scroll
-				ScrollTo(topLine + linesToScroll);
+				linesToScroll *= (wheelDelta / WHEEL_DELTA);
+				if (wheelDelta >= 0)
+					wheelDelta = wheelDelta % WHEEL_DELTA;
+				else
+					wheelDelta = -(-wheelDelta % WHEEL_DELTA);
+
+				if (wParam & MK_CONTROL) {
+					// Zoom! We play with the font sizes in the styles.
+					// Number of steps/line is ignored, we just care if sizing up or down
+					if (linesToScroll < 0) {
+						KeyCommand(Message::ZoomIn);
+					} else {
+						KeyCommand(Message::ZoomOut);
+					}
+				} else {
+					// Scroll
+					ScrollTo(topLine + linesToScroll);
+				}
 			}
+		} else { // WM_MOUSEHWHEEL (horizontal scrolling)
+			SCROLLINFO sci { sizeof(sci), SIF_POS | SIF_RANGE, 0, 0, 0, 0, 0 };
+			GetScrollInfo(SB_HORZ, &sci);
+			sci.nPos -= GET_WHEEL_DELTA_WPARAM(wParam);
+			HorizontalScrollTo(std::clamp(sci.nPos, sci.nMin, sci.nMax));
 		}
 		return 0;
 	}
@@ -1987,6 +1995,7 @@ sptr_t ScintillaWin::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		case WM_MOUSEMOVE:
 		case WM_MOUSELEAVE:
 		case WM_MOUSEWHEEL:
+		case WM_MOUSEHWHEEL:
 			return MouseMessage(msg, wParam, lParam);
 
 		case WM_SETCURSOR:
