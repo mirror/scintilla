@@ -2354,6 +2354,11 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 		return; // No further drawing
 	}
 
+	const bool clipLine = !bufferedDraw && !LinesOverlap();
+	if (clipLine) {
+		surface->SetClip(rcLine);
+	}
+
 	// See if something overrides the line background colour.
 	const std::optional<ColourRGBA> background = vsDraw.Background(model.GetMark(line), model.caret.active, ll->containsCaret);
 
@@ -2428,6 +2433,10 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 
 	if (FlagSet(phase, DrawPhase::lineTranslucent)) {
 		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine, subLine, Layer::OverText);
+	}
+
+	if (clipLine) {
+		surface->PopClip();
 	}
 }
 

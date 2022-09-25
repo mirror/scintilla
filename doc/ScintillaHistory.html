@@ -589,6 +589,12 @@
 	and was exposed by ScintillaDocument in the Qt implementation of ScintillaEdit.
 	</li>
 	<li>
+	Draw lines more consistently in SC_PHASES_TWO and SC_PHASES_ONE modes by
+	clipping drawing to just the line rectangle.
+	This stops drawing some extreme ascenders, descenders and portions of indicators which
+	may appear and then disappear depending on which lines were drawn.
+	</li>
+	<li>
 	On Win32 implement horizontal scrolling mouse wheel.
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1450/">Feature #1450</a>.
 	</li>
