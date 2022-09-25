@@ -1244,7 +1244,8 @@ static void DrawIndicator(int indicNum, Sci::Position startPos, Sci::Position en
 
 	const XYPOSITION left = ll->XInLine(startPos) + horizontalOffset;
 	const XYPOSITION right = ll->XInLine(endPos) + horizontalOffset;
-	const PRectangle rcIndic(left, rcLine.top + vsDraw.maxAscent, right, rcLine.top + vsDraw.maxAscent + 3);
+	const PRectangle rcIndic(left, rcLine.top + vsDraw.maxAscent, right,
+		std::max(rcLine.top + vsDraw.maxAscent + 3, rcLine.bottom));
 
 	if (bidiEnabled) {
 		ScreenLine screenLine(ll, subLine, vsDraw, rcLine.right - xStart, tabWidthMinimumPixels);
