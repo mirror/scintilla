@@ -276,6 +276,20 @@ public:
 	}
 };
 
+class MouseWheelDelta {
+	int wheelDelta = 0;
+public:
+	bool Accumulate(WPARAM wParam) noexcept {
+		wheelDelta -= GET_WHEEL_DELTA_WPARAM(wParam);
+		return std::abs(wheelDelta) >= WHEEL_DELTA;
+	}
+	int Actions() noexcept {
+		const int actions = wheelDelta / WHEEL_DELTA;
+		wheelDelta = wheelDelta % WHEEL_DELTA;
+		return actions;
+	}
+};
+
 struct HorizontalScrollRange {
 	int pageWidth;
 	int documentWidth;
@@ -298,7 +312,7 @@ class ScintillaWin :
 	SetCoalescableTimerSig SetCoalescableTimerFn;
 
 	unsigned int linesPerScroll;	///< Intellimouse support
-	int wheelDelta; ///< Wheel delta from roll
+	MouseWheelDelta verticalWheelDelta;
 
 	UINT dpi = USER_DEFAULT_SCREEN_DPI;
 	ReverseArrowCursor reverseArrowCursor;
@@ -511,7 +525,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	SetCoalescableTimerFn = nullptr;
 
 	linesPerScroll = 0;
-	wheelDelta = 0;   // Wheel delta from roll
 
 	dpi = DpiForWindow(hwnd);
 
@@ -1567,19 +1580,14 @@ sptr_t ScintillaWin::MouseMessage(unsigned int iMessage, uptr_t wParam, sptr_t l
 		}
 		if (iMessage == WM_MOUSEWHEEL) {
 			// Either SCROLL vertically or ZOOM. We handle the wheel steppings calculation
-			wheelDelta -= GET_WHEEL_DELTA_WPARAM(wParam);
-			if (std::abs(wheelDelta) >= WHEEL_DELTA && linesPerScroll > 0) {
+			if (linesPerScroll != 0 && verticalWheelDelta.Accumulate(wParam)) {
 				Sci::Line linesToScroll = linesPerScroll;
 				if (linesPerScroll == WHEEL_PAGESCROLL)
 					linesToScroll = LinesOnScreen() - 1;
 				if (linesToScroll == 0) {
 					linesToScroll = 1;
 				}
-				linesToScroll *= (wheelDelta / WHEEL_DELTA);
-				if (wheelDelta >= 0)
-					wheelDelta = wheelDelta % WHEEL_DELTA;
-				else
-					wheelDelta = -(-wheelDelta % WHEEL_DELTA);
+				linesToScroll *= verticalWheelDelta.Actions();
 
 				if (wParam & MK_CONTROL) {
 					// Zoom! We play with the font sizes in the styles.
