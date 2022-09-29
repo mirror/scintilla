@@ -312,7 +312,9 @@ class ScintillaWin :
 	SetCoalescableTimerSig SetCoalescableTimerFn;
 
 	unsigned int linesPerScroll;	///< Intellimouse support
+	unsigned int charsPerScroll;	///< Intellimouse support
 	MouseWheelDelta verticalWheelDelta;
+	MouseWheelDelta horizontalWheelDelta;
 
 	UINT dpi = USER_DEFAULT_SCREEN_DPI;
 	ReverseArrowCursor reverseArrowCursor;
@@ -525,6 +527,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	SetCoalescableTimerFn = nullptr;
 
 	linesPerScroll = 0;
+	charsPerScroll = 0;
 
 	dpi = DpiForWindow(hwnd);
 
@@ -1571,42 +1574,43 @@ sptr_t ScintillaWin::MouseMessage(unsigned int iMessage, uptr_t wParam, sptr_t l
 			break;
 		}
 
-		// Don't handle datazoom.
-		// (A good idea for datazoom would be to "fold" or "unfold" details.
-		// i.e. if datazoomed out only class structures are visible, when datazooming in the control
-		// structures appear, then eventually the individual statements...)
-		if (wParam & MK_SHIFT) {
-			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
-		}
-		if (iMessage == WM_MOUSEWHEEL) {
-			// Either SCROLL vertically or ZOOM. We handle the wheel steppings calculation
-			if (linesPerScroll != 0 && verticalWheelDelta.Accumulate(wParam)) {
-				Sci::Line linesToScroll = linesPerScroll;
-				if (linesPerScroll == WHEEL_PAGESCROLL)
-					linesToScroll = LinesOnScreen() - 1;
-				if (linesToScroll == 0) {
-					linesToScroll = 1;
-				}
-				linesToScroll *= verticalWheelDelta.Actions();
-
-				if (wParam & MK_CONTROL) {
-					// Zoom! We play with the font sizes in the styles.
-					// Number of steps/line is ignored, we just care if sizing up or down
-					if (linesToScroll < 0) {
-						KeyCommand(Message::ZoomIn);
-					} else {
-						KeyCommand(Message::ZoomOut);
-					}
-				} else {
-					// Scroll
-					ScrollTo(topLine + linesToScroll);
-				}
+		// Treat Shift+WM_MOUSEWHEEL as horizontal scrolling, not data-zoom.
+		if (iMessage == WM_MOUSEHWHEEL || (wParam & MK_SHIFT)) {
+			if (vs.wrap.state != Wrap::None || charsPerScroll == 0) {
+				return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 			}
-		} else { // WM_MOUSEHWHEEL (horizontal scrolling)
-			SCROLLINFO sci { sizeof(sci), SIF_POS | SIF_RANGE, 0, 0, 0, 0, 0 };
-			GetScrollInfo(SB_HORZ, &sci);
-			sci.nPos -= GET_WHEEL_DELTA_WPARAM(wParam);
-			HorizontalScrollTo(std::clamp(sci.nPos, sci.nMin, sci.nMax));
+
+			MouseWheelDelta &wheelDelta = (iMessage == WM_MOUSEHWHEEL) ? horizontalWheelDelta : verticalWheelDelta;
+			if (wheelDelta.Accumulate(wParam)) {
+				const int charsToScroll = charsPerScroll * wheelDelta.Actions();
+				const int widthToScroll = static_cast<int>(std::lround(charsToScroll * vs.aveCharWidth));
+				HorizontalScrollToClamped(xOffset + widthToScroll);
+			}
+			return 0;
+		}
+
+		// Either SCROLL vertically or ZOOM. We handle the wheel steppings calculation
+		if (linesPerScroll != 0 && verticalWheelDelta.Accumulate(wParam)) {
+			Sci::Line linesToScroll = linesPerScroll;
+			if (linesPerScroll == WHEEL_PAGESCROLL)
+				linesToScroll = LinesOnScreen() - 1;
+			if (linesToScroll == 0) {
+				linesToScroll = 1;
+			}
+			linesToScroll *= verticalWheelDelta.Actions();
+
+			if (wParam & MK_CONTROL) {
+				// Zoom! We play with the font sizes in the styles.
+				// Number of steps/line is ignored, we just care if sizing up or down
+				if (linesToScroll < 0) {
+					KeyCommand(Message::ZoomIn);
+				} else {
+					KeyCommand(Message::ZoomOut);
+				}
+			} else {
+				// Scroll
+				ScrollTo(topLine + linesToScroll);
+			}
 		}
 		return 0;
 	}
@@ -3152,6 +3156,10 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 void ScintillaWin::GetIntelliMouseParameters() noexcept {
 	// This retrieves the number of lines per scroll as configured in the Mouse Properties sheet in Control Panel
 	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &linesPerScroll, 0);
+	if (!::SystemParametersInfo(SPI_GETWHEELSCROLLCHARS, 0, &charsPerScroll, 0)) {
+		// no horizontal scrolling configuration on Windows XP
+		charsPerScroll = (linesPerScroll == WHEEL_PAGESCROLL) ? 3 : linesPerScroll;
+	}
 }
 
 void ScintillaWin::CopyToGlobal(GlobalMemory &gmUnicode, const SelectionText &selectedText) {
