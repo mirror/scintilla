@@ -239,10 +239,42 @@ int FoldingMark(FoldLevel level, FoldLevel levelNext, bool firstSubLine, bool la
 	return 0;
 }
 
+LineMarker::FoldPart PartForFoldHighlight(const HighlightDelimiter &highlightDelimiter, Sci::Line lineDoc, bool firstSubLine, bool headWithTail, bool isExpanded) noexcept {
+	if (highlightDelimiter.IsFoldBlockHighlighted(lineDoc)) {
+		if (highlightDelimiter.IsBodyOfFoldBlock(lineDoc)) {
+			return LineMarker::FoldPart::body;
+		}
+		if (highlightDelimiter.IsHeadOfFoldBlock(lineDoc)) {
+			if (firstSubLine) {
+				return headWithTail ? LineMarker::FoldPart::headWithTail : LineMarker::FoldPart::head;
+			}
+			if (isExpanded || headWithTail) {
+				return LineMarker::FoldPart::body;
+			}
+		} else if (highlightDelimiter.IsTailOfFoldBlock(lineDoc)) {
+			return LineMarker::FoldPart::tail;
+		}
+	}
+	return LineMarker::FoldPart::undefined;
+}
+
+constexpr LineMarker::FoldPart PartForBar(bool markBefore, bool markAfter) {
+	if (markBefore) {
+		if (markAfter) {
+			return LineMarker::FoldPart::body;
+		}
+		return LineMarker::FoldPart::tail;
+	}
+	if (markAfter) {
+		return LineMarker::FoldPart::head;
+	}
+	return LineMarker::FoldPart::headWithTail;
+}
+
 }
 
 void MarginView::PaintOneMargin(Surface *surface, PRectangle rc, PRectangle rcOneMargin, const MarginStyle &marginStyle,
-	const EditModel &model, const ViewStyle &vs) {
+	const EditModel &model, const ViewStyle &vs) const {
 	const Point ptOrigin = model.GetVisibleOriginInMain();
 	const Sci::Line lineStartPaint = static_cast<Sci::Line>(rcOneMargin.top + ptOrigin.y) / vs.lineHeight;
 	Sci::Line visibleLine = model.TopLineOfMain() + lineStartPaint;
@@ -290,6 +322,7 @@ void MarginView::PaintOneMargin(Surface *surface, PRectangle rc, PRectangle rcOn
 		}
 
 		bool headWithTail = false;
+		bool isExpanded = false;
 
 		if (marginStyle.ShowsFolding()) {
 			// Decide which fold indicator should be displayed
@@ -297,7 +330,7 @@ void MarginView::PaintOneMargin(Surface *surface, PRectangle rc, PRectangle rcOn
 			const FoldLevel levelNext = model.pdoc->GetFoldLevel(lineDoc + 1);
 			const FoldLevel levelNum = LevelNumberPart(level);
 			const FoldLevel levelNextNum = LevelNumberPart(levelNext);
-			const bool isExpanded = model.pcs->GetExpanded(lineDoc);
+			isExpanded = model.pcs->GetExpanded(lineDoc);
 
 			marks |= FoldingMark(level, levelNext, firstSubLine, lastSubLine,
 				isExpanded, needWhiteClosure, folderOpenMid, folderEnd);
@@ -401,39 +434,13 @@ void MarginView::PaintOneMargin(Surface *surface, PRectangle rc, PRectangle rcOn
 				if (marks & 1) {
 					LineMarker::FoldPart part = LineMarker::FoldPart::undefined;
 					if (marginStyle.ShowsFolding() && highlightDelimiter.IsFoldBlockHighlighted(lineDoc)) {
-						if (highlightDelimiter.IsBodyOfFoldBlock(lineDoc)) {
-							part = LineMarker::FoldPart::body;
-						} else if (highlightDelimiter.IsHeadOfFoldBlock(lineDoc)) {
-							if (firstSubLine) {
-								part = headWithTail ? LineMarker::FoldPart::headWithTail : LineMarker::FoldPart::head;
-							} else {
-								if (model.pcs->GetExpanded(lineDoc) || headWithTail) {
-									part = LineMarker::FoldPart::body;
-								} else {
-									part = LineMarker::FoldPart::undefined;
-								}
-							}
-						} else if (highlightDelimiter.IsTailOfFoldBlock(lineDoc)) {
-							part = LineMarker::FoldPart::tail;
-						}
+						part = PartForFoldHighlight(highlightDelimiter, lineDoc, firstSubLine, headWithTail, isExpanded);
 					}
 					if (vs.markers[markBit].markType == MarkerSymbol::Bar) {
 						const int mask = 1 << markBit;
-						const bool markBefore = firstSubLine ? (model.GetMark(lineDoc-1) & mask) : true;
-						const bool markAfter = lastSubLine ? (model.GetMark(lineDoc+1) & mask) : true;
-						if (markBefore) {
-							if (markAfter) {
-								part = LineMarker::FoldPart::body;
-							} else {
-								part = LineMarker::FoldPart::tail;
-							}
-						} else {
-							if (markAfter) {
-								part = LineMarker::FoldPart::head;
-							} else {
-								part = LineMarker::FoldPart::headWithTail;
-							}
-						}
+						const bool markBefore = firstSubLine ? (model.GetMark(lineDoc - 1) & mask) : true;
+						const bool markAfter = lastSubLine ? (model.GetMark(lineDoc + 1) & mask) : true;
+						part = PartForBar(markBefore, markAfter);
 					}
 					vs.markers[markBit].Draw(surface, rcMarker, vs.styles[StyleLineNumber].font.get(), part, marginStyle.style);
 				}
