@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 26 August 2022 NH</p>
+    <p>Last edited 1 October 2022 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -5175,8 +5175,11 @@ struct Sci_TextToFindFull {
     (<code>SC_MARK_</code>*) or you can use characters. By default, all 32 markers are set to
     <code>SC_MARK_CIRCLE</code> with a black foreground and a white background.</p>
 
-    <p>The markers are drawn in the order of their numbers, so higher numbered markers appear on
-    top of lower numbered ones. Markers try to move with their text by tracking where the start of
+    <p>The markers are drawn in the order of their numbers (except for <code>SC_MARK_BAR</code>), so higher
+    numbered markers appear on top of lower numbered ones.
+    <code>SC_MARK_BAR</code> markers are drawn first so they are underneath as they often cover
+    multiple lines for change history and other markers mark individual lines.
+    Markers try to move with their text by tracking where the start of
     their line moves. When a line is deleted, its markers are combined, by an <code>OR</code>
     operation, with the markers of the next line.</p>
     <code><a class="message" href="#SCI_MARKERDEFINE">SCI_MARKERDEFINE(int markerNumber, int
