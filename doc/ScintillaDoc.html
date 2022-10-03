@@ -3248,6 +3248,8 @@ struct Sci_TextToFindFull {
      <a class="message" href="#SCI_STYLESETCHECKMONOSPACED">SCI_STYLESETCHECKMONOSPACED(int style, bool
     checkMonospaced)</a><br />
     <a class="message" href="#SCI_STYLEGETCHECKMONOSPACED">SCI_STYLEGETCHECKMONOSPACED(int style) &rarr; bool</a><br />
+    <a class="message" href="#SCI_STYLESETINVISIBLEREPRESENTATION">SCI_STYLESETINVISIBLEREPRESENTATION(int style, const char *representation)</a><br />
+    <a class="message" href="#SCI_STYLEGETINVISIBLEREPRESENTATION">SCI_STYLEGETINVISIBLEREPRESENTATION(int style, char *representation NUL-terminated) &rarr; int</a><br />
     <a class="message" href="#SCI_SETFONTLOCALE">SCI_SETFONTLOCALE(&lt;unused&gt;, const char *localeName)</a><br />
     <a class="message" href="#SCI_GETFONTLOCALE">SCI_GETFONTLOCALE(&lt;unused&gt;, char *localeName) &rarr; int</a><br />
     </code>
@@ -3513,6 +3515,15 @@ struct Sci_TextToFindFull {
     that may have different spacings because of kerning or ligatures.
     Applications may apply the 'check monospaced' attribute just to fonts known to be monospaced or on all fonts, leaving it to Scintilla to
     reject fonts that are proportional.</p>
+
+    <p><b id="SCI_STYLESETINVISIBLEREPRESENTATION">SCI_STYLESETINVISIBLEREPRESENTATION(int style, const char *representation)</b><br />
+    <b id="SCI_STYLEGETINVISIBLEREPRESENTATION">SCI_STYLEGETINVISIBLEREPRESENTATION(int style, char *representation NUL-terminated) &rarr; int</b><br />
+     When a style is made invisible with <a class="seealso" href="#SCI_STYLESETVISIBLE">SCI_STYLESETVISIBLE</a>, text is difficult to edit as
+     the cursor can be at both sides of the invisible text segment. With these messages invisible text segements can be made visible with a single
+     UTF8 characater giving the user an indication if the cursor is left or right of the invisible text. The character is displayed using the current style.</p>
+
+    <p>The <code>representation</code> parameter is a zero terminated string holding the one character used to represent the invisible text segment. Only the first character
+    is used, the character is decoded as UTF-8.</p>
 
     <p><b id="SCI_SETFONTLOCALE">SCI_SETFONTLOCALE(&lt;unused&gt;, const char *localeName)</b><br />
     <b id="SCI_GETFONTLOCALE">SCI_GETFONTLOCALE(&lt;unused&gt;, char *localeName NUL-terminated) &rarr; int</b><br />

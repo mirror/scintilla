@@ -435,6 +435,21 @@ void LayoutSegments(IPositionCache *pCache,
 						std::string_view(&ll->chars[ts.start], ts.length), &ll->positions[ts.start + 1], multiThreaded);
 				}
 			}
+		} else if (vstyle.styles[ll->styles[ts.start]].invisibleRepresentation[0]) {
+			const int styleInvisible = ll->styles[ts.start];
+			const std::string_view text = vstyle.styles[styleInvisible].invisibleRepresentation;
+			XYPOSITION positionsRepr[Representation::maxLength + 1];
+			// invisibleRepresentation is UTF-8 which only matches cache if document is UTF-8
+			// or it only contains ASCII which is a subset of all currently supported encodings.
+			if (textUnicode || ViewIsASCII(text)) {
+				pCache->MeasureWidths(surface, vstyle, styleInvisible, text, positionsRepr, multiThreaded);
+			} else {
+				surface->MeasureWidthsUTF8(vstyle.styles[styleInvisible].font.get(), text, positionsRepr);
+			}
+			const XYPOSITION representationWidth = positionsRepr[text.length() - 1];
+			for (int ii = 0; ii < ts.length; ii++) {
+				ll->positions[ts.start + 1 + ii] = representationWidth;
+			}
 		}
 	}
 }
@@ -2228,6 +2243,15 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							rcSegment.top + vsDraw.maxAscent, text, textFore);
 					} else {
 						surface->DrawTextNoClip(rcSegment, textFont,
+							rcSegment.top + vsDraw.maxAscent, text, textFore, textBack);
+					}
+				} else if (vsDraw.styles[styleMain].invisibleRepresentation[0]) {
+					const std::string_view text = vsDraw.styles[styleMain].invisibleRepresentation;
+  					if (phasesDraw != PhasesDraw::One) {
+						surface->DrawTextTransparentUTF8(rcSegment, textFont,
+							rcSegment.top + vsDraw.maxAscent, text, textFore);
+					} else {
+						surface->DrawTextNoClipUTF8(rcSegment, textFont,
 							rcSegment.top + vsDraw.maxAscent, text, textFore, textBack);
 					}
 				}

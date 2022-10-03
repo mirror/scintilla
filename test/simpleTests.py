@@ -1956,6 +1956,7 @@ class TestStyleAttributes(unittest.TestCase):
 		self.ed.EmptyUndoBuffer()
 		self.testColour = 0x171615
 		self.testFont = b"Georgia"
+		self.testRepresentation = "\N{BULLET}".encode("utf-8")
 
 	def tearDown(self):
 		self.ed.StyleResetDefault()
@@ -1970,6 +1971,13 @@ class TestStyleAttributes(unittest.TestCase):
 		self.assertEquals(self.ed.StyleGetSizeFractional(self.ed.STYLE_DEFAULT), 12*self.ed.SC_FONT_SIZE_MULTIPLIER)
 		self.ed.StyleSetSizeFractional(self.ed.STYLE_DEFAULT, 1234)
 		self.assertEquals(self.ed.StyleGetSizeFractional(self.ed.STYLE_DEFAULT), 1234)
+
+	def testInvisibleRepresentation(self):
+		self.assertEquals(self.ed.StyleGetInvisibleRepresentation(self.ed.STYLE_DEFAULT), b"")
+		self.ed.StyleSetInvisibleRepresentation(self.ed.STYLE_DEFAULT, self.testRepresentation)
+		self.assertEquals(self.ed.StyleGetInvisibleRepresentation(self.ed.STYLE_DEFAULT), self.testRepresentation)
+		self.ed.StyleSetInvisibleRepresentation(self.ed.STYLE_DEFAULT, b"\000")
+		self.assertEquals(self.ed.StyleGetInvisibleRepresentation(self.ed.STYLE_DEFAULT), b"")
 
 	def testBold(self):
 		self.ed.StyleSetBold(self.ed.STYLE_DEFAULT, 1)
