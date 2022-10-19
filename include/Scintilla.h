@@ -1240,6 +1240,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SC_AC_TAB 3
 #define SC_AC_NEWLINE 4
 #define SC_AC_COMMAND 5
+#define SC_AC_SINGLE_CHOICE 6
 #define SC_CHARACTERSOURCE_DIRECT_INPUT 0
 #define SC_CHARACTERSOURCE_TENTATIVE_INPUT 1
 #define SC_CHARACTERSOURCE_IME_RESULT 2

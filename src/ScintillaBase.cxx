@@ -254,6 +254,11 @@ void ScintillaBase::AutoCompleteStart(Sci::Position lenEntered, const char *list
 			} else {
 				AutoCompleteInsert(sel.MainCaret(), 0, choice.substr(lenEntered));
 			}
+			const Sci::Position firstPos = sel.MainCaret() - lenEntered;
+			// Construct a string with a NUL at end as that is expected by applications
+			const std::string selected(choice);
+			AutoCompleteNotifyCompleted('\0', CompletionMethods::SingleChoice, firstPos, selected.c_str());
+
 			ac.Cancel();
 			return;
 		}
@@ -395,6 +400,20 @@ void ScintillaBase::AutoCompleteCharacterDeleted() {
 	NotifyParent(scn);
 }
 
+void ScintillaBase::AutoCompleteNotifyCompleted(char ch, CompletionMethods completionMethod, Sci::Position firstPos, const char *text) {
+	NotificationData scn = {};
+	scn.nmhdr.code = Notification::AutoCCompleted;
+	scn.message = static_cast<Message>(0);
+	scn.ch = ch;
+	scn.listCompletionMethod = completionMethod;
+	scn.wParam = listType;
+	scn.listType = listType;
+	scn.position = firstPos;
+	scn.lParam = firstPos;
+	scn.text = text;
+	NotifyParent(scn);
+}
+
 void ScintillaBase::AutoCompleteCompleted(char ch, CompletionMethods completionMethod) {
 	const int item = ac.GetSelection();
 	if (item == -1) {
@@ -433,9 +452,7 @@ void ScintillaBase::AutoCompleteCompleted(char ch, CompletionMethods completionM
 	AutoCompleteInsert(firstPos, endPos - firstPos, selected);
 	SetLastXChosen();
 
-	scn.nmhdr.code = Notification::AutoCCompleted;
-	NotifyParent(scn);
-
+	AutoCompleteNotifyCompleted(ch, completionMethod, firstPos, selected.c_str());
 }
 
 int ScintillaBase::AutoCompleteGetCurrent() const {
