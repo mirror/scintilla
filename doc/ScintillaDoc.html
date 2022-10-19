@@ -536,6 +536,7 @@
      <a class="message" href="#SCI_GETSTYLEAT">SCI_GETSTYLEAT(position pos) &rarr; int</a><br />
      <a class="message" href="#SCI_GETSTYLEINDEXAT">SCI_GETSTYLEINDEXAT(position pos) &rarr; int</a><br />
      <a class="message" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT(&lt;unused&gt;, Sci_TextRange *tr) &rarr; position</a><br />
+     <a class="message" href="#SCI_GETSTYLEDTEXTFULL">SCI_GETSTYLEDTEXTFULL(&lt;unused&gt;, Sci_TextRangeFull *tr) &rarr; position</a><br />
      <a class="message" href="#SCI_RELEASEALLEXTENDEDSTYLES">SCI_RELEASEALLEXTENDEDSTYLES</a><br />
      <a class="message" href="#SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES(int numberStyles) &rarr; int</a><br />
      <a class="message" href="#SCI_TARGETASUTF8">SCI_TARGETASUTF8(&lt;unused&gt;, char *s) &rarr; position</a><br />
@@ -623,15 +624,19 @@
     <a class="seealso" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>,
     <a class="seealso" href="#SCI_GETTEXT">SCI_GETTEXT</a></code></p>
 
-    <p><b id="SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT(&lt;unused&gt;, <a class="jump" href="#Sci_TextRange">Sci_TextRange</a> *tr) &rarr; position</b><br />
+    <p>
+    <b id="SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT(&lt;unused&gt;, <a class="jump" href="#Sci_TextRange">Sci_TextRange</a> *tr) &rarr; position</b><br />
+    <b id="SCI_GETSTYLEDTEXTFULL">SCI_GETSTYLEDTEXTFULL(&lt;unused&gt;, <a class="jump" href="#Sci_TextRangeFull">Sci_TextRangeFull</a> *tr) &rarr; position</b><br />
      This collects styled text into a buffer using two bytes for each cell, with the character at
     the lower address of each pair and the style byte at the upper address. Characters between the
     positions <code>cpMin</code> and <code>cpMax</code> are copied to <code>lpstrText</code> (see
-    <code>struct Sci_TextRange</code> in <code>Scintilla.h</code>). Two 0 bytes are added to the end of
+    <code>struct Sci_TextRange</code> and <code>struct Sci_TextRangeFull</code> in <code>Scintilla.h</code>). Two 0 bytes are added to the end of
     the text, so the buffer that <code>lpstrText</code> points at must be at least
     <code>2*(cpMax-cpMin)+2</code> bytes long. No check is made for sensible values of
     <code>cpMin</code> or <code>cpMax</code>. Positions outside the document return character codes
     and style bytes of 0.</p>
+    <p><code>SCI_GETSTYLEDTEXTFULL</code> uses 64-bit positions on all platforms so is safe for documents larger than 2GB.
+    It should always be used in preference to <code>SCI_GETSTYLEDTEXT</code> which will be deprecated in a future release.</p>
 
     <p>See also: <code><a class="seealso" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>,
     <a class="seealso" href="#SCI_GETLINE">SCI_GETLINE</a>,

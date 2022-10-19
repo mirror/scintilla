@@ -63,6 +63,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SCI_SELECTALL 2013
 #define SCI_SETSAVEPOINT 2014
 #define SCI_GETSTYLEDTEXT 2015
+#define SCI_GETSTYLEDTEXTFULL 2778
 #define SCI_CANREDO 2016
 #define SCI_MARKERLINEFROMHANDLE 2017
 #define SCI_MARKERDELETEHANDLE 2018

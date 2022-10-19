@@ -34,6 +34,7 @@ enum class Message {
 	SelectAll = 2013,
 	SetSavePoint = 2014,
 	GetStyledText = 2015,
+	GetStyledTextFull = 2778,
 	CanRedo = 2016,
 	MarkerLineFromHandle = 2017,
 	MarkerDeleteHandle = 2018,

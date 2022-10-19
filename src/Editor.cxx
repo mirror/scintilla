@@ -5783,6 +5783,17 @@ void Editor::AddStyledText(const char *buffer, Sci::Position appendLength) {
 	SetEmptySelection(sel.MainCaret() + lengthInserted);
 }
 
+Sci::Position Editor::GetStyledText(char *buffer, Sci::Position cpMin, Sci::Position cpMax) const noexcept {
+	Sci::Position iPlace = 0;
+	for (Sci::Position iChar = cpMin; iChar < cpMax; iChar++) {
+		buffer[iPlace++] = pdoc->CharAt(iChar);
+		buffer[iPlace++] = pdoc->StyleAt(iChar);
+	}
+	buffer[iPlace] = '\0';
+	buffer[iPlace + 1] = '\0';
+	return iPlace;
+}
+
 bool Editor::ValidMargin(uptr_t wParam) const noexcept {
 	return wParam < vs.ms.size();
 }
@@ -6588,19 +6599,17 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->SetSavePoint();
 		break;
 
-	case Message::GetStyledText: {
-			if (lParam == 0)
-				return 0;
-			TextRange *tr = static_cast<TextRange *>(PtrFromSPtr(lParam));
-			Sci::Position iPlace = 0;
-			for (Sci::Position iChar = tr->chrg.cpMin; iChar < tr->chrg.cpMax; iChar++) {
-				tr->lpstrText[iPlace++] = pdoc->CharAt(iChar);
-				tr->lpstrText[iPlace++] = pdoc->StyleAt(iChar);
-			}
-			tr->lpstrText[iPlace] = '\0';
-			tr->lpstrText[iPlace + 1] = '\0';
-			return iPlace;
+	case Message::GetStyledText:
+		if (TextRange *tr = static_cast<TextRange *>(PtrFromSPtr(lParam))) {
+			return GetStyledText(tr->lpstrText, tr->chrg.cpMin, tr->chrg.cpMax);
 		}
+		return 0;
+
+	case Message::GetStyledTextFull:
+		if (TextRangeFull *tr = static_cast<TextRangeFull *>(PtrFromSPtr(lParam))) {
+			return GetStyledText(tr->lpstrText, tr->chrg.cpMin, tr->chrg.cpMax);
+		}
+		return 0;
 
 	case Message::CanRedo:
 		return (pdoc->CanRedo() && !pdoc->IsReadOnly()) ? 1 : 0;

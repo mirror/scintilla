@@ -62,6 +62,15 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.GetStyleAt(0), 0)
 		self.assertEquals(self.ed.StyledTextRange(0, 1), b"x\0")
 
+	def testStyledTextRangeFull(self):
+		self.assertEquals(self.ed.EndStyled, 0)
+		self.ed.AddStyledText(4, b"x\002y\377")
+		self.assertEquals(self.ed.StyledTextRangeFull(0, 1), b"x\002")
+		self.assertEquals(self.ed.StyledTextRangeFull(1, 2), b"y\377")
+		self.ed.ClearDocumentStyle()
+		self.assertEquals(self.ed.Length, 2)
+		self.assertEquals(self.ed.StyledTextRangeFull(0, 1), b"x\0")
+
 	def testStyling(self):
 		self.assertEquals(self.ed.EndStyled, 0)
 		self.ed.AddStyledText(4, b"x\002y\003")
