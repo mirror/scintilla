@@ -1572,19 +1572,22 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	// Draw any box or stadium shape
 	if (FlagSet(phase, DrawPhase::indicatorsBack)) {
 		if (vsDraw.eolAnnotationVisible >= EOLAnnotationVisible::Boxed) {
-			PRectangle rcBox = rcSegment;
-			rcBox.left = std::round(rcSegment.left);
-			rcBox.right = std::round(rcSegment.right);
-			if (vsDraw.eolAnnotationVisible == EOLAnnotationVisible::Boxed) {
+			const PRectangle rcBox = PixelAlign(rcSegment, 1);
+
+			switch (vsDraw.eolAnnotationVisible) {
+			case EOLAnnotationVisible::Boxed:
 				surface->RectangleFrame(rcBox, Stroke(textFore));
-			} else {
+				break;
+
+			default:
 				if (phasesDraw == PhasesDraw::One) {
 					// Draw an outline around the text
-					surface->Stadium(rcBox, FillStroke(ColourRGBA(textBack, 0), textFore, 1.0), ends);
+					surface->Stadium(rcBox, FillStroke(ColourRGBA(textBack, 0), textFore), ends);
 				} else {
 					// Draw with a fill to fill the edges of the shape.
-					surface->Stadium(rcBox, FillStroke(textBack, textFore, 1.0), ends);
+					surface->Stadium(rcBox, FillStroke(textBack, textFore), ends);
 				}
+				break;
 			}
 		}
 	}
