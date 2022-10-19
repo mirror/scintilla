@@ -1571,24 +1571,34 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 
 	// Draw any box or stadium shape
 	if (FlagSet(phase, DrawPhase::indicatorsBack)) {
-		if (vsDraw.eolAnnotationVisible >= EOLAnnotationVisible::Boxed) {
-			const PRectangle rcBox = PixelAlign(rcSegment, 1);
+		const PRectangle rcBox = PixelAlign(rcSegment, 1);
 
-			switch (vsDraw.eolAnnotationVisible) {
-			case EOLAnnotationVisible::Boxed:
-				surface->RectangleFrame(rcBox, Stroke(textFore));
-				break;
-
-			default:
-				if (phasesDraw == PhasesDraw::One) {
-					// Draw an outline around the text
-					surface->Stadium(rcBox, FillStroke(ColourRGBA(textBack, 0), textFore), ends);
-				} else {
-					// Draw with a fill to fill the edges of the shape.
-					surface->Stadium(rcBox, FillStroke(textBack, textFore), ends);
-				}
-				break;
+		switch (vsDraw.eolAnnotationVisible) {
+		case EOLAnnotationVisible::Standard:
+			if (phasesDraw != PhasesDraw::One) {
+				surface->FillRectangle(rcBox, textBack);
 			}
+			break;
+
+		case EOLAnnotationVisible::Boxed:
+			if (phasesDraw == PhasesDraw::One) {
+				// Draw a rectangular outline around the text
+				surface->RectangleFrame(rcBox, textFore);
+			} else {
+				// Draw with a fill to fill the edges of the rectangle.
+				surface->RectangleDraw(rcBox, FillStroke(textBack, textFore));
+			}
+			break;
+
+		default:
+			if (phasesDraw == PhasesDraw::One) {
+				// Draw an outline around the text
+				surface->Stadium(rcBox, FillStroke(ColourRGBA(textBack, 0), textFore), ends);
+			} else {
+				// Draw with a fill to fill the edges of the shape.
+				surface->Stadium(rcBox, FillStroke(textBack, textFore), ends);
+			}
+			break;
 		}
 	}
 
