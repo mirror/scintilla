@@ -1336,6 +1336,10 @@ Sci::Position Document::InsertString(Sci::Position position, const char *s, Sci:
 	return insertLength;
 }
 
+Sci::Position Document::InsertString(Sci::Position position, std::string_view sv) {
+	return InsertString(position, sv.data(), sv.length());
+}
+
 void Document::ChangeInsertion(const char *s, Sci::Position length) {
 	insertionSet = true;
 	insertion.assign(s, length);

@@ -57,7 +57,7 @@ protected:
 	void CancelModes() override;
 	int KeyCommand(Scintilla::Message iMessage) override;
 
-	void AutoCompleteInsert(Sci::Position startPos, Sci::Position removeLen, const char *text, Sci::Position textLen);
+	void AutoCompleteInsert(Sci::Position startPos, Sci::Position removeLen, std::string_view text);
 	void AutoCompleteStart(Sci::Position lenEntered, const char *list);
 	void AutoCompleteCancel();
 	void AutoCompleteMove(int delta);
