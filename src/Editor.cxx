@@ -5787,14 +5787,14 @@ Sci::Position Editor::GetStyledText(char *buffer, Sci::Position cpMin, Sci::Posi
 	Sci::Position iPlace = 0;
 	for (Sci::Position iChar = cpMin; iChar < cpMax; iChar++) {
 		buffer[iPlace++] = pdoc->CharAt(iChar);
-		buffer[iPlace++] = pdoc->StyleAt(iChar);
+		buffer[iPlace++] = pdoc->StyleAtNoExcept(iChar);
 	}
 	buffer[iPlace] = '\0';
 	buffer[iPlace + 1] = '\0';
 	return iPlace;
 }
 
-Sci::Position Editor::GetTextRange(char *buffer, Sci::Position cpMin, Sci::Position cpMax) const noexcept {
+Sci::Position Editor::GetTextRange(char *buffer, Sci::Position cpMin, Sci::Position cpMax) const {
 	const Sci::Position cpEnd = (cpMax == -1) ? pdoc->Length() : cpMax;
 	PLATFORM_ASSERT(cpEnd <= pdoc->Length());
 	const Sci::Position len = cpEnd - cpMin; 	// No -1 as cpMin and cpMax are referring to inter character positions
