@@ -2895,7 +2895,7 @@ class ListBoxX : public ListBox {
 	PRectangle rcPreSize;
 	Point dragOffset;
 	Point location;	// Caret location at which the list is opened
-	int wheelDelta; // mouse wheel residue
+	MouseWheelDelta wheelDelta;
 	ListOptions options;
 	DWORD frameStyle = WS_THICKFRAME;
 
@@ -2927,7 +2927,7 @@ public:
 		desiredVisibleRows(9), maxItemCharacters(0), aveCharWidth(8),
 		parent(nullptr), ctrlID(0), dpi(USER_DEFAULT_SCREEN_DPI),
 		delegate(nullptr),
-		widestItem(nullptr), maxCharWidth(1), resizeHit(0), wheelDelta(0) {
+		widestItem(nullptr), maxCharWidth(1), resizeHit(0) {
 	}
 	ListBoxX(const ListBoxX &) = delete;
 	ListBoxX(ListBoxX &&) = delete;
@@ -3689,21 +3689,15 @@ LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam
 		}
 		return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 	case WM_MOUSEWHEEL:
-		wheelDelta -= GET_WHEEL_DELTA_WPARAM(wParam);
-		if (std::abs(wheelDelta) >= WHEEL_DELTA) {
+		if (wheelDelta.Accumulate(wParam)) {
 			const int nRows = GetVisibleRows();
 			int linesToScroll = std::clamp(nRows - 1, 1, 3);
-			linesToScroll *= (wheelDelta / WHEEL_DELTA);
+			linesToScroll *= wheelDelta.Actions();
 			int top = ListBox_GetTopIndex(lb) + linesToScroll;
 			if (top < 0) {
 				top = 0;
 			}
 			ListBox_SetTopIndex(lb, top);
-			// update wheel delta residue
-			if (wheelDelta >= 0)
-				wheelDelta = wheelDelta % WHEEL_DELTA;
-			else
-				wheelDelta = - (-wheelDelta % WHEEL_DELTA);
 		}
 		break;
 
