@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 1 October 2022 NH</p>
+    <p>Last edited 26 October 2022 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -275,7 +275,7 @@
 
           <td>Colours are set using the RGBA format (Red, Green, Blue, Alpha).
           This is similar to <a class="seealso" href="#colour">colour</a> but with a byte
-          of <a class="seealso" href="#colour">alpha</a> added. They are combined as:
+          of <a class="seealso" href="#alpha">alpha</a> added. They are combined as:
           red | (green &lt;&lt; 8) | (blue &lt;&lt; 16) | (alpha &lt;&lt; 24).
           Fully opaque uses an alpha of 255.
         </tr>
@@ -722,7 +722,7 @@
     and <code>CHARRANGE</code>, so that older code that treats Scintilla as a RichEdit will
     work.</p>
     <p>In a future release, these types will be deprecated.
-    <a class="seealso" href="#SCI_MARGINSETSTYLEOFFSET">SCI_GETTEXTRANGEFULL</a>, <code>Sci_TextRangeFull</code>
+    <a class="seealso" href="#SCI_GETTEXTRANGEFULL">SCI_GETTEXTRANGEFULL</a>, <code>Sci_TextRangeFull</code>
     and <code>Sci_CharacterRangeFull</code> should be used instead.</p>
 <pre>
 typedef long Sci_PositionCR;
@@ -1744,11 +1744,12 @@ struct Sci_TextToFindFull {
     If the text argument is NULL(0) then the length that should be allocated
     to store the entire current line is returned.</p>
 
-    <p>See also: <code><a class="seealso" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
-    class="seealso" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="seealso"
-    href="#SCI_GETTEXT">SCI_GETTEXT</a>, <a class="seealso"
-    href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="seealso"
-    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></code></p>
+    <p>See also: <code
+    <a class="seealso" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>,
+    <a class="seealso" href="#SCI_GETLINE">SCI_GETLINE</a>,
+    <a class="seealso" href="#SCI_GETTEXT">SCI_GETTEXT</a>,
+    <a class="seealso" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>,
+    <a class="seealso" href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></code></p>
 
     <p><b id="SCI_SELECTIONISRECTANGLE">SCI_SELECTIONISRECTANGLE &rarr; bool</b><br />
      This returns 1 if the current selection is in rectangle mode, 0 if not.</p>
@@ -4900,7 +4901,7 @@ struct Sci_TextToFindFull {
      <p>If the call succeeded <code>SCI_GETBIDIRECTIONAL</code> will return the same value otherwise
      <code>SC_BIDIRECTIONAL_DISABLED</code> (0) is returned.
      </p>
-     <p>Opaque selection drawing (<a class="seealso" href="#SCI_SETSELECTIONLAYER">SC_LAYER_BASE</a>)
+     <p>Opaque selection drawing (<a class="seealso" href="#SCI_SETSELECTIONLAYER">SCI_SETSELECTIONLAYER(SC_LAYER_BASE)</a>)
      is not supported in bidirectional mode.
      Use <code>SC_LAYER_UNDER_TEXT</code> or <code>SC_LAYER_OVER_TEXT</code> instead. 
      </p>
@@ -5499,10 +5500,10 @@ struct Sci_TextToFindFull {
     <p><b id="SCI_MARKERADD">SCI_MARKERADD(line line, int markerNumber) &rarr; int</b><br />
      This message adds marker number <code class="parameter">markerNumber</code> to a line. The message returns -1 if
     this fails (illegal line number, out of memory) or it returns a marker handle number that
-    identifies the added marker. You can use this returned handle with <a class="seealso"
-    href="#SCI_MARKERLINEFROMHANDLE"><code>SCI_MARKERLINEFROMHANDLE</code></a> to find where a
-    marker is after moving or combining lines and with <a class="message"
-    href="#SCI_MARKERDELETEHANDLE"><code>SCI_MARKERDELETEHANDLE</code></a> to delete the marker
+    identifies the added marker. You can use this returned handle with
+    <a class="seealso" href="#SCI_MARKERLINEFROMHANDLE"><code>SCI_MARKERLINEFROMHANDLE</code></a> to find where a
+    marker is after moving or combining lines and with
+    <a class="message" href="#SCI_MARKERDELETEHANDLE"><code>SCI_MARKERDELETEHANDLE</code></a> to delete the marker
     based on its handle. The message does not check the value of markerNumber, nor does it
     check if the line already contains the marker.</p>
 
@@ -5721,7 +5722,7 @@ struct Sci_TextToFindFull {
           <td>A rectangle with rounded corners around the text using translucent drawing with the
               interior usually more transparent than the border. You can use
               <a class="seealso" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA</a> and
-			  <a class="seealso" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
+              <a class="seealso" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
               to control the alpha transparency values. The default alpha values are 30 for fill colour and 50 for outline colour.</td>
         </tr>
 
@@ -5733,7 +5734,7 @@ struct Sci_TextToFindFull {
           <td>A rectangle around the text using translucent drawing with the
               interior usually more transparent than the border. You can use
               <a class="seealso" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA</a> and
-			  <a class="seealso" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
+              <a class="seealso" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
               to control the alpha transparency values. The default alpha values are 30 for fill colour and 50 for outline colour.
               This indicator does not colour the top pixel of the line so that indicators on contiguous lines are visually distinct
               and disconnected.</td>
@@ -5901,7 +5902,7 @@ struct Sci_TextToFindFull {
      On many systems a half pixel value will appear as a fainter line but it allows drawing very thin lines on systems with multiple physical pixels
      per logical pixel.
      Half (logical) pixel lines are available on macOS with 'retina' displays,
-     see <a class="seealso" href="#SCI_SUPPORTSFEATURE">SC_SUPPORTS_PIXEL_DIVISIONS</a>.</p>
+     see <a class="seealso" href="#SCI_SUPPORTSFEATURE">SCI_SUPPORTSFEATURE(SC_SUPPORTS_PIXEL_DIVISIONS)</a>.</p>
 
     <p><b id="SCI_INDICSETALPHA">SCI_INDICSETALPHA(int indicator, <a class="jump" href="#alpha">alpha</a> alpha)</b><br />
      <b id="SCI_INDICGETALPHA">SCI_INDICGETALPHA(int indicator) &rarr; int</b><br />
@@ -6213,8 +6214,8 @@ struct Sci_TextToFindFull {
      <b id="SCI_AUTOCGETAUTOHIDE">SCI_AUTOCGETAUTOHIDE &rarr; bool</b><br />
      By default, the list is cancelled if there are no viable matches (the user has typed
     characters that no longer match a list entry). If you want to keep displaying the original
-    list, set <code class="parameter">autoHide</code> to <code>false</code>. This also effects <a class="seealso"
-    href="#SCI_AUTOCSELECT"><code>SCI_AUTOCSELECT</code></a>.</p>
+    list, set <code class="parameter">autoHide</code> to <code>false</code>. This also effects
+     <a class="seealso" href="#SCI_AUTOCSELECT"><code>SCI_AUTOCSELECT</code></a>.</p>
 
     <p><b id="SCI_AUTOCSETDROPRESTOFWORD">SCI_AUTOCSETDROPRESTOFWORD(bool dropRestOfWord)</b><br />
      <b id="SCI_AUTOCGETDROPRESTOFWORD">SCI_AUTOCGETDROPRESTOFWORD &rarr; bool</b><br />
@@ -7206,7 +7207,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p>For many applications lexing documents larger than 4GB will be too sluggish so
     <code>SC_DOCUMENTOPTION_STYLES_NONE</code>
     and the null lexer <code>"null"</code> can be used. Another approach is to turn on idle styling with
-    <a class="seealso" href="#SCI_SETIDLESTYLING"><code>SCI_SETIDLESTYLING</code></a>.
+    <code><a class="seealso" href="#SCI_SETIDLESTYLING">SCI_SETIDLESTYLING</code></a>.
     </p>
 
     <table class="standard" summary="Document options">
@@ -7969,7 +7970,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <b id="SCI_GETLAYOUTTHREADS">SCI_GETLAYOUTTHREADS &rarr; int</b><br />
      The time taken to measure text runs on wide lines can be improved by performing the task
      concurrently on multiple threads when
-     <a class="seealso" href="#SCI_SUPPORTSFEATURE">SC_SUPPORTS_THREAD_SAFE_MEASURE_WIDTHS</a>
+     <a class="seealso" href="#SCI_SUPPORTSFEATURE">SCI_SUPPORTSFEATURE(SC_SUPPORTS_THREAD_SAFE_MEASURE_WIDTHS)</a>
      is available.
      This can be a dramatic improvement - a 4 core processor is often able to reduce text layout time to just over one
      quarter of the single-threaded time.</p>
@@ -8227,8 +8228,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <code>SCI_SETILEXER</code> allows setting a lexer as an <code>ILexer5*</code>.
      The lexer may be implemented by an application or a shared library such as Lexilla.</p>
 
-    <p>To test if your lexer assignment worked, use <a class="seealso"
-    href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a> before and after setting the new lexer to
+    <p>To test if your lexer assignment worked, use <a class="seealso" href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a>
+    before and after setting the new lexer to
     see if the lexer number changed.</p>
 
     <p><code>SCI_GETLEXERLANGUAGE</code> retrieves the name of the lexer.</p>
@@ -8717,10 +8718,8 @@ struct SCNotification {
     form:</p>
 <pre>
     startPos = <a class="seealso" href="#SCI_GETENDSTYLED">SCI_GETENDSTYLED</a>()
-    lineNumber = <a class="seealso"
-href="#SCI_LINEFROMPOSITION">SCI_LINEFROMPOSITION</a>(startPos);
-    startPos = <a class="seealso"
-href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
+    lineNumber = <a class="seealso" href="#SCI_LINEFROMPOSITION">SCI_LINEFROMPOSITION</a>(startPos);
+    startPos = <a class="seealso" href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     MyStyleRoutine(startPos, SCNotification.position);
 </pre>
 
@@ -9160,8 +9159,8 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           <td align="right">0x100000</td>
 
           <td>Text is about to be inserted. The handler may change the text being inserted by calling
-	  <a class="seealso" href="#SCI_CHANGEINSERTION">SCI_CHANGEINSERTION</a>.
-	  No other modifications may be made in this handler.</td>
+            <a class="seealso" href="#SCI_CHANGEINSERTION">SCI_CHANGEINSERTION</a>.
+            No other modifications may be made in this handler.</td>
 
           <td><code>position, length, text</code></td>
         </tr>
