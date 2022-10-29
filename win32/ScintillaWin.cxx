@@ -603,7 +603,8 @@ bool ScintillaWin::UpdateRenderingParams(bool force) noexcept {
 			return false;
 		}
 	}
-	HMONITOR monitor = ::MonitorFromWindow(MainHWND(), MONITOR_DEFAULTTONEAREST);
+	const HWND hRootWnd = ::GetAncestor(MainHWND(), GA_ROOT);
+	const HMONITOR monitor = Internal::MonitorFromWindow(hRootWnd);
 	if (!force && monitor == hCurrentMonitor && renderingParams->defaultRenderingParams) {
 		return false;
 	}

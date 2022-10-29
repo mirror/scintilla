@@ -157,11 +157,15 @@ GetSystemMetricsForDpiSig fnGetSystemMetricsForDpi = nullptr;
 using AdjustWindowRectExForDpiSig = BOOL(WINAPI *)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
 AdjustWindowRectExForDpiSig fnAdjustWindowRectExForDpi = nullptr;
 
+using SetThreadDpiAwarenessContextSig = DPI_AWARENESS_CONTEXT(WINAPI *)(DPI_AWARENESS_CONTEXT);
+SetThreadDpiAwarenessContextSig fnSetThreadDpiAwarenessContext = nullptr;
+
 void LoadDpiForWindow() noexcept {
 	HMODULE user32 = ::GetModuleHandleW(L"user32.dll");
 	fnGetDpiForWindow = DLLFunction<GetDpiForWindowSig>(user32, "GetDpiForWindow");
 	fnGetSystemMetricsForDpi = DLLFunction<GetSystemMetricsForDpiSig>(user32, "GetSystemMetricsForDpi");
 	fnAdjustWindowRectExForDpi = DLLFunction<AdjustWindowRectExForDpiSig>(user32, "AdjustWindowRectExForDpi");
+	fnSetThreadDpiAwarenessContext = DLLFunction<SetThreadDpiAwarenessContextSig>(user32, "SetThreadDpiAwarenessContext");
 
 	using GetDpiForSystemSig = UINT(WINAPI *)(void);
 	GetDpiForSystemSig fnGetDpiForSystem = DLLFunction<GetDpiForSystemSig>(user32, "GetDpiForSystem");
@@ -356,6 +360,25 @@ struct FontDirectWrite : public FontWin {
 };
 #endif
 
+}
+
+HMONITOR MonitorFromWindow(HWND hWnd) noexcept {
+	constexpr DWORD monitorFlags = MONITOR_DEFAULTTONEAREST;
+
+	if (!fnSetThreadDpiAwarenessContext) {
+		return ::MonitorFromWindow(hWnd, monitorFlags);
+	}
+
+	// Temporarily switching to PerMonitorV2 to retrieve correct monitor via MonitorFromRect() in case of active GDI scaling.
+	const DPI_AWARENESS_CONTEXT oldContext = fnSetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	PLATFORM_ASSERT(oldContext != nullptr);
+
+	RECT rect;
+	::GetWindowRect(hWnd, &rect);
+	const HMONITOR monitor = ::MonitorFromRect(&rect, monitorFlags);
+
+	fnSetThreadDpiAwarenessContext(oldContext);
+	return monitor;
 }
 
 std::shared_ptr<Font> Font::Allocate(const FontParameters &fp) {
