@@ -227,6 +227,29 @@ public:
 };
 
 /**
+ * A whole character (code point) with a value and width in bytes.
+ * For UTF-8, the value is the code point value.
+ * For DBCS, its jamming the lead and trail bytes together.
+ * For 8 bit encodings, is just the byte value.
+ */
+struct CharacterExtracted {
+	unsigned int character;
+	unsigned int widthBytes;
+
+	CharacterExtracted(unsigned int character_, unsigned int widthBytes_) noexcept :
+		character(character_), widthBytes(widthBytes_) {
+	}
+
+	// For UTF-8:
+	CharacterExtracted(const unsigned char *charBytes, size_t widthCharBytes) noexcept;
+
+	// For DBCS characters turn 2 bytes into an int
+	static CharacterExtracted DBCS(unsigned char lead, unsigned char trail) noexcept {
+		return CharacterExtracted((lead << 8) | trail, 2);
+	}
+};
+
+/**
  */
 class Document : PerLine, public Scintilla::IDocument, public Scintilla::ILoader {
 
@@ -275,18 +298,6 @@ private:
 	std::unique_ptr<LexInterface> pli;
 
 public:
-
-	struct CharacterExtracted {
-		unsigned int character;
-		unsigned int widthBytes;
-		CharacterExtracted(unsigned int character_, unsigned int widthBytes_) noexcept :
-			character(character_), widthBytes(widthBytes_) {
-		}
-		// For DBCS characters turn 2 bytes into an int
-		static CharacterExtracted DBCS(unsigned char lead, unsigned char trail) noexcept {
-			return CharacterExtracted((lead << 8) | trail, 2);
-		}
-	};
 
 	Scintilla::EndOfLine eolMode;
 	/// Can also be SC_CP_UTF8 to enable UTF-8 mode
@@ -341,8 +352,8 @@ public:
 	Sci::Position MovePositionOutsideChar(Sci::Position pos, Sci::Position moveDir, bool checkLineEnd=true) const noexcept;
 	Sci::Position NextPosition(Sci::Position pos, int moveDir) const noexcept;
 	bool NextCharacter(Sci::Position &pos, int moveDir) const noexcept;	// Returns true if pos changed
-	Document::CharacterExtracted CharacterAfter(Sci::Position position) const noexcept;
-	Document::CharacterExtracted CharacterBefore(Sci::Position position) const noexcept;
+	CharacterExtracted CharacterAfter(Sci::Position position) const noexcept;
+	CharacterExtracted CharacterBefore(Sci::Position position) const noexcept;
 	Sci_Position SCI_METHOD GetRelativePosition(Sci_Position positionStart, Sci_Position characterOffset) const override;
 	Sci::Position GetRelativePositionUTF16(Sci::Position positionStart, Sci::Position characterOffset) const noexcept;
 	int SCI_METHOD GetCharacterAndWidth(Sci_Position position, Sci_Position *pWidth) const override;
