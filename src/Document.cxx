@@ -3063,7 +3063,7 @@ public:
 		doc(doc_), position(position_) {
 	}
 	wchar_t operator*() const noexcept {
-		const Document::CharacterExtracted charExtracted = doc->ExtractCharacter(position);
+		const CharacterExtracted charExtracted = doc->ExtractCharacter(position);
 		return charExtracted.character;
 	}
 	UTF8Iterator &operator++() noexcept {
