@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 26 October 2022 NH</p>
+    <p>Last edited 15 November 2022 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -821,6 +821,7 @@ struct Sci_TextRangeFull {
      <a class="message" href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET(position length, const char *text) &rarr; position</a><br />
      <a class="message" href="#SCI_GETTARGETTEXT">SCI_GETTARGETTEXT(&lt;unused&gt;, char *text) &rarr; position</a><br />
      <a class="message" href="#SCI_REPLACETARGET">SCI_REPLACETARGET(position length, const char *text) &rarr; position</a><br />
+     <a class="message" href="#SCI_REPLACETARGETMINIMAL">SCI_REPLACETARGETMINIMAL(position length, const char *text) &rarr; position</a><br />
      <a class="message" href="#SCI_REPLACETARGETRE">SCI_REPLACETARGETRE(position length, const char *text) &rarr; position</a><br />
      <a class="message" href="#SCI_GETTAG">SCI_GETTAG(int tagNumber, char *tagValue) &rarr; int</a><br />
     </code>
@@ -870,9 +871,21 @@ struct Sci_TextRangeFull {
     <p><b id="SCI_REPLACETARGET">SCI_REPLACETARGET(position length, const char *text) &rarr; position</b><br />
      If <code class="parameter">length</code> is -1, <code class="parameter">text</code> is a zero terminated string, otherwise
     <code class="parameter">length</code> sets the number of character to replace the target with.
-           After replacement, the target range refers to the replacement text.
-           The return value
-    is the length of the replacement string.<br />
+    After replacement, the target range refers to the replacement text.
+    The return value is the length of the replacement string.<br />
+    Note that the recommended way to delete text in the document is to set the target to the text to be removed,
+    and to perform a replace target with an empty string.</p>
+
+    <p><b id="SCI_REPLACETARGETMINIMAL">SCI_REPLACETARGETMINIMAL(position length, const char *text) &rarr; position</b><br />
+    This is similar to <a class="message" href="#SCI_REPLACETARGET"><code>SCI_REPLACETARGET</code></a>
+    but tries to minimize change history when the current target text shares a common prefix or suffix with the replacement.
+    Only the text that is actually different is marked as changed.
+    This might be used when automatically reformatting some text
+    so that the whole area formatted doesn't show change marks.
+     If <code class="parameter">length</code> is -1, <code class="parameter">text</code> is a zero terminated string, otherwise
+    <code class="parameter">length</code> sets the number of character to replace the target with.
+    After replacement, the target range refers to the replacement text.
+    The return value is the length of the replacement string.<br />
     Note that the recommended way to delete text in the document is to set the target to the text to be removed,
     and to perform a replace target with an empty string.</p>
 
@@ -882,8 +895,8 @@ struct Sci_TextRangeFull {
     characters to use. The replacement string is formed from the text string with any sequences of
     <code>\1</code> through <code>\9</code> replaced by tagged matches from the most recent regular
     expression search. <code>\0</code> is replaced with all the matched text from the most recent search.
-           After replacement, the target range refers to the replacement text.
-           The return value is the length of the replacement string.</p>
+    After replacement, the target range refers to the replacement text.
+    The return value is the length of the replacement string.</p>
 
     <p><b id="SCI_GETTAG">SCI_GETTAG(int tagNumber, char *tagValue NUL-terminated) &rarr; int</b><br />
      Discover what text was matched by tagged expressions in a regular expression search.

@@ -46,6 +46,10 @@ public:
 		return (start != Sci::invalidPosition) && (end != Sci::invalidPosition);
 	}
 
+	[[nodiscard]] bool Empty() const noexcept {
+		return start == end;
+	}
+
 	Sci::Position First() const noexcept {
 		return (start <= end) ? start : end;
 	}
@@ -369,6 +373,7 @@ public:
 	// Gateways to modifying document
 	void ModifiedAt(Sci::Position pos) noexcept;
 	void CheckReadOnly();
+	void TrimReplacement(std::string_view &text, Range &range) const noexcept;
 	bool DeleteChars(Sci::Position pos, Sci::Position len);
 	Sci::Position InsertString(Sci::Position position, const char *s, Sci::Position insertLength);
 	Sci::Position InsertString(Sci::Position position, std::string_view sv);

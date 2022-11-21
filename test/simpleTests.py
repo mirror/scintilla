@@ -634,6 +634,45 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.TargetStart, 4)
 		self.assertEquals(self.ed.TargetEnd, 5)
 
+	def testReplaceTargetMinimal(self):
+		# 1: No common characters
+		self.ed.SetContents(b"abcd")
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 3
+		self.assertEquals(self.ed.TargetStart, 1)
+		self.assertEquals(self.ed.TargetEnd, 3)
+		rep = b"321"
+		self.ed.ReplaceTargetMinimal(len(rep), rep)
+		self.assertEquals(self.ed.Contents(), b"a321d")
+
+		# 2: New characters with common prefix and suffix
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 4
+		rep = b"3<>1"
+		self.ed.ReplaceTargetMinimal(len(rep), rep)
+		self.assertEquals(self.ed.Contents(), b"a3<>1d")
+
+		# 3: Remove characters with common prefix and suffix
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 5
+		rep = b"31"
+		self.ed.ReplaceTargetMinimal(len(rep), rep)
+		self.assertEquals(self.ed.Contents(), b"a31d")
+
+		# 4: Common prefix
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 3
+		rep = b"3bc"
+		self.ed.ReplaceTargetMinimal(len(rep), rep)
+		self.assertEquals(self.ed.Contents(), b"a3bcd")
+
+		# 5: Common suffix
+		self.ed.TargetStart = 2
+		self.ed.TargetEnd = 5
+		rep = b"cd"
+		self.ed.ReplaceTargetMinimal(len(rep), rep)
+		self.assertEquals(self.ed.Contents(), b"a3cd")
+
 	def testTargetWhole(self):
 		self.ed.SetContents(b"abcd")
 		self.ed.TargetStart = 1

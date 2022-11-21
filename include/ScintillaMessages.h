@@ -323,6 +323,7 @@ enum class Message {
 	TargetWholeDocument = 2690,
 	ReplaceTarget = 2194,
 	ReplaceTargetRE = 2195,
+	ReplaceTargetMinimal = 2779,
 	SearchInTarget = 2197,
 	SetSearchFlags = 2198,
 	GetSearchFlags = 2199,
