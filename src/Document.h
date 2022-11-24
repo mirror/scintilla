@@ -199,7 +199,7 @@ public:
 	LexInterface &operator=(const LexInterface &) = delete;
 	LexInterface &operator=(LexInterface &&) = delete;
 	virtual ~LexInterface() noexcept;
-	void SetInstance(ILexer5 *instance_);
+	void SetInstance(ILexer5 *instance_) noexcept;
 	void Colourise(Sci::Position start, Sci::Position end);
 	virtual Scintilla::LineEndType LineEndTypesSupported();
 	bool UseContainerLexing() const noexcept;
@@ -413,7 +413,7 @@ public:
 	int SCI_METHOD GetLineIndentation(Sci_Position line) override;
 	Sci::Position SetLineIndentation(Sci::Line line, Sci::Position indent);
 	Sci::Position GetLineIndentPosition(Sci::Line line) const;
-	Sci::Position GetColumn(Sci::Position pos);
+	Sci::Position GetColumn(Sci::Position pos) const;
 	Sci::Position CountCharacters(Sci::Position startPos, Sci::Position endPos) const noexcept;
 	Sci::Position CountUTF16(Sci::Position startPos, Sci::Position endPos) const noexcept;
 	Sci::Position FindColumn(Sci::Line line, Sci::Position column);

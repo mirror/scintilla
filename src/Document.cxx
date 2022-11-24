@@ -56,7 +56,7 @@ LexInterface::LexInterface(Document *pdoc_) noexcept : pdoc(pdoc_), performingSt
 
 LexInterface::~LexInterface() noexcept = default;
 
-void LexInterface::SetInstance(ILexer5 *instance_) {
+void LexInterface::SetInstance(ILexer5 *instance_) noexcept {
 	instance.reset(instance_);
 }
 
@@ -1599,7 +1599,7 @@ Sci::Position Document::GetLineIndentPosition(Sci::Line line) const {
 	return pos;
 }
 
-Sci::Position Document::GetColumn(Sci::Position pos) {
+Sci::Position Document::GetColumn(Sci::Position pos) const {
 	Sci::Position column = 0;
 	const Sci::Line line = SciLineFromPosition(pos);
 	if ((line >= 0) && (line < LinesTotal())) {
