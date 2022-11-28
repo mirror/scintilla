@@ -606,7 +606,7 @@ bool ScintillaWin::UpdateRenderingParams(bool force) noexcept {
 		}
 	}
 	const HWND hRootWnd = ::GetAncestor(MainHWND(), GA_ROOT);
-	const HMONITOR monitor = Internal::MonitorFromWindow(hRootWnd);
+	const HMONITOR monitor = Internal::MonitorFromWindowHandleScaling(hRootWnd);
 	if (!force && monitor == hCurrentMonitor && renderingParams->defaultRenderingParams) {
 		return false;
 	}

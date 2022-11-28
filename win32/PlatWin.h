@@ -43,7 +43,7 @@ inline HWND HwndFromWindow(const Window &w) noexcept {
 void *PointerFromWindow(HWND hWnd) noexcept;
 void SetWindowPointer(HWND hWnd, void *ptr) noexcept;
 
-HMONITOR MonitorFromWindow(HWND hWnd) noexcept;
+HMONITOR MonitorFromWindowHandleScaling(HWND hWnd) noexcept;
 
 UINT DpiForWindow(WindowID wid) noexcept;
 int GetDeviceScaleFactorWhenGdiScalingActive(HWND hWnd) noexcept;

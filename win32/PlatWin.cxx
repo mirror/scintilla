@@ -374,7 +374,7 @@ struct FontDirectWrite : public FontWin {
 
 }
 
-HMONITOR MonitorFromWindow(HWND hWnd) noexcept {
+HMONITOR MonitorFromWindowHandleScaling(HWND hWnd) noexcept {
 	constexpr DWORD monitorFlags = MONITOR_DEFAULTTONEAREST;
 
 	if (!fnSetThreadDpiAwarenessContext) {
@@ -398,7 +398,7 @@ int GetDeviceScaleFactorWhenGdiScalingActive(HWND hWnd) noexcept {
 		PLATFORM_ASSERT(fnGetWindowDpiAwarenessContext && fnGetScaleFactorForMonitor);
 		if (fnAreDpiAwarenessContextsEqual(DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED, fnGetWindowDpiAwarenessContext(hWnd))) {
 			const HWND hRootWnd = ::GetAncestor(hWnd, GA_ROOT); // Scale factor applies to entire (root) window.
-			const HMONITOR hMonitor = MonitorFromWindow(hRootWnd, MONITOR_DEFAULTTONEAREST);
+			const HMONITOR hMonitor = MonitorFromWindowHandleScaling(hRootWnd);
 			DEVICE_SCALE_FACTOR deviceScaleFactor;
 			if (S_OK == fnGetScaleFactorForMonitor(hMonitor, &deviceScaleFactor))
 				return (static_cast<int>(deviceScaleFactor) + 99) / 100; // increase to first integral multiple of 1
