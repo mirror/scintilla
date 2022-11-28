@@ -574,6 +574,7 @@
       </tr><tr>
 	<td>Reinhard Nißl</td>
 	<td>Ferdinand Oeinck</td>
+	<td>Michael Heath</td>
     </tr>
     </table>
     <h2>Releases</h2>
@@ -600,6 +601,13 @@
 	Send SCN_AUTOCCOMPLETED for SCI_AUTOCSHOW
 	triggering insertion because of SCI_AUTOCSETCHOOSESINGLE mode.
 	<a href="https://sourceforge.net/p/scintilla/feature-requests/1459/">Feature #1459</a>.
+	</li>
+	<li>
+	Change 'paragraph up' commands SCI_PARAUP and SCI_PARAUPEXTEND to
+	go to the start position of the paragraph containing the caret.
+	Only if the caret is already at the start of the paragraph will it go to the start
+	of the previous paragraph.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2363/">Bug #2363</a>.
 	</li>
 	<li>
 	On Win32, avoid blurry display with DirectWrite in GDI scaling mode.

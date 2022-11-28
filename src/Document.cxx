@@ -1772,7 +1772,10 @@ bool Document::IsWhiteLine(Sci::Line line) const {
 
 Sci::Position Document::ParaUp(Sci::Position pos) const {
 	Sci::Line line = SciLineFromPosition(pos);
-	line--;
+	const Sci::Position start = LineStart(line);
+	if (pos == start) {
+		line--;
+	}
 	while (line >= 0 && IsWhiteLine(line)) { // skip empty lines
 		line--;
 	}

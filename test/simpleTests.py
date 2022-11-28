@@ -1021,6 +1021,46 @@ class TestKeyCommands(unittest.TestCase):
 		self.ed.DocumentEndExtend()
 		self.assertEquals(self.selRange(), (10, 3))
 
+	def testParagraphMove(self):
+		example = b"a\n\nbig\n\n\n\nboat"
+		self.ed.AddText(len(example), example)
+		start1 = 0	# Before 'a'
+		start2 = 3	# Before 'big'
+		start3 = 10	# Before 'boat'
+
+		# Paragraph 2 to 1
+		self.ed.SetSel(start2, start2)
+		self.ed.ParaUp()
+		self.assertEquals(self.selRange(), (start1, start1))
+		self.ed.ParaDown()
+		self.assertEquals(self.selRange(), (start2, start2))
+		self.ed.SetSel(start2, start2)
+		self.ed.ParaUpExtend()
+		self.assertEquals(self.selRange(), (start1, start2))
+		self.ed.ParaDownExtend()
+		self.assertEquals(self.selRange(), (start2, start2))
+
+		# Inside paragraph 2 to start paragraph 2
+		mid2 = start2+1
+		self.ed.SetSel(mid2, mid2)
+		# Next line behaved differently before change for bug #2363
+		self.ed.ParaUp()
+		self.assertEquals(self.selRange(), (start2, start2))
+		self.ed.ParaDown()
+		self.assertEquals(self.selRange(), (start3, start3))
+		self.ed.SetSel(mid2, mid2)
+		self.ed.ParaUpExtend()
+		self.assertEquals(self.selRange(), (start2, mid2))
+		self.ed.ParaDownExtend()
+		self.assertEquals(self.selRange(), (start3, mid2))
+
+		# Paragraph 3 to 2
+		self.ed.SetSel(start3, start3)
+		self.ed.ParaUp()
+		self.assertEquals(self.selRange(), (start2, start2))
+		self.ed.ParaDown()
+		self.assertEquals(self.selRange(), (start3, start3))
+
 
 class TestMarkers(unittest.TestCase):
 
