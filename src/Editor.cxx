@@ -5872,7 +5872,7 @@ void Editor::StyleSetMessage(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		if (!(classified & UTF8MaskInvalid)) {
 			// valid UTF-8
 			int len = classified & UTF8MaskWidth;
-			while (len--)
+			for (int i=0; i<len && i<4; i++)
 				*rep++ = *utf8++;
 		}
 		*rep = 0;
