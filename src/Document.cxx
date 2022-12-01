@@ -2185,32 +2185,32 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 			const size_t lenSearch =
 				pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
 			while (forward ? (pos < endPos) : (pos >= endPos)) {
-				int widthFirstCharacter = 0;
+				int widthFirstCharacter = 1;
 				Sci::Position posIndexDocument = pos;
 				size_t indexSearch = 0;
 				bool characterMatches = true;
-				for (;;) {
+				while (indexSearch < lenSearch) {
 					const unsigned char leadByte = cbView.CharAt(posIndexDocument);
-					char bytes[UTF8MaxBytes + 1];
 					int widthChar = 1;
-					if (!UTF8IsAscii(leadByte)) {
-						const int widthCharBytes = UTF8BytesOfLead[leadByte];
-						bytes[0] = leadByte;
-						for (int b=1; b<widthCharBytes; b++) {
-							bytes[b] = cbView.CharAt(posIndexDocument+b);
-						}
-						widthChar = UTF8Classify(reinterpret_cast<const unsigned char *>(bytes), widthCharBytes) & UTF8MaskWidth;
-					}
-					if (!widthFirstCharacter) {
-						widthFirstCharacter = widthChar;
-					}
-					if ((posIndexDocument + widthChar) > limitPos) {
-						break;
-					}
 					size_t lenFlat = 1;
-					if (widthChar == 1) {
+					if (UTF8IsAscii(leadByte)) {
+						if ((posIndexDocument + 1) > limitPos) {
+							break;
+						}
 						characterMatches = searchThing[indexSearch] == MakeLowerCase(leadByte);
 					} else {
+						char bytes[UTF8MaxBytes]{ static_cast<char>(leadByte) };
+						const int widthCharBytes = UTF8BytesOfLead[leadByte];
+						for (int b = 1; b < widthCharBytes; b++) {
+							bytes[b] = cbView.CharAt(posIndexDocument + b);
+						}
+						widthChar = UTF8Classify(reinterpret_cast<const unsigned char *>(bytes), widthCharBytes) & UTF8MaskWidth;
+						if (!indexSearch) {	// First character
+							widthFirstCharacter = widthChar;
+						}
+						if ((posIndexDocument + widthChar) > limitPos) {
+							break;
+						}
 						char folded[UTF8MaxBytes * maxFoldingExpansion + 1];
 						lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
 						// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
@@ -2223,9 +2223,6 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 					}
 					posIndexDocument += widthChar;
 					indexSearch += lenFlat;
-					if (indexSearch >= lenSearch) {
-						break;
-					}
 				}
 				if (characterMatches && (indexSearch == lenSearch)) {
 					if (MatchesWordOptions(word, wordStart, pos, posIndexDocument - pos)) {
