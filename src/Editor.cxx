@@ -5870,8 +5870,8 @@ void Editor::StyleSetMessage(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		const int classified = UTF8Classify(utf8);
 		if (!(classified & UTF8MaskInvalid)) {
 			// valid UTF-8
-			int len = classified & UTF8MaskWidth;
-			for (int i=0; i<len && i<4; i++)
+			const int len = classified & UTF8MaskWidth;
+			for (int i=0; i<len && i<UTF8MaxBytes; i++)
 				*rep++ = *utf8++;
 		}
 		*rep = 0;
