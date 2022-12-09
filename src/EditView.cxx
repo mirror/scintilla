@@ -1228,7 +1228,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		if (vsDraw.IsLineFrameOpaque(model.caret.active, ll->containsCaret)) {
 			// Draw right of frame under marker
 			surface->FillRectangleAligned(Side(rcLine, Edge::right, vsDraw.GetFrameWidth()),
-				vsDraw.ElementColour(Element::CaretLineBack)->Opaque());
+				vsDraw.ElementColourForced(Element::CaretLineBack).Opaque());
 		}
 	}
 
@@ -1837,7 +1837,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 					rcCaret.right = rcCaret.left + vsDraw.caret.width;
 				}
 				const Element elementCaret = mainCaret ? Element::Caret : Element::CaretAdditional;
-				const ColourRGBA caretColour = *vsDraw.ElementColour(elementCaret);
+				const ColourRGBA caretColour = vsDraw.ElementColourForced(elementCaret);
 				//assert(caretColour.IsOpaque());
 				if (drawBlockCaret) {
 					DrawBlockCaret(surface, model, vsDraw, ll, subLine, xStart, offset, posCaret.Position(), rcCaret, caretColour);
@@ -1862,7 +1862,7 @@ void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, const Li
 	if (vsDraw.IsLineFrameOpaque(caretActive, ll->containsCaret)) {
 		// Draw left of frame under marker
 		surface->FillRectangleAligned(Side(rcLine, Edge::left, vsDraw.GetFrameWidth()),
-			vsDraw.ElementColour(Element::CaretLineBack)->Opaque());
+			vsDraw.ElementColourForced(Element::CaretLineBack).Opaque());
 	}
 
 	if (FlagSet(vsDraw.wrap.visualFlags, WrapVisualFlag::Start)) {
@@ -1947,7 +1947,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 				if (ll->chars[i] == '\t') {
 					// Tab display
 					if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation)) {
-						textBack = vsDraw.ElementColour(Element::WhiteSpaceBack)->Opaque();
+						textBack = vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque();
 					}
 				} else {
 					// Blob display
@@ -1967,7 +1967,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 									ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
 									rcSegment.bottom);
 								surface->FillRectangleAligned(rcSpace,
-									vsDraw.ElementColour(Element::WhiteSpaceBack)->Opaque());
+									vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque());
 							}
 						} else {
 							inIndentation = false;
@@ -2093,7 +2093,7 @@ static void DrawTranslucentLineState(Surface *surface, const EditModel &model, c
 		if (vsDraw.caretLine.frame) {
 			DrawCaretLineFramed(surface, vsDraw, ll, rcLine, subLine);
 		} else {
-			surface->FillRectangleAligned(rcLine, *vsDraw.ElementColour(Element::CaretLineBack));
+			surface->FillRectangleAligned(rcLine, vsDraw.ElementColourForced(Element::CaretLineBack));
 		}
 	}
 	const int marksOfLine = model.GetMark(line);
@@ -2199,7 +2199,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					// Tab display
 					if (phasesDraw == PhasesDraw::One) {
 						if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
-							textBack = vsDraw.ElementColour(Element::WhiteSpaceBack)->Opaque();
+							textBack = vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque();
 						surface->FillRectangleAligned(rcSegment, Fill(textBack));
 					}
 					if (inIndentation && vsDraw.viewIndentationGuides == IndentView::Real) {
@@ -2278,7 +2278,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 									const XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
 									if ((phasesDraw == PhasesDraw::One) && drawWhitespaceBackground) {
-										textBack = vsDraw.ElementColour(Element::WhiteSpaceBack)->Opaque();
+										textBack = vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque();
 										const PRectangle rcSpace(
 											ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
 											rcSegment.top,

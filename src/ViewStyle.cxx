@@ -617,6 +617,15 @@ ColourOptional ViewStyle::ElementColour(Element element) const {
 	return {};
 }
 
+ColourRGBA ViewStyle::ElementColourForced(Element element) const {
+	// Like ElementColour but never returns empty - when not found return opaque black.
+	// This method avoids warnings for unwrapping potentially empty optionals from
+	// Visual C++ Code Analysis
+	const ColourOptional colour = ElementColour(element);
+	constexpr ColourRGBA opaqueBlack(0, 0, 0, 0xff);
+	return colour.value_or(opaqueBlack);
+}
+
 bool ViewStyle::ElementAllowsTranslucent(Element element) const {
 	return elementAllowsTranslucent.count(element) > 0;
 }

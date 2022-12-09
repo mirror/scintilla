@@ -7473,10 +7473,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 	case Message::GetCaretLineBack:
-		if (vs.ElementColour(Element::CaretLineBack))
-			return vs.ElementColour(Element::CaretLineBack)->OpaqueRGB();
-		else
-			return 0;
+		return vs.ElementColourForced(Element::CaretLineBack).OpaqueRGB();
 
 	case Message::SetCaretLineBack:
 		vs.SetElementRGB(Element::CaretLineBack, static_cast<int>(wParam));
@@ -7687,7 +7684,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::GetSelAlpha:
 		if (vs.selection.layer == Layer::Base)
 			return static_cast<sptr_t>(Alpha::NoAlpha);
-		return vs.ElementColour(Element::SelectionBack)->GetAlpha();
+		return vs.ElementColourForced(Element::SelectionBack).GetAlpha();
 
 	case Message::GetSelEOLFilled:
 		return vs.selection.eolFilled;
@@ -7726,7 +7723,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case Message::GetCaretFore:
-		return vs.ElementColour(Element::Caret)->OpaqueRGB();
+		return vs.ElementColourForced(Element::Caret).OpaqueRGB();
 
 	case Message::SetCaretStyle:
 		if (static_cast<CaretStyle>(wParam) <= (CaretStyle::Block | CaretStyle::OverstrikeBlock | CaretStyle::Curses | CaretStyle::BlockAfter))
@@ -8747,7 +8744,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::GetAdditionalSelAlpha:
 		if (vs.selection.layer == Layer::Base)
 			return static_cast<sptr_t>(Alpha::NoAlpha);
-		return vs.ElementColour(Element::SelectionAdditionalBack)->GetAlpha();
+		return vs.ElementColourForced(Element::SelectionAdditionalBack).GetAlpha();
 
 	case Message::SetAdditionalCaretFore:
 		vs.elementColours[Element::CaretAdditional] = ColourRGBA::FromIpRGB(SPtrFromUPtr(wParam));
@@ -8755,7 +8752,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case Message::GetAdditionalCaretFore:
-		return vs.ElementColour(Element::CaretAdditional)->OpaqueRGB();
+		return vs.ElementColourForced(Element::CaretAdditional).OpaqueRGB();
 
 	case Message::RotateSelection:
 		sel.RotateMain();

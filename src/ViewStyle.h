@@ -221,6 +221,7 @@ public:
 	void AddMultiEdge(int column, ColourRGBA colour);
 
 	ColourOptional ElementColour(Scintilla::Element element) const;
+	ColourRGBA ElementColourForced(Scintilla::Element element) const;
 	bool ElementAllowsTranslucent(Scintilla::Element element) const;
 	bool ResetElement(Scintilla::Element element);
 	bool SetElementColour(Scintilla::Element element, ColourRGBA colour);
