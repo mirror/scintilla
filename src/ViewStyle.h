@@ -39,7 +39,7 @@ typedef std::map<FontSpecification, std::unique_ptr<FontRealised>> FontMap;
 
 using ColourOptional = std::optional<ColourRGBA>;
 
-inline ColourOptional OptionalColour(Scintilla::uptr_t wParam, Scintilla::sptr_t lParam) {
+inline ColourOptional OptionalColour(Scintilla::uptr_t wParam, Scintilla::sptr_t lParam) noexcept {
 	if (wParam) {
 		return ColourRGBA::FromIpRGB(lParam);
 	} else {
