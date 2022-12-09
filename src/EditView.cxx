@@ -994,8 +994,11 @@ static ColourRGBA TextBackground(const EditModel &model, const ViewStyle &vsDraw
 		(i >= ll->edgeColumn) &&
 		(i < ll->numCharsBeforeEOL))
 		return vsDraw.theEdge.colour;
-	if (inHotspot && vsDraw.ElementColour(Element::HotSpotActiveBack))
-		return vsDraw.ElementColour(Element::HotSpotActiveBack)->Opaque();
+	if (inHotspot) {
+		if (const ColourOptional colourHotSpotBack = vsDraw.ElementColour(Element::HotSpotActiveBack)) {
+			return colourHotSpotBack->Opaque();
+		}
+	}
 	if (background && (styleMain != StyleBraceLight) && (styleMain != StyleBraceBad)) {
 		return *background;
 	} else {
@@ -1853,9 +1856,8 @@ namespace {
 void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll,
 	int xStart, PRectangle rcLine, ColourOptional background, DrawWrapMarkerFn customDrawWrapMarker,
 	bool caretActive) {
-	// default bgnd here..
-	surface->FillRectangleAligned(rcLine, Fill(background ? *background :
-		vsDraw.styles[StyleDefault].back));
+	// default background here..
+	surface->FillRectangleAligned(rcLine, Fill(background.value_or(vsDraw.styles[StyleDefault].back)));
 
 	if (vsDraw.IsLineFrameOpaque(caretActive, ll->containsCaret)) {
 		// Draw left of frame under marker
@@ -2154,8 +2156,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			// Hot-spot foreground
 			const bool inHotspot = model.hotspot.Valid() && model.hotspot.ContainsCharacter(iDoc);
 			if (inHotspot) {
-				if (vsDraw.ElementColour(Element::HotSpotActive))
-					textFore = *vsDraw.ElementColour(Element::HotSpotActive);
+				if (const ColourOptional colourHotSpot = vsDraw.ElementColour(Element::HotSpotActive)) {
+					textFore = *colourHotSpot;
+				}
 			}
 			if (vsDraw.indicatorsSetFore) {
 				// At least one indicator sets the text colour so see if it applies to this segment
@@ -2187,8 +2190,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			InSelection inSelection = vsDraw.selection.visible ? model.sel.CharacterInSelection(iDoc) : InSelection::inNone;
 			if (FlagSet(vsDraw.caret.style, CaretStyle::Curses) && (inSelection == InSelection::inMain))
 				inSelection = CharacterInCursesSelection(iDoc, model, vsDraw);
-			const ColourOptional selectionFore = SelectionForeground(model, vsDraw, inSelection);
-			if (selectionFore) {
+			if (const ColourOptional selectionFore = SelectionForeground(model, vsDraw, inSelection)) {
 				textFore = *selectionFore;
 			}
 			ColourRGBA textBack = TextBackground(model, vsDraw, ll, background, inSelection, inHotspot, styleMain, i);
@@ -2314,10 +2316,8 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				PRectangle rcUL = rcSegment;
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 				rcUL.bottom = rcUL.top + 1;
-				if (vsDraw.ElementColour(Element::HotSpotActive))
-					surface->FillRectangleAligned(rcUL, Fill(*vsDraw.ElementColour(Element::HotSpotActive)));
-				else
-					surface->FillRectangleAligned(rcUL, Fill(textFore));
+				const ColourOptional colourHotSpot = vsDraw.ElementColour(Element::HotSpotActive);
+				surface->FillRectangleAligned(rcUL, Fill(colourHotSpot.value_or(textFore)));
 			} else if (vsDraw.styles[styleMain].underline) {
 				PRectangle rcUL = rcSegment;
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
@@ -2509,8 +2509,7 @@ static void DrawFoldLines(Surface *surface, const EditModel &model, const ViewSt
 		}
 	}
 	if (lastSubLine && model.pcs->GetVisible(line) && !model.pcs->GetVisible(line + 1)) {
-		ColourOptional hiddenLineColour = vsDraw.ElementColour(Element::HiddenLine);
-		if (hiddenLineColour) {
+		if (const ColourOptional hiddenLineColour = vsDraw.ElementColour(Element::HiddenLine)) {
 			surface->FillRectangleAligned(Side(rcLine, Edge::bottom, 1.0), *hiddenLineColour);
 		}
 	}
@@ -2720,11 +2719,10 @@ void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const
 		eolInSelection = model.LineEndInSelection(line);
 	}
 
-	const ColourOptional background = vsDraw.Background(model.GetMark(line), model.caret.active, ll->containsCaret);
-
 	if (eolInSelection && vsDraw.selection.eolFilled && (line < model.pdoc->LinesTotal() - 1) && (vsDraw.selection.layer == Layer::Base)) {
 		surface->FillRectangleAligned(rcArea, Fill(SelectionBackground(model, vsDraw, eolInSelection).Opaque()));
 	} else {
+		const ColourOptional background = vsDraw.Background(model.GetMark(line), model.caret.active, ll->containsCaret);
 		if (background) {
 			surface->FillRectangleAligned(rcArea, Fill(*background));
 		} else if (vsDraw.styles[ll->styles[ll->numCharsInLine]].eolFilled) {
