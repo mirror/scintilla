@@ -1819,7 +1819,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		return;
 	}
 
-	view.PaintText(surfaceWindow, *this, rcArea, rcClient, vs);
+	view.PaintText(surfaceWindow, *this, vs, rcArea, rcClient);
 
 	if (horizontalScrollBarVisible && trackLineWidth && (view.lineWidthMaxSeen > scrollWidth)) {
 		scrollWidth = view.lineWidthMaxSeen;
