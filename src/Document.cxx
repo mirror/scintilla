@@ -558,7 +558,7 @@ int SCI_METHOD Document::GetLevel(Sci_Position line) const {
 	return Levels()->GetLevel(line);
 }
 
-FoldLevel Document::GetFoldLevel(Sci_Position line) const {
+FoldLevel Document::GetFoldLevel(Sci_Position line) const noexcept {
 	return static_cast<FoldLevel>(Levels()->GetLevel(line));
 }
 
@@ -597,21 +597,15 @@ Sci::Line Document::GetLastChild(Sci::Line lineParent, std::optional<FoldLevel> 
 	return lineMaxSubord;
 }
 
-Sci::Line Document::GetFoldParent(Sci::Line line) const {
+Sci::Line Document::GetFoldParent(Sci::Line line) const noexcept {
 	const FoldLevel level = LevelNumberPart(GetFoldLevel(line));
-	Sci::Line lineLook = line - 1;
-	while ((lineLook > 0) && (
-	            (!LevelIsHeader(GetFoldLevel(lineLook))) ||
-	            (LevelNumberPart(GetFoldLevel(lineLook)) >= level))
-	      ) {
-		lineLook--;
+	for (Sci::Line lineLook = line - 1; lineLook >= 0; lineLook--) {
+		const FoldLevel levelTry = GetFoldLevel(lineLook);
+		if (LevelIsHeader(levelTry) && LevelNumberPart(levelTry) < level) {
+			return lineLook;
+		}
 	}
-	if (LevelIsHeader(GetFoldLevel(lineLook)) &&
-	        (LevelNumberPart(GetFoldLevel(lineLook)) < level)) {
-		return lineLook;
-	} else {
-		return -1;
-	}
+	return -1;
 }
 
 void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, Sci::Line line, Sci::Line lastLine) {
