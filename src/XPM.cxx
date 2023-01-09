@@ -239,6 +239,14 @@ RGBAImage::RGBAImage(const XPM &xpm) {
 	}
 }
 
+float RGBAImage::GetScaledHeight() const noexcept {
+	return static_cast<float>(height) / scale;
+}
+
+float RGBAImage::GetScaledWidth() const noexcept {
+	return static_cast<float>(width) / scale;
+}
+
 int RGBAImage::CountBytes() const noexcept {
 	return width * height * 4;
 }
