@@ -2960,6 +2960,49 @@ class TestDirectAccess(unittest.TestCase):
 		cpBuffer = ctypes.c_char_p(rangePointer)
 		self.assertEquals(cpBuffer.value, text[1:])
 
+class TestJoin(unittest.TestCase):
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+
+	def tearDown(self):
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+
+	def testJoin(self):
+		text = b"a\r\nb\r\nc"
+		self.ed.SetContents(text)
+		self.ed.TargetWholeDocument()
+		self.ed.LinesJoin()
+		self.assertEquals(self.ed.Contents(), b"a b c")
+
+	def testJoinEndLine(self):
+		text = b"a\r\nb\r\nc"
+		self.ed.SetContents(text)
+		# Select a..b
+		self.ed.SetTargetRange(0, 4)
+		self.ed.LinesJoin()
+		self.assertEquals(self.ed.Contents(), b"a b\r\nc")
+
+	def testJoinSpace(self):
+		# Demonstration of bug #2372 which produced b"a \r"
+		text = b"a \r\n\r\n"
+		self.ed.SetContents(text)
+		self.ed.TargetWholeDocument()
+		self.ed.LinesJoin()
+		self.assertEquals(self.ed.Contents(), b"a ")
+
+	def testJoinOutOfBounds(self):
+		text = b"a\r\nb\r\nc"
+		self.ed.SetContents(text)
+		# Setting end of target after document end encourages non-termination.
+		self.ed.SetTargetRange(-10, 16)
+		self.ed.LinesJoin()
+		# Out-of-bounds leaves extra space as 'c' is processed
+		self.assertEquals(self.ed.Contents(), b"a b c ")
+
 class TestWordChars(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame
