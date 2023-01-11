@@ -1623,7 +1623,8 @@ bool Editor::WrapLines(WrapScope ws) {
 void Editor::LinesJoin() {
 	if (!RangeContainsProtected(targetRange.start.Position(), targetRange.end.Position())) {
 		UndoGroup ug(pdoc);
-		for (Sci::Position pos = pdoc->LineEndPosition(targetRange.start.Position()); pos < targetRange.end.Position();) {
+		const Sci::Line line = pdoc->SciLineFromPosition(targetRange.start.Position());
+		for (Sci::Position pos = pdoc->LineEnd(line); pos < targetRange.end.Position(); pos = pdoc->LineEnd(line)) {
 			const char chPrev = pdoc->CharAt(pos - 1);
 			const Sci::Position widthChar = pdoc->LenChar(pos);
 			targetRange.end.Add(-widthChar);
@@ -1633,7 +1634,6 @@ void Editor::LinesJoin() {
 				const Sci::Position lengthInserted = pdoc->InsertString(pos, " ", 1);
 				targetRange.end.Add(lengthInserted);
 			}
-			pos = pdoc->LineEndPosition(pos);
 		}
 	}
 }
