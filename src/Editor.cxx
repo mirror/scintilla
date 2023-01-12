@@ -1913,8 +1913,8 @@ Sci::Position Editor::RealizeVirtualSpace(Sci::Position position, Sci::Position 
 		if (indent == position) {
 			return pdoc->SetLineIndentation(line, pdoc->GetLineIndentation(line) + virtualSpace);
 		} else {
-			std::string spaceText(virtualSpace, ' ');
-			const Sci::Position lengthInserted = pdoc->InsertString(position, spaceText.c_str(), virtualSpace);
+			const std::string spaceText(virtualSpace, ' ');
+			const Sci::Position lengthInserted = pdoc->InsertString(position, spaceText);
 			position += lengthInserted;
 		}
 	}
@@ -1981,7 +1981,7 @@ void Editor::InsertCharacter(std::string_view sv, CharacterSource charSource) {
 					}
 				}
 				positionInsert = RealizeVirtualSpace(positionInsert, currentSel->caret.VirtualSpace());
-				const Sci::Position lengthInserted = pdoc->InsertString(positionInsert, sv.data(), sv.length());
+				const Sci::Position lengthInserted = pdoc->InsertString(positionInsert, sv);
 				if (lengthInserted > 0) {
 					currentSel->caret.SetPosition(positionInsert + lengthInserted);
 					currentSel->anchor.SetPosition(positionInsert + lengthInserted);
@@ -3013,10 +3013,8 @@ void Editor::LineTranspose() {
 		pdoc->DeleteChars(startPrevious, linePrevious.length());
 		startCurrent -= linePrevious.length();
 
-		startCurrent += pdoc->InsertString(startPrevious, lineCurrent.c_str(),
-			lineCurrent.length());
-		pdoc->InsertString(startCurrent, linePrevious.c_str(),
-			linePrevious.length());
+		startCurrent += pdoc->InsertString(startPrevious, lineCurrent);
+		pdoc->InsertString(startCurrent, linePrevious);
 		// Move caret to start of current line
 		MovePositionTo(SelectionPosition(startCurrent));
 	}
@@ -3043,8 +3041,8 @@ void Editor::LineReverse() {
 		pdoc->DeleteChars(lineStart2, lineLen2);
 		pdoc->DeleteChars(lineStart1, lineLen1);
 		lineStart2 -= lineLen1;
-		pdoc->InsertString(lineStart2, line1.c_str(), lineLen1);
-		pdoc->InsertString(lineStart1, line2.c_str(), lineLen2);
+		pdoc->InsertString(lineStart2, line1);
+		pdoc->InsertString(lineStart1, line2);
 	}
 	// Wholly select all affected lines
 	sel.RangeMain() = SelectionRange(pdoc->LineStart(lineStart),
@@ -4015,8 +4013,7 @@ void Editor::Indent(bool forwards) {
 						if (numSpaces < 1)
 							numSpaces = pdoc->tabInChars;
 						const std::string spaceText(numSpaces, ' ');
-						const Sci::Position lengthInserted = pdoc->InsertString(caretPosition, spaceText.c_str(),
-							spaceText.length());
+						const Sci::Position lengthInserted = pdoc->InsertString(caretPosition, spaceText);
 						sel.Range(r) = SelectionRange(caretPosition + lengthInserted);
 					}
 				}
@@ -4400,7 +4397,7 @@ void Editor::DropAt(SelectionPosition position, const char *value, size_t length
 			position = MovePositionOutsideChar(position, sel.MainCaret() - position.Position());
 			position = RealizeVirtualSpace(position);
 			const Sci::Position lengthInserted = pdoc->InsertString(
-				position.Position(), convertedText.c_str(), convertedText.length());
+				position.Position(), convertedText);
 			if (lengthInserted > 0) {
 				SelectionPosition posAfterInsertion = position;
 				posAfterInsertion.Add(lengthInserted);
@@ -5763,7 +5760,7 @@ void Editor::AddStyledText(const char *buffer, Sci::Position appendLength) {
 	for (i = 0; i < textLength; i++) {
 		text[i] = buffer[i*2];
 	}
-	const Sci::Position lengthInserted = pdoc->InsertString(CurrentPosition(), text.c_str(), textLength);
+	const Sci::Position lengthInserted = pdoc->InsertString(CurrentPosition(), text);
 	for (i = 0; i < textLength; i++) {
 		text[i] = buffer[i*2+1];
 	}

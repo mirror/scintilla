@@ -1570,13 +1570,12 @@ Sci::Position Document::SetLineIndentation(Sci::Line line, Sci::Position indent)
 	if (indent < 0)
 		indent = 0;
 	if (indent != indentOfLine) {
-		std::string linebuf = CreateIndentation(indent, tabInChars, !useTabs);
+		const std::string linebuf = CreateIndentation(indent, tabInChars, !useTabs);
 		const Sci::Position thisLineStart = LineStart(line);
 		const Sci::Position indentPos = GetLineIndentPosition(line);
 		UndoGroup ug(this);
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
-		return thisLineStart + InsertString(thisLineStart, linebuf.c_str(),
-			linebuf.length());
+		return thisLineStart + InsertString(thisLineStart, linebuf);
 	} else {
 		return GetLineIndentPosition(line);
 	}

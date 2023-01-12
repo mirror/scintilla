@@ -607,6 +607,17 @@ class TestSimple(unittest.TestCase):
 		self.ed.LineTranspose()
 		self.assertEquals(self.ed.Contents(), b"b2\na1\nc3")
 
+	def testReverseLines(self):
+		self.ed.SetContents(b"a1\nb2\nc3")
+		self.ed.SetSel(0, 8)
+		self.ed.LineReverse()
+		self.assertEquals(self.ed.Contents(), b"c3\nb2\na1")
+
+		self.ed.SetContents(b"a1\nb2\nc3\n")
+		self.ed.SetSel(0, 9)
+		self.ed.LineReverse()
+		self.assertEquals(self.ed.Contents(), b"c3\nb2\na1\n")
+
 	def testMoveSelectedLines(self):
 		lineEndType = self.ed.EOLMode
 		self.ed.EOLMode = self.ed.SC_EOL_LF
