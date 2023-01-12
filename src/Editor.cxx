@@ -1067,14 +1067,14 @@ void Editor::MoveSelectedLines(int lineDelta) {
 		SetSelection(pdoc->MovePositionOutsideChar(selectionStart - 1, -1), selectionEnd);
 	ClearSelection();
 
-	const char *eol = StringFromEOLMode(pdoc->eolMode);
+	const std::string_view eol = pdoc->EOLString();
 	if (currentLine + lineDelta >= pdoc->LinesTotal())
-		pdoc->InsertString(pdoc->Length(), eol, strlen(eol));
+		pdoc->InsertString(pdoc->Length(), eol);
 	GoToLine(currentLine + lineDelta);
 
 	Sci::Position selectionLength = pdoc->InsertString(CurrentPosition(), selectedText);
 	if (appendEol) {
-		const Sci::Position lengthInserted = pdoc->InsertString(CurrentPosition() + selectionLength, eol, strlen(eol));
+		const Sci::Position lengthInserted = pdoc->InsertString(CurrentPosition() + selectionLength, eol);
 		selectionLength += lengthInserted;
 	}
 	SetSelection(CurrentPosition(), CurrentPosition() + selectionLength);
@@ -1638,16 +1638,6 @@ void Editor::LinesJoin() {
 	}
 }
 
-const char *Editor::StringFromEOLMode(EndOfLine eolMode) noexcept {
-	if (eolMode == EndOfLine::CrLf) {
-		return "\r\n";
-	} else if (eolMode == EndOfLine::Cr) {
-		return "\r";
-	} else {
-		return "\n";
-	}
-}
-
 void Editor::LinesSplit(int pixelWidth) {
 	if (!RangeContainsProtected(targetRange.start.Position(), targetRange.end.Position())) {
 		if (pixelWidth == 0) {
@@ -1656,7 +1646,7 @@ void Editor::LinesSplit(int pixelWidth) {
 		}
 		const Sci::Line lineStart = pdoc->SciLineFromPosition(targetRange.start.Position());
 		Sci::Line lineEnd = pdoc->SciLineFromPosition(targetRange.end.Position());
-		const char *eol = StringFromEOLMode(pdoc->eolMode);
+		const std::string_view eol = pdoc->EOLString();
 		UndoGroup ug(pdoc);
 		for (Sci::Line line = lineStart; line <= lineEnd; line++) {
 			AutoSurface surface(this);
@@ -1667,8 +1657,7 @@ void Editor::LinesSplit(int pixelWidth) {
 				Sci::Position lengthInsertedTotal = 0;
 				for (int subLine = 1; subLine < ll->lines; subLine++) {
 					const Sci::Position lengthInserted = pdoc->InsertString(
-						posLineStart + lengthInsertedTotal + ll->LineStart(subLine),
-						eol, strlen(eol));
+						posLineStart + lengthInsertedTotal + ll->LineStart(subLine), eol);
 					targetRange.end.Add(lengthInserted);
 					lengthInsertedTotal += lengthInserted;
 				}
@@ -2126,9 +2115,8 @@ void Editor::InsertPasteShape(const char *text, Sci::Position len, PasteShape sh
 			Sci::Position lengthInserted = pdoc->InsertString(insertPos, text, len);
 			// add the newline if necessary
 			if ((len > 0) && (text[len - 1] != '\n' && text[len - 1] != '\r')) {
-				const char *endline = StringFromEOLMode(pdoc->eolMode);
-				const Sci::Position length = strlen(endline);
-				lengthInserted += pdoc->InsertString(insertPos + lengthInserted, endline, length);
+				const std::string_view endline = pdoc->EOLString();
+				lengthInserted += pdoc->InsertString(insertPos + lengthInserted, endline);
 			}
 			if (sel.MainCaret() == insertPos) {
 				SetEmptySelection(sel.MainCaret() + lengthInserted);
@@ -2222,10 +2210,8 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, Sci::Posit
 			if ((ptr[i] == '\r') || (!prevCr))
 				line++;
 			if (line >= pdoc->LinesTotal()) {
-				if (pdoc->eolMode != EndOfLine::Lf)
-					pdoc->InsertString(pdoc->Length(), "\r", 1);
-				if (pdoc->eolMode != EndOfLine::Cr)
-					pdoc->InsertString(pdoc->Length(), "\n", 1);
+				const std::string_view eol = pdoc->EOLString();
+				pdoc->InsertString(pdoc->LengthNoExcept(), eol);
 			}
 			// Pad the end of lines with spaces if required
 			sel.RangeMain().caret.SetPosition(PositionFromLineX(line, xInsert));
@@ -3070,11 +3056,9 @@ void Editor::Duplicate(bool forLine) {
 		forLine = true;
 	}
 	UndoGroup ug(pdoc);
-	const char *eol = "";
-	Sci::Position eolLen = 0;
+	std::string_view eol;
 	if (forLine) {
-		eol = StringFromEOLMode(pdoc->eolMode);
-		eolLen = strlen(eol);
+		eol = pdoc->EOLString();
 	}
 	for (size_t r=0; r<sel.Count(); r++) {
 		SelectionPosition start = sel.Range(r).Start();
@@ -3085,10 +3069,10 @@ void Editor::Duplicate(bool forLine) {
 			end = SelectionPosition(pdoc->LineEnd(line));
 		}
 		std::string text = RangeText(start.Position(), end.Position());
-		Sci::Position lengthInserted = eolLen;
+		Sci::Position lengthInserted = 0;
 		if (forLine)
-			lengthInserted = pdoc->InsertString(end.Position(), eol, eolLen);
-		pdoc->InsertString(end.Position() + lengthInserted, text.c_str(), text.length());
+			lengthInserted = pdoc->InsertString(end.Position(), eol);
+		pdoc->InsertString(end.Position() + lengthInserted, text);
 	}
 	if (sel.Count() && sel.IsRectangular()) {
 		SelectionPosition last = sel.Last();
@@ -3125,11 +3109,11 @@ void Editor::NewLine() {
 
 	// Insert each line end
 	size_t countInsertions = 0;
+	const std::string_view eol = pdoc->EOLString();
 	for (size_t r = 0; r < sel.Count(); r++) {
 		sel.Range(r).ClearVirtualSpace();
-		const char *eol = StringFromEOLMode(pdoc->eolMode);
 		const Sci::Position positionInsert = sel.Range(r).caret.Position();
-		const Sci::Position insertLength = pdoc->InsertString(positionInsert, eol, strlen(eol));
+		const Sci::Position insertLength = pdoc->InsertString(positionInsert, eol);
 		if (insertLength > 0) {
 			sel.Range(r) = SelectionRange(positionInsert + insertLength);
 			countInsertions++;
@@ -3139,16 +3123,12 @@ void Editor::NewLine() {
 	// Perform notifications after all the changes as the application may change the
 	// selections in response to the characters.
 	for (size_t i = 0; i < countInsertions; i++) {
-		const char *eol = StringFromEOLMode(pdoc->eolMode);
-		while (*eol) {
-			NotifyChar(*eol, CharacterSource::DirectInput);
+		for (const char ch : eol) {
+			NotifyChar(ch, CharacterSource::DirectInput);
 			if (recordingMacro) {
-				char txt[2];
-				txt[0] = *eol;
-				txt[1] = '\0';
+				const char txt[2] = { ch, '\0' };
 				NotifyMacroRecord(Message::ReplaceSel, 0, reinterpret_cast<sptr_t>(txt));
 			}
-			eol++;
 		}
 	}
 
