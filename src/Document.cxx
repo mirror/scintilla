@@ -512,7 +512,7 @@ Sci::Position Document::VCHomePosition(Sci::Position position) const {
 	const Sci::Position startPosition = LineStart(line);
 	const Sci::Position endLine = LineEnd(line);
 	Sci::Position startText = startPosition;
-	while (startText < endLine && (cb.CharAt(startText) == ' ' || cb.CharAt(startText) == '\t'))
+	while (startText < endLine && IsSpaceOrTab(cb.CharAt(startText)))
 		startText++;
 	if (position == startText)
 		return startPosition;
@@ -1712,7 +1712,8 @@ void Document::ConvertLineEnds(EndOfLine eolModeSet) {
 	UndoGroup ug(this);
 
 	for (Sci::Position pos = 0; pos < Length(); pos++) {
-		if (cb.CharAt(pos) == '\r') {
+		const char ch = cb.CharAt(pos);
+		if (ch == '\r') {
 			if (cb.CharAt(pos + 1) == '\n') {
 				// CRLF
 				if (eolModeSet == EndOfLine::Cr) {
@@ -1732,7 +1733,7 @@ void Document::ConvertLineEnds(EndOfLine eolModeSet) {
 					pos--;
 				}
 			}
-		} else if (cb.CharAt(pos) == '\n') {
+		} else if (ch == '\n') {
 			// LF
 			if (eolModeSet == EndOfLine::CrLf) {
 				pos += InsertString(pos, "\r", 1); // Insert CR
