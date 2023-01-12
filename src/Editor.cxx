@@ -1181,9 +1181,11 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange &ran
 		// It should be possible to scroll the window to show the caret,
 		// but this fails to remove the caret on GTK+
 		if (bSlop) {	// A margin is defined
-			Sci::Line yMoveT, yMoveB;
+			Sci::Line yMoveT = 0;
+			Sci::Line yMoveB = 0;
 			if (bStrict) {
-				Sci::Line yMarginT, yMarginB;
+				Sci::Line yMarginT = 0;
+				Sci::Line yMarginB = 0;
 				if (!FlagSet(options, XYScrollOptions::useMargin)) {
 					// In drag mode, avoid moves
 					// otherwise, a double click will select several lines.
@@ -1278,9 +1280,11 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange &ran
 		const bool bEven = FlagSet(policies.x.policy, CaretPolicy::Even);
 
 		if (bSlop) {	// A margin is defined
-			int xMoveL, xMoveR;
+			int xMoveL = 0;
+			int xMoveR = 0;
 			if (bStrict) {
-				int xMarginL, xMarginR;
+				int xMarginL = 0;
+				int xMarginR = 0;
 				if (!FlagSet(options, XYScrollOptions::useMargin)) {
 					// In drag mode, avoid moves unless very near of the margin
 					// otherwise, a simple click will select text.
@@ -5754,12 +5758,11 @@ void Editor::AddStyledText(const char *buffer, Sci::Position appendLength) {
 	// The buffer consists of alternating character bytes and style bytes
 	const Sci::Position textLength = appendLength / 2;
 	std::string text(textLength, '\0');
-	Sci::Position i;
-	for (i = 0; i < textLength; i++) {
+	for (Sci::Position i = 0; i < textLength; i++) {
 		text[i] = buffer[i*2];
 	}
 	const Sci::Position lengthInserted = pdoc->InsertString(CurrentPosition(), text);
-	for (i = 0; i < textLength; i++) {
+	for (Sci::Position i = 0; i < textLength; i++) {
 		text[i] = buffer[i*2+1];
 	}
 	pdoc->StartStyling(CurrentPosition());
