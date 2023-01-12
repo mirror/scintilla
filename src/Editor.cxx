@@ -4117,14 +4117,14 @@ Sci::Position Editor::FindTextFull(
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
 	try {
 		const Sci::Position pos = pdoc->FindText(
-			static_cast<Sci::Position>(ft->chrg.cpMin),
-			static_cast<Sci::Position>(ft->chrg.cpMax),
+			ft->chrg.cpMin,
+			ft->chrg.cpMax,
 			ft->lpstrText,
 			static_cast<FindOption>(wParam),
 			&lengthFound);
 		if (pos != -1) {
-			ft->chrgText.cpMin = static_cast<Sci_PositionCR>(pos);
-			ft->chrgText.cpMax = static_cast<Sci_PositionCR>(pos + lengthFound);
+			ft->chrgText.cpMin = pos;
+			ft->chrgText.cpMax = pos + lengthFound;
 		}
 		return pos;
 	} catch (RegexError &) {
