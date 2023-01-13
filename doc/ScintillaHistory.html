@@ -589,6 +589,13 @@
 	Fix SCI_LINESJOIN bug where carriage returns were incorrectly retained.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2372/">Bug #2372</a>.
 	</li>
+	<li>
+	On Cocoa fix character input bug where dotless 'i' and some other extended
+	Latin characters could not be entered.
+	The change also stops SCI_ASSIGNCMDKEY from working with these characters
+	on Cocoa.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2374/">Bug #2374</a>.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scintilla532.zip">Release 5.3.2</a>
