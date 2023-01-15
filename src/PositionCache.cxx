@@ -314,6 +314,14 @@ XYPOSITION LineLayout::XInLine(Sci::Position index) const noexcept {
 	return positions[numCharsInLine] + 1.0;
 }
 
+Interval LineLayout::Span(int start, int end) const noexcept {
+	return { positions[start], positions[end] };
+}
+
+Interval LineLayout::SpanByte(int index) const noexcept {
+	return Span(index, index+1);
+}
+
 int LineLayout::EndLineStyle() const noexcept {
 	return styles[numCharsBeforeEOL > 0 ? numCharsBeforeEOL-1 : 0];
 }

@@ -1756,17 +1756,11 @@ void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &v
 		const Sci::Position i = ts.end() - 1;
 		const Sci::Position iDoc = i + posLineStart;
 
-		PRectangle rcSegment = rcLine;
-		rcSegment.left = ll->positions[ts.start] + horizontalOffset;
-		rcSegment.right = ll->positions[ts.end()] + horizontalOffset;
+		const Interval horizontal = ll->Span(ts.start, ts.end()).Offset(horizontalOffset);
 		// Only try to draw if really visible - enhances performance by not calling environment to
 		// draw strings that are completely past the right side of the window.
-		if (!rcSegment.Empty() && rcSegment.Intersects(rcLine)) {
-			// Clip to line rectangle, since may have a huge position which will not work with some platforms
-			if (rcSegment.left < rcLine.left)
-				rcSegment.left = rcLine.left;
-			if (rcSegment.right > rcLine.right)
-				rcSegment.right = rcLine.right;
+		if (!horizontal.Empty() && rcLine.Intersects(horizontal)) {
+			const PRectangle rcSegment = Intersection(rcLine, horizontal);
 
 			InSelection inSelection = vsDraw.selection.visible ? model.sel.CharacterInSelection(iDoc) : InSelection::inNone;
 			if (FlagSet(vsDraw.caret.style, CaretStyle::Curses) && (inSelection == InSelection::inMain))
@@ -1792,11 +1786,8 @@ void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &v
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
 							if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation)) {
-								const PRectangle rcSpace(
-									ll->positions[cpos + ts.start] + horizontalOffset,
-									rcSegment.top,
-									ll->positions[cpos + ts.start + 1] + horizontalOffset,
-									rcSegment.bottom);
+								const PRectangle rcSpace = Intersection(rcLine,
+									ll->SpanByte(cpos + ts.start).Offset(horizontalOffset));
 								surface->FillRectangleAligned(rcSpace,
 									vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque());
 							}
@@ -1806,7 +1797,7 @@ void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &v
 					}
 				}
 			}
-		} else if (rcSegment.left > rcLine.right) {
+		} else if (horizontal.left > rcLine.right) {
 			break;
 		}
 	}
@@ -1869,45 +1860,44 @@ void DrawTranslucentSelection(Surface *surface, const EditModel &model, const Vi
 		for (size_t r = 0; r < model.sel.Count(); r++) {
 			const SelectionSegment portion = model.sel.Range(r).Intersect(virtualSpaceRange);
 			if (!portion.Empty()) {
+				const SelectionSegment portionInLine = portion.Subtract(posLineStart);
 				const ColourRGBA selectionBack = SelectionBackground(
 					model, vsDraw, model.sel.RangeType(r));
 				const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
+				const Interval intervalVirtual{ portion.start.VirtualSpace() * spaceWidth, portion.end.VirtualSpace() * spaceWidth };
 				if (model.BidirectionalEnabled()) {
-					const Sci::Position selectionStart = portion.start.Position() - posLineStart - lineRange.start;
-					const Sci::Position selectionEnd = portion.end.Position() - posLineStart - lineRange.start;
+					const SelectionSegment portionInSubLine = portionInLine.Subtract(lineRange.start);
 
 					const ScreenLine screenLine(ll, subLine, vsDraw, rcLine.right, tabWidthMinimumPixels);
 					std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
 
 					if (slLayout) {
-						const std::vector<Interval> intervals = slLayout->FindRangeIntervals(selectionStart, selectionEnd);
+						const std::vector<Interval> intervals = slLayout->FindRangeIntervals(
+							portionInSubLine.start.Position(), portionInSubLine.end.Position());
 						for (const Interval &interval : intervals) {
-							const XYPOSITION rcRight = interval.right + xStart;
-							const XYPOSITION rcLeft = interval.left + xStart;
-							const PRectangle rcSelection(rcLeft, rcLine.top, rcRight, rcLine.bottom);
+							const PRectangle rcSelection = rcLine.WithHorizontalBounds(interval.Offset(xStart));
 							surface->FillRectangleAligned(rcSelection, selectionBack);
 						}
 					}
 
 					if (portion.end.VirtualSpace()) {
 						const XYPOSITION xStartVirtual = ll->positions[lineRange.end] + horizontalOffset;
-						PRectangle rcSegment = rcLine;
-						rcSegment.left = xStartVirtual + portion.start.VirtualSpace() * spaceWidth;
-						rcSegment.right = xStartVirtual + portion.end.VirtualSpace() * spaceWidth;
+						const PRectangle rcSegment = rcLine.WithHorizontalBounds(intervalVirtual.Offset(xStartVirtual));
 						surface->FillRectangleAligned(rcSegment, selectionBack);
 					}
 				} else {
-					PRectangle rcSegment = rcLine;
-					rcSegment.left = ll->positions[portion.start.Position() - posLineStart] +
-						horizontalOffset + portion.start.VirtualSpace() * spaceWidth;
-					rcSegment.right = ll->positions[portion.end.Position() - posLineStart] +
-						horizontalOffset + portion.end.VirtualSpace() * spaceWidth;
+					Interval intervalSegment = ll->Span(
+						static_cast<int>(portionInLine.start.Position()),
+						static_cast<int>(portionInLine.end.Position()))
+						.Offset(horizontalOffset);
+					intervalSegment.left += intervalVirtual.left;
+					intervalSegment.right += intervalVirtual.right;
 					if ((ll->wrapIndent != 0) && (lineRange.start != 0)) {
-						if ((portion.start.Position() - posLineStart) == lineRange.start && model.sel.Range(r).ContainsCharacter(portion.start.Position() - 1))
-							rcSegment.left -= static_cast<int>(ll->wrapIndent); // indentation added to xStart was truncated to int, so we do the same here
+						if ((portionInLine.start.Position() == lineRange.start) &&
+							model.sel.Range(r).ContainsCharacter(portion.start.Position() - 1))
+							intervalSegment.left -= static_cast<int>(ll->wrapIndent); // indentation added to xStart was truncated to int, so we do the same here
 					}
-					rcSegment.left = (rcSegment.left > rcLine.left) ? rcSegment.left : rcLine.left;
-					rcSegment.right = (rcSegment.right < rcLine.right) ? rcSegment.right : rcLine.right;
+					const PRectangle rcSegment = Intersection(rcLine, intervalSegment);
 					if (rcSegment.right > rcLine.left)
 						surface->FillRectangleAligned(rcSegment, selectionBack);
 				}
@@ -2240,12 +2230,11 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 		const Sci::Position i = ts.end() - 1;
 		const Sci::Position iDoc = i + posLineStart;
 
-		PRectangle rcSegment = rcLine;
-		rcSegment.left = ll->positions[ts.start] + horizontalOffset;
-		rcSegment.right = ll->positions[ts.end()] + horizontalOffset;
+		const Interval horizontal = ll->Span(ts.start, ts.end()).Offset(horizontalOffset);
 		// Only try to draw if really visible - enhances performance by not calling environment to
 		// draw strings that are completely past the right side of the window.
-		if (rcSegment.Intersects(rcLine)) {
+		if (rcLine.Intersects(horizontal)) {
+			const PRectangle rcSegment = rcLine.WithHorizontalBounds(horizontal);
 			const int styleMain = ll->styles[i];
 			ColourRGBA textFore = vsDraw.styles[styleMain].fore;
 			const Font *textFont = vsDraw.styles[styleMain].font.get();
@@ -2299,8 +2288,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						surface->FillRectangleAligned(rcSegment, Fill(textBack));
 					}
 					if (inIndentation && vsDraw.viewIndentationGuides == IndentView::Real) {
-						for (int indentCount = static_cast<int>((ll->positions[i] + epsilon) / indentWidth);
-							indentCount <= (ll->positions[i + 1] - epsilon) / indentWidth;
+						const Interval intervalCharacter = ll->SpanByte(static_cast<int>(i));
+						for (int indentCount = static_cast<int>((intervalCharacter.left + epsilon) / indentWidth);
+							indentCount <= (intervalCharacter.right - epsilon) / indentWidth;
 							indentCount++) {
 							if (indentCount > 0) {
 								const XYPOSITION xIndent = std::floor(indentCount * indentWidth);
@@ -2370,18 +2360,15 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						if (ll->chars[cpos + ts.start] == ' ') {
 							if (vsDraw.viewWhitespace != WhiteSpace::Invisible) {
 								if (vsDraw.WhiteSpaceVisible(inIndentation)) {
-									const XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
+									const Interval intervalSpace = ll->SpanByte(cpos + ts.start).Offset(horizontalOffset);
+									const XYPOSITION xmid = (intervalSpace.left + intervalSpace.right) / 2;
 									if ((phasesDraw == PhasesDraw::One) && drawWhitespaceBackground) {
 										textBack = vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque();
-										const PRectangle rcSpace(
-											ll->positions[cpos + ts.start] + horizontalOffset,
-											rcSegment.top,
-											ll->positions[cpos + ts.start + 1] + horizontalOffset,
-											rcSegment.bottom);
+										const PRectangle rcSpace = rcLine.WithHorizontalBounds(intervalSpace);
 										surface->FillRectangleAligned(rcSpace, Fill(textBack));
 									}
 									const int halfDotWidth = vsDraw.whitespaceSize / 2;
-									PRectangle rcDot(xmid - halfDotWidth + horizontalOffset,
+									PRectangle rcDot(xmid - halfDotWidth,
 										rcSegment.top + vsDraw.lineHeight / 2, 0.0f, 0.0f);
 									rcDot.right = rcDot.left + vsDraw.whitespaceSize;
 									rcDot.bottom = rcDot.top + vsDraw.whitespaceSize;
@@ -2390,8 +2377,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								}
 							}
 							if (inIndentation && vsDraw.viewIndentationGuides == IndentView::Real) {
-								for (int indentCount = static_cast<int>((ll->positions[cpos + ts.start] + epsilon) / indentWidth);
-									indentCount <= (ll->positions[cpos + ts.start + 1] - epsilon) / indentWidth;
+								const Interval intervalCharacter = ll->SpanByte(cpos + ts.start);
+								for (int indentCount = static_cast<int>((intervalCharacter.left + epsilon) / indentWidth);
+									indentCount <= (intervalCharacter.right - epsilon) / indentWidth;
 									indentCount++) {
 									if (indentCount > 0) {
 										const XYPOSITION xIndent = std::floor(indentCount * indentWidth);
@@ -2405,19 +2393,17 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					}
 				}
 			}
-			if (inHotspot && vsDraw.hotspotUnderline) {
+			if ((inHotspot && vsDraw.hotspotUnderline) || vsDraw.styles[styleMain].underline) {
 				PRectangle rcUL = rcSegment;
 				rcUL.top = ybase + 1;
 				rcUL.bottom = ybase + 2;
-				const ColourOptional colourHotSpot = vsDraw.ElementColour(Element::HotSpotActive);
-				surface->FillRectangleAligned(rcUL, Fill(colourHotSpot.value_or(textFore)));
-			} else if (vsDraw.styles[styleMain].underline) {
-				PRectangle rcUL = rcSegment;
-				rcUL.top = ybase + 1;
-				rcUL.bottom = ybase + 2;
-				surface->FillRectangleAligned(rcUL, Fill(textFore));
+				ColourRGBA colourUnderline = textFore;
+				if (inHotspot && vsDraw.hotspotUnderline) {
+					colourUnderline = vsDraw.ElementColour(Element::HotSpotActive).value_or(textFore);
+				}
+				surface->FillRectangleAligned(rcUL, colourUnderline);
 			}
-		} else if (rcSegment.left > rcLine.right) {
+		} else if (horizontal.left > rcLine.right) {
 			break;
 		}
 	}
