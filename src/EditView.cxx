@@ -1740,6 +1740,7 @@ void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &v
 	const bool selBackDrawn = vsDraw.SelectionBackgroundDrawn();
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+	const XYPOSITION horizontalOffset = xStart - subLineStart;
 	// Does not take margin into account but not significant
 	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
 
@@ -1756,8 +1757,8 @@ void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &v
 		const Sci::Position iDoc = i + posLineStart;
 
 		PRectangle rcSegment = rcLine;
-		rcSegment.left = ll->positions[ts.start] + xStart - static_cast<XYPOSITION>(subLineStart);
-		rcSegment.right = ll->positions[ts.end()] + xStart - static_cast<XYPOSITION>(subLineStart);
+		rcSegment.left = ll->positions[ts.start] + horizontalOffset;
+		rcSegment.right = ll->positions[ts.end()] + horizontalOffset;
 		// Only try to draw if really visible - enhances performance by not calling environment to
 		// draw strings that are completely past the right side of the window.
 		if (!rcSegment.Empty() && rcSegment.Intersects(rcLine)) {
@@ -1792,9 +1793,9 @@ void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &v
 						if (ll->chars[cpos + ts.start] == ' ') {
 							if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation)) {
 								const PRectangle rcSpace(
-									ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
+									ll->positions[cpos + ts.start] + horizontalOffset,
 									rcSegment.top,
-									ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
+									ll->positions[cpos + ts.start + 1] + horizontalOffset,
 									rcSegment.bottom);
 								surface->FillRectangleAligned(rcSpace,
 									vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque());
@@ -1856,6 +1857,7 @@ void DrawTranslucentSelection(Surface *surface, const EditModel &model, const Vi
 	if (vsDraw.selection.layer == layer) {
 		const Sci::Position posLineStart = model.pdoc->LineStart(line);
 		const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+		const XYPOSITION horizontalOffset = xStart - subLineStart;
 		// For each selection draw
 		Sci::Position virtualSpaces = 0;
 		if (subLine == (ll->lines - 1)) {
@@ -1888,8 +1890,7 @@ void DrawTranslucentSelection(Surface *surface, const EditModel &model, const Vi
 					}
 
 					if (portion.end.VirtualSpace()) {
-						const XYPOSITION xStartVirtual = ll->positions[lineRange.end] -
-							static_cast<XYPOSITION>(subLineStart) + xStart;
+						const XYPOSITION xStartVirtual = ll->positions[lineRange.end] + horizontalOffset;
 						PRectangle rcSegment = rcLine;
 						rcSegment.left = xStartVirtual + portion.start.VirtualSpace() * spaceWidth;
 						rcSegment.right = xStartVirtual + portion.end.VirtualSpace() * spaceWidth;
@@ -1897,10 +1898,10 @@ void DrawTranslucentSelection(Surface *surface, const EditModel &model, const Vi
 					}
 				} else {
 					PRectangle rcSegment = rcLine;
-					rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] -
-						static_cast<XYPOSITION>(subLineStart) + portion.start.VirtualSpace() * spaceWidth;
-					rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] -
-						static_cast<XYPOSITION>(subLineStart) + portion.end.VirtualSpace() * spaceWidth;
+					rcSegment.left = ll->positions[portion.start.Position() - posLineStart] +
+						horizontalOffset + portion.start.VirtualSpace() * spaceWidth;
+					rcSegment.right = ll->positions[portion.end.Position() - posLineStart] +
+						horizontalOffset + portion.end.VirtualSpace() * spaceWidth;
 					if ((ll->wrapIndent != 0) && (lineRange.start != 0)) {
 						if ((portion.start.Position() - posLineStart) == lineRange.start && model.sel.Range(r).ContainsCharacter(portion.start.Position() - 1))
 							rcSegment.left -= static_cast<int>(ll->wrapIndent); // indentation added to xStart was truncated to int, so we do the same here
@@ -2216,6 +2217,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 
 	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+	const XYPOSITION horizontalOffset = xStart - subLineStart;
 	const XYPOSITION indentWidth = model.pdoc->IndentSize() * vsDraw.spaceWidth;
 
 	// Does not take margin into account but not significant
@@ -2239,8 +2241,8 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 		const Sci::Position iDoc = i + posLineStart;
 
 		PRectangle rcSegment = rcLine;
-		rcSegment.left = ll->positions[ts.start] + xStart - static_cast<XYPOSITION>(subLineStart);
-		rcSegment.right = ll->positions[ts.end()] + xStart - static_cast<XYPOSITION>(subLineStart);
+		rcSegment.left = ll->positions[ts.start] + horizontalOffset;
+		rcSegment.right = ll->positions[ts.end()] + horizontalOffset;
 		// Only try to draw if really visible - enhances performance by not calling environment to
 		// draw strings that are completely past the right side of the window.
 		if (rcSegment.Intersects(rcLine)) {
@@ -2372,14 +2374,14 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 									if ((phasesDraw == PhasesDraw::One) && drawWhitespaceBackground) {
 										textBack = vsDraw.ElementColourForced(Element::WhiteSpaceBack).Opaque();
 										const PRectangle rcSpace(
-											ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
+											ll->positions[cpos + ts.start] + horizontalOffset,
 											rcSegment.top,
-											ll->positions[cpos + ts.start + 1] + xStart - static_cast<XYPOSITION>(subLineStart),
+											ll->positions[cpos + ts.start + 1] + horizontalOffset,
 											rcSegment.bottom);
 										surface->FillRectangleAligned(rcSpace, Fill(textBack));
 									}
 									const int halfDotWidth = vsDraw.whitespaceSize / 2;
-									PRectangle rcDot(xmid + xStart - halfDotWidth - static_cast<XYPOSITION>(subLineStart),
+									PRectangle rcDot(xmid - halfDotWidth + horizontalOffset,
 										rcSegment.top + vsDraw.lineHeight / 2, 0.0f, 0.0f);
 									rcDot.right = rcDot.left + vsDraw.whitespaceSize;
 									rcDot.bottom = rcDot.top + vsDraw.whitespaceSize;
