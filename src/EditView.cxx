@@ -2199,8 +2199,8 @@ ColourRGBA InvertedLight(ColourRGBA orig) noexcept {
 
 }
 
-void EditView::DrawIndentGuide(Surface *surface, Sci::Line lineVisible, int lineHeight, XYPOSITION start, PRectangle rcSegment, bool highlight) {
-	const Point from = Point::FromInts(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
+void EditView::DrawIndentGuide(Surface *surface, XYPOSITION start, PRectangle rcSegment, bool highlight, bool offset) {
+	const Point from = Point::FromInts(0, offset ? 1 : 0);
 	const PRectangle rcCopyArea(start + 1, rcSegment.top,
 		start + 2, rcSegment.bottom);
 	surface->Copy(rcCopyArea, from,
@@ -2220,6 +2220,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 
 	// Does not take margin into account but not significant
 	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
+
+	// When lineHeight is odd, dotted indent guides are drawn offset by 1 on odd lines to join together.
+	const bool offsetGuide = (lineVisible & 1) && (vsDraw.lineHeight & 1);
 
 	// Same baseline used for all text
 	const XYPOSITION ybase = rcLine.top + vsDraw.maxAscent;
@@ -2299,8 +2302,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							indentCount++) {
 							if (indentCount > 0) {
 								const XYPOSITION xIndent = std::floor(indentCount * indentWidth);
-								DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
-									(ll->xHighlightGuide == xIndent));
+								DrawIndentGuide(surface, xIndent + xStart, rcSegment, ll->xHighlightGuide == xIndent, offsetGuide);
 							}
 						}
 					}
@@ -2391,8 +2393,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 									indentCount++) {
 									if (indentCount > 0) {
 										const XYPOSITION xIndent = std::floor(indentCount * indentWidth);
-										DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
-											(ll->xHighlightGuide == xIndent));
+										DrawIndentGuide(surface, xIndent + xStart, rcSegment, ll->xHighlightGuide == xIndent, offsetGuide);
 									}
 								}
 							}
@@ -2464,11 +2465,11 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 				model.pdoc->GetLineIndentation(lineNextWithText));
 		}
 
+		const bool offsetGuide = (lineVisible & 1) && (vsDraw.lineHeight & 1);
 		for (int indentPos = model.pdoc->IndentSize(); indentPos < indentSpace; indentPos += model.pdoc->IndentSize()) {
 			const XYPOSITION xIndent = std::floor(indentPos * vsDraw.spaceWidth);
 			if (xIndent < xStartText) {
-				DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcLine,
-					(ll->xHighlightGuide == xIndent));
+				DrawIndentGuide(surface, xIndent + xStart, rcLine,	ll->xHighlightGuide == xIndent, offsetGuide);
 			}
 		}
 	}
