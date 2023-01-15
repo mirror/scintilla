@@ -620,7 +620,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 			ll->lines = 0;
 			// Calculate line start positions based upon width.
 			Sci::Position lastLineStart = 0;
-			XYACCUMULATOR startOffset = width;
+			XYPOSITION startOffset = width;
 			Sci::Position p = 0;
 			const Wrap wrapState = vstyle.wrap.state;
 			const Sci::Position numCharsInLine = ll->numCharsInLine;
@@ -806,10 +806,10 @@ SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditMo
 
 				const ScreenLine screenLine(ll.get(), subLine, vs, rcClient.right, tabWidthMinimumPixels);
 				std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
-				positionInLine = slLayout->PositionFromX(static_cast<XYPOSITION>(pt.x), charPosition) +
+				positionInLine = slLayout->PositionFromX(pt.x, charPosition) +
 					rangeSubLine.start;
 			} else {
-				positionInLine = ll->FindPositionFromX(static_cast<XYPOSITION>(pt.x + subLineStart),
+				positionInLine = ll->FindPositionFromX(pt.x + subLineStart,
 					rangeSubLine, charPosition);
 			}
 			if (positionInLine < rangeSubLine.end) {
@@ -1029,7 +1029,7 @@ void FillLineRemainder(Surface *surface, const EditModel &model, const ViewStyle
 }
 
 void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-	Sci::Line line, int xStart, PRectangle rcLine, int subLine, Sci::Position lineEnd, XYACCUMULATOR subLineStart, ColourOptional background) {
+	Sci::Line line, int xStart, PRectangle rcLine, int subLine, Sci::Position lineEnd, XYPOSITION subLineStart, ColourOptional background) {
 
 	const Sci::Position posLineStart = model.pdoc->LineStart(line);
 	PRectangle rcSegment = rcLine;
@@ -1040,7 +1040,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 		virtualSpace = model.sel.VirtualSpaceFor(model.pdoc->LineEnd(line)) * spaceWidth;
 	}
-	const XYPOSITION xEol = static_cast<XYPOSITION>(ll->positions[lineEnd] - subLineStart);
+	const XYPOSITION xEol = ll->positions[lineEnd] - subLineStart;
 
 	// Fill the virtual space and show selections within it
 	if (virtualSpace > 0.0f) {
@@ -1057,9 +1057,9 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 				if (!portion.Empty()) {
 					const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 					rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] -
-						static_cast<XYPOSITION>(subLineStart)+portion.start.VirtualSpace() * spaceWidth;
+						subLineStart+portion.start.VirtualSpace() * spaceWidth;
 					rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] -
-						static_cast<XYPOSITION>(subLineStart)+portion.end.VirtualSpace() * spaceWidth;
+						subLineStart+portion.end.VirtualSpace() * spaceWidth;
 					rcSegment.left = (rcSegment.left > rcLine.left) ? rcSegment.left : rcLine.left;
 					rcSegment.right = (rcSegment.right < rcLine.right) ? rcSegment.right : rcLine.right;
 					surface->FillRectangleAligned(rcSegment, Fill(
@@ -1110,8 +1110,8 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 				}
 			}
 
-			rcSegment.left = xStart + ll->positions[eolPos] - static_cast<XYPOSITION>(subLineStart)+virtualSpace;
-			rcSegment.right = xStart + ll->positions[eolPos + widthBytes] - static_cast<XYPOSITION>(subLineStart)+virtualSpace;
+			rcSegment.left = xStart + ll->positions[eolPos] - subLineStart + virtualSpace;
+			rcSegment.right = xStart + ll->positions[eolPos + widthBytes] - subLineStart + virtualSpace;
 			blobsWidth += rcSegment.Width();
 			const ColourRGBA textBack = TextBackground(model, vsDraw, ll, background, eolInSelection, false, styleMain, eolPos);
 			if (eolInSelection && (line < model.pdoc->LinesTotal() - 1)) {
@@ -1208,7 +1208,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 }
 
 void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-							  Sci::Line line, int xStart, PRectangle rcLine, int subLine, XYACCUMULATOR subLineStart, DrawPhase phase) {
+							  Sci::Line line, int xStart, PRectangle rcLine, int subLine, XYPOSITION subLineStart, DrawPhase phase) {
 	const bool lastSubLine = subLine == (ll->lines - 1);
 	if (!lastSubLine)
 		return;
@@ -1230,7 +1230,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 	const XYPOSITION virtualSpace = model.sel.VirtualSpaceFor(
 		model.pdoc->LineEnd(line)) * spaceWidth;
-	rcSegment.left = xStart + static_cast<XYPOSITION>(ll->positions[ll->numCharsInLine] - subLineStart) + virtualSpace + vsDraw.aveCharWidth;
+	rcSegment.left = xStart + ll->positions[ll->numCharsInLine] - subLineStart + virtualSpace + vsDraw.aveCharWidth;
 	rcSegment.right = rcSegment.left + static_cast<XYPOSITION>(widthFoldDisplayText);
 
 	const ColourOptional background = vsDraw.Background(model.GetMark(line), model.caret.active, ll->containsCaret);
@@ -1287,7 +1287,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 }
 
 void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-	Sci::Line line, int xStart, PRectangle rcLine, int subLine, XYACCUMULATOR subLineStart, DrawPhase phase) {
+	Sci::Line line, int xStart, PRectangle rcLine, int subLine, XYPOSITION subLineStart, DrawPhase phase) {
 
 	const bool lastSubLine = subLine == (ll->lines - 1);
 	if (!lastSubLine)
@@ -1349,7 +1349,7 @@ void EditView::DrawEOLAnnotationText(Surface *surface, const EditModel &model, c
 	const XYPOSITION virtualSpace = model.sel.VirtualSpaceFor(
 		model.pdoc->LineEnd(line)) * spaceWidth;
 	rcSegment.left = xStart +
-		static_cast<XYPOSITION>(ll->positions[ll->numCharsInLine] - subLineStart)
+		ll->positions[ll->numCharsInLine] - subLineStart
 		+ virtualSpace + vsDraw.aveCharWidth;
 
 	const char *textFoldDisplay = model.GetFoldDisplayText(line);
@@ -1739,10 +1739,10 @@ void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &v
 
 	const bool selBackDrawn = vsDraw.SelectionBackgroundDrawn();
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
-	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+	const XYPOSITION subLineStart = ll->positions[lineRange.start];
 	const XYPOSITION horizontalOffset = xStart - subLineStart;
 	// Does not take margin into account but not significant
-	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
+	const XYPOSITION xStartVisible = subLineStart - xStart;
 
 	const BreakFinder::BreakFor breakFor = selBackDrawn ? BreakFinder::BreakFor::Selection : BreakFinder::BreakFor::Text;
 	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, breakFor, model.pdoc, &model.reprs, &vsDraw);
@@ -1856,7 +1856,7 @@ void DrawTranslucentSelection(Surface *surface, const EditModel &model, const Vi
 	Sci::Line line, int xStart, PRectangle rcLine, int subLine, Range lineRange, int tabWidthMinimumPixels, Layer layer) {
 	if (vsDraw.selection.layer == layer) {
 		const Sci::Position posLineStart = model.pdoc->LineStart(line);
-		const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+		const XYPOSITION subLineStart = ll->positions[lineRange.start];
 		const XYPOSITION horizontalOffset = xStart - subLineStart;
 		// For each selection draw
 		Sci::Position virtualSpaces = 0;
@@ -2216,12 +2216,12 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 	const bool drawWhitespaceBackground = vsDraw.WhitespaceBackgroundDrawn() && !background;
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 
-	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+	const XYPOSITION subLineStart = ll->positions[lineRange.start];
 	const XYPOSITION horizontalOffset = xStart - subLineStart;
 	const XYPOSITION indentWidth = model.pdoc->IndentSize() * vsDraw.spaceWidth;
 
 	// Does not take margin into account but not significant
-	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
+	const XYPOSITION xStartVisible = subLineStart - xStart;
 
 	// When lineHeight is odd, dotted indent guides are drawn offset by 1 on odd lines to join together.
 	const bool offsetGuide = (lineVisible & 1) && (vsDraw.lineHeight & 1);
@@ -2497,7 +2497,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 
 	const Range lineRange = ll->SubLineRange(subLine, LineLayout::Scope::visibleOnly);
 	const Range lineRangeIncludingEnd = ll->SubLineRange(subLine, LineLayout::Scope::includeEnd);
-	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+	const XYPOSITION subLineStart = ll->positions[lineRange.start];
 
 	if ((ll->wrapIndent != 0) && (subLine > 0)) {
 		if (FlagSet(phase, DrawPhase::back)) {
