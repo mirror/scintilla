@@ -2221,6 +2221,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 	// Does not take margin into account but not significant
 	const XYPOSITION xStartVisible = static_cast<XYPOSITION>(subLineStart-xStart);
 
+	// Same baseline used for all text
+	const XYPOSITION ybase = rcLine.top + vsDraw.maxAscent;
+
 	// Foreground drawing loop
 	const BreakFinder::BreakFor breakFor = (((phasesDraw == PhasesDraw::One) && selBackDrawn) || vsDraw.SelectionTextDrawn())
 		? BreakFinder::BreakFor::ForegroundAndSelection : BreakFinder::BreakFor::Foreground;
@@ -2322,8 +2325,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						const Font *ctrlCharsFont = vsDraw.styles[StyleControlChar].font.get();
 						const char cc[2] = { static_cast<char>(vsDraw.controlCharSymbol), '\0' };
 						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
-							rcSegment.top + vsDraw.maxAscent,
-							cc, textBack, textFore);
+							ybase, cc, textBack, textFore);
 					} else {
 						if (FlagSet(ts.representation->appearance, RepresentationAppearance::Colour)) {
 							textFore = ts.representation->colour;
@@ -2333,7 +2335,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								textBack, textFore, phasesDraw == PhasesDraw::One);
 						} else {
 							surface->DrawTextTransparentUTF8(rcSegment, vsDraw.styles[StyleControlChar].font.get(),
-								rcSegment.top + vsDraw.maxAscent, ts.representation->stringRep, textFore);
+								ybase, ts.representation->stringRep, textFore);
 						}
 					}
 				}
@@ -2343,19 +2345,19 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					const std::string_view text(&ll->chars[ts.start], i - ts.start + 1);
 					if (phasesDraw != PhasesDraw::One) {
 						surface->DrawTextTransparent(rcSegment, textFont,
-							rcSegment.top + vsDraw.maxAscent, text, textFore);
+							ybase, text, textFore);
 					} else {
 						surface->DrawTextNoClip(rcSegment, textFont,
-							rcSegment.top + vsDraw.maxAscent, text, textFore, textBack);
+							ybase, text, textFore, textBack);
 					}
 				} else if (vsDraw.styles[styleMain].invisibleRepresentation[0]) {
 					const std::string_view text = vsDraw.styles[styleMain].invisibleRepresentation;
   					if (phasesDraw != PhasesDraw::One) {
 						surface->DrawTextTransparentUTF8(rcSegment, textFont,
-							rcSegment.top + vsDraw.maxAscent, text, textFore);
+							ybase, text, textFore);
 					} else {
 						surface->DrawTextNoClipUTF8(rcSegment, textFont,
-							rcSegment.top + vsDraw.maxAscent, text, textFore, textBack);
+							ybase, text, textFore, textBack);
 					}
 				}
 				if (vsDraw.viewWhitespace != WhiteSpace::Invisible ||
@@ -2402,14 +2404,14 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			}
 			if (inHotspot && vsDraw.hotspotUnderline) {
 				PRectangle rcUL = rcSegment;
-				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
-				rcUL.bottom = rcUL.top + 1;
+				rcUL.top = ybase + 1;
+				rcUL.bottom = ybase + 2;
 				const ColourOptional colourHotSpot = vsDraw.ElementColour(Element::HotSpotActive);
 				surface->FillRectangleAligned(rcUL, Fill(colourHotSpot.value_or(textFore)));
 			} else if (vsDraw.styles[styleMain].underline) {
 				PRectangle rcUL = rcSegment;
-				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
-				rcUL.bottom = rcUL.top + 1;
+				rcUL.top = ybase + 1;
+				rcUL.bottom = ybase + 2;
 				surface->FillRectangleAligned(rcUL, Fill(textFore));
 			}
 		} else if (rcSegment.left > rcLine.right) {
