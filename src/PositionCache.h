@@ -257,7 +257,7 @@ public:
 	virtual void SetSize(size_t size_) = 0;
 	virtual size_t GetSize() const noexcept = 0;
 	virtual void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-		std::string_view sv, XYPOSITION *positions, bool needsLocking) = 0;
+		bool unicode, std::string_view sv, XYPOSITION *positions, bool needsLocking) = 0;
 };
 
 std::unique_ptr<IPositionCache> CreatePositionCache();

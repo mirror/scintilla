@@ -339,10 +339,6 @@ inline char CaseForce(Style::CaseForce caseForce, char chDoc, char chPrevious) n
 	}
 }
 
-bool ViewIsASCII(std::string_view text) {
-	return std::all_of(text.cbegin(), text.cend(), IsASCII);
-}
-
 void LayoutSegments(IPositionCache *pCache,
 	Surface *surface,
 	const ViewStyle &vstyle,
@@ -357,58 +353,44 @@ void LayoutSegments(IPositionCache *pCache,
 			break;
 		}
 		const TextSegment &ts = segments[i];
-		if (vstyle.styles[ll->styles[ts.start]].visible) {
+		const unsigned int styleSegment = ll->styles[ts.start];
+		XYPOSITION *positions = &ll->positions[ts.start + 1];
+		if (vstyle.styles[styleSegment].visible) {
 			if (ts.representation) {
-				XYPOSITION representationWidth = vstyle.controlCharWidth;
-				if (ll->chars[ts.start] == '\t') {
-					// Tab is a special case of representation, taking a variable amount of space
-					// which will be filled in later.
-					representationWidth = 0;
-				} else {
+				XYPOSITION representationWidth = 0.0;
+				// Tab is a special case of representation, taking a variable amount of space
+				// which will be filled in later.
+				if (ll->chars[ts.start] != '\t') {
+					representationWidth = vstyle.controlCharWidth;
 					if (representationWidth <= 0.0) {
 						assert(ts.representation->stringRep.length() <= Representation::maxLength);
 						XYPOSITION positionsRepr[Representation::maxLength + 1];
-						// ts.representation->stringRep is UTF-8 which only matches cache if document is UTF-8
-						// or it only contains ASCII which is a subset of all currently supported encodings.
-						if (textUnicode || ViewIsASCII(ts.representation->stringRep)) {
-							pCache->MeasureWidths(surface, vstyle, StyleControlChar, ts.representation->stringRep,
-								positionsRepr, multiThreaded);
-						} else {
-							surface->MeasureWidthsUTF8(vstyle.styles[StyleControlChar].font.get(), ts.representation->stringRep, positionsRepr);
-						}
+						// ts.representation->stringRep is UTF-8.
+						pCache->MeasureWidths(surface, vstyle, StyleControlChar, true, ts.representation->stringRep,
+							positionsRepr, multiThreaded);
 						representationWidth = positionsRepr[ts.representation->stringRep.length() - 1];
 						if (FlagSet(ts.representation->appearance, RepresentationAppearance::Blob)) {
 							representationWidth += vstyle.ctrlCharPadding;
 						}
 					}
 				}
-				for (int ii = 0; ii < ts.length; ii++) {
-					ll->positions[ts.start + 1 + ii] = representationWidth;
-				}
+				std::fill(positions, positions + ts.length, representationWidth);
 			} else {
 				if ((ts.length == 1) && (' ' == ll->chars[ts.start])) {
 					// Over half the segments are single characters and of these about half are space characters.
-					ll->positions[ts.start + 1] = vstyle.styles[ll->styles[ts.start]].spaceWidth;
+					positions[0] = vstyle.styles[styleSegment].spaceWidth;
 				} else {
-					pCache->MeasureWidths(surface, vstyle, ll->styles[ts.start],
-						std::string_view(&ll->chars[ts.start], ts.length), &ll->positions[ts.start + 1], multiThreaded);
+					pCache->MeasureWidths(surface, vstyle, styleSegment, textUnicode,
+						std::string_view(&ll->chars[ts.start], ts.length), positions, multiThreaded);
 				}
 			}
-		} else if (vstyle.styles[ll->styles[ts.start]].invisibleRepresentation[0]) {
-			const int styleInvisible = ll->styles[ts.start];
-			const std::string_view text = vstyle.styles[styleInvisible].invisibleRepresentation;
+		} else if (vstyle.styles[styleSegment].invisibleRepresentation[0]) {
+			const std::string_view text = vstyle.styles[styleSegment].invisibleRepresentation;
 			XYPOSITION positionsRepr[Representation::maxLength + 1];
-			// invisibleRepresentation is UTF-8 which only matches cache if document is UTF-8
-			// or it only contains ASCII which is a subset of all currently supported encodings.
-			if (textUnicode || ViewIsASCII(text)) {
-				pCache->MeasureWidths(surface, vstyle, styleInvisible, text, positionsRepr, multiThreaded);
-			} else {
-				surface->MeasureWidthsUTF8(vstyle.styles[styleInvisible].font.get(), text, positionsRepr);
-			}
+			// invisibleRepresentation is UTF-8.
+			pCache->MeasureWidths(surface, vstyle, styleSegment, true, text, positionsRepr, multiThreaded);
 			const XYPOSITION representationWidth = positionsRepr[text.length() - 1];
-			for (int ii = 0; ii < ts.length; ii++) {
-				ll->positions[ts.start + 1 + ii] = representationWidth;
-			}
+			std::fill(positions, positions + ts.length, representationWidth);
 		}
 	}
 }
