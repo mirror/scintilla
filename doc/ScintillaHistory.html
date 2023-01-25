@@ -594,6 +594,10 @@
 	Fix SCI_VERTICALCENTRECARET to update the vertical scroll position.
 	</li>
 	<li>
+	When an autocompletion list is shown in response to SCN_CHARADDED, do not process character as fill-up or stop.
+	This avoids closing immediately when a character may both trigger and finish autocompletion.
+	</li>
+	<li>
 	On Cocoa fix character input bug where dotless 'i' and some other extended
 	Latin characters could not be entered.
 	The change also stops SCI_ASSIGNCMDKEY from working with these characters
