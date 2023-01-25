@@ -48,7 +48,6 @@ public:
  */
 class LineLayout {
 private:
-	friend class LineLayoutCache;
 	std::unique_ptr<int []>lineStarts;
 	int lenLineStarts;
 	/// Drawing is only performed for @a maxLineLength characters on each line.

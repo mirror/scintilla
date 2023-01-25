@@ -574,21 +574,21 @@ std::shared_ptr<LineLayout> LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci:
 	size_t pos = 0;
 	if (level == LineCache::Page) {
 		// If first entry is this line then just reuse it.
-		if (!(cache[0] && (cache[0]->lineNumber == lineNumber))) {
+		if (!(cache[0] && (cache[0]->LineNumber() == lineNumber))) {
 			const size_t posForLine = EntryForLine(lineNumber);
 			if (lineNumber == lineCaret) {
 				// Use position 0 for caret line.
 				if (cache[0]) {
 					// Another line is currently in [0] so move it out to its normal position.
 					// Since it was recently the caret line its likely to be needed soon.
-					const size_t posNewForEntry0 = EntryForLine(cache[0]->lineNumber);
+					const size_t posNewForEntry0 = EntryForLine(cache[0]->LineNumber());
 					if (posForLine == posNewForEntry0) {
 						std::swap(cache[0], cache[posNewForEntry0]);
 					} else {
 						cache[posNewForEntry0] = std::move(cache[0]);
 					}
 				}
-				if (cache[posForLine] && (cache[posForLine]->lineNumber == lineNumber)) {
+				if (cache[posForLine] && (cache[posForLine]->LineNumber() == lineNumber)) {
 					// Caret line is currently somewhere else so move it to [0].
 					cache[0] = std::move(cache[posForLine]);
 				}
