@@ -599,58 +599,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 			// Check for wrapIndent minimum
 			if ((FlagSet(vstyle.wrap.visualFlags, WrapVisualFlag::Start)) && (ll->wrapIndent < vstyle.aveCharWidth))
 				ll->wrapIndent = vstyle.aveCharWidth; // Indent to show start visual
-			ll->lines = 0;
-			// Calculate line start positions based upon width.
-			Sci::Position lastLineStart = 0;
-			XYPOSITION startOffset = width;
-			Sci::Position p = 0;
-			const Wrap wrapState = vstyle.wrap.state;
-			const Sci::Position numCharsInLine = ll->numCharsInLine;
-			while (p < numCharsInLine) {
-				while (p < numCharsInLine && ll->positions[p + 1] < startOffset) {
-					p++;
-				}
-				if (p < numCharsInLine) {
-					// backtrack to find lastGoodBreak
-					Sci::Position lastGoodBreak = p;
-					if (p > 0) {
-						lastGoodBreak = model.pdoc->MovePositionOutsideChar(p + posLineStart, -1) - posLineStart;
-					}
-					if (wrapState != Wrap::Char) {
-						Sci::Position pos = lastGoodBreak;
-						while (pos > lastLineStart) {
-							// style boundary and space
-							if (wrapState != Wrap::WhiteSpace && (ll->styles[pos - 1] != ll->styles[pos])) {
-								break;
-							}
-							if (IsBreakSpace(ll->chars[pos - 1]) && !IsBreakSpace(ll->chars[pos])) {
-								break;
-							}
-							pos = model.pdoc->MovePositionOutsideChar(pos + posLineStart - 1, -1) - posLineStart;
-						}
-						if (pos > lastLineStart) {
-							lastGoodBreak = pos;
-						}
-					}
-					if (lastGoodBreak == lastLineStart) {
-						// Try moving to start of last character
-						if (p > 0) {
-							lastGoodBreak = model.pdoc->MovePositionOutsideChar(p + posLineStart, -1) - posLineStart;
-						}
-						if (lastGoodBreak == lastLineStart) {
-							// Ensure at least one character on line.
-							lastGoodBreak = model.pdoc->MovePositionOutsideChar(lastGoodBreak + posLineStart + 1, 1) - posLineStart;
-						}
-					}
-					lastLineStart = lastGoodBreak;
-					ll->AddLineStart(lastLineStart);
-					startOffset = ll->positions[lastLineStart];
-					// take into account the space for start wrap mark and indent
-					startOffset += width - ll->wrapIndent;
-					p = lastLineStart + 1;
-				}
-			}
-			ll->lines++;
+			ll->WrapLine(model.pdoc, posLineStart, vstyle.wrap.state);
 		}
 		ll->validity = LineLayout::ValidLevel::lines;
 	}

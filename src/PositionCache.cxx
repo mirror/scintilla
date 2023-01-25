@@ -326,6 +326,64 @@ int LineLayout::EndLineStyle() const noexcept {
 	return styles[numCharsBeforeEOL > 0 ? numCharsBeforeEOL-1 : 0];
 }
 
+void LineLayout::WrapLine(const Document *pdoc, Sci::Position posLineStart, Wrap wrapState) {
+	// Document wants document positions but simpler to work in line positions
+	// so take care of adding and subtracting line start in a lambda.
+	auto CharacterBoundary = [=](Sci::Position i, Sci::Position moveDir) noexcept -> Sci::Position {
+		return pdoc->MovePositionOutsideChar(i + posLineStart, moveDir) - posLineStart;
+	};
+	lines = 0;
+	// Calculate line start positions based upon width.
+	Sci::Position lastLineStart = 0;
+	XYPOSITION startOffset = widthLine;
+	Sci::Position p = 0;
+	while (p < numCharsInLine) {
+		while (p < numCharsInLine && positions[p + 1] < startOffset) {
+			p++;
+		}
+		if (p < numCharsInLine) {
+			// backtrack to find lastGoodBreak
+			Sci::Position lastGoodBreak = p;
+			if (p > 0) {
+				lastGoodBreak = CharacterBoundary(p, -1);
+			}
+			if (wrapState != Wrap::Char) {
+				Sci::Position pos = lastGoodBreak;
+				while (pos > lastLineStart) {
+					// style boundary and space
+					if (wrapState != Wrap::WhiteSpace && (styles[pos - 1] != styles[pos])) {
+						break;
+					}
+					if (IsBreakSpace(chars[pos - 1]) && !IsBreakSpace(chars[pos])) {
+						break;
+					}
+					pos = CharacterBoundary(pos - 1, -1);
+				}
+				if (pos > lastLineStart) {
+					lastGoodBreak = pos;
+				}
+			}
+			if (lastGoodBreak == lastLineStart) {
+				// Try moving to start of last character
+				if (p > 0) {
+					lastGoodBreak = CharacterBoundary(p, -1);
+				}
+				if (lastGoodBreak == lastLineStart) {
+					// Ensure at least one character on line.
+					lastGoodBreak = CharacterBoundary(lastGoodBreak + 1, 1);
+				}
+			}
+			lastLineStart = lastGoodBreak;
+			AddLineStart(lastLineStart);
+			startOffset = positions[lastLineStart];
+			// take into account the space for start wrap mark and indent
+			startOffset += widthLine - wrapIndent;
+			p = lastLineStart + 1;
+		}
+	}
+	lines++;
+}
+
 ScreenLine::ScreenLine(
 	const LineLayout *ll_,
 	int subLine,
