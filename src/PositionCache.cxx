@@ -51,6 +51,7 @@
 #include "CaseFolder.h"
 #include "Document.h"
 #include "UniConversion.h"
+#include "DBCS.h"
 #include "Selection.h"
 #include "PositionCache.h"
 
@@ -638,6 +639,40 @@ constexpr unsigned int KeyFromString(std::string_view charBytes) noexcept {
 
 constexpr unsigned int representationKeyCrLf = KeyFromString("\r\n");
 
+const char *const repsC0[] = {
+	"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
+	"BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",
+	"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
+	"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"
+};
+
+const char *const repsC1[] = {
+	"PAD", "HOP", "BPH", "NBH", "IND", "NEL", "SSA", "ESA",
+	"HTS", "HTJ", "VTS", "PLD", "PLU", "RI", "SS2", "SS3",
+	"DCS", "PU1", "PU2", "STS", "CCH", "MW", "SPA", "EPA",
+	"SOS", "SGCI", "SCI", "CSI", "ST", "OSC", "PM", "APC"
+};
+
+}
+
+namespace Scintilla::Internal {
+
+const char *ControlCharacterString(unsigned char ch) noexcept {
+	if (ch < std::size(repsC0)) {
+		return repsC0[ch];
+	} else {
+		return "BAD";
+	}
+}
+
+
+void Hexits(char *hexits, int ch) noexcept {
+	hexits[0] = 'x';
+	hexits[1] = "0123456789ABCDEF"[ch / 0x10];
+	hexits[2] = "0123456789ABCDEF"[ch % 0x10];
+	hexits[3] = 0;
+}
+
 }
 
 void SpecialRepresentations::SetRepresentation(std::string_view charBytes, std::string_view value) {
@@ -729,6 +764,40 @@ void SpecialRepresentations::Clear() {
 	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
 	maxKey = 0;
 	crlf = false;
+}
+
+void SpecialRepresentations::SetDefaultRepresentations(int dbcsCodePage) {
+	Clear();
+
+	// C0 control set
+	for (size_t j = 0; j < std::size(repsC0); j++) {
+		const char c[2] = { static_cast<char>(j), 0 };
+		SetRepresentation(std::string_view(c, 1), repsC0[j]);
+	}
+	SetRepresentation("\x7f", "DEL");
+
+	// C1 control set
+	// As well as Unicode mode, ISO-8859-1 should use these
+	if (CpUtf8 == dbcsCodePage) {
+		for (size_t j = 0; j < std::size(repsC1); j++) {
+			const char c1[3] = { '\xc2',  static_cast<char>(0x80 + j), 0 };
+			SetRepresentation(c1, repsC1[j]);
+		}
+		SetRepresentation("\xe2\x80\xa8", "LS");
+		SetRepresentation("\xe2\x80\xa9", "PS");
+	}
+
+	// Invalid as single bytes in multi-byte encodings
+	if (dbcsCodePage) {
+		for (int k = 0x80; k < 0x100; k++) {
+			if ((CpUtf8 == dbcsCodePage) || !IsDBCSValidSingleByte(dbcsCodePage, k)) {
+				const char hiByte[2] = { static_cast<char>(k), 0 };
+				char hexits[4];
+				Hexits(hexits, k);
+				SetRepresentation(hiByte, hexits);
+			}
+		}
+	}
 }
 
 void BreakFinder::Insert(Sci::Position val) {

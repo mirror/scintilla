@@ -178,13 +178,6 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 	}
 }
 
-void Hexits(char *hexits, int ch) noexcept {
-	hexits[0] = 'x';
-	hexits[1] = "0123456789ABCDEF"[ch / 0x10];
-	hexits[2] = "0123456789ABCDEF"[ch % 0x10];
-	hexits[3] = 0;
-}
-
 }
 
 EditView::EditView() {
@@ -891,20 +884,6 @@ ColourRGBA TextBackground(const EditModel &model, const ViewStyle &vsDraw, const
 		return *background;
 	} else {
 		return vsDraw.styles[styleMain].back;
-	}
-}
-
-const char *ControlCharacterString(unsigned char ch) noexcept {
-	const char *const reps[] = {
-		"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
-		"BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",
-		"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
-		"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"
-	};
-	if (ch < std::size(reps)) {
-		return reps[ch];
-	} else {
-		return "BAD";
 	}
 }
 
