@@ -1121,14 +1121,15 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 
 	if (drawWrapMarkEnd) {
 		PRectangle rcPlace = rcSegment;
+		const XYPOSITION maxLeft = rcPlace.right - vsDraw.aveCharWidth;
 
 		if (FlagSet(vsDraw.wrap.visualFlagsLocation, WrapVisualLocation::EndByText)) {
-			rcPlace.left = xEol + xStart + virtualSpace;
+			rcPlace.left = std::min(xEol + xStart + virtualSpace, maxLeft);
 			rcPlace.right = rcPlace.left + vsDraw.aveCharWidth;
 		} else {
 			// rcLine is clipped to text area
 			rcPlace.right = rcLine.right;
-			rcPlace.left = rcPlace.right - vsDraw.aveCharWidth;
+			rcPlace.left = maxLeft;
 		}
 		if (!customDrawWrapMarker) {
 			DrawWrapMarker(surface, rcPlace, true, vsDraw.WrapColour());
