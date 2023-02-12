@@ -326,7 +326,7 @@ int LineLayout::EndLineStyle() const noexcept {
 	return styles[numCharsBeforeEOL > 0 ? numCharsBeforeEOL-1 : 0];
 }
 
-void LineLayout::WrapLine(const Document *pdoc, Sci::Position posLineStart, Wrap wrapState) {
+void LineLayout::WrapLine(const Document *pdoc, Sci::Position posLineStart, Wrap wrapState, XYPOSITION wrapWidth) {
 	// Document wants document positions but simpler to work in line positions
 	// so take care of adding and subtracting line start in a lambda.
 	auto CharacterBoundary = [=](Sci::Position i, Sci::Position moveDir) noexcept -> Sci::Position {
@@ -335,7 +335,7 @@ void LineLayout::WrapLine(const Document *pdoc, Sci::Position posLineStart, Wrap
 	lines = 0;
 	// Calculate line start positions based upon width.
 	Sci::Position lastLineStart = 0;
-	XYPOSITION startOffset = widthLine;
+	XYPOSITION startOffset = wrapWidth;
 	Sci::Position p = 0;
 	while (p < numCharsInLine) {
 		while (p < numCharsInLine && positions[p + 1] < startOffset) {
@@ -377,7 +377,7 @@ void LineLayout::WrapLine(const Document *pdoc, Sci::Position posLineStart, Wrap
 			AddLineStart(lastLineStart);
 			startOffset = positions[lastLineStart];
 			// take into account the space for start wrap mark and indent
-			startOffset += widthLine - wrapIndent;
+			startOffset += wrapWidth - wrapIndent;
 			p = lastLineStart + 1;
 		}
 	}

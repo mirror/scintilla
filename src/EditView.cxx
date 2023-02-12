@@ -599,7 +599,7 @@ void EditView::LayoutLine(const EditModel &model, Surface *surface, const ViewSt
 			// Check for wrapIndent minimum
 			if ((FlagSet(vstyle.wrap.visualFlags, WrapVisualFlag::Start)) && (ll->wrapIndent < vstyle.aveCharWidth))
 				ll->wrapIndent = vstyle.aveCharWidth; // Indent to show start visual
-			ll->WrapLine(model.pdoc, posLineStart, vstyle.wrap.state);
+			ll->WrapLine(model.pdoc, posLineStart, vstyle.wrap.state, width);
 		}
 		ll->validity = LineLayout::ValidLevel::lines;
 	}
