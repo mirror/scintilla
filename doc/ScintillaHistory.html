@@ -593,6 +593,11 @@
 	<li>
 	Fix clipping of line end wrap symbol for SC_WRAPVISUALFLAGLOC_END_BY_TEXT.
 	</li>
+	<li>
+	Where a multi-byte character contains multiple styles, display each byte as a representation.
+	This makes it easier to see and fix lexers that change styles mid-character, commonly because
+	they use fixed size buffers.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scintilla533.zip">Release 5.3.3</a>

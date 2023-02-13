@@ -888,11 +888,27 @@ TextSegment BreakFinder::Next() {
 			int charWidth = 1;
 			const char * const chars = &ll->chars[nextBreak];
 			const unsigned char ch = chars[0];
+			bool characterStyleConsistent = true;	// All bytes of character in same style?
 			if (!UTF8IsAscii(ch) && encodingFamily != EncodingFamily::eightBit) {
 				if (encodingFamily == EncodingFamily::unicode) {
 					charWidth = UTF8DrawBytes(chars, lineRange.end - nextBreak);
 				} else {
 					charWidth = pdoc->DBCSDrawBytes(std::string_view(chars, lineRange.end - nextBreak));
+				}
+				for (int trail = 1; trail < charWidth; trail++) {
+					if (ll->styles[nextBreak] != ll->styles[nextBreak + trail]) {
+						characterStyleConsistent = false;
+					}
+				}
+			}
+			if (!characterStyleConsistent) {
+				if (nextBreak == prev) {
+					// Show first character representation bytes since it has inconsistent styles.
+					charWidth = 1;
+				} else {
+					// Return segment before nextBreak but allow to be split up if too long
+					// If not split up, next call will hit the above 'charWidth = 1;' and display bytes.
+					break;
 				}
 			}
 			repr = nullptr;
