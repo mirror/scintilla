@@ -598,6 +598,10 @@
 	This makes it easier to see and fix lexers that change styles mid-character, commonly because
 	they use fixed size buffers.
 	</li>
+	<li>
+	Fix a potential crash with autocompletion list fill-ups where a SCN_CHARADDED
+	handler retriggered an autocompletion list, but with no items that match the typed character.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scintilla533.zip">Release 5.3.3</a>

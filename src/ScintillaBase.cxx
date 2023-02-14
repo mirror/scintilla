@@ -83,7 +83,7 @@ void ScintillaBase::InsertCharacter(std::string_view sv, CharacterSource charSou
 	if (!isFillUp) {
 		Editor::InsertCharacter(sv, charSource);
 	}
-	if (acActive) {
+	if (acActive && ac.Active()) { // if it was and still is active
 		AutoCompleteCharacterAdded(sv[0]);
 		// For fill ups add the character after the autocompletion has
 		// triggered so containers see the key so can display a calltip.
