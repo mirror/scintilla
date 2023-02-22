@@ -235,7 +235,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		trackingArea = nil;
 		mMarkedTextRange = NSMakeRange(NSNotFound, 0);
 
-		[self registerForDraggedTypes: @[NSStringPboardType, ScintillaRecPboardType, NSFilenamesPboardType]];
+		[self registerForDraggedTypes: @[NSPasteboardTypeString, ScintillaRecPboardType, NSFilenamesPboardType]];
 
 		// Set up accessibility in the text role
 		if ([self respondsToSelector: @selector(setAccessibilityElement:)]) {

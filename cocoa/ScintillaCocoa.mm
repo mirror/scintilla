@@ -1341,7 +1341,7 @@ void ScintillaCocoa::DragScroll() {
 		return;
 
 	if ([type compare: NSPasteboardTypeString] == NSOrderedSame) {
-		[pasteboard setString: (__bridge NSString *)cfsVal forType: NSStringPboardType];
+		[pasteboard setString: (__bridge NSString *)cfsVal forType: NSPasteboardTypeString];
 	} else if ([type compare: ScintillaRecPboardType] == NSOrderedSame) {
 		// This is specific to scintilla, allows us to drag rectangular selections around the document.
 		if (selectedText.rectangular)
@@ -1550,7 +1550,7 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info) {
 	NSPasteboard *pasteboard = [info draggingPasteboard];
 
 	// Return what type of operation we will perform. Prefer move over copy.
-	if ([pasteboard.types containsObject: NSStringPboardType] ||
+	if ([pasteboard.types containsObject: NSPasteboardTypeString] ||
 			[pasteboard.types containsObject: ScintillaRecPboardType])
 		return (sourceDragMask & NSDragOperationMove) ? NSDragOperationMove : NSDragOperationCopy;
 
@@ -1612,8 +1612,8 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard *board, const SelectionText 
 		return;
 
 	NSArray *pbTypes = selectedText.rectangular ?
-			   @[NSStringPboardType, ScintillaRecPboardType] :
-			   @[NSStringPboardType];
+			   @[NSPasteboardTypeString, ScintillaRecPboardType] :
+			   @[NSPasteboardTypeString];
 	[board declareTypes: pbTypes owner: nil];
 
 	if (selectedText.rectangular) {
@@ -1621,7 +1621,7 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard *board, const SelectionText 
 		[board setString: (__bridge NSString *)cfsVal forType: ScintillaRecPboardType];
 	}
 
-	[board setString: (__bridge NSString *)cfsVal forType: NSStringPboardType];
+	[board setString: (__bridge NSString *)cfsVal forType: NSPasteboardTypeString];
 
 	if (cfsVal)
 		CFRelease(cfsVal);
@@ -1634,7 +1634,7 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard *board, const SelectionText 
  */
 bool ScintillaCocoa::GetPasteboardData(NSPasteboard *board, SelectionText *selectedText) {
 	NSArray *supportedTypes = @[ScintillaRecPboardType,
-				    NSStringPboardType];
+				    NSPasteboardTypeString];
 	NSString *bestType = [board availableTypeFromArray: supportedTypes];
 	NSString *data = [board stringForType: bestType];
 
