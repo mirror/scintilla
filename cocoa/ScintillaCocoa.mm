@@ -1369,7 +1369,7 @@ void ScintillaCocoa::StartDrag() {
 
 	// Put the data to be dragged on the drag pasteboard.
 	SelectionText selectedText;
-	NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName: NSDragPboard];
+	NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName: NSPasteboardNameDrag];
 	CopySelectionRange(&selectedText);
 	SetPasteboardData(pasteboard, selectedText);
 
