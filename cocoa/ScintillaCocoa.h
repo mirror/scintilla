@@ -83,6 +83,8 @@ extern "C" NSString *ScintillaRecPboardType;
 
 namespace Scintilla::Internal {
 
+CGContextRef CGContextCurrent();
+
 /**
  * Main scintilla class, implemented for macOS (Cocoa).
  */

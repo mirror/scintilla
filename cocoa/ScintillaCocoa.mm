@@ -399,6 +399,20 @@ const CGFloat paddingHighlightY = 2;
 
 @end
 
+//----------------- CGContextCurrent ---------------------------------------------------------------
+
+CGContextRef Scintilla::Internal::CGContextCurrent() {
+	if (@available(macOS 10.10, *)) {
+		return [NSGraphicsContext currentContext].CGContext;
+	} else {
+		// Use old deprecated API
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+		return static_cast<CGContextRef>([NSGraphicsContext currentContext].graphicsPort);
+#pragma clang diagnostic pop
+	}
+}
+
 //----------------- ScintillaCocoa -----------------------------------------------------------------
 
 ScintillaCocoa::ScintillaCocoa(ScintillaView *sciView_, SCIContentView *viewContent, SCIMarginView *viewMargin) {
@@ -1132,7 +1146,7 @@ void ScintillaCocoa::CTPaint(void *gc, NSRect rc) {
 
 - (void) drawRect: (NSRect) needsDisplayInRect {
 	if (sci) {
-		CGContextRef context = (CGContextRef) [NSGraphicsContext currentContext].graphicsPort;
+		CGContextRef context = CGContextCurrent();
 		sci->CTPaint(context, needsDisplayInRect);
 	}
 }
@@ -1873,7 +1887,7 @@ bool ScintillaCocoa::SyncPaint(void *gc, PRectangle rc) {
  * Paint the margin into the SCIMarginView space.
  */
 void ScintillaCocoa::PaintMargin(NSRect aRect) {
-	CGContextRef gc = (CGContextRef) [NSGraphicsContext currentContext].graphicsPort;
+	CGContextRef gc = CGContextCurrent();
 
 	PRectangle rc = NSRectToPRectangle(aRect);
 	rcPaint = rc;
