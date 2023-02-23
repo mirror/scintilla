@@ -1828,11 +1828,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * Specialized property setter for colors.
  */
 - (void) setColorProperty: (int) property parameter: (long) parameter value: (NSColor *) value {
-	if (value.colorSpaceName != NSDeviceRGBColorSpace)
-		value = [value colorUsingColorSpaceName: NSDeviceRGBColorSpace];
-	long red = static_cast<long>(value.redComponent * 255);
-	long green = static_cast<long>(value.greenComponent * 255);
-	long blue = static_cast<long>(value.blueComponent * 255);
+	NSColor *deviceColor = [value colorUsingColorSpace: [NSColorSpace deviceRGBColorSpace]];
+	long red = static_cast<long>(deviceColor.redComponent * 255);
+	long green = static_cast<long>(deviceColor.greenComponent * 255);
+	long blue = static_cast<long>(deviceColor.blueComponent * 255);
 
 	long color = (blue << 16) + (green << 8) + red;
 	mBackend->WndProc(static_cast<Message>(property), parameter, color);
