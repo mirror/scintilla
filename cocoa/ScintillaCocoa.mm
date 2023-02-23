@@ -1563,8 +1563,16 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info) {
 			[pasteboard.types containsObject: ScintillaRecPboardType])
 		return (sourceDragMask & NSDragOperationMove) ? NSDragOperationMove : NSDragOperationCopy;
 
-	if ([pasteboard.types containsObject: NSFilenamesPboardType])
-		return (sourceDragMask & NSDragOperationGeneric);
+	if (@available(macOS 10.13, *)) {
+		if ([pasteboard.types containsObject: NSPasteboardTypeFileURL])
+			return (sourceDragMask & NSDragOperationGeneric);
+	} else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+		if ([pasteboard.types containsObject: NSFilenamesPboardType])
+			return (sourceDragMask & NSDragOperationGeneric);
+#pragma clang diagnostic pop
+	}
 	return NSDragOperationNone;
 }
 
@@ -1588,21 +1596,37 @@ void ScintillaCocoa::DraggingExited(id <NSDraggingInfo> info) {
 bool ScintillaCocoa::PerformDragOperation(id <NSDraggingInfo> info) {
 	NSPasteboard *pasteboard = [info draggingPasteboard];
 
-	if ([pasteboard.types containsObject: NSFilenamesPboardType]) {
-		NSArray *files = [pasteboard propertyListForType: NSFilenamesPboardType];
-		for (NSString* uri in files)
-			NotifyURIDropped(uri.UTF8String);
+	if (@available(macOS 10.13, *)) {
+		// NSPasteboardTypeFileURL is available for macOS 10.13+, provides NSURLs
+		if ([pasteboard.types containsObject: NSPasteboardTypeFileURL]) {
+			NSArray *files = [pasteboard readObjectsForClasses:@[NSURL.class] options:nil];
+			for (NSURL *uri in files) {
+				NotifyURIDropped([uri path].UTF8String);
+			}
+			return true;
+		}
 	} else {
-		SelectionText text;
-		GetPasteboardData(pasteboard, &text);
-
-		if (text.Length() > 0) {
-			NSDragOperation operation = [info draggingSourceOperationMask];
-			bool moving = (operation & NSDragOperationMove) != 0;
-
-			DropAt(posDrag, text.Data(), text.Length(), moving, text.rectangular);
-		};
+		// Use deprecated NSFilenamesPboardType, provides NSStrings
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+		if ([pasteboard.types containsObject: NSFilenamesPboardType]) {
+			NSArray *files = [pasteboard propertyListForType: NSFilenamesPboardType];
+			for (NSString *uri in files) {
+				NotifyURIDropped(uri.UTF8String);
+			}
+		}
+#pragma clang diagnostic pop
 	}
+
+	SelectionText text;
+	GetPasteboardData(pasteboard, &text);
+
+	if (text.Length() > 0) {
+		NSDragOperation operation = [info draggingSourceOperationMask];
+		bool moving = (operation & NSDragOperationMove) != 0;
+
+		DropAt(posDrag, text.Data(), text.Length(), moving, text.rectangular);
+	};
 
 	return true;
 }

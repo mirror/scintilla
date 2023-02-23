@@ -235,7 +235,15 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		trackingArea = nil;
 		mMarkedTextRange = NSMakeRange(NSNotFound, 0);
 
-		[self registerForDraggedTypes: @[NSPasteboardTypeString, ScintillaRecPboardType, NSFilenamesPboardType]];
+		if (@available(macOS 10.13, *)) {
+			[self registerForDraggedTypes: @[NSPasteboardTypeString, ScintillaRecPboardType, NSPasteboardTypeFileURL]];
+		} else {
+			// Use old deprecated type
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+			[self registerForDraggedTypes: @[NSPasteboardTypeString, ScintillaRecPboardType, NSFilenamesPboardType]];
+#pragma clang diagnostic pop
+		}
 
 		// Set up accessibility in the text role
 		if ([self respondsToSelector: @selector(setAccessibilityElement:)]) {
