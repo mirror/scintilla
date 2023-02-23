@@ -1373,7 +1373,11 @@ void ScintillaCocoa::StartDrag() {
 	if (@available(macOS 10.13, *)) {
 		pasteboard = [NSPasteboard pasteboardWithName: NSPasteboardNameDrag];
 	} else {
+		// Use old deprecated name
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 		pasteboard = [NSPasteboard pasteboardWithName: NSDragPboard];
+#pragma clang diagnostic pop
 	}
 	CopySelectionRange(&selectedText);
 	SetPasteboardData(pasteboard, selectedText);
