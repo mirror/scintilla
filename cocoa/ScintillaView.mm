@@ -197,7 +197,6 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		marginRect.origin.x = x;
 		marginRect.size.width = width;
 		[self addCursorRect: marginRect cursor: cc];
-		[cc setOnMouseEntered: YES];
 		x += width;
 	}
 }
@@ -316,7 +315,6 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 	// We only have one cursor rect: our bounds.
 	const NSRect visibleBounds = mOwner.backend->GetBounds();
 	[self addCursorRect: visibleBounds cursor: mCurrentCursor];
-	[mCurrentCursor setOnMouseEntered: YES];
 }
 
 //--------------------------------------------------------------------------------------------------
