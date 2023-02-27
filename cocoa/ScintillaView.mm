@@ -784,14 +784,14 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		// Only snap for positions inside the document - allow outside
 		// for overshoot.
 		long lineHeight = mOwner.backend->WndProc(Message::TextHeight, 0, 0);
-		rc.origin.y = std::round(static_cast<XYPOSITION>(rc.origin.y) / lineHeight) * lineHeight;
+		rc.origin.y = std::round(rc.origin.y / lineHeight) * lineHeight;
 	}
 	// Snap to whole points - on retina displays this avoids visual debris
 	// when scrolling horizontally.
 	if ((rc.origin.x > 0) && (NSMaxX(rc) < contentRect.size.width)) {
 		// Only snap for positions inside the document - allow outside
 		// for overshoot.
-		rc.origin.x = std::round(static_cast<XYPOSITION>(rc.origin.x));
+		rc.origin.x = std::round(rc.origin.x);
 	}
 	return rc;
 }
