@@ -73,7 +73,7 @@ NSRect PRectangleToNSRect(const PRectangle &rc) {
 /**
  * Converts an NSRect as used by the system to a native Scintilla rectangle.
  */
-PRectangle NSRectToPRectangle(NSRect &rc) {
+PRectangle NSRectToPRectangle(const NSRect &rc) {
 	return PRectangle(rc.origin.x, rc.origin.y, NSMaxX(rc), NSMaxY(rc));
 }
 
