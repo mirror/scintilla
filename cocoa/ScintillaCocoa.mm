@@ -737,10 +737,7 @@ Scintilla::Internal::Point ScintillaCocoa::GetVisibleOriginInMain() const {
  * The returned value is in document coordinates.
  */
 PRectangle ScintillaCocoa::GetClientRectangle() const {
-	NSScrollView *scrollView = ScrollContainer();
-	NSSize size = scrollView.contentView.bounds.size;
-	Point origin = GetVisibleOriginInMain();
-	return PRectangle(origin.x, origin.y, origin.x+size.width, origin.y + size.height);
+	return rectangleClient;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2033,6 +2030,10 @@ bool ScintillaCocoa::SetScrollingSize() {
 
 void ScintillaCocoa::Resize() {
 	SetScrollingSize();
+
+	NSScrollView *scrollView = ScrollContainer();
+	rectangleClient = NSRectToPRectangle(scrollView.contentView.bounds);
+
 	ChangeSize();
 }
 
