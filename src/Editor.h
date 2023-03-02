@@ -400,6 +400,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool Wrapping() const noexcept;
 	void NeedWrapping(Sci::Line docLineStart=0, Sci::Line docLineEnd=WrapPending::lineLarge);
 	bool WrapOneLine(Surface *surface, Sci::Line lineToWrap);
+	bool WrapBlock(Surface *surface, Sci::Line lineToWrap, Sci::Line lineToWrapEnd);
 	enum class WrapScope {wsAll, wsVisible, wsIdle};
 	bool WrapLines(WrapScope ws);
 	void LinesJoin();
