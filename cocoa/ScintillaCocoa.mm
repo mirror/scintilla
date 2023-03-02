@@ -732,15 +732,22 @@ Scintilla::Internal::Point ScintillaCocoa::GetVisibleOriginInMain() const {
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Return the size of the client area which has been cached.
+ */
+Scintilla::Internal::Point ScintillaCocoa::ClientSize() const {
+	return sizeClient;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Instead of returning the size of the inner view we have to return the visible part of it
  * in order to make scrolling working properly.
  * The returned value is in document coordinates.
  */
 PRectangle ScintillaCocoa::GetClientRectangle() const {
 	NSScrollView *scrollView = ScrollContainer();
-	NSSize size = scrollView.contentView.bounds.size;
-	Point origin = GetVisibleOriginInMain();
-	return PRectangle(origin.x, origin.y, origin.x+size.width, origin.y + size.height);
+	return NSRectToPRectangle(scrollView.contentView.bounds);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2033,6 +2040,10 @@ bool ScintillaCocoa::SetScrollingSize() {
 
 void ScintillaCocoa::Resize() {
 	SetScrollingSize();
+
+	const PRectangle rcClient = GetClientRectangle();
+	sizeClient = Point(rcClient.Width(), rcClient.Height());
+
 	ChangeSize();
 }
 
