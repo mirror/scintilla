@@ -103,8 +103,6 @@ private:
 	bool isFirstResponder;
 	bool isActive;
 
-	PRectangle rectangleClient;
-
 	bool enteredSetScrollingSize;
 
 	bool GetPasteboardData(NSPasteboard *board, SelectionText *selectedText);
