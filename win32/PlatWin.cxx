@@ -1954,7 +1954,7 @@ void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
-class BlobInline : public IDWriteInlineObject {
+class BlobInline final : public IDWriteInlineObject {
 	XYPOSITION width;
 
 	// IUnknown
@@ -1980,12 +1980,6 @@ class BlobInline : public IDWriteInlineObject {
 public:
 	BlobInline(XYPOSITION width_=0.0f) noexcept : width(width_) {
 	}
-	// Defaulted so BlobInline objects can be copied.
-	BlobInline(const BlobInline &) = default;
-	BlobInline(BlobInline &&) = default;
-	BlobInline &operator=(const BlobInline &) = default;
-	BlobInline &operator=(BlobInline &&) = default;
-	virtual ~BlobInline() noexcept = default;
 };
 
 /// Implement IUnknown
@@ -1995,9 +1989,9 @@ STDMETHODIMP BlobInline::QueryInterface(REFIID riid, PVOID *ppv) {
 	// Never called so not checked.
 	*ppv = nullptr;
 	if (riid == IID_IUnknown)
-		*ppv = static_cast<IUnknown *>(this);
+		*ppv = this;
 	if (riid == __uuidof(IDWriteInlineObject))
-		*ppv = static_cast<IDWriteInlineObject *>(this);
+		*ppv = this;
 	if (!*ppv)
 		return E_NOINTERFACE;
 	return S_OK;
