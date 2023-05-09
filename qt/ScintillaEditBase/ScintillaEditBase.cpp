@@ -485,8 +485,6 @@ static std::vector<int> MapImeIndicators(QInputMethodEvent *event)
 			int indicator = IndicatorUnknown;
 			switch (charFormat.underlineStyle()) {
 				case QTextCharFormat::NoUnderline: // win32, linux
-					indicator = IndicatorTarget;
-					break;
 				case QTextCharFormat::SingleUnderline: // osx
 				case QTextCharFormat::DashUnderline: // win32, linux
 					indicator = IndicatorInput;
@@ -542,6 +540,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 	}
 
 	sqt->view.imeCaretBlockOverride = false;
+	preeditPos = -1; // reset not to interrupt Qt::ImCursorRectangle.
 
 	if (!event->commitString().isEmpty()) {
 		const QString &commitStr = event->commitString();
@@ -567,6 +566,9 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 		if (initialCompose)
 			sqt->ClearBeforeTentativeStart();
 		sqt->pdoc->TentativeStart(); // TentativeActive() from now on.
+
+		// Fix candidate window position at the start of preeditString.
+		preeditPos = sqt->CurrentPosition();
 
 		std::vector<int> imeIndicator = MapImeIndicators(event);
 
@@ -599,10 +601,14 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 			sqt->view.imeCaretBlockOverride = true;
 		}
 
-		// Set candidate box position for Qt::ImMicroFocus.
-		preeditPos = sqt->CurrentPosition();
+		// Set Candidate window position again at imeCaret when target input.
+		const bool targetAny = std::any_of(imeIndicator.begin(), imeIndicator.end(), [](int i) noexcept {
+			return i == IndicatorTarget;
+		});
+		if (targetAny)
+			preeditPos = sqt->CurrentPosition();
+
 		sqt->EnsureCaretVisible();
-		updateMicroFocus();
 	}
 	sqt->ShowCaretAtCurrentPosition();
 }
