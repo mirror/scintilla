@@ -655,7 +655,7 @@ QVariant ScintillaEditBase::inputMethodQuery(Qt::InputMethodQuery query) const
 		case Qt::ImCursorPosition:
 		{
 			const Scintilla::Position paraStart = sqt->pdoc->ParaUp(pos);
-			return QVariant(static_cast<int>(pos - paraStart));
+			return static_cast<int>(sqt->pdoc->CountUTF16(paraStart, pos));
 		}
 
 		case Qt::ImSurroundingText:
