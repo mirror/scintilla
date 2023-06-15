@@ -712,6 +712,9 @@ void ScintillaEditBase::notifyParent(NotificationData scn)
 			break;
 
 		case Notification::UpdateUI:
+			if (FlagSet(scn.updated, Update::Selection)) {
+				updateMicroFocus();
+			}
 			emit updateUi(scn.updated);
 			break;
 
