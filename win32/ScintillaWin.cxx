@@ -3030,7 +3030,7 @@ void ScintillaWin::ImeStartComposition() {
 		// Move IME Window to current caret position
 		IMContext imc(MainHWND());
 		const Point pos = PointMainCaret();
-		COMPOSITIONFORM CompForm;
+		COMPOSITIONFORM CompForm {};
 		CompForm.dwStyle = CFS_POINT;
 		CompForm.ptCurrentPos = POINTFromPoint(pos);
 
