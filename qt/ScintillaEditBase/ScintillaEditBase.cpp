@@ -611,14 +611,6 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 #endif
 			sqt->view.imeCaretBlockOverride = true;
 		}
-
-		// Set Candidate window position again at imeCaret when target input.
-		const bool targetAny = std::any_of(imeIndicator.begin(), imeIndicator.end(), [](int i) noexcept {
-			return i == IndicatorTarget;
-		});
-		if (targetAny)
-			preeditPos = sqt->CurrentPosition();
-
 		sqt->EnsureCaretVisible();
 	}
 	sqt->ShowCaretAtCurrentPosition();
