@@ -372,6 +372,9 @@ void ScintillaEditBase::contextMenuEvent(QContextMenuEvent *event)
 	}
 	if (sqt->ShouldDisplayPopup(pt)) {
 		sqt->ContextMenu(pos);
+		event->accept();
+	} else {
+		event->ignore();
 	}
 }
 
