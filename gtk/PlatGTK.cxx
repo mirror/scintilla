@@ -1622,6 +1622,7 @@ void ListBoxX::Create(Window &parent, int, Point, int, bool, Technology) {
 #endif
 
 	wid = widCached = gtk_window_new(GTK_WINDOW_POPUP);
+	gtk_window_set_type_hint(GTK_WINDOW(wid), GDK_WINDOW_TYPE_HINT_POPUP_MENU);
 
 	frame = gtk_frame_new(nullptr);
 	gtk_widget_show(PWidget(frame));
