@@ -607,6 +607,8 @@ void SurfaceImpl::GradientRectangle(PRectangle rc, const std::vector<ColourStop>
 
 void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
 	PLATFORM_ASSERT(context);
+	if (width == 0)
+		return;
 	if (rc.Width() > width)
 		rc.left += (rc.Width() - width) / 2;
 	rc.right = rc.left + width;
