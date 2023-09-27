@@ -1349,10 +1349,17 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * (like clearing all marks and setting new ones etc.).
  */
 - (void) suspendDrawing: (BOOL) suspend {
-	if (suspend)
-		[self.window disableFlushWindow];
-	else
-		[self.window enableFlushWindow];
+	if (@available(macOS 10.14, *)) {
+		// Don't try where deprecated
+	} else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+		if (suspend)
+			[self.window disableFlushWindow];
+		else
+			[self.window enableFlushWindow];
+#pragma GCC diagnostic pop
+	}
 }
 
 //--------------------------------------------------------------------------------------------------
