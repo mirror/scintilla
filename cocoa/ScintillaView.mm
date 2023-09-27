@@ -202,6 +202,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 }
 
 - (void) drawRect: (NSRect) rect {
+	if (!NSContainsRect(self.bounds, rect)) {
+	    rect = self.bounds;
+	}
 	[super drawRect:rect];
 }
 
