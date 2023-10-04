@@ -586,14 +586,14 @@ TEST_CASE("ChangeHistory") {
 		REQUIRE(il.DeletionCount(0, 2) == 0);
 		il.DeleteRangeSavingHistory(1, 1, true, false);
 		REQUIRE(il.DeletionCount(0,2) == 1);
-		const EditionSet at1 = {2};
+		const EditionSet at1 = { {2, 1} };
 		REQUIRE(il.DeletionsAt(1) == at1);
 		il.DeleteRangeSavingHistory(1, 1, false, false);
 		REQUIRE(il.DeletionCount(0,1) == 2);
-		const EditionSet at2 = { 2, 3 };
+		const EditionSet at2 = { {2, 1}, {3, 1} };
 		REQUIRE(il.DeletionsAt(1) == at2);
 		il.DeleteRangeSavingHistory(0, 1, false, false);
-		const EditionSet at3 = { 2, 3, 3 };
+		const EditionSet at3 = { {2, 1}, {3, 2} };
 		REQUIRE(il.DeletionsAt(0) == at3);
 		REQUIRE(il.DeletionCount(0,0) == 3);
 
