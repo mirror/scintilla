@@ -633,6 +633,55 @@ TEST_CASE("ChangeHistory") {
 		}
 		REQUIRE(il.DeletionCount(0, 10) == 0);
 		REQUIRE(il.Length() == 10);
+
+	}
+
+	SECTION("Delete Contiguous Backward") {
+		// Deletes that touch
+		constexpr size_t length = 20;
+		constexpr size_t rounds = 8;
+		il.Insert(0, length, false, true);
+		REQUIRE(il.Length() == length);
+		il.SetSavePoint();
+		for (size_t i = 0; i < rounds; i++) {
+			il.DeleteRangeSavingHistory(9-i, 1, false, false);
+		}
+
+		constexpr size_t lengthAfterDeletions = length - rounds;
+		REQUIRE(il.Length() == lengthAfterDeletions);
+		REQUIRE(il.DeletionCount(0, lengthAfterDeletions) == rounds);
+
+		for (size_t j = 0; j < rounds; j++) {
+			il.UndoDeleteStep(2+j, 1, false);
+		}
+
+		// Restored to original
+		REQUIRE(il.DeletionCount(0, length) == 0);
+		REQUIRE(il.Length() == length);
+	}
+
+	SECTION("Delete Contiguous Forward") {
+		// Deletes that touch
+		constexpr size_t length = 20;
+		constexpr size_t rounds = 8;
+		il.Insert(0, length, false, true);
+		REQUIRE(il.Length() == length);
+		il.SetSavePoint();
+		for (size_t i = 0; i < rounds; i++) {
+			il.DeleteRangeSavingHistory(2,1, false, false);
+		}
+
+		constexpr size_t lengthAfterDeletions = length - rounds;
+		REQUIRE(il.Length() == lengthAfterDeletions);
+		REQUIRE(il.DeletionCount(0, lengthAfterDeletions) == rounds);
+
+		for (size_t j = 0; j < rounds; j++) {
+			il.UndoDeleteStep(2, 1, false);
+		}
+
+		// Restored to original
+		REQUIRE(il.Length() == length);
+		REQUIRE(il.DeletionCount(0, length) == 0);
 	}
 }
 

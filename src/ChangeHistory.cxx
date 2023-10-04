@@ -30,7 +30,7 @@ namespace Scintilla::Internal {
 
 void ChangeStack::Clear() noexcept {
 	steps.clear();
-	insertions.clear();
+	changes.clear();
 }
 
 void ChangeStack::AddStep() {
@@ -39,12 +39,12 @@ void ChangeStack::AddStep() {
 
 void ChangeStack::PushDeletion(Sci::Position positionDeletion, int edition) {
 	steps.back()++;
-	insertions.push_back({ positionDeletion, 0, edition, InsertionSpan::Direction::deletion });
+	changes.push_back({ positionDeletion, 0, edition, ChangeSpan::Direction::deletion });
 }
 
 void ChangeStack::PushInsertion(Sci::Position positionInsertion, Sci::Position length, int edition) {
 	steps.back()++;
-	insertions.push_back({ positionInsertion, length, edition, InsertionSpan::Direction::insertion });
+	changes.push_back({ positionInsertion, length, edition, ChangeSpan::Direction::insertion });
 }
 
 size_t ChangeStack::PopStep() noexcept {
@@ -53,19 +53,31 @@ size_t ChangeStack::PopStep() noexcept {
 	return spans;
 }
 
-InsertionSpan ChangeStack::PopSpan() noexcept {
-	const InsertionSpan span = insertions.back();
-	insertions.pop_back();
+ChangeSpan ChangeStack::PopSpan() noexcept {
+	const ChangeSpan span = changes.back();
+	changes.pop_back();
 	return span;
 }
 
 void ChangeStack::SetSavePoint() noexcept {
 	// Switch changeUnsaved to changeSaved
-	for (InsertionSpan &x : insertions) {
+	for (ChangeSpan &x : changes) {
 		if (x.edition == changeModified) {
 			x.edition = changeSaved;
 		}
 	}
+}
+
+void ChangeStack::Check() const noexcept {
+#ifdef _DEBUG
+	// Ensure count in steps same as insertions;
+	size_t sizeSteps = 0;
+	for (const size_t c : steps) {
+		sizeSteps += c;
+	}
+	const size_t sizeInsertions = changes.size();
+	assert(sizeSteps == sizeInsertions);
+#endif
 }
 
 void ChangeLog::Clear(Sci::Position length) {
@@ -167,13 +179,16 @@ void ChangeLog::PopDeletion(Sci::Position position, Sci::Position deleteLength) 
 	editions->pop_back();
 	const size_t inserts = changeStack.PopStep();
 	for (size_t i = 0; i < inserts; i++) {
-		const InsertionSpan span = changeStack.PopSpan();
-		if (span.direction == InsertionSpan::Direction::insertion) {
+		const ChangeSpan span = changeStack.PopSpan();
+		if (span.direction == ChangeSpan::Direction::insertion) {
 			insertEdition.FillRange(span.start, span.edition, span.length);
 		} else {
 			assert(editions);
 			assert(editions->back() == span.edition);
 			editions->pop_back();
+			// Iterating backwards (pop) through changeStack, reverse order of insertion
+			// and original deletion list.
+			// Therefore need to insert at front to recreate original order.
 			InsertFrontDeletionAt(span.start, span.edition);
 		}
 	}
@@ -242,6 +257,7 @@ size_t ChangeLog::DeletionCount(Sci::Position start, Sci::Position length) const
 
 void ChangeLog::Check() const noexcept {
 	assert(insertEdition.Length() == deleteEdition.Length());
+	changeStack.Check();
 }
 
 ChangeHistory::ChangeHistory(Sci::Position length) {
@@ -270,7 +286,7 @@ void ChangeHistory::DeleteRange(Sci::Position position, Sci::Position deleteLeng
 	if (changeLogReversions) {
 		changeLogReversions->DeleteRangeSavingHistory(position, deleteLength);
 		if (reverting) {
-			changeLogReversions->PushDeletionAt(position, 1);
+			changeLogReversions->PushDeletionAt(position, changeRevertedOriginal);
 		}
 	}
 	Check();
@@ -349,9 +365,9 @@ int ChangeHistory::EditionAt(Sci::Position pos) const noexcept {
 	if (changeLogReversions) {
 		const int editionReversion = changeLogReversions->insertEdition.ValueAt(pos);
 		if (editionReversion) {
-			if (edition < 0)
-				return 1;
-			return edition ? 4 : 1;
+			if (edition < 0)	// Historical revision
+				return changeRevertedOriginal;
+			return edition ? changeRevertedToChange : changeRevertedOriginal;
 		}
 	}
 	return edition;

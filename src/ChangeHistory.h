@@ -22,27 +22,29 @@ constexpr unsigned int bitSaved = 2;
 constexpr unsigned int bitModified = 4;
 constexpr unsigned int bitRevertedToModified = 8;
 
-struct InsertionSpan {
+struct ChangeSpan {
 	Sci::Position start;
 	Sci::Position length;
 	int edition;
 	enum class Direction { insertion, deletion } direction;
 };
 
+// EditionSet is ordered from oldest to newest, its not really a set
 using EditionSet = std::vector<int>;
 using EditionSetOwned = std::unique_ptr<EditionSet>;
 
 class ChangeStack {
 	std::vector<size_t> steps;
-	std::vector<InsertionSpan> insertions;
+	std::vector<ChangeSpan> changes;
 public:
 	void Clear() noexcept;
 	void AddStep();
 	void PushDeletion(Sci::Position positionDeletion, int edition);
 	void PushInsertion(Sci::Position positionInsertion, Sci::Position length, int edition);
 	[[nodiscard]] size_t PopStep() noexcept;
-	[[nodiscard]] InsertionSpan PopSpan() noexcept;
+	[[nodiscard]] ChangeSpan PopSpan() noexcept;
 	void SetSavePoint() noexcept;
+	void Check() const noexcept;
 };
 
 struct ChangeLog {
