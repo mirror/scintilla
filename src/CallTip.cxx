@@ -37,6 +37,13 @@ size_t Chunk::Length() const noexcept {
 	return end - start;
 }
 
+namespace {
+
+constexpr ColourRGBA silver(0xc0, 0xc0, 0xc0);
+constexpr ColourRGBA grey(0x80, 0x80, 0x80);
+
+}
+
 CallTip::CallTip() noexcept {
 	wCallTip = {};
 	inCallTipMode = false;
@@ -57,14 +64,14 @@ CallTip::CallTip() noexcept {
 #ifdef __APPLE__
 	// proper apple colours for the default
 	colourBG = ColourRGBA(0xff, 0xff, 0xc6);
-	colourUnSel = ColourRGBA(0, 0, 0);
+	colourUnSel = black;
 #else
-	colourBG = ColourRGBA(0xff, 0xff, 0xff);
-	colourUnSel = ColourRGBA(0x80, 0x80, 0x80);
+	colourBG = white;
+	colourUnSel = grey;
 #endif
 	colourSel = ColourRGBA(0, 0, 0x80);
-	colourShade = ColourRGBA(0, 0, 0);
-	colourLight = ColourRGBA(0xc0, 0xc0, 0xc0);
+	colourShade = black;
+	colourLight = silver;
 	codePage = 0;
 	clickPlace = 0;
 }

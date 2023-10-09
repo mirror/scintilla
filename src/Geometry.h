@@ -256,6 +256,9 @@ public:
 	ColourRGBA MixedWith(ColourRGBA other, double proportion) const noexcept;
 };
 
+constexpr ColourRGBA white(maximumByte, maximumByte, maximumByte);
+constexpr ColourRGBA black(0x0, 0x0, 0x0);
+
 /**
 * Holds an RGBA colour and stroke width to stroke a shape.
 */

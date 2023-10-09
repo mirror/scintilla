@@ -2093,7 +2093,7 @@ ColourRGBA InvertedLight(ColourRGBA orig) noexcept {
 	const unsigned int l = (r + g + b) / 3; 	// There is a better calculation for this that matches human eye
 	const unsigned int il = 0xff - l;
 	if (l == 0)
-		return ColourRGBA(0xff, 0xff, 0xff);
+		return white;
 	r = r * il / l;
 	g = g * il / l;
 	b = b * il / l;
@@ -2714,15 +2714,15 @@ Sci::Position EditView::FormatRange(bool draw, CharacterRangeFull chrg, Rectangl
 			it->fore = InvertedLight(it->fore);
 			it->back = InvertedLight(it->back);
 		} else if (colourMode == PrintOption::BlackOnWhite) {
-			it->fore = ColourRGBA(0, 0, 0);
-			it->back = ColourRGBA(0xff, 0xff, 0xff);
+			it->fore = black;
+			it->back = white;
 		} else if (colourMode == PrintOption::ColourOnWhite || colourMode == PrintOption::ColourOnWhiteDefaultBG) {
-			it->back = ColourRGBA(0xff, 0xff, 0xff);
+			it->back = white;
 		}
 	}
 	// White background for the line numbers if PrintOption::ScreenColours isn't used
 	if (colourMode != PrintOption::ScreenColours) {
-		vsPrint.styles[StyleLineNumber].back = ColourRGBA(0xff, 0xff, 0xff);
+		vsPrint.styles[StyleLineNumber].back = white;
 	}
 
 	// Printing uses different margins, so reset screen margins
