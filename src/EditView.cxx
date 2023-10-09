@@ -831,13 +831,13 @@ Sci::Position EditView::StartEndDisplayLine(Surface *surface, const EditModel &m
 
 namespace {
 
-constexpr ColourRGBA bugColour = ColourRGBA(0xff, 0, 0xfe, 0xf0);
+constexpr ColourRGBA colourBug(0xff, 0, 0xfe, 0xf0);
 
 // Selection background colours are always defined, the value_or is to show if bug
 
 ColourRGBA SelectionBackground(const EditModel &model, const ViewStyle &vsDraw, InSelection inSelection) {
 	if (inSelection == InSelection::inNone)
-		return bugColour;	// Not selected is a bug
+		return colourBug;	// Not selected is a bug
 
 	Element element = Element::SelectionBack;
 	if (inSelection == InSelection::inAdditional)
@@ -846,7 +846,7 @@ ColourRGBA SelectionBackground(const EditModel &model, const ViewStyle &vsDraw, 
 		element = Element::SelectionSecondaryBack;
 	if (!model.hasFocus && vsDraw.ElementColour(Element::SelectionInactiveBack))
 		element = Element::SelectionInactiveBack;
-	return vsDraw.ElementColour(element).value_or(bugColour);
+	return vsDraw.ElementColour(element).value_or(colourBug);
 }
 
 ColourOptional SelectionForeground(const EditModel &model, const ViewStyle &vsDraw, InSelection inSelection) {
@@ -1411,9 +1411,9 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 			}
 		}
 	} else {
-		// No annotation to draw so show bug with bugColour
+		// No annotation to draw so show bug with colourBug
 		if (FlagSet(phase, DrawPhase::back)) {
-			surface->FillRectangle(rcSegment, bugColour.Opaque());
+			surface->FillRectangle(rcSegment, colourBug.Opaque());
 		}
 	}
 }
