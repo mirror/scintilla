@@ -39,8 +39,17 @@ size_t Chunk::Length() const noexcept {
 
 namespace {
 
+#ifdef __APPLE__
+// Archaic macOS colours for the default: black on light yellow
+constexpr ColourRGBA colourTextAndArrow(black);
+constexpr ColourRGBA colourBackground(0xff, 0xff, 0xc6);
+#else
+// Grey on white
+constexpr ColourRGBA colourTextAndArrow(0x80, 0x80, 0x80);
+constexpr ColourRGBA colourBackground(white);
+#endif
+
 constexpr ColourRGBA silver(0xc0, 0xc0, 0xc0);
-constexpr ColourRGBA grey(0x80, 0x80, 0x80);
 
 }
 
@@ -61,14 +70,9 @@ CallTip::CallTip() noexcept {
 	borderHeight = 2; // Extra line for border and an empty line at top and bottom.
 	verticalOffset = 1;
 
-#ifdef __APPLE__
-	// proper apple colours for the default
-	colourBG = ColourRGBA(0xff, 0xff, 0xc6);
-	colourUnSel = black;
-#else
-	colourBG = white;
-	colourUnSel = grey;
-#endif
+	colourBG = colourBackground;
+	colourUnSel = colourTextAndArrow;
+
 	colourSel = ColourRGBA(0, 0, 0x80);
 	colourShade = black;
 	colourLight = silver;
