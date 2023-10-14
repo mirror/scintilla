@@ -453,6 +453,52 @@ TEST_CASE("Document") {
 		REQUIRE(doc.NextPosition(15, -1) == 14);
 	}
 
+	SECTION("RegexSearchAndSubstitution") {
+		DocPlus doc("\n\r\r\n 1a\xCE\x93z \n\r\r\n 2b\xCE\x93y \n\r\r\n", CpUtf8);// 1a gamma z 2b gamma y
+		const std::string finding = R"(\d+(\w+))";
+		Sci::Position lengthFinding = finding.length();
+		Sci::Position location = doc.FindNeedle(finding, FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 5);
+		REQUIRE(lengthFinding == 5);
+
+		const std::string_view substituteText = R"(\t\1\n)";
+		Sci::Position lengthsubstitute = substituteText.length();
+		std::string substituted = doc.document.SubstituteByPosition(substituteText.data(), &lengthsubstitute);
+		REQUIRE(lengthsubstitute == 6);
+		REQUIRE(substituted == "\ta\xCE\x93z\n");
+
+		lengthFinding = finding.length();
+		location = doc.FindNeedleReverse(finding, FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 16);
+		REQUIRE(lengthFinding == 5);
+
+		lengthsubstitute = substituteText.length();
+		substituted = doc.document.SubstituteByPosition(substituteText.data(), &lengthsubstitute);
+		REQUIRE(lengthsubstitute == 6);
+		REQUIRE(substituted == "\tb\xCE\x93y\n");
+
+		#ifndef NO_CXX11_REGEX
+		lengthFinding = finding.length();
+		location = doc.FindNeedle(finding, FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 5);
+		REQUIRE(lengthFinding == 5);
+
+		lengthsubstitute = substituteText.length();
+		substituted = doc.document.SubstituteByPosition(substituteText.data(), &lengthsubstitute);
+		REQUIRE(lengthsubstitute == 6);
+		REQUIRE(substituted == "\ta\xCE\x93z\n");
+
+		lengthFinding = finding.length();
+		location = doc.FindNeedleReverse(finding, FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 16);
+		REQUIRE(lengthFinding == 5);
+
+		lengthsubstitute = substituteText.length();
+		substituted = doc.document.SubstituteByPosition(substituteText.data(), &lengthsubstitute);
+		REQUIRE(lengthsubstitute == 6);
+		REQUIRE(substituted == "\tb\xCE\x93y\n");
+		#endif
+	}
 }
 
 TEST_CASE("Words") {
