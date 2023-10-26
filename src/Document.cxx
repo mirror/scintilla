@@ -458,30 +458,7 @@ bool Document::IsLineStartPosition(Sci::Position position) const {
 }
 
 Sci_Position SCI_METHOD Document::LineEnd(Sci_Position line) const {
-	if (line >= LinesTotal() - 1) {
-		return LineStart(line + 1);
-	} else {
-		Sci::Position position = LineStart(line + 1);
-		if (LineEndType::Unicode == cb.GetLineEndTypes()) {
-			const unsigned char bytes[] = {
-				cb.UCharAt(position-3),
-				cb.UCharAt(position-2),
-				cb.UCharAt(position-1),
-			};
-			if (UTF8IsSeparator(bytes)) {
-				return position - UTF8SeparatorLength;
-			}
-			if (UTF8IsNEL(bytes+1)) {
-				return position - UTF8NELLength;
-			}
-		}
-		position--; // Back over CR or LF
-		// When line terminator is CR+LF, may need to go back one more
-		if ((position > LineStart(line)) && (cb.CharAt(position - 1) == '\r')) {
-			position--;
-		}
-		return position;
-	}
+	return cb.LineEnd(line);
 }
 
 void SCI_METHOD Document::SetErrorStatus(int status) {
@@ -500,16 +477,16 @@ Sci::Line Document::SciLineFromPosition(Sci::Position pos) const noexcept {
 	return cb.LineFromPosition(pos);
 }
 
-Sci::Position Document::LineEndPosition(Sci::Position position) const {
-	return LineEnd(LineFromPosition(position));
+Sci::Position Document::LineEndPosition(Sci::Position position) const noexcept {
+	return cb.LineEnd(cb.LineFromPosition(position));
 }
 
-bool Document::IsLineEndPosition(Sci::Position position) const {
-	return LineEnd(LineFromPosition(position)) == position;
+bool Document::IsLineEndPosition(Sci::Position position) const noexcept {
+	return LineEndPosition(position) == position;
 }
 
-bool Document::IsPositionInLineEnd(Sci::Position position) const {
-	return position >= LineEnd(LineFromPosition(position));
+bool Document::IsPositionInLineEnd(Sci::Position position) const noexcept {
+	return position >= LineEndPosition(position);
 }
 
 Sci::Position Document::VCHomePosition(Sci::Position position) const {

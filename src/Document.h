@@ -457,9 +457,9 @@ public:
 	[[nodiscard]] Range LineRange(Sci::Line line) const noexcept;
 	bool IsLineStartPosition(Sci::Position position) const;
 	Sci_Position SCI_METHOD LineEnd(Sci_Position line) const override;
-	Sci::Position LineEndPosition(Sci::Position position) const;
-	bool IsLineEndPosition(Sci::Position position) const;
-	bool IsPositionInLineEnd(Sci::Position position) const;
+	Sci::Position LineEndPosition(Sci::Position position) const noexcept;
+	bool IsLineEndPosition(Sci::Position position) const noexcept;
+	bool IsPositionInLineEnd(Sci::Position position) const noexcept;
 	Sci::Position VCHomePosition(Sci::Position position) const;
 	Sci::Position IndexLineStart(Sci::Line line, Scintilla::LineCharacterIndexType lineCharacterIndex) const noexcept;
 	Sci::Line LineFromPositionIndex(Sci::Position pos, Scintilla::LineCharacterIndexType lineCharacterIndex) const noexcept;

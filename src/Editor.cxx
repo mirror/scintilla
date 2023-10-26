@@ -625,13 +625,11 @@ SelectionRange Editor::LineSelectionRange(SelectionPosition currentPos_, Selecti
 	if (currentPos_ > anchor_) {
 		anchor_ = SelectionPosition(
 			pdoc->LineStart(pdoc->LineFromPosition(anchor_.Position())));
-		currentPos_ = SelectionPosition(
-			pdoc->LineEnd(pdoc->LineFromPosition(currentPos_.Position())));
+		currentPos_ = SelectionPosition(pdoc->LineEndPosition(currentPos_.Position()));
 	} else {
 		currentPos_ = SelectionPosition(
 			pdoc->LineStart(pdoc->LineFromPosition(currentPos_.Position())));
-		anchor_ = SelectionPosition(
-			pdoc->LineEnd(pdoc->LineFromPosition(anchor_.Position())));
+		anchor_ = SelectionPosition(pdoc->LineEndPosition(anchor_.Position()));
 	}
 	return SelectionRange(currentPos_, anchor_);
 }
