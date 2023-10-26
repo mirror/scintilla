@@ -155,6 +155,7 @@ TEST_CASE("Document") {
 		REQUIRE(1 == doc.document.LinesTotal());
 		REQUIRE(0 == doc.document.LineStart(0));
 		REQUIRE(0 == doc.document.LineFromPosition(0));
+		REQUIRE(0 == doc.document.LineStartPosition(0));
 		REQUIRE(sLength == doc.document.LineStart(1));
 		REQUIRE(0 == doc.document.LineFromPosition(static_cast<int>(sLength)));
 		REQUIRE(doc.document.CanUndo());
