@@ -1094,6 +1094,17 @@ class TestKeyCommands(unittest.TestCase):
 		self.ed.LineEndExtend()
 		self.assertEqual(self.selRange(), (10, 3))
 
+	def testVCHome(self):
+		# Goes to the indent unless there already when goes to origin
+		self.ed.AddText(10, b"   a big boat")
+		self.ed.SetSel(6,6)
+		self.ed.VCHome()
+		self.assertEqual(self.selRange(), (3, 3))
+		self.ed.VCHome()
+		self.assertEqual(self.selRange(), (0, 0))
+		self.ed.VCHome()
+		self.assertEqual(self.selRange(), (3, 3))
+
 	def testStartEndMove(self):
 		self.ed.AddText(10, b"a\nbig\nboat")
 		self.ed.SetSel(3,3)
