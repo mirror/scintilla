@@ -705,7 +705,7 @@ class TestSimple(unittest.TestCase):
 		self.assertEqual(self.ed.Contents(), b"a321d")
 		self.ed.SearchFlags = self.ed.SCFIND_REGEXP
 		self.assertEqual(self.ed.SearchFlags, self.ed.SCFIND_REGEXP)
-		searchString = b"\([1-9]+\)"
+		searchString = rb"\([1-9]+\)"
 		pos = self.ed.SearchInTarget(len(searchString), searchString)
 		self.assertEqual(1, pos)
 		tagString = self.ed.GetTag(1)
@@ -1435,20 +1435,20 @@ class TestSearch(unittest.TestCase):
 		flags = self.ed.SCFIND_REGEXP
 		self.assertEqual(-1, self.ed.FindBytes(0, self.ed.Length, b"b.g", 0))
 		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, b"b.g", flags))
-		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, b"\<b.g\>", flags))
+		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, rb"\<b.g\>", flags))
 		self.assertEqual(-1, self.ed.FindBytes(0, self.ed.Length, b"b[A-Z]g",
 			flags | self.ed.SCFIND_MATCHCASE))
 		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, b"b[a-z]g", flags))
 		self.assertEqual(6, self.ed.FindBytes(0, self.ed.Length, b"b[a-z]*t", flags))
 		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, b"^a", flags))
 		self.assertEqual(10, self.ed.FindBytes(0, self.ed.Length, b"\t$", flags))
-		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, b"\([a]\).*\0", flags))
+		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, b"\\([a]\\).*\0", flags))
 
 	def testPosixREFind(self):
 		flags = self.ed.SCFIND_REGEXP | self.ed.SCFIND_POSIX
 		self.assertEqual(-1, self.ed.FindBytes(0, self.ed.Length, b"b.g", 0))
 		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, b"b.g", flags))
-		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, b"\<b.g\>", flags))
+		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, rb"\<b.g\>", flags))
 		self.assertEqual(-1, self.ed.FindBytes(0, self.ed.Length, b"b[A-Z]g",
 			flags | self.ed.SCFIND_MATCHCASE))
 		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, b"b[a-z]g", flags))
@@ -1482,12 +1482,12 @@ class TestSearch(unittest.TestCase):
 	def testPhilippeREFind(self):
 		# Requires 1.,72
 		flags = self.ed.SCFIND_REGEXP
-		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, b"\w", flags))
-		self.assertEqual(1, self.ed.FindBytes(0, self.ed.Length, b"\W", flags))
-		self.assertEqual(-1, self.ed.FindBytes(0, self.ed.Length, b"\d", flags))
-		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, b"\D", flags))
-		self.assertEqual(1, self.ed.FindBytes(0, self.ed.Length, b"\s", flags))
-		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, b"\S", flags))
+		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, rb"\w", flags))
+		self.assertEqual(1, self.ed.FindBytes(0, self.ed.Length, rb"\W", flags))
+		self.assertEqual(-1, self.ed.FindBytes(0, self.ed.Length, rb"\d", flags))
+		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, rb"\D", flags))
+		self.assertEqual(1, self.ed.FindBytes(0, self.ed.Length, rb"\s", flags))
+		self.assertEqual(0, self.ed.FindBytes(0, self.ed.Length, rb"\S", flags))
 		self.assertEqual(2, self.ed.FindBytes(0, self.ed.Length, b"\x62", flags))
 
 	def testRENonASCII(self):
