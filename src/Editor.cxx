@@ -980,7 +980,10 @@ void Editor::VerticalCentreCaret() {
 void Editor::MoveSelectedLines(int lineDelta) {
 
 	if (sel.IsRectangular()) {
-		return;
+		// Convert to stream selection
+		const SelectionRange rangeRectangular = sel.Rectangular();
+		sel.Clear();
+		sel.SetSelection(rangeRectangular);
 	}
 
 	// if selection doesn't start at the beginning of the line, set the new start

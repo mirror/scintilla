@@ -668,6 +668,17 @@ class TestSimple(unittest.TestCase):
 		self.ed.SetSel(1, 2)
 		self.ed.MoveSelectedLinesDown()
 		self.assertEqual(self.ed.Contents(), b"b2\na1\nc3")
+		
+		# Exercise rectangular selection
+		self.ed.EOLMode = self.ed.SC_EOL_LF
+		self.ed.SetContents(b"a1\nb2\nc3")
+		self.ed.RectangularSelectionAnchor = 1
+		self.ed.RectangularSelectionCaret = 4
+		# Check rectangular not stream
+		self.assertEqual(self.ed.GetSelectionMode(), self.ed.SC_SEL_RECTANGLE)
+		self.assertEqual(self.ed.Selections, 2)
+		self.ed.MoveSelectedLinesDown()
+		self.assertEqual(self.ed.Contents(), b"c3\na1\nb2")
 
 		# Restore line end
 		self.ed.EOLMode = lineEndType
@@ -2044,6 +2055,7 @@ class TestModalSelection(unittest.TestCase):
 		self.assertEqual(self.ed.GetSelectionNCaret(0), 1)
 		self.assertEqual(self.ed.GetSelectionNAnchor(0), 1)
 		self.ed.SelectionMode = self.ed.SC_SEL_STREAM
+		self.assertEqual(self.ed.GetSelectionMode(), self.ed.SC_SEL_STREAM)
 		self.assertEqual(self.ed.Selections, 1)
 		self.assertEqual(self.ed.MainSelection, 0)
 		self.assertEqual(self.ed.GetSelectionNCaret(0), 1)
@@ -2067,6 +2079,7 @@ class TestModalSelection(unittest.TestCase):
 		self.assertEqual(self.ed.GetSelectionNCaret(0), 1)
 		self.assertEqual(self.ed.GetSelectionNAnchor(0), 1)
 		self.ed.SelectionMode = self.ed.SC_SEL_RECTANGLE
+		self.assertEqual(self.ed.GetSelectionMode(), self.ed.SC_SEL_RECTANGLE)
 		self.assertEqual(self.ed.Selections, 1)
 		self.assertEqual(self.ed.MainSelection, 0)
 		self.assertEqual(self.ed.GetSelectionNCaret(0), 1)
@@ -2092,6 +2105,7 @@ class TestModalSelection(unittest.TestCase):
 		self.assertEqual(self.ed.GetSelectionNCaret(0), 1)
 		self.assertEqual(self.ed.GetSelectionNAnchor(0), 1)
 		self.ed.SelectionMode = self.ed.SC_SEL_LINES
+		self.assertEqual(self.ed.GetSelectionMode(), self.ed.SC_SEL_LINES)
 		self.assertEqual(self.ed.Selections, 1)
 		self.assertEqual(self.ed.MainSelection, 0)
 		self.assertEqual(self.ed.GetSelectionNCaret(0), 0)
