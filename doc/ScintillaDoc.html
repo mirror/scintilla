@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 14 January 2023 NH</p>
+    <p>Last edited 30 October 2023 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -10001,23 +10001,6 @@ EM_SETTARGETDEVICE
     <p>When producing a stand-alone Scintilla DLL, the ScintillaDLL.cxx file should be compiled and
     linked in to provide <code>DllMain</code> and <code>Scintilla_RegisterClasses</code>.</p>
 
-    <h3>Ensuring lexers are linked into Scintilla</h3>
-
-    <p>Depending on the compiler and linker used, the lexers may be stripped out. This is most
-    often caused when building a static library. To ensure the lexers are linked in, the
-    <code>Scintilla_LinkLexers()</code> function may be called.</p>
-
-    <h3>Changing set of lexers</h3>
-
-    <p>To change the set of lexers in Scintilla, add and remove lexer source files
-    (<code>Lex*.cxx</code>) from the <code>scintilla/lexers directory</code> and run the
-    <code>scripts/LexGen.py</code> script from the <code>scripts</code> directory to update the make files
-    and <code>Catalogue.cxx</code>. <code>LexGen.py</code> requires Python 3.6 or later. If you do
-    not have access to Python, you can hand edit <code>Catalogue.cxx</code> in a simple-minded way,
-    following the patterns of other lexers. The important thing is to include
-    <code>LINK_LEXER(lmMyLexer);</code> to correspond with the <code>LexerModule
-    lmMyLexer(...);</code> in your lexer source code.</p>
-
     <h3>Building with an alternative Regular Expression implementation</h3>
 
  <p id="AlternativeRegEx">A simple interface provides support for switching the Regular Expressions engine at
@@ -10027,7 +10010,7 @@ EM_SETTARGETDEVICE
  to create an instance of your class. You must disable the built-in implementation by defining
  <code>SCI_OWNREGEX</code>.</p>
 
-    <h3>Preprocessors affect building</h3>
+    <h3>Preprocessor definitions that affect building</h3>
 
     <table class="standard" summary="Building preprocessors">
       <tbody>
