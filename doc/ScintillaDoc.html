@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 30 October 2023 NH</p>
+    <p>Last edited 1 November 2023 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -322,153 +322,110 @@
     <table class="categories" summary="Message categories">
       <tbody>
         <tr>
-          <td>&cir; <a class="toc" href="#TextRetrievalAndModification">Text retrieval and
-          modification</a></td>
-
+          <td>&cir; <a class="toc" href="#TextRetrievalAndModification">Text retrieval and modification</a></td>
           <td>&cir; <a class="toc" href="#Searching">Searching and replacing</a></td>
-
           <td>&cir; <a class="toc" href="#Overtype">Overtype</a></td>
-
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#CutCopyAndPaste">Cut, copy and paste</a></td>
-
           <td>&cir; <a class="toc" href="#ErrorHandling">Error handling</a></td>
-
           <td>&cir; <a class="toc" href="#UndoAndRedo">Undo and Redo</a></td>
-
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#ChangeHistory">Change history</a></td>
-
           <td>&cir; <a class="toc" href="#SelectionAndInformation">Selection and information</a></td>
-
           <td>&cir; <a class="toc" href="#ByCharacterOrCodeUnit">By character or UTF-16 code unit</a></td>
-
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#MultipleSelectionAndVirtualSpace">Multiple Selection and Virtual Space</a></td>
-
           <td>&cir; <a class="toc" href="#ScrollingAndAutomaticScrolling">Scrolling and automatic scrolling</a></td>
-
           <td>&cir; <a class="toc" href="#WhiteSpace">White space</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#Cursor">Cursor</a></td>
-
           <td>&cir; <a class="toc" href="#MouseCapture">Mouse capture</a></td>
-
           <td>&cir; <a class="toc" href="#LineEndings">Line endings</a></td>
-
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#Words">Words</a></td>
-
           <td>&cir; <a class="toc" href="#Styling">Styling</a></td>
-
           <td>&cir; <a class="toc" href="#StyleDefinition">Style definition</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#ElementColours">Element colours</a></td>
-
           <td>&cir; <a class="toc" href="#CaretAndSelectionStyles">Selection, caret, and hotspot styles</a></td>
-
           <td>&cir; <a class="toc" href="#CharacterRepresentations">Character representations</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#Margins">Margins</a></td>
-
           <td>&cir; <a class="toc" href="#Annotations">Annotations</a></td>
-
           <td>&cir; <a class="toc" href="#OtherSettings">Other settings</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
-
-          <td>&cir; <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
-          Guides</a></td>
-
+          <td>&cir; <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation Guides</a></td>
           <td>&cir; <a class="toc" href="#Markers">Markers</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#Indicators">Indicators</a></td>
-
           <td>&cir; <a class="toc" href="#Autocompletion">Autocompletion</a></td>
-
           <td>&cir; <a class="toc" href="#UserLists">User lists</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#CallTips">Call tips</a></td>
-
           <td>&cir; <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
-
           <td>&cir; <a class="toc" href="#KeyBindings">Key bindings</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
-
           <td>&cir; <a class="toc" href="#MacroRecording">Macro recording</a></td>
-
           <td>&cir; <a class="toc" href="#Printing">Printing</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#DirectAccess">Direct access</a></td>
-
           <td>&cir; <a class="toc" href="#MultipleViews">Multiple views</a></td>
-
           <td>&cir; <a class="toc" href="#BackgroundLoadSave">Background loading and saving</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#Folding">Folding</a></td>
-
           <td>&cir; <a class="toc" href="#LineWrapping">Line wrapping</a></td>
-
           <td>&cir; <a class="toc" href="#Zooming">Zooming</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#LongLines">Long lines</a></td>
-
           <td>&cir; <a class="toc" href="#Accessibility">Accessibility</a></td>
-
           <td>&cir; <a class="toc" href="#Lexer">Lexer</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#LexerObjects">Lexer objects</a></td>
-
           <td>&cir; <a class="toc" href="#Notifications">Notifications</a></td>
-
           <td>&cir; <a class="toc" href="#Images">Images</a></td>
         </tr>
 
         <tr>
           <td>&cir; <a class="toc" href="#GTK">GTK</a></td>
-
           <td>&cir; <a class="toc" href="#ProvisionalMessages"><span class="provisional">Provisional messages</span></a></td>
-
           <td>&cir; <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
         </tr>
 
         <tr>
-          <td>&cir; <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
-          supported by Scintilla</a></td>
-
+          <td>&cir; <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never supported by Scintilla</a></td>
           <td>&cir; <a class="toc" href="#RemovedFeatures">Removed features</a></td>
-
           <td>&cir; <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
         </tr>
 
