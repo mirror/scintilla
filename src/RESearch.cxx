@@ -264,20 +264,6 @@ RESearch::RESearch(CharClassify *charClassTable) {
 void RESearch::Clear() {
 	bopat.fill(NOTFOUND);
 	eopat.fill(NOTFOUND);
-	for (int i = 0; i < MAXTAG; i++) {
-		pat[i].clear();
-	}
-}
-
-void RESearch::GrabMatches(const CharacterIndexer &ci) {
-	for (unsigned int i = 0; i < MAXTAG; i++) {
-		if ((bopat[i] != NOTFOUND) && (eopat[i] != NOTFOUND)) {
-			const Sci::Position len = eopat[i] - bopat[i];
-			pat[i].resize(len);
-			for (Sci::Position j = 0; j < len; j++)
-				pat[i][j] = ci.CharAt(bopat[i] + j);
-		}
-	}
 }
 
 void RESearch::ChSet(unsigned char c) noexcept {
