@@ -548,6 +548,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void FineTickerStart(TickReason reason, int millis, int tolerance);
 	virtual void FineTickerCancel(TickReason reason);
 	virtual bool SetIdle(bool) { return false; }
+	void ChangeMouseCapture(bool on);
 	virtual void SetMouseCapture(bool on) = 0;
 	virtual bool HaveMouseCapture() = 0;
 	void SetFocusState(bool focusState);
