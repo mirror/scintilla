@@ -4789,8 +4789,22 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, KeyMod modi
 				hotSpotClickPos = newCharPos.Position();
 			}
 			if (!shift) {
-				if (PointInSelection(pt) && !SelectionEmpty()) {
-					inDragDrop = DragDrop::initial;
+				const ptrdiff_t selectionPart = SelectionFromPoint(pt);
+				if (selectionPart >= 0) {
+					if (multipleSelection && ctrl) {
+						// Deselect
+						if (sel.Count() > 1) {
+							DropSelection(selectionPart);
+							// Completed: don't want any more processing of this click
+							return;
+						} else {
+							// Switch to just the click position
+							SetSelection(newPos, newPos);
+						}
+					}
+					if (!sel.Range(selectionPart).Empty()) {
+						inDragDrop = DragDrop::initial;
+					}
 				}
 			}
 			ChangeMouseCapture(true);
