@@ -4557,6 +4557,12 @@ Window::Cursor Editor::GetMarginCursor(Point pt) const noexcept {
 	return Window::Cursor::reverseArrow;
 }
 
+void Editor::DropSelection(size_t part) {
+	sel.DropSelection(part);
+	ContainerNeedsUpdate(Update::Selection);
+	Redraw();
+}
+
 void Editor::TrimAndSetSelection(Sci::Position currentPos_, Sci::Position anchor_) {
 	sel.TrimSelection(SelectionRange(currentPos_, anchor_));
 	SetSelection(currentPos_, anchor_);
@@ -8702,9 +8708,7 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		return SelectionFromPoint(PointFromParameters(wParam, lParam));
 
 	case Message::DropSelectionN:
-		sel.DropSelection(wParam);
-		ContainerNeedsUpdate(Update::Selection);
-		Redraw();
+		DropSelection(wParam);
 		break;
 
 	case Message::SetMainSelection:
