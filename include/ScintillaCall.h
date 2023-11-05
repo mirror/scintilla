@@ -635,6 +635,7 @@ public:
 	void CopyText(Position length, const char *text);
 	void SetSelectionMode(Scintilla::SelectionMode selectionMode);
 	Scintilla::SelectionMode SelectionMode();
+	void SetMoveExtendsSelection(bool moveExtendsSelection);
 	bool MoveExtendsSelection();
 	Position GetLineSelStartPosition(Line line);
 	Position GetLineSelEndPosition(Line line);

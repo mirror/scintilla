@@ -2367,6 +2367,10 @@ SelectionMode ScintillaCall::SelectionMode() {
 	return static_cast<Scintilla::SelectionMode>(Call(Message::GetSelectionMode));
 }
 
+void ScintillaCall::SetMoveExtendsSelection(bool moveExtendsSelection) {
+	Call(Message::SetMoveExtendsSelection, moveExtendsSelection);
+}
+
 bool ScintillaCall::MoveExtendsSelection() {
 	return Call(Message::GetMoveExtendsSelection);
 }

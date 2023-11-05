@@ -557,6 +557,7 @@ enum class Message {
 	CopyText = 2420,
 	SetSelectionMode = 2422,
 	GetSelectionMode = 2423,
+	SetMoveExtendsSelection = 2719,
 	GetMoveExtendsSelection = 2706,
 	GetLineSelStartPosition = 2424,
 	GetLineSelEndPosition = 2425,

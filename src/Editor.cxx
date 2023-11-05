@@ -8226,6 +8226,9 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		default:	// ?!
 			return static_cast<sptr_t>(SelectionMode::Stream);
 		}
+	case Message::SetMoveExtendsSelection:
+		sel.SetMoveExtends(wParam != 0);
+		break;
 	case Message::GetMoveExtendsSelection:
 		return sel.MoveExtends();
 	case Message::GetLineSelStartPosition:
