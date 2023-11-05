@@ -765,6 +765,7 @@ public:
 	void ClearSelections();
 	void SetSelection(Position caret, Position anchor);
 	void AddSelection(Position caret, Position anchor);
+	int SelectionFromPoint(int x, int y);
 	void DropSelectionN(int selection);
 	void SetMainSelection(int selection);
 	int MainSelection();

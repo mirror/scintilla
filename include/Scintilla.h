@@ -1022,6 +1022,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SCI_CLEARSELECTIONS 2571
 #define SCI_SETSELECTION 2572
 #define SCI_ADDSELECTION 2573
+#define SCI_SELECTIONFROMPOINT 2474
 #define SCI_DROPSELECTIONN 2671
 #define SCI_SETMAINSELECTION 2574
 #define SCI_GETMAINSELECTION 2575

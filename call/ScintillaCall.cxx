@@ -2887,6 +2887,10 @@ void ScintillaCall::AddSelection(Position caret, Position anchor) {
 	Call(Message::AddSelection, caret, anchor);
 }
 
+int ScintillaCall::SelectionFromPoint(int x, int y) {
+	return static_cast<int>(Call(Message::SelectionFromPoint, x, y));
+}
+
 void ScintillaCall::DropSelectionN(int selection) {
 	Call(Message::DropSelectionN, selection);
 }

@@ -678,6 +678,7 @@ enum class Message {
 	ClearSelections = 2571,
 	SetSelection = 2572,
 	AddSelection = 2573,
+	SelectionFromPoint = 2474,
 	DropSelectionN = 2671,
 	SetMainSelection = 2574,
 	GetMainSelection = 2575,

@@ -527,6 +527,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	/** PositionInSelection returns true if position in selection. */
 	bool PositionInSelection(Sci::Position pos);
 	bool PointInSelection(Point pt);
+	ptrdiff_t SelectionFromPoint(Point pt);
 	bool PointInSelMargin(Point pt) const;
 	Window::Cursor GetMarginCursor(Point pt) const noexcept;
 	void TrimAndSetSelection(Sci::Position currentPos_, Sci::Position anchor_);

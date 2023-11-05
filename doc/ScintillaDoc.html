@@ -1199,6 +1199,7 @@ struct Sci_TextRangeFull {
      <a class="message" href="#SCI_CLEARSELECTIONS">SCI_CLEARSELECTIONS</a><br />
      <a class="message" href="#SCI_SETSELECTION">SCI_SETSELECTION(position caret, position anchor)</a><br />
      <a class="message" href="#SCI_ADDSELECTION">SCI_ADDSELECTION(position caret, position anchor)</a><br />
+     <a class="message" href="#SCI_SELECTIONFROMPOINT">SCI_SELECTIONFROMPOINT(int x, int y) &rarr; int</a><br />
      <a class="message" href="#SCI_DROPSELECTIONN">SCI_DROPSELECTIONN(int selection)</a><br />
      <a class="message" href="#SCI_SETMAINSELECTION">SCI_SETMAINSELECTION(int selection)</a><br />
      <a class="message" href="#SCI_GETMAINSELECTION">SCI_GETMAINSELECTION &rarr; int</a><br />
@@ -1342,6 +1343,11 @@ struct Sci_TextRangeFull {
      selections as additional selections.
      Since there is always at least one selection, to set a list of selections, the first selection should be
      added with <code>SCI_SETSELECTION</code> and later selections added with <code>SCI_ADDSELECTION</code></p>
+
+    <p>
+    <b id="SCI_SELECTIONFROMPOINT">SCI_SELECTIONFROMPOINT(int x, int y) &rarr; int</b><br />
+     Return the index of the selection at the point. If there is no selection at the point, return -1.
+     This can be used to drop a selection or make it the main selection.</p>
 
     <p>
     <b id="SCI_DROPSELECTIONN">SCI_DROPSELECTIONN(int selection)</b><br />
