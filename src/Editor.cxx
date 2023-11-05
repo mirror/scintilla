@@ -6009,6 +6009,43 @@ void Editor::SetSelectionNMessage(Message iMessage, uptr_t wParam, sptr_t lParam
 	ContainerNeedsUpdate(Update::Selection);
 }
 
+namespace {
+
+constexpr Selection::SelTypes SelTypeFromMode(SelectionMode mode) {
+	switch (mode) {
+	case SelectionMode::Rectangle:
+		return Selection::SelTypes::rectangle;
+	case SelectionMode::Lines:
+		return Selection::SelTypes::lines;
+	case SelectionMode::Thin:
+		return Selection::SelTypes::thin;
+	case SelectionMode::Stream:
+	default:
+		return Selection::SelTypes::stream;
+	}
+}
+
+}
+
+void Editor::SetSelectionMode(uptr_t wParam, bool setMoveExtends) {
+	const Selection::SelTypes newSelType = SelTypeFromMode(static_cast<SelectionMode>(wParam));
+	if (setMoveExtends) {
+		sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != newSelType));
+	}
+	sel.selType = newSelType;
+	switch (sel.selType) {
+	case Selection::SelTypes::rectangle:
+		sel.Rectangular() = sel.RangeMain(); // adjust current selection
+		break;
+	case Selection::SelTypes::lines:
+		SetSelection(sel.RangeMain().caret, sel.RangeMain().anchor); // adjust current selection
+		break;
+	default:
+		;
+	}
+	InvalidateWholeSelection();
+}
+
 sptr_t Editor::StringResult(sptr_t lParam, const char *val) noexcept {
 	const size_t len = val ? strlen(val) : 0;
 	if (lParam) {
@@ -8186,33 +8223,12 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::SelectionIsRectangle:
 		return sel.selType == Selection::SelTypes::rectangle ? 1 : 0;
 
-	case Message::SetSelectionMode: {
-			switch (static_cast<SelectionMode>(wParam)) {
-			case SelectionMode::Stream:
-				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::SelTypes::stream));
-				sel.selType = Selection::SelTypes::stream;
-				break;
-			case SelectionMode::Rectangle:
-				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::SelTypes::rectangle));
-				sel.selType = Selection::SelTypes::rectangle;
-				sel.Rectangular() = sel.RangeMain(); // adjust current selection
-				break;
-			case SelectionMode::Lines:
-				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::SelTypes::lines));
-				sel.selType = Selection::SelTypes::lines;
-				SetSelection(sel.RangeMain().caret, sel.RangeMain().anchor); // adjust current selection
-				break;
-			case SelectionMode::Thin:
-				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::SelTypes::thin));
-				sel.selType = Selection::SelTypes::thin;
-				break;
-			default:
-				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::SelTypes::stream));
-				sel.selType = Selection::SelTypes::stream;
-			}
-			InvalidateWholeSelection();
-			break;
-		}
+	case Message::SetSelectionMode:
+		SetSelectionMode(wParam, true);
+		break;
+	case Message::ChangeSelectionMode:
+		SetSelectionMode(wParam, false);
+		break;
 	case Message::GetSelectionMode:
 		switch (sel.selType) {
 		case Selection::SelTypes::stream:

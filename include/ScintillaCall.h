@@ -634,6 +634,7 @@ public:
 	void CopyRange(Position start, Position end);
 	void CopyText(Position length, const char *text);
 	void SetSelectionMode(Scintilla::SelectionMode selectionMode);
+	void ChangeSelectionMode(Scintilla::SelectionMode selectionMode);
 	Scintilla::SelectionMode SelectionMode();
 	void SetMoveExtendsSelection(bool moveExtendsSelection);
 	bool MoveExtendsSelection();

@@ -1747,6 +1747,10 @@ def selectionRepresentation(ed, n):
 	caret = (ed.GetSelectionNCaret(n), ed.GetSelectionNCaretVirtualSpace(n))
 	return selectionRangeRepresentation((anchor, caret))
 
+def allSelectionsRepresentation(ed):
+	reps = [selectionRepresentation(ed, i) for i in range(ed.Selections)]
+	return ';'.join(reps)
+
 class TestMultiSelection(unittest.TestCase):
 
 	def setUp(self):
@@ -2051,29 +2055,32 @@ class TestModalSelection(unittest.TestCase):
 
 	def testCharacterSelection(self):
 		self.ed.SetSelection(1, 1)
-		self.assertEqual(self.ed.Selections, 1)
 		self.assertEqual(self.ed.MainSelection, 0)
-		self.assertEqual(self.ed.GetSelectionNCaret(0), 1)
-		self.assertEqual(self.ed.GetSelectionNAnchor(0), 1)
+		self.assertEqual(allSelectionsRepresentation(self.ed), "1-1")
 		self.ed.SelectionMode = self.ed.SC_SEL_STREAM
 		self.assertEqual(self.ed.GetSelectionMode(), self.ed.SC_SEL_STREAM)
 		self.assertEqual(self.ed.MoveExtendsSelection, True)
-		self.assertEqual(self.ed.Selections, 1)
-		self.assertEqual(self.ed.MainSelection, 0)
-		self.assertEqual(self.ed.GetSelectionNCaret(0), 1)
-		self.assertEqual(self.ed.GetSelectionNAnchor(0), 1)
+		self.assertEqual(allSelectionsRepresentation(self.ed), "1-1")
 		self.ed.CharRight()
-		self.assertEqual(self.ed.Selections, 1)
-		self.assertEqual(self.ed.MainSelection, 0)
-		self.assertEqual(self.ed.GetSelectionNCaret(0), 2)
-		self.assertEqual(self.ed.GetSelectionNAnchor(0), 1)
+		self.assertEqual(allSelectionsRepresentation(self.ed), "1-2")
 		self.ed.LineDown()
-		self.assertEqual(self.ed.Selections, 1)
-		self.assertEqual(self.ed.MainSelection, 0)
-		self.assertEqual(self.ed.GetSelectionNCaret(0), 6)
-		self.assertEqual(self.ed.GetSelectionNAnchor(0), 1)
+		self.assertEqual(allSelectionsRepresentation(self.ed), "1-6")
 		self.ed.ClearSelections()
-		
+
+	def testChangeSelectionMode(self):
+		# Like testCharacterSelection but calling ChangeSelectionMode instead of SetSelectionMode
+		self.ed.SetSelection(1, 1)
+		self.assertEqual(allSelectionsRepresentation(self.ed), "1-1")
+		self.ed.ChangeSelectionMode(self.ed.SC_SEL_STREAM)
+		self.assertEqual(self.ed.GetSelectionMode(), self.ed.SC_SEL_STREAM)
+		self.assertEqual(self.ed.MoveExtendsSelection, False)
+		self.assertEqual(allSelectionsRepresentation(self.ed), "1-1")
+		self.ed.CharRight()
+		self.assertEqual(allSelectionsRepresentation(self.ed), "2-2")
+		self.ed.LineDown()
+		self.assertEqual(allSelectionsRepresentation(self.ed), "6-6")
+		self.ed.ClearSelections()
+
 	def testTurningOffMoveExtendsSelection(self):
 		self.ed.SetSelection(1, 1)
 		self.ed.SelectionMode = self.ed.SC_SEL_STREAM
@@ -2083,13 +2090,9 @@ class TestModalSelection(unittest.TestCase):
 		self.ed.MoveExtendsSelection = False
 		self.assertEqual(self.ed.MoveExtendsSelection, False)
 		self.ed.CharRight()
-		self.assertEqual(self.ed.Selections, 1)
-		self.assertEqual(self.ed.MainSelection, 0)
-		self.assertEqual(selectionRepresentation(self.ed, 0), "6-6")
+		self.assertEqual(allSelectionsRepresentation(self.ed), "6-6")
 		self.ed.CharRight()
-		self.assertEqual(self.ed.Selections, 1)
-		self.assertEqual(self.ed.MainSelection, 0)
-		self.assertEqual(selectionRepresentation(self.ed, 0), "7-7")
+		self.assertEqual(allSelectionsRepresentation(self.ed), "7-7")
 		self.ed.ClearSelections()
 
 	def testRectangleSelection(self):

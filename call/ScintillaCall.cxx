@@ -2363,6 +2363,10 @@ void ScintillaCall::SetSelectionMode(Scintilla::SelectionMode selectionMode) {
 	Call(Message::SetSelectionMode, static_cast<uintptr_t>(selectionMode));
 }
 
+void ScintillaCall::ChangeSelectionMode(Scintilla::SelectionMode selectionMode) {
+	Call(Message::ChangeSelectionMode, static_cast<uintptr_t>(selectionMode));
+}
+
 SelectionMode ScintillaCall::SelectionMode() {
 	return static_cast<Scintilla::SelectionMode>(Call(Message::GetSelectionMode));
 }

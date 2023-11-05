@@ -874,6 +874,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SC_SEL_LINES 2
 #define SC_SEL_THIN 3
 #define SCI_SETSELECTIONMODE 2422
+#define SCI_CHANGESELECTIONMODE 2659
 #define SCI_GETSELECTIONMODE 2423
 #define SCI_SETMOVEEXTENDSSELECTION 2719
 #define SCI_GETMOVEEXTENDSSELECTION 2706
