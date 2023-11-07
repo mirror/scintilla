@@ -3750,7 +3750,7 @@ int Editor::DelWordOrLine(Message iMessage) {
 		case Message::DelLineRight:
 			rangeDelete = Range(
 				sel.Range(r).caret.Position(),
-				pdoc->LineEnd(pdoc->LineFromPosition(sel.Range(r).caret.Position())));
+				pdoc->LineEndPosition(sel.Range(r).caret.Position()));
 			break;
 		default:
 			break;
