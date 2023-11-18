@@ -405,7 +405,7 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 	} else if (detach && (*detach > currentAction)) {
 		detach = currentAction;
 	}
-	int oldCurrentAction = currentAction;
+	const int oldCurrentAction = currentAction;
 	if (currentAction >= 1) {
 		if (0 == undoSequenceDepth) {
 			// Top level actions may not always be coalesced
