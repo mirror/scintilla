@@ -66,7 +66,7 @@ public:
 	std::unique_ptr<char[]> chars;
 	std::unique_ptr<unsigned char[]> styles;
 	std::unique_ptr<XYPOSITION[]> positions;
-	char bracePreviousStyles[2];
+	unsigned char bracePreviousStyles[2];
 
 	std::unique_ptr<BidiData> bidiData;
 
