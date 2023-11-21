@@ -60,6 +60,17 @@ TEST_CASE("RESearch") {
 		REQUIRE(nullptr == msg);
 	}
 
+	SECTION("Bug2413") {
+		// Check for https://sourceforge.net/p/scintilla/bugs/2413/
+		std::unique_ptr<RESearch> re = std::make_unique<RESearch>(&cc);
+		constexpr std::string_view BOW = "\\<";
+		constexpr std::string_view EOW = "\\>";
+		const char *msg = re->Compile(BOW.data(), BOW.length(), true, false);
+		REQUIRE(nullptr == msg);
+		msg = re->Compile(EOW.data(), EOW.length(), true, false);
+		REQUIRE(nullptr == msg);
+	}
+
 	SECTION("Execute") {
 		std::unique_ptr<RESearch> re = std::make_unique<RESearch>(&cc);
 		re->Compile(pattern.data(), pattern.length(), true, false);

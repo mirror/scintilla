@@ -22,7 +22,7 @@ public:
 	explicit RESearch(CharClassify *charClassTable);
 	// No dynamic allocation so default copy constructor and assignment operator are OK.
 	void Clear();
-	const char *Compile(const char *pattern, Sci::Position length, bool caseSensitive, bool posix) noexcept;
+	const char *Compile(const char *pattern, Sci::Position length, bool caseSensitive, bool posix);
 	int Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp);
 
 	static constexpr int MAXTAG = 10;
@@ -48,7 +48,6 @@ private:
 	Sci::Position PMatch(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp, const char *ap);
 
 	Sci::Position bol;
-	Sci::Position tagstk[MAXTAG];  /* subpat tag stack */
 	char nfa[MAXNFA];    /* automaton */
 	int sta;
 	unsigned char bittab[BITBLK]; /* bit table for CCL pre-set bits */

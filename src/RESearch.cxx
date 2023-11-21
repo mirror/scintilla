@@ -256,8 +256,7 @@ RESearch::RESearch(CharClassify *charClassTable) {
 	bol = 0;
 	constexpr unsigned char nul = 0;
 	std::fill(bittab, std::end(bittab), nul);
-	std::fill(tagstk, std::end(tagstk), 0);
-	std::fill(nfa, std::end(nfa), '\0');
+	nfa[0] = END;
 	Clear();
 }
 
@@ -419,12 +418,24 @@ int RESearch::GetBackslashExpression(
 	return result;
 }
 
-const char *RESearch::Compile(const char *pattern, Sci::Position length, bool caseSensitive, bool posix) noexcept {
+const char *RESearch::Compile(const char *pattern, Sci::Position length, bool caseSensitive, bool posix) {
+	if (!pattern || !length) {
+		if (sta)
+			return nullptr;
+		else
+			return badpat("No previous regular expression");
+	}
+
+	constexpr unsigned char nul = 0;
+	std::fill(bittab, std::end(bittab), nul);
+	nfa[0] = END;
+
 	char *mp=nfa;          /* nfa pointer       */
 	char *lp=nullptr;      /* saved pointer     */
 	char *sp=nfa;          /* another one       */
 	const char * mpMax = mp + MAXNFA - BITBLK - 10;
 
+	int tagstk[MAXTAG]{};  /* subpat tag stack */
 	int tagi = 0;          /* tag stack index   */
 	int tagc = 1;          /* actual tag count  */
 
@@ -434,12 +445,6 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 	int c2 = 0;
 	int prevChar = 0;
 
-	if (!pattern || !length) {
-		if (sta)
-			return nullptr;
-		else
-			return badpat("No previous regular expression");
-	}
 	sta = NOP;
 
 	const char *p=pattern;     /* pattern pointer   */
