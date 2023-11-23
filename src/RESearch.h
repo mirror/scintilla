@@ -50,8 +50,8 @@ private:
 	Sci::Position bol;
 	char nfa[MAXNFA];    /* automaton */
 	int sta;
-	unsigned char bittab[BITBLK]; /* bit table for CCL pre-set bits */
 	int failure;
+	unsigned char bittab[BITBLK]; /* bit table for CCL pre-set bits */
 	CharClassify *charClass;
 	bool iswordc(unsigned char x) const noexcept {
 		return charClass->IsWord(x);
