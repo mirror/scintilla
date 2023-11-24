@@ -254,8 +254,6 @@ RESearch::RESearch(CharClassify *charClassTable) {
 	charClass = charClassTable;
 	sta = NOP;                  /* status of lastpat */
 	bol = 0;
-	constexpr unsigned char nul = 0;
-	std::fill(bittab, std::end(bittab), nul);
 	nfa[0] = END;
 	Clear();
 }
@@ -423,8 +421,7 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 			return badpat("No previous regular expression");
 	}
 
-	constexpr unsigned char nul = 0;
-	std::fill(bittab, std::end(bittab), nul);
+	bittab.fill(0);
 	nfa[0] = END;
 
 	char *mp=nfa;          /* nfa pointer       */
@@ -434,8 +431,6 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 	int tagstk[MAXTAG]{};  /* subpat tag stack */
 	int tagi = 0;          /* tag stack index   */
 	int tagc = 1;          /* actual tag count  */
-
-	char mask = 0;         /* xor mask -CCL/NCL */
 
 	sta = NOP;
 
@@ -469,16 +464,14 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 			break;
 
 		case '[': {               /* match char class */
-			*mp++ = CCL;
 			int prevChar = 0;
+			char mask = 0;      /* xor mask -CCL/NCL */
 
 			i++;
 			if (*++p == '^') {
 				mask = '\377';
 				i++;
 				p++;
-			} else {
-				mask = 0;
 			}
 
 			if (*p == '-') {	/* real dash */
@@ -565,9 +558,11 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 			if (!*p)
 				return badpat("Missing ]");
 
-			for (int n = 0; n < BITBLK; bittab[n++] = 0)
-				*mp++ = static_cast<char>(mask ^ bittab[n]);
-
+			*mp++ = CCL;
+			for (const unsigned char byte : bittab) {
+				*mp++ = mask ^ byte;
+			}
+			bittab.fill(0);
 		} break;
 
 		case '*':               /* match 0 or more... */
@@ -666,9 +661,10 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 						*mp++ = static_cast<unsigned char>(c);
 					} else {
 						*mp++ = CCL;
-						mask = 0;
-						for (int n = 0; n < BITBLK; bittab[n++] = 0)
-							*mp++ = static_cast<char>(mask ^ bittab[n]);
+						for (const unsigned char byte : bittab) {
+							*mp++ = byte;
+						}
+						bittab.fill(0);
 					}
 				}
 			}
@@ -700,11 +696,12 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
 					*mp++ = CHR;
 					*mp++ = c;
 				} else {
-					*mp++ = CCL;
-					mask = 0;
 					ChSetWithCase(c, false);
-					for (int n = 0; n < BITBLK; bittab[n++] = 0)
-						*mp++ = static_cast<char>(mask ^ bittab[n]);
+					*mp++ = CCL;
+					for (const unsigned char byte : bittab) {
+						*mp++ = byte;
+					}
+					bittab.fill(0);
 				}
 			}
 			break;
