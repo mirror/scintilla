@@ -512,6 +512,136 @@ TEST_CASE("Document") {
 		REQUIRE(substituted == "\tb\xCE\x93y\n");
 		#endif
 	}
+
+	SECTION("RegexAssertion") {
+		DocPlus doc("ab cd ef\r\ngh ij kl", CpUtf8);
+		const Sci::Position docLength = doc.document.Length();
+		constexpr std::string_view findingBOL = "^";
+		Sci::Position lengthFinding = findingBOL.length();
+		Sci::Position location = doc.document.FindText(0, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 0);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingBOL.length();
+		location = doc.document.FindText(1, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 10);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingBOL.length();
+		location = doc.document.FindText(docLength, 0, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 10);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingBOL.length();
+		location = doc.document.FindText(docLength - 1, 0, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 10);
+		REQUIRE(lengthFinding == 0);
+
+		#ifndef NO_CXX11_REGEX
+		lengthFinding = findingBOL.length();
+		location = doc.document.FindText(0, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 0);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingBOL.length();
+		location = doc.document.FindText(1, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 10);
+		REQUIRE(lengthFinding == 0);
+		#endif
+
+		constexpr std::string_view findingEOL = "$";
+		lengthFinding = findingEOL.length();
+		location = doc.document.FindText(0, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 8);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOL.length();
+		location = doc.document.FindText(1, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 8);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOL.length();
+		location = doc.document.FindText(docLength, 0, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 18);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOL.length();
+		location = doc.document.FindText(docLength - 1, 0, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 8);
+		REQUIRE(lengthFinding == 0);
+
+		#ifndef NO_CXX11_REGEX
+		lengthFinding = findingEOL.length();
+		location = doc.document.FindText(0, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 8);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOL.length();
+		location = doc.document.FindText(1, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 8);
+		REQUIRE(lengthFinding == 0);
+		#endif
+
+		constexpr std::string_view findingBOW = "\\<";
+		lengthFinding = findingBOW.length();
+		location = doc.document.FindText(0, docLength, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 0);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingBOW.length();
+		location = doc.document.FindText(1, docLength, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 3);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingBOW.length();
+		location = doc.document.FindText(docLength, 0, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 16);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingBOW.length();
+		location = doc.document.FindText(docLength - 1, 0, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 16);
+		REQUIRE(lengthFinding == 0);
+
+		constexpr std::string_view findingEOW = "\\>";
+		lengthFinding = findingEOW.length();
+		location = doc.document.FindText(0, docLength, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 2);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOW.length();
+		location = doc.document.FindText(1, docLength, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 2);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOW.length();
+		location = doc.document.FindText(docLength, 0, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 18);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOW.length();
+		location = doc.document.FindText(docLength - 1, 0, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 15);
+		REQUIRE(lengthFinding == 0);
+
+		constexpr std::string_view findingEOWEOL = "\\>$";
+		lengthFinding = findingEOWEOL.length();
+		location = doc.document.FindText(0, docLength, findingEOWEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 8);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingEOWEOL.length();
+		location = doc.document.FindText(10, docLength, findingEOWEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
+		REQUIRE(location == 18);
+		REQUIRE(lengthFinding == 0);
+
+#ifndef NO_CXX11_REGEX
+		constexpr std::string_view findingWB = "\\b";
+		lengthFinding = findingWB.length();
+		location = doc.document.FindText(0, docLength, findingWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 0);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingWB.length();
+		location = doc.document.FindText(1, docLength, findingWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 1);
+		REQUIRE(lengthFinding == 0);
+
+		constexpr std::string_view findingNWB = "\\B";
+		lengthFinding = findingNWB.length();
+		location = doc.document.FindText(0, docLength, findingNWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 1);
+		REQUIRE(lengthFinding == 0);
+		lengthFinding = findingNWB.length();
+		location = doc.document.FindText(1, docLength, findingNWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
+		REQUIRE(location == 4);
+		REQUIRE(lengthFinding == 0);
+		#endif
+	}
 }
 
 TEST_CASE("Words") {

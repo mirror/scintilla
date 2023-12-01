@@ -253,7 +253,8 @@ RESearch::RESearch(CharClassify *charClassTable) {
 	failure = 0;
 	charClass = charClassTable;
 	sta = NOP;                  /* status of lastpat */
-	bol = 0;
+	lineStartPos = 0;
+	lineEndPos = 0;
 	nfa[0] = END;
 	Clear();
 }
@@ -740,7 +741,6 @@ int RESearch::Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Positio
 	Sci::Position ep = NOTFOUND;
 	const char * const ap = nfa;
 
-	bol = lp;
 	failure = 0;
 
 	Clear();
@@ -751,7 +751,7 @@ int RESearch::Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Positio
 		ep = PMatch(ci, lp, endp, ap);
 		break;
 	case EOL:			/* just searching for end of line normal path doesn't work */
-		if (ap[1] == END) {
+		if (endp == lineEndPos && ap[1] == END) {
 			lp = endp;
 			ep = lp;
 			break;
@@ -777,8 +777,19 @@ int RESearch::Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Positio
 	case END:			/* munged automaton. fail always */
 		return 0;
 	}
-	if (ep == NOTFOUND)
-		return 0;
+	if (ep == NOTFOUND) {
+		/* similar to EOL, match EOW at line end */
+		if (endp == lineEndPos && *ap == EOW) {
+			if ((ap[1] == END || ((ap[1] == EOL && ap[2] == END))) && iswordc(ci.CharAt(lp - 1))) {
+				lp = endp;
+				ep = lp;
+			} else {
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	}
 
 	bopat[0] = lp;
 	eopat[0] = ep;
@@ -846,11 +857,11 @@ Sci::Position RESearch::PMatch(const CharacterIndexer &ci, Sci::Position lp, Sci
 			ap += BITBLK;
 			break;
 		case BOL:
-			if (lp != bol)
+			if (lp != lineStartPos)
 				return NOTFOUND;
 			break;
 		case EOL:
-			if (lp < endp)
+			if (lp < lineEndPos)
 				return NOTFOUND;
 			break;
 		case BOT:
@@ -860,11 +871,11 @@ Sci::Position RESearch::PMatch(const CharacterIndexer &ci, Sci::Position lp, Sci
 			eopat[static_cast<unsigned char>(*ap++)] = lp;
 			break;
 		case BOW:
-			if ((lp!=bol && iswordc(ci.CharAt(lp-1))) || !iswordc(ci.CharAt(lp)))
+			if ((lp!=lineStartPos && iswordc(ci.CharAt(lp-1))) || !iswordc(ci.CharAt(lp)))
 				return NOTFOUND;
 			break;
 		case EOW:
-			if (lp==bol || !iswordc(ci.CharAt(lp-1)) || iswordc(ci.CharAt(lp)))
+			if (lp==lineStartPos || !iswordc(ci.CharAt(lp-1)) || iswordc(ci.CharAt(lp)))
 				return NOTFOUND;
 			break;
 		case REF: {

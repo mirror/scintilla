@@ -24,6 +24,10 @@ public:
 	void Clear();
 	const char *Compile(const char *pattern, Sci::Position length, bool caseSensitive, bool posix);
 	int Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp);
+	void SetLineRange(Sci::Position startPos, Sci::Position endPos) noexcept {
+		lineStartPos = startPos;
+		lineEndPos = endPos;
+	}
 
 	static constexpr int MAXTAG = 10;
 	static constexpr int NOTFOUND = -1;
@@ -47,7 +51,9 @@ private:
 
 	Sci::Position PMatch(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp, const char *ap);
 
-	Sci::Position bol;
+	// positions to match line start and line end
+	Sci::Position lineStartPos;
+	Sci::Position lineEndPos;
 	char nfa[MAXNFA];    /* automaton */
 	int sta;
 	int failure;
