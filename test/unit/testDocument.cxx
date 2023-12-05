@@ -92,6 +92,22 @@ std::string ReadFile(std::string path) {
 	return content;
 }
 
+struct Match {
+	Sci::Position location = 0;
+	Sci::Position length = 0;
+	constexpr Match() = default;
+	constexpr Match(Sci::Position location_, Sci::Position length_=0) : location(location_), length(length_) {
+	}
+	constexpr bool operator==(const Match &other) const {
+		return location == other.location && length == other.length;
+	}
+};
+
+std::ostream &operator << (std::ostream &os, Match const &value) {
+	os << value.location << "," << value.length;
+	return os;
+}
+
 struct DocPlus {
 	Document document;
 
@@ -130,6 +146,13 @@ struct DocPlus {
 		assert(*length == static_cast<Sci::Position>(needle.length()));
 		return document.FindText(document.Length(), 0, needle.data(), options, length);
 	}
+
+	Match FindString(Sci::Position minPos, Sci::Position maxPos, const std::string_view needle, FindOption flags) {
+		Sci::Position lengthFinding = needle.length();
+		const Sci::Position location = document.FindText(minPos, maxPos, needle.data(), flags, &lengthFinding);
+		return { location, lengthFinding };
+	}
+
 	void MoveGap(Sci::Position gapNew) {
 		// Move gap to gapNew by inserting
 		document.InsertString(gapNew, "!", 1);
@@ -516,130 +539,84 @@ TEST_CASE("Document") {
 	SECTION("RegexAssertion") {
 		DocPlus doc("ab cd ef\r\ngh ij kl", CpUtf8);
 		const Sci::Position docLength = doc.document.Length();
+
+		constexpr FindOption rePosix = FindOption::RegExp | FindOption::Posix;
+		constexpr FindOption reCxx11 = FindOption::RegExp | FindOption::Cxx11RegEx;
+
+		Match match;
+
 		constexpr std::string_view findingBOL = "^";
-		Sci::Position lengthFinding = findingBOL.length();
-		Sci::Position location = doc.document.FindText(0, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 0);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingBOL.length();
-		location = doc.document.FindText(1, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 10);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingBOL.length();
-		location = doc.document.FindText(docLength, 0, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 10);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingBOL.length();
-		location = doc.document.FindText(docLength - 1, 0, findingBOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 10);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingBOL, rePosix);
+		REQUIRE(match == Match(0));
+		match = doc.FindString(1, docLength, findingBOL, rePosix);
+		REQUIRE(match == Match(10));
+		match = doc.FindString(docLength, 0, findingBOL, rePosix);
+		REQUIRE(match == Match(10));
+		match = doc.FindString(docLength - 1, 0, findingBOL, rePosix);
+		REQUIRE(match == Match(10));
 
 		#ifndef NO_CXX11_REGEX
-		lengthFinding = findingBOL.length();
-		location = doc.document.FindText(0, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 0);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingBOL.length();
-		location = doc.document.FindText(1, docLength, findingBOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 10);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingBOL, reCxx11);
+		REQUIRE(match == Match(0));
+		match = doc.FindString(1, docLength, findingBOL, reCxx11);
+		REQUIRE(match == Match(10));
 		#endif
 
 		constexpr std::string_view findingEOL = "$";
-		lengthFinding = findingEOL.length();
-		location = doc.document.FindText(0, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 8);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOL.length();
-		location = doc.document.FindText(1, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 8);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOL.length();
-		location = doc.document.FindText(docLength, 0, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 18);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOL.length();
-		location = doc.document.FindText(docLength - 1, 0, findingEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 8);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingEOL, rePosix);
+		REQUIRE(match == Match(8));
+		match = doc.FindString(1, docLength, findingEOL, rePosix);
+		REQUIRE(match == Match(8));
+		match = doc.FindString(docLength, 0, findingEOL, rePosix);
+		REQUIRE(match == Match(18));
+		match = doc.FindString(docLength - 1, 0, findingEOL, rePosix);
+		REQUIRE(match == Match(8));
 
 		#ifndef NO_CXX11_REGEX
-		lengthFinding = findingEOL.length();
-		location = doc.document.FindText(0, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 8);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOL.length();
-		location = doc.document.FindText(1, docLength, findingEOL.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 8);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingEOL, reCxx11);
+		REQUIRE(match == Match(8));
+		match = doc.FindString(1, docLength, findingEOL, reCxx11);
+		REQUIRE(match == Match(8));
 		#endif
 
 		constexpr std::string_view findingBOW = "\\<";
-		lengthFinding = findingBOW.length();
-		location = doc.document.FindText(0, docLength, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 0);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingBOW.length();
-		location = doc.document.FindText(1, docLength, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 3);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingBOW.length();
-		location = doc.document.FindText(docLength, 0, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 16);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingBOW.length();
-		location = doc.document.FindText(docLength - 1, 0, findingBOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 16);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingBOW, rePosix);
+		REQUIRE(match == Match(0));
+		match = doc.FindString(1, docLength, findingBOW, rePosix);
+		REQUIRE(match == Match(3));
+		match = doc.FindString(docLength, 0, findingBOW, rePosix);
+		REQUIRE(match == Match(16));
+		match = doc.FindString(docLength - 1, 0, findingBOW, rePosix);
+		REQUIRE(match == Match(16));
 
 		constexpr std::string_view findingEOW = "\\>";
-		lengthFinding = findingEOW.length();
-		location = doc.document.FindText(0, docLength, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 2);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOW.length();
-		location = doc.document.FindText(1, docLength, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 2);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOW.length();
-		location = doc.document.FindText(docLength, 0, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 18);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOW.length();
-		location = doc.document.FindText(docLength - 1, 0, findingEOW.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 15);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingEOW, rePosix);
+		REQUIRE(match == Match(2));
+		match = doc.FindString(1, docLength, findingEOW, rePosix);
+		REQUIRE(match == Match(2));
+		match = doc.FindString(docLength, 0, findingEOW, rePosix);
+		REQUIRE(match == Match(18));
+		match = doc.FindString(docLength - 1, 0, findingEOW, rePosix);
+		REQUIRE(match == Match(15));
 
 		constexpr std::string_view findingEOWEOL = "\\>$";
-		lengthFinding = findingEOWEOL.length();
-		location = doc.document.FindText(0, docLength, findingEOWEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 8);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingEOWEOL.length();
-		location = doc.document.FindText(10, docLength, findingEOWEOL.data(), FindOption::RegExp | FindOption::Posix, &lengthFinding);
-		REQUIRE(location == 18);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingEOWEOL, rePosix);
+		REQUIRE(match == Match(8));
+		match = doc.FindString(10, docLength, findingEOWEOL, rePosix);
+		REQUIRE(match == Match(18));
 
-#ifndef NO_CXX11_REGEX
+		#ifndef NO_CXX11_REGEX
 		constexpr std::string_view findingWB = "\\b";
-		lengthFinding = findingWB.length();
-		location = doc.document.FindText(0, docLength, findingWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 0);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingWB.length();
-		location = doc.document.FindText(1, docLength, findingWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 1);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingWB, reCxx11);
+		REQUIRE(match == Match(0));
+		match = doc.FindString(1, docLength, findingWB, reCxx11);
+		REQUIRE(match == Match(1));
 
 		constexpr std::string_view findingNWB = "\\B";
-		lengthFinding = findingNWB.length();
-		location = doc.document.FindText(0, docLength, findingNWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 1);
-		REQUIRE(lengthFinding == 0);
-		lengthFinding = findingNWB.length();
-		location = doc.document.FindText(1, docLength, findingNWB.data(), FindOption::RegExp | FindOption::Cxx11RegEx, &lengthFinding);
-		REQUIRE(location == 4);
-		REQUIRE(lengthFinding == 0);
+		match = doc.FindString(0, docLength, findingNWB, reCxx11);
+		REQUIRE(match == Match(1));
+		match = doc.FindString(1, docLength, findingNWB, reCxx11);
+		REQUIRE(match == Match(4));
 		#endif
 	}
 }
