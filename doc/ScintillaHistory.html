@@ -613,6 +613,10 @@
 	Fix regular expression search failure when search for "\&lt;" followed by search for "\&gt;".
 	<a href="https://sourceforge.net/p/scintilla/bugs/2413/">Bug #2413</a>.
 	</li>
+	<li>
+	With a document that does not have the SC_DOCUMENTOPTION_TEXT_LARGE option set,
+	allocating more than 2G (calling SCI_ALLOCATE or similar) will now fail with SC_STATUS_FAILURE.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scintilla540.zip">Release 5.4.0</a>
