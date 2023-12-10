@@ -614,6 +614,48 @@ TEST_CASE("Document") {
 		REQUIRE(match == Match(4));
 		#endif
 	}
+
+	SECTION("RegexContextualAssertion") {
+		// For std::regex, check the use of assertions next to text in forward direction
+		// These are more common than empty assertions
+		DocPlus doc("ab cd ef\r\ngh ij kl", CpUtf8);
+		const Sci::Position docLength = doc.document.Length();
+		Match match;
+
+		#ifndef NO_CXX11_REGEX
+
+		match = doc.FindString(0, docLength, "^[a-z]", reCxx11);
+		REQUIRE(match == Match(0, 1));
+		match = doc.FindString(1, docLength, "^[a-z]", reCxx11);
+		REQUIRE(match == Match(10, 1));
+
+		match = doc.FindString(0, docLength, "[a-z]$", reCxx11);
+		REQUIRE(match == Match(7, 1));
+		match = doc.FindString(10, docLength, "[a-z]$", reCxx11);
+		REQUIRE(match == Match(17, 1));
+
+		match = doc.FindString(0, docLength, "\\b[a-z]", reCxx11);
+		REQUIRE(match == Match(0, 1));
+		match = doc.FindString(1, docLength, "\\b[a-z]", reCxx11);
+		REQUIRE(match == Match(1, 1));	// Should be (3,1)
+		match = doc.FindString(0, docLength, "[a-z]\\b", reCxx11);
+		REQUIRE(match == Match(1, 1));
+		match = doc.FindString(2, docLength, "[a-z]\\b", reCxx11);
+		REQUIRE(match == Match(4, 1));
+
+		match = doc.FindString(0, docLength, "\\B[a-z]", reCxx11);
+		REQUIRE(match == Match(1, 1));
+		match = doc.FindString(1, docLength, "\\B[a-z]", reCxx11);
+		REQUIRE(match == Match(4, 1));	// Should be (1,1)
+		match = doc.FindString(0, docLength, "[a-z]\\B", reCxx11);
+		REQUIRE(match == Match(0, 1));
+		match = doc.FindString(2, docLength, "[a-z]\\B", reCxx11);
+		REQUIRE(match == Match(3, 1));
+
+		#endif
+	}
+
+
 }
 
 TEST_CASE("Words") {
