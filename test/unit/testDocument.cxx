@@ -555,6 +555,10 @@ TEST_CASE("Document") {
 		REQUIRE(match == Match(0));
 		match = doc.FindString(1, docLength, findingBOL, reCxx11);
 		REQUIRE(match == Match(10));
+		match = doc.FindString(docLength, 0, findingBOL, reCxx11);
+		REQUIRE(match == Match(10));
+		match = doc.FindString(docLength - 1, 0, findingBOL, reCxx11);
+		REQUIRE(match == Match(10));
 		#endif
 
 		constexpr std::string_view findingEOL = "$";
@@ -567,10 +571,14 @@ TEST_CASE("Document") {
 		match = doc.FindString(docLength - 1, 0, findingEOL, rePosix);
 		REQUIRE(match == Match(8));
 
-		#ifndef NO_CXX11_REGEX
+		#if !defined(NO_CXX11_REGEX) && !defined(_LIBCPP_VERSION)
 		match = doc.FindString(0, docLength, findingEOL, reCxx11);
 		REQUIRE(match == Match(8));
 		match = doc.FindString(1, docLength, findingEOL, reCxx11);
+		REQUIRE(match == Match(8));
+		match = doc.FindString(docLength, 0, findingEOL, reCxx11);
+		REQUIRE(match == Match(18));
+		match = doc.FindString(docLength - 1, 0, findingEOL, reCxx11);
 		REQUIRE(match == Match(8));
 		#endif
 
@@ -605,13 +613,32 @@ TEST_CASE("Document") {
 		match = doc.FindString(0, docLength, findingWB, reCxx11);
 		REQUIRE(match == Match(0));
 		match = doc.FindString(1, docLength, findingWB, reCxx11);
-		REQUIRE(match == Match(1));
+		REQUIRE(match == Match(2));
+		match = doc.FindString(docLength, 0, findingWB, reCxx11);
+		#ifdef _LIBCPP_VERSION
+		REQUIRE(match == Match(16));
+		#else
+		REQUIRE(match == Match(18));
+		#endif
+		match = doc.FindString(docLength - 1, 0, findingWB, reCxx11);
+		REQUIRE(match == Match(16));
 
 		constexpr std::string_view findingNWB = "\\B";
 		match = doc.FindString(0, docLength, findingNWB, reCxx11);
 		REQUIRE(match == Match(1));
 		match = doc.FindString(1, docLength, findingNWB, reCxx11);
-		REQUIRE(match == Match(4));
+		REQUIRE(match == Match(1));
+		#ifdef _LIBCPP_VERSION
+		match = doc.FindString(docLength, 0, findingNWB, reCxx11);
+		REQUIRE(match == Match(18));
+		match = doc.FindString(docLength - 1, 0, findingNWB, reCxx11);
+		REQUIRE(match == Match(14));
+		#else
+		match = doc.FindString(docLength, 0, findingNWB, reCxx11);
+		REQUIRE(match == Match(17));
+		match = doc.FindString(docLength - 1, 0, findingNWB, reCxx11);
+		REQUIRE(match == Match(17));
+		#endif
 		#endif
 	}
 
@@ -637,7 +664,7 @@ TEST_CASE("Document") {
 		match = doc.FindString(0, docLength, "\\b[a-z]", reCxx11);
 		REQUIRE(match == Match(0, 1));
 		match = doc.FindString(1, docLength, "\\b[a-z]", reCxx11);
-		REQUIRE(match == Match(1, 1));	// Should be (3,1)
+		REQUIRE(match == Match(3, 1));
 		match = doc.FindString(0, docLength, "[a-z]\\b", reCxx11);
 		REQUIRE(match == Match(1, 1));
 		match = doc.FindString(2, docLength, "[a-z]\\b", reCxx11);
@@ -646,7 +673,7 @@ TEST_CASE("Document") {
 		match = doc.FindString(0, docLength, "\\B[a-z]", reCxx11);
 		REQUIRE(match == Match(1, 1));
 		match = doc.FindString(1, docLength, "\\B[a-z]", reCxx11);
-		REQUIRE(match == Match(4, 1));	// Should be (1,1)
+		REQUIRE(match == Match(1, 1));
 		match = doc.FindString(0, docLength, "[a-z]\\B", reCxx11);
 		REQUIRE(match == Match(0, 1));
 		match = doc.FindString(2, docLength, "[a-z]\\B", reCxx11);
