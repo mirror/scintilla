@@ -84,5 +84,5 @@ clean:
 %.o: %.cxx
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(EXE): $(TESTOBJ) $(TESTEDOBJ) unitTest.cxx
+$(EXE): $(TESTOBJ) $(TESTEDOBJ) unitTest.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINKFLAGS) $^ -o $@
