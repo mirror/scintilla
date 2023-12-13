@@ -3082,7 +3082,7 @@ public:
 
 #endif
 
-std::regex_constants::match_flag_type MatchFlags(const Document *doc, Sci::Position startPos, Sci::Position endPos, Sci::Position lineStartPos, Sci::Position lineEndPos) noexcept {
+std::regex_constants::match_flag_type MatchFlags(const Document *doc, Sci::Position startPos, Sci::Position endPos, Sci::Position lineStartPos, Sci::Position lineEndPos) {
 	std::regex_constants::match_flag_type flagsMatch = std::regex_constants::match_default;
 	if (startPos != lineStartPos) {
 #ifdef _LIBCPP_VERSION
