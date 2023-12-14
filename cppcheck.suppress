@@ -85,8 +85,6 @@ passedByValue
 // Checks for moves move to variables that are not read but the moved from is checked
 unreadVariable:scintilla/test/unit/*.cxx
 accessMoved:scintilla/test/unit/*.cxx
-// Temporary code for test that fails
-redundantAssignment:scintilla/test/unit/testDocument.cxx
 
 // cppcheck fails REQUIRE from Catch
 comparisonOfFuncReturningBoolError:scintilla/test/unit/*.cxx

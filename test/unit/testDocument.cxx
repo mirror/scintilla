@@ -517,7 +517,7 @@ TEST_CASE("Document") {
 		REQUIRE(substituted == "\tb\xCE\x93y\n");
 
 		match = doc.FindString(docLength, 0, longest, rePosix);
-		//REQUIRE(match == Match(16, 5));
+		REQUIRE(match == Match(16, 5));
 
 		#ifndef NO_CXX11_REGEX
 		match = doc.FindString(0, docLength, finding, reCxx11);

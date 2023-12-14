@@ -3269,34 +3269,31 @@ Sci::Position BuiltinRegex::FindText(Document *doc, Sci::Position minPos, Sci::P
 		search.SetLineRange(lineStartPos, lineEndPos);
 		int success = search.Execute(di, startOfLine, endOfLine);
 		if (success) {
-			pos = search.bopat[0];
 			// Ensure only whole characters selected
-			search.eopat[0] = doc->MovePositionOutsideChar(search.eopat[0], 1, false);
-			lenRet = search.eopat[0] - search.bopat[0];
+			Sci::Position endPos = doc->MovePositionOutsideChar(search.eopat[0], 1, false);
 			// There can be only one start of a line, so no need to look for last match in line
 			if ((resr.increment == -1) && !searchforLineStart) {
 				// Check for the last match on this line.
-				int repetitions = 1000;	// Break out of infinite loop
-				RESearch::MatchPositions bopat{};
-				RESearch::MatchPositions eopat{};
-				while (success && (search.eopat[0] <= endOfLine) && (repetitions--)) {
-					bopat = search.bopat;
-					eopat = search.eopat;
-					success = search.Execute(di, pos+1, endOfLine);
+				while (success && (endPos < endOfLine)) {
+					const RESearch::MatchPositions bopat = search.bopat;
+					const RESearch::MatchPositions eopat = search.eopat;
+					pos = endPos;
+					if (pos == bopat[0]) {
+						// empty match
+						pos = doc->NextPosition(pos, 1);
+					}
+					success = search.Execute(di, pos, endOfLine);
 					if (success) {
-						if (search.eopat[0] <= minPos) {
-							pos = search.bopat[0];
-							lenRet = search.eopat[0] - search.bopat[0];
-						} else {
-							success = 0;
-						}
+						endPos = doc->MovePositionOutsideChar(search.eopat[0], 1, false);
+					} else {
+						search.bopat = bopat;
+						search.eopat = eopat;
 					}
 				}
-				if (!success) {
-					search.bopat = bopat;
-					search.eopat = eopat;
-				}
 			}
+			search.eopat[0] = endPos;
+			pos = search.bopat[0];
+			lenRet = endPos - pos;
 			break;
 		}
 	}
