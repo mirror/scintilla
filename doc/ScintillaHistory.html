@@ -625,6 +625,11 @@
 	With a document that does not have the SC_DOCUMENTOPTION_TEXT_LARGE option set,
 	allocating more than 2G (calling SCI_ALLOCATE or similar) will now fail with SC_STATUS_FAILURE.
 	</li>
+	<li>
+	Protect SCI_REPLACETARGET, SCI_REPLACETARGETMINIMAL, and SCI_REPLACETARGETRE from
+	application changing target in notification handlers.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2289/">Bug #2289</a>.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scintilla540.zip">Release 5.4.0</a>
