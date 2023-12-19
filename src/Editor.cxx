@@ -6079,6 +6079,10 @@ constexpr Selection::SelTypes SelTypeFromMode(SelectionMode mode) {
 	}
 }
 
+sptr_t SPtrFromPtr(void *ptr) noexcept {
+	return reinterpret_cast<sptr_t>(ptr);
+}
+
 }
 
 void Editor::SetSelectionMode(uptr_t wParam, bool setMoveExtends) {
@@ -8216,11 +8220,11 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case Message::GetDocPointer:
-		return reinterpret_cast<sptr_t>(pdoc);
+		return SPtrFromPtr(pdoc->AsDocumentEditable());
 
 	case Message::SetDocPointer:
 		CancelModes();
-		SetDocPointer(static_cast<Document *>(PtrFromSPtr(lParam)));
+		SetDocPointer(static_cast<Document *>(static_cast<IDocumentEditable *>(PtrFromSPtr(lParam))));
 		return 0;
 
 	case Message::CreateDocument: {
@@ -8228,15 +8232,15 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 			doc->AddRef();
 			doc->Allocate(PositionFromUPtr(wParam));
 			pcs = ContractionStateCreate(pdoc->IsLarge());
-			return reinterpret_cast<sptr_t>(doc);
+			return SPtrFromPtr(doc->AsDocumentEditable());
 		}
 
 	case Message::AddRefDocument:
-		(static_cast<Document *>(PtrFromSPtr(lParam)))->AddRef();
+		(static_cast<IDocumentEditable *>(PtrFromSPtr(lParam)))->AddRef();
 		break;
 
 	case Message::ReleaseDocument:
-		(static_cast<Document *>(PtrFromSPtr(lParam)))->Release();
+		(static_cast<IDocumentEditable *>(PtrFromSPtr(lParam)))->Release();
 		break;
 
 	case Message::GetDocumentOptions:

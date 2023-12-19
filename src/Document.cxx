@@ -184,7 +184,7 @@ Document::~Document() {
 }
 
 // Increase reference count and return its previous value.
-int Document::AddRef() {
+int SCI_METHOD Document::AddRef() noexcept {
 	return refCount++;
 }
 
@@ -459,6 +459,10 @@ bool Document::IsLineStartPosition(Sci::Position position) const noexcept {
 
 Sci_Position SCI_METHOD Document::LineEnd(Sci_Position line) const {
 	return cb.LineEnd(line);
+}
+
+int SCI_METHOD Document::DEVersion() const noexcept {
+	return deRelease0;
 }
 
 void SCI_METHOD Document::SetErrorStatus(int status) {
@@ -1341,8 +1345,12 @@ int SCI_METHOD Document::AddData(const char *data, Sci_Position length) {
 	return static_cast<int>(Status::Ok);
 }
 
+IDocumentEditable *Document::AsDocumentEditable() noexcept {
+	return static_cast<IDocumentEditable *>(this);
+}
+
 void * SCI_METHOD Document::ConvertToDocument() {
-	return this;
+	return AsDocumentEditable();
 }
 
 Sci::Position Document::Undo() {
