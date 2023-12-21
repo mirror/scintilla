@@ -2883,6 +2883,9 @@ public:
 		else
 			return pdoc->CharAt(index);
 	}
+	Sci::Position MovePositionOutsideChar(Sci::Position pos, Sci::Position moveDir) const noexcept override {
+		return pdoc->MovePositionOutsideChar(pos, moveDir, false);
+	}
 };
 
 #ifndef NO_CXX11_REGEX
@@ -3277,8 +3280,7 @@ Sci::Position BuiltinRegex::FindText(Document *doc, Sci::Position minPos, Sci::P
 		search.SetLineRange(lineStartPos, lineEndPos);
 		int success = search.Execute(di, startOfLine, endOfLine);
 		if (success) {
-			// Ensure only whole characters selected
-			Sci::Position endPos = doc->MovePositionOutsideChar(search.eopat[0], 1, false);
+			Sci::Position endPos = search.eopat[0];
 			// There can be only one start of a line, so no need to look for last match in line
 			if ((resr.increment == -1) && !searchforLineStart) {
 				// Check for the last match on this line.
@@ -3292,14 +3294,13 @@ Sci::Position BuiltinRegex::FindText(Document *doc, Sci::Position minPos, Sci::P
 					}
 					success = search.Execute(di, pos, endOfLine);
 					if (success) {
-						endPos = doc->MovePositionOutsideChar(search.eopat[0], 1, false);
+						endPos = search.eopat[0];
 					} else {
 						search.bopat = bopat;
 						search.eopat = eopat;
 					}
 				}
 			}
-			search.eopat[0] = endPos;
 			pos = search.bopat[0];
 			lenRet = endPos - pos;
 			break;

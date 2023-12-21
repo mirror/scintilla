@@ -41,6 +41,9 @@ public:
 	char CharAt(Sci::Position index) const override {
 		return s.at(index);
 	}
+	Sci::Position MovePositionOutsideChar(Sci::Position pos, [[maybe_unused]] Sci::Position moveDir) const noexcept override {
+		return pos;
+	}
 	std::string GetCharRange(Sci::Position position, Sci::Position lengthRetrieve) const {
 		return s.substr(position, lengthRetrieve);
 	}

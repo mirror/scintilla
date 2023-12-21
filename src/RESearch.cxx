@@ -769,8 +769,15 @@ int RESearch::Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Positio
 	default:			/* regular matching all the way. */
 		while (lp < endp) {
 			ep = PMatch(ci, lp, endp, ap);
-			if (ep != NOTFOUND)
-				break;
+			if (ep != NOTFOUND) {
+				// fix match started from middle of character like DBCS trailing ASCII byte
+				const Sci::Position pos = ci.MovePositionOutsideChar(lp, -1);
+				if (pos != lp) {
+					ep = NOTFOUND;
+				} else {
+					break;
+				}
+			}
 			lp++;
 		}
 		break;
@@ -791,6 +798,7 @@ int RESearch::Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Positio
 		}
 	}
 
+	ep = ci.MovePositionOutsideChar(ep, 1);
 	bopat[0] = lp;
 	eopat[0] = ep;
 	return 1;
@@ -865,9 +873,13 @@ Sci::Position RESearch::PMatch(const CharacterIndexer &ci, Sci::Position lp, Sci
 				return NOTFOUND;
 			break;
 		case BOT:
+			if (lp != ci.MovePositionOutsideChar(lp, -1)) {
+				return NOTFOUND;
+			}
 			bopat[static_cast<unsigned char>(*ap++)] = lp;
 			break;
 		case EOT:
+			lp = ci.MovePositionOutsideChar(lp, 1);
 			eopat[static_cast<unsigned char>(*ap++)] = lp;
 			break;
 		case BOW:

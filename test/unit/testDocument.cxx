@@ -682,6 +682,44 @@ TEST_CASE("Document") {
 		#endif
 	}
 
+	SECTION("RESearchMovePositionOutsideCharUTF8") {
+		DocPlus doc(" a\xCE\x93\xCE\x93z ", CpUtf8);// a gamma gamma z
+		const Sci::Position docLength = doc.document.Length();
+		constexpr std::string_view finding = R"([a-z](\w)\1)";
+
+		Match match = doc.FindString(0, docLength, finding, rePosix);
+		REQUIRE(match == Match(1, 5));
+
+		constexpr std::string_view substituteText = R"(\t\1\n)";
+		std::string substituted = doc.Substitute(substituteText);
+		REQUIRE(substituted == "\t\xCE\x93\n");
+
+		#ifndef NO_CXX11_REGEX
+		match = doc.FindString(0, docLength, finding, reCxx11);
+		REQUIRE(match == Match(1, 5));
+
+		substituted = doc.Substitute(substituteText);
+		REQUIRE(substituted == "\t\xCE\x93\n");
+		#endif
+	}
+
+	SECTION("RESearchMovePositionOutsideCharDBCS") {
+		DocPlus doc(" \x98\x61xx 1aa\x83\xA1\x83\xA1z ", 932);// U+548C xx 1aa gamma gamma z
+		const Sci::Position docLength = doc.document.Length();
+
+		Match match = doc.FindString(0, docLength, R"([a-z](\w)\1)", rePosix);
+		REQUIRE(match == Match(8, 5));
+
+		constexpr std::string_view substituteText = R"(\t\1\n)";
+		std::string substituted = doc.Substitute(substituteText);
+		REQUIRE(substituted == "\t\x83\xA1\n");
+
+		match = doc.FindString(0, docLength, R"(\w([a-z])\1)", rePosix);
+		REQUIRE(match == Match(6, 3));
+
+		substituted = doc.Substitute(substituteText);
+		REQUIRE(substituted == "\ta\n");
+	}
 
 }
 
