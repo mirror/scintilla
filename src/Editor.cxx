@@ -6099,7 +6099,7 @@ void Editor::SetSelectionMode(uptr_t wParam, bool setMoveExtends) {
 		SetSelection(sel.RangeMain().caret, sel.RangeMain().anchor); // adjust current selection
 		break;
 	default:
-		;
+		break;
 	}
 	InvalidateWholeSelection();
 }
