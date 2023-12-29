@@ -230,7 +230,7 @@ SelectionSegment Selection::Limits() const noexcept {
 	}
 }
 
-SelectionSegment Selection::LimitsForRectangularElseMain() const {
+SelectionSegment Selection::LimitsForRectangularElseMain() const noexcept {
 	if (IsRectangular()) {
 		return Limits();
 	} else {
@@ -343,10 +343,12 @@ void Selection::TrimOtherSelections(size_t r, SelectionRange range) noexcept {
 	}
 }
 
-void Selection::SetSelection(SelectionRange range) {
-	ranges.clear();
-	ranges.push_back(range);
-	mainRange = ranges.size() - 1;
+void Selection::SetSelection(SelectionRange range) noexcept {
+	if (ranges.size() > 1) {
+		ranges.erase(ranges.begin() + 1, ranges.end());
+	}
+	ranges[0] = range;
+	mainRange = 0;
 }
 
 void Selection::AddSelection(SelectionRange range) {
@@ -360,7 +362,7 @@ void Selection::AddSelectionWithoutTrim(SelectionRange range) {
 	mainRange = ranges.size() - 1;
 }
 
-void Selection::DropSelection(size_t r) {
+void Selection::DropSelection(size_t r) noexcept {
 	if ((ranges.size() > 1) && (r < ranges.size())) {
 		size_t mainNew = mainRange;
 		if (mainNew >= r) {
@@ -375,7 +377,7 @@ void Selection::DropSelection(size_t r) {
 	}
 }
 
-void Selection::DropAdditionalRanges() {
+void Selection::DropAdditionalRanges() noexcept {
 	SetSelection(RangeMain());
 }
 
@@ -425,17 +427,18 @@ Sci::Position Selection::VirtualSpaceFor(Sci::Position pos) const noexcept {
 	return virtualSpace;
 }
 
-void Selection::Clear() {
-	ranges.clear();
-	ranges.emplace_back();
-	mainRange = ranges.size() - 1;
+void Selection::Clear() noexcept {
+	if (ranges.size() > 1) {
+		ranges.erase(ranges.begin() + 1, ranges.end());
+	}
+	mainRange = 0;
 	selType = SelTypes::stream;
 	moveExtends = false;
 	ranges[mainRange].Reset();
 	rangeRectangular.Reset();
 }
 
-void Selection::RemoveDuplicates() {
+void Selection::RemoveDuplicates() noexcept {
 	for (size_t i=0; i<ranges.size()-1; i++) {
 		if (ranges[i].Empty()) {
 			size_t j=i+1;
