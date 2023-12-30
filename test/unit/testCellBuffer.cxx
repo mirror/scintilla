@@ -210,6 +210,222 @@ TEST_CASE("CellBuffer") {
 
 }
 
+bool Equal(const Action &a, ActionType at, Sci::Position position, std::string_view value) noexcept {
+	// Currently ignores mayCoalesce
+	if (a.at != at)
+		return false;
+	if (a.position != position)
+		return false;
+	if (a.lenData != static_cast<Sci::Position>(value.length()))
+		return false;
+	if (memcmp(a.data.get(), value.data(), a.lenData) != 0)
+		return false;
+	return true;
+}
+
+void TentativeUndo(UndoHistory &uh) {
+	const int steps = uh.TentativeSteps();
+	for (int step = 0; step < steps; step++) {
+		/* const Action &actionStep = */ uh.GetUndoStep();
+		uh.CompletedUndoStep();
+	}
+	uh.TentativeCommit();
+}
+
+TEST_CASE("UndoHistory") {
+
+	UndoHistory uh;
+
+	SECTION("Basics") {
+		REQUIRE(uh.IsSavePoint());
+		REQUIRE(uh.AfterSavePoint());
+		REQUIRE(!uh.BeforeSavePoint());
+		REQUIRE(!uh.BeforeReachableSavePoint());
+		REQUIRE(!uh.CanUndo());
+		REQUIRE(!uh.CanRedo());
+
+		bool startSequence = false;
+		const char *val = uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(startSequence);
+		REQUIRE(!uh.IsSavePoint());
+		REQUIRE(uh.AfterSavePoint());
+		REQUIRE(uh.CanUndo());
+		REQUIRE(!uh.CanRedo());
+		val = uh.AppendAction(ActionType::remove, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(startSequence);
+
+		// Undoing
+		{
+			const int steps = uh.StartUndo();
+			REQUIRE(steps == 1);
+			const Action &action = uh.GetUndoStep();
+			REQUIRE(Equal(action, ActionType::remove, 0, "ab"));
+			uh.CompletedUndoStep();
+		}
+		{
+			const int steps = uh.StartUndo();
+			REQUIRE(steps == 1);
+			const Action &action = uh.GetUndoStep();
+			REQUIRE(Equal(action, ActionType::insert, 0, "ab"));
+			uh.CompletedUndoStep();
+		}
+
+		REQUIRE(uh.IsSavePoint());
+
+		// Redoing
+		{
+			const int steps = uh.StartRedo();
+			REQUIRE(steps == 1);
+			const Action &action = uh.GetRedoStep();
+			REQUIRE(Equal(action, ActionType::insert, 0, "ab"));
+			uh.CompletedRedoStep();
+		}
+		{
+			const int steps = uh.StartRedo();
+			REQUIRE(steps == 1);
+			const Action &action = uh.GetRedoStep();
+			REQUIRE(Equal(action, ActionType::remove, 0, "ab"));
+			uh.CompletedRedoStep();
+		}
+
+		REQUIRE(!uh.IsSavePoint());
+	}
+
+	SECTION("Coalesce") {
+
+		bool startSequence = false;
+		const char *val = uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(startSequence);
+		REQUIRE(!uh.IsSavePoint());
+		REQUIRE(uh.AfterSavePoint());
+		REQUIRE(uh.CanUndo());
+		REQUIRE(!uh.CanRedo());
+		val = uh.AppendAction(ActionType::insert, 2, "cd", 2, startSequence, true);
+		REQUIRE(memcmp(val, "cd", 2) == 0);
+		REQUIRE(!startSequence);
+
+		// Undoing
+		{
+			const int steps = uh.StartUndo();
+			REQUIRE(steps == 2);
+			const Action &action2 = uh.GetUndoStep();
+			REQUIRE(Equal(action2, ActionType::insert, 2, "cd"));
+			uh.CompletedUndoStep();
+			const Action &action1 = uh.GetUndoStep();
+			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
+			uh.CompletedUndoStep();
+		}
+
+		REQUIRE(uh.IsSavePoint());
+
+		// Redoing
+		{
+			const int steps = uh.StartRedo();
+			REQUIRE(steps == 2);
+			const Action &action1 = uh.GetRedoStep();
+			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
+			uh.CompletedRedoStep();
+			const Action &action2 = uh.GetRedoStep();
+			REQUIRE(Equal(action2, ActionType::insert, 2, "cd"));
+			uh.CompletedRedoStep();
+		}
+
+		REQUIRE(!uh.IsSavePoint());
+
+	}
+
+	SECTION("Grouping") {
+
+		uh.BeginUndoAction();
+
+		bool startSequence = false;
+		const char *val = uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(startSequence);
+		REQUIRE(!uh.IsSavePoint());
+		REQUIRE(uh.AfterSavePoint());
+		REQUIRE(uh.CanUndo());
+		REQUIRE(!uh.CanRedo());
+		val = uh.AppendAction(ActionType::remove, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(!startSequence);
+		val = uh.AppendAction(ActionType::insert, 0, "cde", 3, startSequence, true);
+		REQUIRE(memcmp(val, "cde", 3) == 0);
+		REQUIRE(!startSequence);
+
+		uh.EndUndoAction();
+
+		// Undoing
+		{
+			const int steps = uh.StartUndo();
+			REQUIRE(steps == 3);
+			const Action &action3 = uh.GetUndoStep();
+			REQUIRE(Equal(action3, ActionType::insert, 0, "cde"));
+			uh.CompletedUndoStep();
+			const Action &action2 = uh.GetUndoStep();
+			REQUIRE(Equal(action2, ActionType::remove, 0, "ab"));
+			uh.CompletedUndoStep();
+			const Action &action1 = uh.GetUndoStep();
+			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
+			uh.CompletedUndoStep();
+		}
+
+		REQUIRE(uh.IsSavePoint());
+
+		// Redoing
+		{
+			const int steps = uh.StartRedo();
+			REQUIRE(steps == 3);
+			const Action &action1 = uh.GetRedoStep();
+			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
+			uh.CompletedRedoStep();
+			const Action &action2 = uh.GetRedoStep();
+			REQUIRE(Equal(action2, ActionType::remove, 0, "ab"));
+			uh.CompletedRedoStep();
+			const Action &action3 = uh.GetRedoStep();
+			REQUIRE(Equal(action3, ActionType::insert, 0, "cde"));
+			uh.CompletedRedoStep();
+		}
+
+		REQUIRE(!uh.IsSavePoint());
+
+	}
+
+	SECTION("Tentative") {
+
+		REQUIRE(!uh.TentativeActive());
+		REQUIRE(uh.TentativeSteps() == -1);
+		uh.TentativeStart();
+		REQUIRE(uh.TentativeActive());
+		REQUIRE(uh.TentativeSteps() == 0);
+		bool startSequence = false;
+		uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
+		REQUIRE(uh.TentativeActive());
+		REQUIRE(uh.TentativeSteps() == 1);
+		REQUIRE(uh.CanUndo());
+		uh.TentativeCommit();
+		REQUIRE(!uh.TentativeActive());
+		REQUIRE(uh.TentativeSteps() == -1);
+		REQUIRE(uh.CanUndo());
+
+		// TentativeUndo is the other important operation but it is performed by Document so add a local equivalent
+		uh.TentativeStart();
+		uh.AppendAction(ActionType::remove, 0, "ab", 2, startSequence, false);
+		uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
+		REQUIRE(uh.TentativeActive());
+		// The first TentativeCommit didn't seal off the first action so it is still undoable
+		REQUIRE(uh.TentativeSteps() == 3);
+		REQUIRE(uh.CanUndo());
+		TentativeUndo(uh);
+		REQUIRE(!uh.TentativeActive());
+		REQUIRE(uh.TentativeSteps() == -1);
+		REQUIRE(uh.CanUndo());
+	}
+}
+
 TEST_CASE("CharacterIndex") {
 
 	CellBuffer cb(true, false);
