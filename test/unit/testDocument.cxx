@@ -164,6 +164,13 @@ struct DocPlus {
 		// Remove insertion
 		document.DeleteChars(gapNew, 1);
 	}
+
+	[[nodiscard]] std::string Contents() const {
+		const Sci::Position length = document.Length();
+		std::string contents(length, 0);
+		document.GetCharRange(contents.data(), 0, length);
+		return contents;
+	}
 };
 
 void TimeTrace(std::string_view sv, const Catch::Timer &tikka) {
@@ -721,6 +728,80 @@ TEST_CASE("Document") {
 		REQUIRE(substituted == "\ta\n");
 	}
 
+}
+
+TEST_CASE("DocumentUndo") {
+
+	// These tests check that Undo reports the end of coalesced deletes
+
+	constexpr std::string_view sText = "Scintilla";
+	DocPlus doc(sText, 0);
+
+	SECTION("CheckDeleteForwards") {
+		// Delete forwards like the Del key
+		doc.document.DeleteUndoHistory();
+		doc.document.DeleteChars(1, 1);
+		doc.document.DeleteChars(1, 1);
+		doc.document.DeleteChars(1, 1);
+		const Sci::Position position = doc.document.Undo();
+		REQUIRE(position == 4);	// End of reinsertion
+		REQUIRE(!doc.document.CanUndo());	// Exhausted undo stack
+		REQUIRE(doc.document.CanRedo());
+	}
+
+	SECTION("CheckDeleteBackwards") {
+		// Delete backwards like the backspace key
+		doc.document.DeleteUndoHistory();
+		doc.document.DeleteChars(5, 1);
+		doc.document.DeleteChars(4, 1);
+		doc.document.DeleteChars(3, 1);
+		const Sci::Position position = doc.document.Undo();
+		REQUIRE(position == 6);	// End of reinsertion
+		REQUIRE(!doc.document.CanUndo());	// Exhausted undo stack
+	}
+
+	SECTION("CheckBothWays") {
+		// Delete backwards like the backspace key
+		doc.document.DeleteUndoHistory();
+		// Like having the caret at position 5 then
+		doc.document.DeleteChars(5, 1);	// Del
+		doc.document.DeleteChars(4, 1); // Backspace
+		doc.document.DeleteChars(4, 1); // Del
+		doc.document.DeleteChars(3, 1); // Backspace
+		const Sci::Position position = doc.document.Undo();
+		REQUIRE(position == 7);	// End of reinsertion, Start at 5, 2*Del
+		REQUIRE(!doc.document.CanUndo());	// Exhausted undo stack
+	}
+
+	SECTION("CheckInsert") {
+		// Insertions are only coalesced when following previous
+		doc.document.DeleteUndoHistory();
+		doc.document.InsertString(1, "1");
+		doc.document.InsertString(2, "2");
+		doc.document.InsertString(3, "3");
+		REQUIRE(doc.Contents() == "S123cintilla");
+		const Sci::Position position = doc.document.Undo();
+		REQUIRE(position == 1);	// Start of insertions
+		REQUIRE(!doc.document.CanUndo());	// Exhausted undo stack
+	}
+
+	SECTION("CheckGrouped") {
+		// Check that position returned for group is that at end of first deletion set
+		// Also include a container undo action.
+		doc.document.DeleteUndoHistory();
+		doc.document.BeginUndoAction();
+		// At 1, 2*Del so end of initial deletion sequence is 3
+		doc.document.DeleteChars(1, 1); // 'c'
+		doc.document.DeleteChars(1, 1); // 'i'
+		doc.document.AddUndoAction(99, true);
+		doc.document.InsertString(1, "1");
+		doc.document.DeleteChars(4, 2); // 'il'
+		doc.document.BeginUndoAction();
+		REQUIRE(doc.Contents() == "S1ntla");
+		const Sci::Position position = doc.document.Undo();
+		REQUIRE(position == 3);	// Start of insertions
+		REQUIRE(!doc.document.CanUndo());	// Exhausted undo stack
+	}
 }
 
 TEST_CASE("Words") {
