@@ -66,8 +66,9 @@ TEST_CASE("CompileCopying SparseVector") {
 		// Move constructor
 		SparseVector<UniqueInt> sc(std::move(s));
 		// Move assignment
+		SparseVector<UniqueInt> s2;
 		SparseVector<UniqueInt> sd;
-		sd = (std::move(s));
+		sd = (std::move(s2));
 	}
 
 }
@@ -480,7 +481,8 @@ TEST_CASE("SparseTextString") {
 		REQUIRE("" == st.ValueAt(1));
 		std::string s25("25");
 		st.SetValueAt(1, std::move(s25));
-		REQUIRE("" == s25);	// moved from
+		// Deliberate check of moved from: provokes warning from Visual C++ code analysis
+		REQUIRE("" == s25);
 		REQUIRE("25" == st.ValueAt(1));
 	}
 

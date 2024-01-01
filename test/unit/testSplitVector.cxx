@@ -374,7 +374,7 @@ TEST_CASE("SplitVector") {
 	SECTION("DeleteBackAndForth") {
 		sv.InsertValue(0, 10, 87);
 		for (int i=0; i<10; i+=2) {
-			int len = 10 - i;
+			const int len = 10 - i;
 			REQUIRE(len == sv.Length());
 			for (int j=0; j<sv.Length(); j++) {
 				REQUIRE(87 == sv.ValueAt(j));

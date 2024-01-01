@@ -273,7 +273,7 @@ TEST_CASE("Document") {
 		DocPlus doc("_abcdef", 0);	// _ a b c d e f
 		constexpr std::string_view finding = "cd";
 		Sci::Position lengthFinding = finding.length();
-		size_t docLength = doc.document.Length() - 1;
+		const size_t docLength = doc.document.Length() - 1;
 		Sci::Position location = doc.document.FindText(1, docLength, finding.data(), FindOption::MatchCase, &lengthFinding);
 		REQUIRE(location == 3);
 		location = doc.document.FindText(docLength, 1, finding.data(), FindOption::MatchCase, &lengthFinding);
@@ -840,7 +840,7 @@ TEST_CASE("SafeSegment") {
 		const DocPlus doc("", 0);
 		// all encoding: break before or after last space
 		constexpr std::string_view text = "12 ";
-		size_t length = doc.document.SafeSegment(text);
+		const size_t length = doc.document.SafeSegment(text);
 		REQUIRE(length <= text.length());
 		REQUIRE(text[length - 1] == '2');
 		REQUIRE(text[length] == ' ');

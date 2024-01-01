@@ -42,7 +42,7 @@ protected:
 	std::unique_ptr<CharClassify> pcc;
 	CharacterClass charClass[256];
 
-	static const char* GetClassName(CharacterClass charClass) {
+	static const char* GetClassName(CharacterClass charClass) noexcept {
 		switch(charClass) {
 			#define CASE(c) case CharacterClass::c: return #c
 			CASE(space);
@@ -70,7 +70,7 @@ TEST_CASE_METHOD(CharClassifyTest, "Defaults") {
 TEST_CASE_METHOD(CharClassifyTest, "Custom") {
 	unsigned char buf[2] = {0, 0};
 	for (int i = 0; i < 256; i++) {
-		CharacterClass thisClass = CharacterClass(i % 4);
+		const CharacterClass thisClass = static_cast<CharacterClass>(i % 4);
 		buf[0] = i;
 		pcc->SetCharClasses(buf, thisClass);
 		charClass[i] = thisClass;
@@ -88,16 +88,16 @@ TEST_CASE_METHOD(CharClassifyTest, "Custom") {
 TEST_CASE_METHOD(CharClassifyTest, "CharsOfClass") {
 	unsigned char buf[2] = {0, 0};
 	for (int i = 1; i < 256; i++) {
-		CharacterClass thisClass = CharacterClass(i % 4);
+		const CharacterClass thisClass = static_cast<CharacterClass>(i % 4);
 		buf[0] = i;
 		pcc->SetCharClasses(buf, thisClass);
 		charClass[i] = thisClass;
 	}
 	for (int classVal = 0; classVal < 4; ++classVal) {
-		CharacterClass thisClass = CharacterClass(classVal % 4);
-		int size = pcc->GetCharsOfClass(thisClass, NULL);
+		const CharacterClass thisClass = static_cast<CharacterClass>(classVal % 4);
+		const int size = pcc->GetCharsOfClass(thisClass, NULL);
 		std::vector<unsigned char> buffer(size+1);
-		void *pBuffer = static_cast<void *>(buffer.data());
+		const unsigned char *pBuffer = buffer.data();
 		pcc->GetCharsOfClass(thisClass, buffer.data());
 		for (int i = 1; i < 256; i++) {
 			if (charClass[i] == thisClass) {
