@@ -594,6 +594,11 @@
 	For ScintillaEdit on Qt, fix reference from ScintillaDocument to Document to match change in 5.4.1
 	using IDocumentEditable for SCI_GETDOCPOINTER and SCI_SETDOCPOINTER.
 	</li>
+	<li>
+	For Direct2D on Win32, use the multi-threaded option to avoid crashes when Scintilla instances
+	created on different threads. There may be more problems with this scenario so it should be avoided.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2420/">Bug #2420</a>.
+	</li>
     </ul>
     <h3>
        <a href="https://www.scintilla.org/scintilla541.zip">Release 5.4.1</a>
