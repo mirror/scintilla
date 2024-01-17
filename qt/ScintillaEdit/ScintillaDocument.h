@@ -23,11 +23,16 @@ class WatcherHelper;
 #endif
 #endif
 
+// Forward declaration
+namespace Scintilla {
+    class IDocumentEditable;
+}
+
 class EXPORT_IMPORT_API ScintillaDocument : public QObject
 {
     Q_OBJECT
 
-    void *pdoc;
+    Scintilla::IDocumentEditable *pdoc;
     WatcherHelper *docWatcher;
 
 public:

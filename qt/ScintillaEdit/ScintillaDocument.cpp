@@ -89,7 +89,7 @@ void WatcherHelper::NotifyErrorOccurred(Document *, void *, Status status) {
 }
 
 ScintillaDocument::ScintillaDocument(QObject *parent, void *pdoc_) :
-    QObject(parent), pdoc(pdoc_), docWatcher(nullptr) {
+    QObject(parent), pdoc(static_cast<Scintilla::IDocumentEditable *>(pdoc_)), docWatcher(nullptr) {
     if (!pdoc) {
 	pdoc = new Document(DocumentOption::Default);
     }
