@@ -3358,7 +3358,7 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 	Clear();
 	const size_t size = strlen(list);
 	char *words = lti.SetWords(list);
-	char *startword = words;
+	const char *startword = words;
 	char *numword = nullptr;
 	for (size_t i=0; i < size; i++) {
 		if (words[i] == separator) {
