@@ -329,23 +329,18 @@ public:
 	}
 };
 
-Action::Action() noexcept {
-	at = ActionType::start;
-	position = 0;
-	lenData = 0;
-	mayCoalesce = false;
-}
+Action::Action() noexcept = default;
 
 void Action::Create(ActionType at_, Sci::Position position_, const char *data_, Sci::Position lenData_, bool mayCoalesce_) {
-	data = nullptr;
 	position = position_;
 	at = at_;
+	mayCoalesce = mayCoalesce_;
+	lenData = lenData_;
+	data = nullptr;
 	if (lenData_) {
 		data = std::make_unique<char[]>(lenData_);
 		memcpy(&data[0], data_, lenData_);
 	}
-	lenData = lenData_;
-	mayCoalesce = mayCoalesce_;
 }
 
 void Action::Clear() noexcept {
