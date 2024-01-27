@@ -65,7 +65,7 @@ public:
 
 	void BeginUndoAction();
 	void EndUndoAction();
-	void DropUndoSequence();
+	void DropUndoSequence() noexcept;
 	void DeleteUndoHistory();
 
 	/// The save point is a marker in the undo stack where the container has stated that
@@ -78,21 +78,21 @@ public:
 	bool AfterDetachPoint() const noexcept;
 
 	// Tentative actions are used for input composition so that it can be undone cleanly
-	void TentativeStart();
-	void TentativeCommit();
+	void TentativeStart() noexcept;
+	void TentativeCommit() noexcept;
 	bool TentativeActive() const noexcept;
 	int TentativeSteps() noexcept;
 
 	/// To perform an undo, StartUndo is called to retrieve the number of steps, then UndoStep is
 	/// called that many times. Similarly for redo.
 	bool CanUndo() const noexcept;
-	int StartUndo();
-	const Action &GetUndoStep() const;
-	void CompletedUndoStep();
+	int StartUndo() noexcept;
+	const Action &GetUndoStep() const noexcept;
+	void CompletedUndoStep() noexcept;
 	bool CanRedo() const noexcept;
-	int StartRedo();
-	const Action &GetRedoStep() const;
-	void CompletedRedoStep();
+	int StartRedo() noexcept;
+	const Action &GetRedoStep() const noexcept;
+	void CompletedRedoStep() noexcept;
 };
 
 struct SplitView {
@@ -211,12 +211,12 @@ public:
 	void SetSavePoint();
 	bool IsSavePoint() const noexcept;
 
-	void TentativeStart();
-	void TentativeCommit();
+	void TentativeStart() noexcept;
+	void TentativeCommit() noexcept;
 	bool TentativeActive() const noexcept;
 	int TentativeSteps() noexcept;
 
-	bool SetUndoCollection(bool collectUndo);
+	bool SetUndoCollection(bool collectUndo) noexcept;
 	bool IsCollectingUndo() const noexcept;
 	void BeginUndoAction();
 	void EndUndoAction();
@@ -226,12 +226,12 @@ public:
 	/// To perform an undo, StartUndo is called to retrieve the number of steps, then UndoStep is
 	/// called that many times. Similarly for redo.
 	bool CanUndo() const noexcept;
-	int StartUndo();
-	const Action &GetUndoStep() const;
+	int StartUndo() noexcept;
+	const Action &GetUndoStep() const noexcept;
 	void PerformUndoStep();
 	bool CanRedo() const noexcept;
-	int StartRedo();
-	const Action &GetRedoStep() const;
+	int StartRedo() noexcept;
+	const Action &GetRedoStep() const noexcept;
 	void PerformRedoStep();
 
 	void ChangeHistorySet(bool set);

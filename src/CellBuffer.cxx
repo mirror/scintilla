@@ -491,7 +491,7 @@ void UndoHistory::EndUndoAction() {
 	}
 }
 
-void UndoHistory::DropUndoSequence() {
+void UndoHistory::DropUndoSequence() noexcept {
 	undoSequenceDepth = 0;
 }
 
@@ -530,11 +530,11 @@ bool UndoHistory::AfterDetachPoint() const noexcept {
 	return detach && (*detach < currentAction);
 }
 
-void UndoHistory::TentativeStart() {
+void UndoHistory::TentativeStart() noexcept {
 	tentativePoint = currentAction;
 }
 
-void UndoHistory::TentativeCommit() {
+void UndoHistory::TentativeCommit() noexcept {
 	tentativePoint = -1;
 	// Truncate undo history
 	maxAction = currentAction;
@@ -558,7 +558,7 @@ bool UndoHistory::CanUndo() const noexcept {
 	return (currentAction > 0) && (maxAction > 0);
 }
 
-int UndoHistory::StartUndo() {
+int UndoHistory::StartUndo() noexcept {
 	// Drop any trailing startAction
 	if (actions[currentAction].at == ActionType::start && currentAction > 0)
 		currentAction--;
@@ -571,11 +571,11 @@ int UndoHistory::StartUndo() {
 	return currentAction - act;
 }
 
-const Action &UndoHistory::GetUndoStep() const {
+const Action &UndoHistory::GetUndoStep() const noexcept {
 	return actions[currentAction];
 }
 
-void UndoHistory::CompletedUndoStep() {
+void UndoHistory::CompletedUndoStep() noexcept {
 	currentAction--;
 }
 
@@ -583,7 +583,7 @@ bool UndoHistory::CanRedo() const noexcept {
 	return maxAction > currentAction;
 }
 
-int UndoHistory::StartRedo() {
+int UndoHistory::StartRedo() noexcept {
 	// Drop any leading startAction
 	if (currentAction < maxAction && actions[currentAction].at == ActionType::start)
 		currentAction++;
@@ -596,11 +596,11 @@ int UndoHistory::StartRedo() {
 	return act - currentAction;
 }
 
-const Action &UndoHistory::GetRedoStep() const {
+const Action &UndoHistory::GetRedoStep() const noexcept {
 	return actions[currentAction];
 }
 
-void UndoHistory::CompletedRedoStep() {
+void UndoHistory::CompletedRedoStep() noexcept {
 	currentAction++;
 }
 
@@ -913,11 +913,11 @@ bool CellBuffer::IsSavePoint() const noexcept {
 	return uh.IsSavePoint();
 }
 
-void CellBuffer::TentativeStart() {
+void CellBuffer::TentativeStart() noexcept {
 	uh.TentativeStart();
 }
 
-void CellBuffer::TentativeCommit() {
+void CellBuffer::TentativeCommit() noexcept {
 	uh.TentativeCommit();
 }
 
@@ -1325,7 +1325,7 @@ void CellBuffer::BasicDeleteChars(Sci::Position position, Sci::Position deleteLe
 	}
 }
 
-bool CellBuffer::SetUndoCollection(bool collectUndo) {
+bool CellBuffer::SetUndoCollection(bool collectUndo) noexcept {
 	collectingUndo = collectUndo;
 	uh.DropUndoSequence();
 	return collectingUndo;
@@ -1356,11 +1356,11 @@ bool CellBuffer::CanUndo() const noexcept {
 	return uh.CanUndo();
 }
 
-int CellBuffer::StartUndo() {
+int CellBuffer::StartUndo() noexcept {
 	return uh.StartUndo();
 }
 
-const Action &CellBuffer::GetUndoStep() const {
+const Action &CellBuffer::GetUndoStep() const noexcept {
 	return uh.GetUndoStep();
 }
 
@@ -1392,11 +1392,11 @@ bool CellBuffer::CanRedo() const noexcept {
 	return uh.CanRedo();
 }
 
-int CellBuffer::StartRedo() {
+int CellBuffer::StartRedo() noexcept {
 	return uh.StartRedo();
 }
 
-const Action &CellBuffer::GetRedoStep() const {
+const Action &CellBuffer::GetRedoStep() const noexcept {
 	return uh.GetRedoStep();
 }
 
