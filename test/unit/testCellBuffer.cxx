@@ -211,7 +211,8 @@ TEST_CASE("CellBuffer") {
 }
 
 bool Equal(const Action &a, ActionType at, Sci::Position position, std::string_view value) noexcept {
-	// Currently ignores mayCoalesce
+	// Currently ignores mayCoalesce since this is not set consistently when following
+	// start action implies it.
 	if (a.at != at)
 		return false;
 	if (a.position != position)
@@ -219,6 +220,19 @@ bool Equal(const Action &a, ActionType at, Sci::Position position, std::string_v
 	if (a.lenData != static_cast<Sci::Position>(value.length()))
 		return false;
 	if (memcmp(a.data.get(), value.data(), a.lenData) != 0)
+		return false;
+	return true;
+}
+
+bool EqualContainerAction(const Action &a, Sci::Position token) noexcept {
+	// Currently ignores mayCoalesce
+	if (a.at != ActionType::container)
+		return false;
+	if (a.position != token)
+		return false;
+	if (a.lenData != 0)
+		return false;
+	if (a.data)
 		return false;
 	return true;
 }
@@ -335,6 +349,59 @@ TEST_CASE("UndoHistory") {
 
 		REQUIRE(!uh.IsSavePoint());
 
+	}
+
+	SECTION("CoalesceContainer") {
+		bool startSequence = false;
+		const char *val = uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(startSequence);
+		val = uh.AppendAction(ActionType::container, 1000, nullptr, 0, startSequence, true);
+		REQUIRE(!startSequence);
+		// container actions do not have text data, just the token store in position
+		REQUIRE(!val);
+		val = uh.AppendAction(ActionType::container, 1001, nullptr, 0, startSequence, true);
+		REQUIRE(!startSequence);
+		// This is a coalescible change since the container actions are skipped to determine compatibility
+		val = uh.AppendAction(ActionType::insert, 2, "cd", 2, startSequence, true);
+		REQUIRE(memcmp(val, "cd", 2) == 0);
+		REQUIRE(!startSequence);
+		// Break the sequence with a non-coalescible container action
+		val = uh.AppendAction(ActionType::container, 1002, nullptr, 0, startSequence, false);
+		REQUIRE(startSequence);
+
+		{
+			const int steps = uh.StartUndo();
+			REQUIRE(steps == 1);
+			const Action &actionContainer = uh.GetUndoStep();
+			REQUIRE(EqualContainerAction(actionContainer, 1002));
+			REQUIRE(actionContainer.mayCoalesce == false);
+			uh.CompletedUndoStep();
+		}
+		{
+			const int steps = uh.StartUndo();
+			REQUIRE(steps == 4);
+			const Action &actionInsert = uh.GetUndoStep();
+			REQUIRE(Equal(actionInsert, ActionType::insert, 2, "cd"));
+			uh.CompletedUndoStep();
+			{
+				const Action &actionContainer = uh.GetUndoStep();
+				REQUIRE(EqualContainerAction(actionContainer, 1001));
+				uh.CompletedUndoStep();
+			}
+			{
+				const Action &actionContainer = uh.GetUndoStep();
+				REQUIRE(EqualContainerAction(actionContainer, 1000));
+				uh.CompletedUndoStep();
+			}
+			{
+				const Action &actionInsert1 = uh.GetUndoStep();
+				REQUIRE(Equal(actionInsert1, ActionType::insert, 0, "ab"));
+				uh.CompletedUndoStep();
+			}
+		}
+		// Reached beginning
+		REQUIRE(!uh.CanUndo());
 	}
 
 	SECTION("Grouping") {
