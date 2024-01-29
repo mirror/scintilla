@@ -37,13 +37,13 @@ TEST_CASE("CompileCopying RunStyles") {
 		RunStyles<int, int> s2;
 
 		// Copy constructor
-		RunStyles<int, int> sa(s);
+		const RunStyles<int, int> sa(s);
 		// Copy assignment fails
 		RunStyles<int, int> sb;
 		sb = s;
 
 		// Move constructor
-		RunStyles<int, int> sc(std::move(s));
+		const RunStyles<int, int> sc(std::move(s));
 		// Move assignment
 		RunStyles<int, int> sd;
 		sd = (std::move(s2));

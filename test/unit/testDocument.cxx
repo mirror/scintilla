@@ -57,7 +57,7 @@ struct Folding {
 };
 
 // Table of case folding for non-ASCII bytes in Windows Latin code page 1252
-Folding foldings1252[] = {
+const Folding foldings1252[] = {
 	{0x8a, 0x9a, 0x01},
 	{0x8c, 0x9c, 0x01},
 	{0x8e, 0x9e, 0x01},
@@ -67,7 +67,7 @@ Folding foldings1252[] = {
 };
 
 // Table of case folding for non-ASCII bytes in Windows Russian code page 1251
-Folding foldings1251[] = {
+const Folding foldings1251[] = {
 	{0x80, 0x90, 0x01},
 	{0x81, 0x83, 0x01},
 	{0x8a, 0x9a, 0x01},
@@ -83,7 +83,7 @@ Folding foldings1251[] = {
 	{0xc0, 0xe0, 0x20},
 };
 
-std::string ReadFile(std::string path) {
+std::string ReadFile(const std::string &path) {
 	std::ifstream ifs(path, std::ios::binary);
 	std::string content((std::istreambuf_iterator<char>(ifs)),
 		(std::istreambuf_iterator<char>()));

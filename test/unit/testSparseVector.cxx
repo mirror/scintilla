@@ -39,13 +39,13 @@ TEST_CASE("CompileCopying SparseVector") {
 		SparseVector<int> s2;
 
 		// Copy constructor
-		SparseVector<int> sa(s);
+		const SparseVector<int> sa(s);
 		// Copy assignment
 		SparseVector<int> sb;
 		sb = s;
 
 		// Move constructor
-		SparseVector<int> sc(std::move(s));
+		const SparseVector<int> sc(std::move(s));
 		// Move assignment
 		SparseVector<int> sd;
 		sd = (std::move(s2));
@@ -64,7 +64,7 @@ TEST_CASE("CompileCopying SparseVector") {
 #endif
 
 		// Move constructor
-		SparseVector<UniqueInt> sc(std::move(s));
+		const SparseVector<UniqueInt> sc(std::move(s));
 		// Move assignment
 		SparseVector<UniqueInt> s2;
 		SparseVector<UniqueInt> sd;
@@ -73,9 +73,11 @@ TEST_CASE("CompileCopying SparseVector") {
 
 }
 
+namespace {
+
 // Helper to produce a string representation of a SparseVector<const char *>
 // to simplify checks.
-static std::string Representation(const SparseVector<UniqueString> &st) {
+std::string Representation(const SparseVector<UniqueString> &st) {
 	std::string ret;
 	for (int i = 0;i <= st.Length();i++) {
 		const char *value = st.ValueAt(i).get();
@@ -85,6 +87,8 @@ static std::string Representation(const SparseVector<UniqueString> &st) {
 			ret += "-";
 	}
 	return ret;
+}
+
 }
 
 TEST_CASE("SparseVector") {
@@ -473,7 +477,7 @@ TEST_CASE("SparseTextString") {
 	SECTION("SetAndMoveString") {
 		st.InsertSpace(0, 2);
 		REQUIRE(2u == st.Length());
-		std::string s24("24");
+		const std::string s24("24");
 		st.SetValueAt(0, s24);
 		REQUIRE("24" == s24);	// Not moved from
 		REQUIRE("" == st.ValueAt(-1));

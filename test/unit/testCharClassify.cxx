@@ -22,8 +22,6 @@ using namespace Scintilla::Internal;
 // Test CharClassify.
 
 class CharClassifyTest {
-	// Avoid warnings, deleted so never called.
-	CharClassifyTest(const CharClassifyTest &) = delete;
 protected:
 	CharClassifyTest() {
 		pcc = std::make_unique<CharClassify>();
@@ -38,9 +36,11 @@ protected:
 				charClass[ch] = CharacterClass::punctuation;
 		}
 	}
+	// Avoid warnings, deleted so never called.
+	CharClassifyTest(const CharClassifyTest &) = delete;
 
 	std::unique_ptr<CharClassify> pcc;
-	CharacterClass charClass[256];
+	CharacterClass charClass[256] {};
 
 	static const char* GetClassName(CharacterClass charClass) noexcept {
 		switch(charClass) {
@@ -95,7 +95,7 @@ TEST_CASE_METHOD(CharClassifyTest, "CharsOfClass") {
 	}
 	for (int classVal = 0; classVal < 4; ++classVal) {
 		const CharacterClass thisClass = static_cast<CharacterClass>(classVal % 4);
-		const int size = pcc->GetCharsOfClass(thisClass, NULL);
+		const int size = pcc->GetCharsOfClass(thisClass, nullptr);
 		std::vector<unsigned char> buffer(size+1);
 		const unsigned char *pBuffer = buffer.data();
 		pcc->GetCharsOfClass(thisClass, buffer.data());

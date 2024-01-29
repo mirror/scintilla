@@ -1405,7 +1405,7 @@ TEST_CASE("CellBufferLong") {
 
 	SECTION("Random") {
 		RandomSequence rseq;
-		for (size_t i = 0l; i < 20000; i++) {
+		for (size_t i = 0; i < 20000; i++) {
 			const int r = rseq.Next() % 10;
 			if (r <= 2) {			// 30%
 				// Insert text

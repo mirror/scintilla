@@ -33,10 +33,10 @@ using namespace Scintilla::Internal;
 class StringCI : public CharacterIndexer {
 	std::string s;
 public:
-	StringCI(std::string_view sv_) : s(sv_) {
+	explicit StringCI(std::string_view sv_) : s(sv_) {
 	}
 	virtual ~StringCI() = default;
-	Sci::Position Length() const noexcept {
+	[[nodiscard]] Sci::Position Length() const noexcept {
 		return s.length();
 	}
 	char CharAt(Sci::Position index) const override {
@@ -45,7 +45,7 @@ public:
 	Sci::Position MovePositionOutsideChar(Sci::Position pos, [[maybe_unused]] Sci::Position moveDir) const noexcept override {
 		return pos;
 	}
-	std::string GetCharRange(Sci::Position position, Sci::Position lengthRetrieve) const {
+	[[nodiscard]] std::string GetCharRange(Sci::Position position, Sci::Position lengthRetrieve) const {
 		return s.substr(position, lengthRetrieve);
 	}
 };
@@ -78,7 +78,7 @@ TEST_CASE("RESearch") {
 	SECTION("Execute") {
 		RESearch re(&cc);
 		re.Compile(pattern.data(), pattern.length(), true, false);
-		StringCI sci(sTextSpace);
+		const StringCI sci(sTextSpace);
 		const int x = re.Execute(sci, 0, sci.Length());
 		REQUIRE(x == 1);
 		REQUIRE(re.bopat[0] == 1);
@@ -88,9 +88,9 @@ TEST_CASE("RESearch") {
 	SECTION("Grab") {
 		RESearch re(&cc);
 		re.Compile(pattern.data(), pattern.length(), true, false);
-		StringCI sci(sTextSpace);
+		const StringCI sci(sTextSpace);
 		re.Execute(sci, 0, sci.Length());
-		std::string pat = sci.GetCharRange(re.bopat[0], re.eopat[0] - re.bopat[0]);
+		const std::string pat = sci.GetCharRange(re.bopat[0], re.eopat[0] - re.bopat[0]);
 		REQUIRE(pat == "cintilla");
 	}
 
