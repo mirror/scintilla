@@ -351,6 +351,16 @@ TEST_CASE("UndoHistory") {
 
 	}
 
+	SECTION("SimpleContainer") {
+		bool startSequence = false;
+		const char *val = uh.AppendAction(ActionType::container, 1000, nullptr, 0, startSequence, true);
+		REQUIRE(startSequence);
+		REQUIRE(!val);
+		val = uh.AppendAction(ActionType::container, 1001, nullptr, 0, startSequence, true);
+		REQUIRE(!startSequence);
+		REQUIRE(!val);
+	}
+
 	SECTION("CoalesceContainer") {
 		bool startSequence = false;
 		const char *val = uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
@@ -360,14 +370,14 @@ TEST_CASE("UndoHistory") {
 		REQUIRE(!startSequence);
 		// container actions do not have text data, just the token store in position
 		REQUIRE(!val);
-		val = uh.AppendAction(ActionType::container, 1001, nullptr, 0, startSequence, true);
+		uh.AppendAction(ActionType::container, 1001, nullptr, 0, startSequence, true);
 		REQUIRE(!startSequence);
 		// This is a coalescible change since the container actions are skipped to determine compatibility
 		val = uh.AppendAction(ActionType::insert, 2, "cd", 2, startSequence, true);
 		REQUIRE(memcmp(val, "cd", 2) == 0);
 		REQUIRE(!startSequence);
 		// Break the sequence with a non-coalescible container action
-		val = uh.AppendAction(ActionType::container, 1002, nullptr, 0, startSequence, false);
+		uh.AppendAction(ActionType::container, 1002, nullptr, 0, startSequence, false);
 		REQUIRE(startSequence);
 
 		{
@@ -459,6 +469,32 @@ TEST_CASE("UndoHistory") {
 
 		REQUIRE(!uh.IsSavePoint());
 
+	}
+
+	SECTION("DeepGroup") {
+
+		uh.BeginUndoAction();
+		uh.BeginUndoAction();
+
+		bool startSequence = false;
+		const char *val = uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(startSequence);
+		val = uh.AppendAction(ActionType::container, 1000, nullptr, 0, startSequence, false);
+		REQUIRE(!val);
+		REQUIRE(!startSequence);
+		val = uh.AppendAction(ActionType::remove, 0, "ab", 2, startSequence, true);
+		REQUIRE(memcmp(val, "ab", 2) == 0);
+		REQUIRE(!startSequence);
+		val = uh.AppendAction(ActionType::insert, 0, "cde", 3, startSequence, true);
+		REQUIRE(memcmp(val, "cde", 3) == 0);
+		REQUIRE(!startSequence);
+
+		uh.EndUndoAction();
+		uh.EndUndoAction();
+
+		const int steps = uh.StartUndo();
+		REQUIRE(steps == 4);
 	}
 
 	SECTION("Tentative") {
