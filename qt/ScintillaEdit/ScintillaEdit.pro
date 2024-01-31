@@ -23,6 +23,7 @@ SOURCES += \
     ../ScintillaEditBase/ScintillaEditBase.cpp \
     ../../src/XPM.cxx \
     ../../src/ViewStyle.cxx \
+    ../../src/UndoHistory.cxx \
     ../../src/UniqueString.cxx \
     ../../src/UniConversion.cxx \
     ../../src/Style.cxx \

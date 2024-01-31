@@ -23,6 +23,7 @@
 #include "SparseVector.h"
 #include "ChangeHistory.h"
 #include "CellBuffer.h"
+#include "UndoHistory.h"
 
 #include "catch.hpp"
 

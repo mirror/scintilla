@@ -23,6 +23,7 @@ SOURCES += \
     ../../src/ViewStyle.cxx \
     ../../src/UniqueString.cxx \
     ../../src/UniConversion.cxx \
+    ../../src/UndoHistory.cxx \
     ../../src/Style.cxx \
     ../../src/Selection.cxx \
     ../../src/ScintillaBase.cxx \
@@ -58,6 +59,7 @@ HEADERS  += \
     ScintillaEditBase.h \
     ../../src/XPM.h \
     ../../src/ViewStyle.h \
+    ../../src/UndoHistory.h \
     ../../src/UniConversion.h \
     ../../src/Style.h \
     ../../src/SplitVector.h \
