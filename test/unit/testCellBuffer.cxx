@@ -211,7 +211,7 @@ TEST_CASE("CellBuffer") {
 
 }
 
-bool Equal(const Action &a, ActionType at, Sci::Position position, std::string_view value) noexcept {
+bool Equal(const UndoAction &a, ActionType at, Sci::Position position, std::string_view value) noexcept {
 	// Currently ignores mayCoalesce since this is not set consistently when following
 	// start action implies it.
 	if (a.at != at)
@@ -225,7 +225,7 @@ bool Equal(const Action &a, ActionType at, Sci::Position position, std::string_v
 	return true;
 }
 
-bool EqualContainerAction(const Action &a, Sci::Position token) noexcept {
+bool EqualContainerAction(const UndoAction &a, Sci::Position token) noexcept {
 	// Currently ignores mayCoalesce
 	if (a.at != ActionType::container)
 		return false;
@@ -275,14 +275,14 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartUndo();
 			REQUIRE(steps == 1);
-			const Action &action = uh.GetUndoStep();
+			const UndoAction &action = uh.GetUndoStep();
 			REQUIRE(Equal(action, ActionType::remove, 0, "ab"));
 			uh.CompletedUndoStep();
 		}
 		{
 			const int steps = uh.StartUndo();
 			REQUIRE(steps == 1);
-			const Action &action = uh.GetUndoStep();
+			const UndoAction &action = uh.GetUndoStep();
 			REQUIRE(Equal(action, ActionType::insert, 0, "ab"));
 			uh.CompletedUndoStep();
 		}
@@ -293,14 +293,14 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartRedo();
 			REQUIRE(steps == 1);
-			const Action &action = uh.GetRedoStep();
+			const UndoAction &action = uh.GetRedoStep();
 			REQUIRE(Equal(action, ActionType::insert, 0, "ab"));
 			uh.CompletedRedoStep();
 		}
 		{
 			const int steps = uh.StartRedo();
 			REQUIRE(steps == 1);
-			const Action &action = uh.GetRedoStep();
+			const UndoAction &action = uh.GetRedoStep();
 			REQUIRE(Equal(action, ActionType::remove, 0, "ab"));
 			uh.CompletedRedoStep();
 		}
@@ -326,10 +326,10 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartUndo();
 			REQUIRE(steps == 2);
-			const Action &action2 = uh.GetUndoStep();
+			const UndoAction &action2 = uh.GetUndoStep();
 			REQUIRE(Equal(action2, ActionType::insert, 2, "cd"));
 			uh.CompletedUndoStep();
-			const Action &action1 = uh.GetUndoStep();
+			const UndoAction &action1 = uh.GetUndoStep();
 			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
 			uh.CompletedUndoStep();
 		}
@@ -340,10 +340,10 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartRedo();
 			REQUIRE(steps == 2);
-			const Action &action1 = uh.GetRedoStep();
+			const UndoAction &action1 = uh.GetRedoStep();
 			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
 			uh.CompletedRedoStep();
-			const Action &action2 = uh.GetRedoStep();
+			const UndoAction &action2 = uh.GetRedoStep();
 			REQUIRE(Equal(action2, ActionType::insert, 2, "cd"));
 			uh.CompletedRedoStep();
 		}
@@ -384,7 +384,7 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartUndo();
 			REQUIRE(steps == 1);
-			const Action &actionContainer = uh.GetUndoStep();
+			const UndoAction &actionContainer = uh.GetUndoStep();
 			REQUIRE(EqualContainerAction(actionContainer, 1002));
 			REQUIRE(actionContainer.mayCoalesce == false);
 			uh.CompletedUndoStep();
@@ -392,21 +392,21 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartUndo();
 			REQUIRE(steps == 4);
-			const Action &actionInsert = uh.GetUndoStep();
+			const UndoAction &actionInsert = uh.GetUndoStep();
 			REQUIRE(Equal(actionInsert, ActionType::insert, 2, "cd"));
 			uh.CompletedUndoStep();
 			{
-				const Action &actionContainer = uh.GetUndoStep();
+				const UndoAction &actionContainer = uh.GetUndoStep();
 				REQUIRE(EqualContainerAction(actionContainer, 1001));
 				uh.CompletedUndoStep();
 			}
 			{
-				const Action &actionContainer = uh.GetUndoStep();
+				const UndoAction &actionContainer = uh.GetUndoStep();
 				REQUIRE(EqualContainerAction(actionContainer, 1000));
 				uh.CompletedUndoStep();
 			}
 			{
-				const Action &actionInsert1 = uh.GetUndoStep();
+				const UndoAction &actionInsert1 = uh.GetUndoStep();
 				REQUIRE(Equal(actionInsert1, ActionType::insert, 0, "ab"));
 				uh.CompletedUndoStep();
 			}
@@ -440,13 +440,13 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartUndo();
 			REQUIRE(steps == 3);
-			const Action &action3 = uh.GetUndoStep();
+			const UndoAction &action3 = uh.GetUndoStep();
 			REQUIRE(Equal(action3, ActionType::insert, 0, "cde"));
 			uh.CompletedUndoStep();
-			const Action &action2 = uh.GetUndoStep();
+			const UndoAction &action2 = uh.GetUndoStep();
 			REQUIRE(Equal(action2, ActionType::remove, 0, "ab"));
 			uh.CompletedUndoStep();
-			const Action &action1 = uh.GetUndoStep();
+			const UndoAction &action1 = uh.GetUndoStep();
 			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
 			uh.CompletedUndoStep();
 		}
@@ -457,13 +457,13 @@ TEST_CASE("UndoHistory") {
 		{
 			const int steps = uh.StartRedo();
 			REQUIRE(steps == 3);
-			const Action &action1 = uh.GetRedoStep();
+			const UndoAction &action1 = uh.GetRedoStep();
 			REQUIRE(Equal(action1, ActionType::insert, 0, "ab"));
 			uh.CompletedRedoStep();
-			const Action &action2 = uh.GetRedoStep();
+			const UndoAction &action2 = uh.GetRedoStep();
 			REQUIRE(Equal(action2, ActionType::remove, 0, "ab"));
 			uh.CompletedRedoStep();
-			const Action &action3 = uh.GetRedoStep();
+			const UndoAction &action3 = uh.GetRedoStep();
 			REQUIRE(Equal(action3, ActionType::insert, 0, "cde"));
 			uh.CompletedRedoStep();
 		}

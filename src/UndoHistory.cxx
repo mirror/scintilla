@@ -36,6 +36,25 @@
 
 namespace Scintilla::Internal {
 
+UndoAction::UndoAction() noexcept = default;
+
+void UndoAction::Create(ActionType at_, Sci::Position position_, const char *data_, Sci::Position lenData_, bool mayCoalesce_) {
+	position = position_;
+	at = at_;
+	mayCoalesce = mayCoalesce_;
+	lenData = lenData_;
+	data = nullptr;
+	if (lenData_) {
+		data = std::make_unique<char[]>(lenData_);
+		memcpy(&data[0], data_, lenData_);
+	}
+}
+
+void UndoAction::Clear() noexcept {
+	data = nullptr;
+	lenData = 0;
+}
+
 // The undo history stores a sequence of user operations that represent the user's view of the
 // commands executed on the text.
 // Each user operation contains a sequence of text insertion and text deletion actions.
@@ -94,7 +113,7 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 		if (0 == undoSequenceDepth) {
 			// Top level actions may not always be coalesced
 			ptrdiff_t targetAct = -1;
-			const Action *actPrevious = &(actions[currentAction + targetAct]);
+			const UndoAction *actPrevious = &(actions[currentAction + targetAct]);
 			// Container actions may forward the coalesce state of Scintilla Actions.
 			while ((actPrevious->at == ActionType::container) && actPrevious->mayCoalesce) {
 				targetAct--;
@@ -259,7 +278,7 @@ int UndoHistory::StartUndo() noexcept {
 	return currentAction - act;
 }
 
-const Action &UndoHistory::GetUndoStep() const noexcept {
+const UndoAction &UndoHistory::GetUndoStep() const noexcept {
 	return actions[currentAction];
 }
 
@@ -284,7 +303,7 @@ int UndoHistory::StartRedo() noexcept {
 	return act - currentAction;
 }
 
-const Action &UndoHistory::GetRedoStep() const noexcept {
+const UndoAction &UndoHistory::GetRedoStep() const noexcept {
 	return actions[currentAction];
 }
 

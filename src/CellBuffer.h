@@ -31,19 +31,14 @@ class ILineVector;
 enum class ActionType : unsigned char { insert, remove, start, container };
 
 /**
- * Actions are used to store all the information required to perform one undo/redo step.
+ * Actions are used to return the information required to report one undo/redo step.
  */
-class Action {
-public:
+struct Action {
 	ActionType at = ActionType::insert;
 	bool mayCoalesce = false;
 	Sci::Position position = 0;
-	std::unique_ptr<char[]> data;
+	const char *data = nullptr;
 	Sci::Position lenData = 0;
-
-	Action() noexcept;
-	void Create(ActionType at_, Sci::Position position_=0, const char *data_=nullptr, Sci::Position lenData_=0, bool mayCoalesce_=true);
-	void Clear() noexcept;
 };
 
 struct SplitView {
@@ -178,11 +173,11 @@ public:
 	/// called that many times. Similarly for redo.
 	bool CanUndo() const noexcept;
 	int StartUndo() noexcept;
-	const Action &GetUndoStep() const noexcept;
+	Action GetUndoStep() const noexcept;
 	void PerformUndoStep();
 	bool CanRedo() const noexcept;
 	int StartRedo() noexcept;
-	const Action &GetRedoStep() const noexcept;
+	Action GetRedoStep() const noexcept;
 	void PerformRedoStep();
 
 	void ChangeHistorySet(bool set);

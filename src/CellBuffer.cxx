@@ -330,25 +330,6 @@ public:
 	}
 };
 
-Action::Action() noexcept = default;
-
-void Action::Create(ActionType at_, Sci::Position position_, const char *data_, Sci::Position lenData_, bool mayCoalesce_) {
-	position = position_;
-	at = at_;
-	mayCoalesce = mayCoalesce_;
-	lenData = lenData_;
-	data = nullptr;
-	if (lenData_) {
-		data = std::make_unique<char[]>(lenData_);
-		memcpy(&data[0], data_, lenData_);
-	}
-}
-
-void Action::Clear() noexcept {
-	data = nullptr;
-	lenData = 0;
-}
-
 CellBuffer::CellBuffer(bool hasStyles_, bool largeDocument_) :
 	hasStyles(hasStyles_), largeDocument(largeDocument_) {
 	readOnly = false;
@@ -1106,12 +1087,17 @@ int CellBuffer::StartUndo() noexcept {
 	return uh->StartUndo();
 }
 
-const Action &CellBuffer::GetUndoStep() const noexcept {
-	return uh->GetUndoStep();
+Action CellBuffer::GetUndoStep() const noexcept {
+	const UndoAction &actionStep = uh->GetUndoStep();
+	Action acta{ actionStep.at, actionStep.mayCoalesce, actionStep.position, nullptr, actionStep.lenData };
+	if (actionStep.lenData) {
+		acta.data = actionStep.data.get();
+	}
+	return acta;
 }
 
 void CellBuffer::PerformUndoStep() {
-	const Action &actionStep = uh->GetUndoStep();
+	const UndoAction &actionStep = uh->GetUndoStep();
 	if (changeHistory && uh->BeforeSavePoint()) {
 		changeHistory->StartReversion();
 	}
@@ -1142,12 +1128,17 @@ int CellBuffer::StartRedo() noexcept {
 	return uh->StartRedo();
 }
 
-const Action &CellBuffer::GetRedoStep() const noexcept {
-	return uh->GetRedoStep();
+Action CellBuffer::GetRedoStep() const noexcept {
+	const UndoAction &actionStep = uh->GetRedoStep();
+	Action acta {actionStep.at, actionStep.mayCoalesce, actionStep.position, nullptr, actionStep.lenData};
+	if (actionStep.lenData) {
+		acta.data = actionStep.data.get();
+	}
+	return acta;
 }
 
 void CellBuffer::PerformRedoStep() {
-	const Action &actionStep = uh->GetRedoStep();
+	const UndoAction &actionStep = uh->GetRedoStep();
 	if (actionStep.at == ActionType::insert) {
 		BasicInsertString(actionStep.position, actionStep.data.get(), actionStep.lenData);
 		if (changeHistory) {

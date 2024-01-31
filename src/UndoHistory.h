@@ -10,11 +10,24 @@
 
 namespace Scintilla::Internal {
 
+class UndoAction {
+public:
+	ActionType at = ActionType::insert;
+	bool mayCoalesce = false;
+	Sci::Position position = 0;
+	std::unique_ptr<char[]> data;
+	Sci::Position lenData = 0;
+
+	UndoAction() noexcept;
+	void Create(ActionType at_, Sci::Position position_ = 0, const char *data_ = nullptr, Sci::Position lenData_ = 0, bool mayCoalesce_ = true);
+	void Clear() noexcept;
+};
+
 /**
  *
  */
 class UndoHistory {
-	std::vector<Action> actions;
+	std::vector<UndoAction> actions;
 	int maxAction;
 	int currentAction;
 	int undoSequenceDepth;
@@ -53,11 +66,11 @@ public:
 	/// called that many times. Similarly for redo.
 	bool CanUndo() const noexcept;
 	int StartUndo() noexcept;
-	const Action &GetUndoStep() const noexcept;
+	const UndoAction &GetUndoStep() const noexcept;
 	void CompletedUndoStep() noexcept;
 	bool CanRedo() const noexcept;
 	int StartRedo() noexcept;
-	const Action &GetRedoStep() const noexcept;
+	const UndoAction &GetRedoStep() const noexcept;
 	void CompletedRedoStep() noexcept;
 };
 
