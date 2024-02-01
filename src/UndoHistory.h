@@ -10,16 +10,21 @@
 
 namespace Scintilla::Internal {
 
-class UndoAction {
+class UndoActionType {
 public:
-	ActionType at = ActionType::insert;
-	bool mayCoalesce = false;
-	Sci::Position position = 0;
-	Sci::Position lenData = 0;
+	ActionType at : 4;
+	bool mayCoalesce : 1;
+	UndoActionType() noexcept;
+};
 
-	UndoAction() noexcept;
-	void Create(ActionType at_, Sci::Position position_=0, Sci::Position lenData_=0, bool mayCoalesce_=true) noexcept;
-	void Clear() noexcept;
+struct UndoActions {
+	std::vector<UndoActionType> types;
+	std::vector<Sci::Position> positions;
+	std::vector<Sci::Position> lengths;
+
+	void resize(size_t length);
+	[[nodiscard]] size_t size() const noexcept;
+	void Create(size_t index, ActionType at_, Sci::Position position_ = 0, Sci::Position lenData_ = 0, bool mayCoalesce_ = true) noexcept;
 };
 
 class ScrapStack {
@@ -38,7 +43,7 @@ public:
  *
  */
 class UndoHistory {
-	std::vector<UndoAction> actions;
+	UndoActions actions;
 	int maxAction = 0;
 	int currentAction = 0;
 	int undoSequenceDepth = 0;
