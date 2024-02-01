@@ -39,11 +39,11 @@ public:
  */
 class UndoHistory {
 	std::vector<UndoAction> actions;
-	int maxAction;
-	int currentAction;
-	int undoSequenceDepth;
-	int savePoint;
-	int tentativePoint;
+	int maxAction = 0;
+	int currentAction = 0;
+	int undoSequenceDepth = 0;
+	int savePoint = 0;
+	int tentativePoint = -1;
 	std::optional<int> detach;
 	std::unique_ptr<ScrapStack> scraps;
 

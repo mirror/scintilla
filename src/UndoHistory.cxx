@@ -101,15 +101,8 @@ const char *ScrapStack::TextAt(size_t position) const noexcept {
 // Sequences that look like typing or deletion are coalesced into a single user operation.
 
 UndoHistory::UndoHistory() {
-
 	actions.resize(3);
-	maxAction = 0;
-	currentAction = 0;
-	undoSequenceDepth = 0;
-	savePoint = 0;
-	tentativePoint = -1;
 	scraps = std::make_unique<ScrapStack>();
-
 	actions[currentAction].Create(ActionType::start);
 }
 
@@ -287,8 +280,7 @@ int UndoHistory::TentativeSteps() noexcept {
 		currentAction--;
 	if (tentativePoint >= 0)
 		return currentAction - tentativePoint;
-	else
-		return -1;
+	return -1;
 }
 
 bool UndoHistory::CanUndo() const noexcept {
