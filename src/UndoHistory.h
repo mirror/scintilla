@@ -15,12 +15,23 @@ public:
 	ActionType at = ActionType::insert;
 	bool mayCoalesce = false;
 	Sci::Position position = 0;
-	std::unique_ptr<char[]> data;
 	Sci::Position lenData = 0;
 
 	UndoAction() noexcept;
-	void Create(ActionType at_, Sci::Position position_ = 0, const char *data_ = nullptr, Sci::Position lenData_ = 0, bool mayCoalesce_ = true);
+	void Create(ActionType at_, Sci::Position position_=0, Sci::Position lenData_=0, bool mayCoalesce_=true) noexcept;
 	void Clear() noexcept;
+};
+
+class ScrapStack {
+	std::string stack;
+	size_t current = 0;
+public:
+	const char *Push(const char *text, size_t length);
+	void SetCurrent(size_t position) noexcept;
+	void MoveForward(size_t length) noexcept;
+	void MoveBack(size_t length) noexcept;
+	[[nodiscard]] const char *CurrentText() const noexcept;
+	[[nodiscard]] const char *TextAt(size_t position) const noexcept;
 };
 
 /**
@@ -34,18 +45,20 @@ class UndoHistory {
 	int savePoint;
 	int tentativePoint;
 	std::optional<int> detach;
+	std::unique_ptr<ScrapStack> scraps;
 
 	void EnsureUndoRoom();
 
 public:
 	UndoHistory();
+	~UndoHistory() noexcept;
 
 	const char *AppendAction(ActionType at, Sci::Position position, const char *data, Sci::Position lengthData, bool &startSequence, bool mayCoalesce=true);
 
 	void BeginUndoAction();
 	void EndUndoAction();
 	void DropUndoSequence() noexcept;
-	void DeleteUndoHistory();
+	void DeleteUndoHistory() noexcept;
 
 	/// The save point is a marker in the undo stack where the container has stated that
 	/// the buffer was saved. Undo and redo can move over the save point.
@@ -66,11 +79,11 @@ public:
 	/// called that many times. Similarly for redo.
 	bool CanUndo() const noexcept;
 	int StartUndo() noexcept;
-	const UndoAction &GetUndoStep() const noexcept;
+	Action GetUndoStep() const noexcept;
 	void CompletedUndoStep() noexcept;
 	bool CanRedo() const noexcept;
 	int StartRedo() noexcept;
-	const UndoAction &GetRedoStep() const noexcept;
+	Action GetRedoStep() const noexcept;
 	void CompletedRedoStep() noexcept;
 };
 

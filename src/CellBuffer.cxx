@@ -1088,16 +1088,11 @@ int CellBuffer::StartUndo() noexcept {
 }
 
 Action CellBuffer::GetUndoStep() const noexcept {
-	const UndoAction &actionStep = uh->GetUndoStep();
-	Action acta{ actionStep.at, actionStep.mayCoalesce, actionStep.position, nullptr, actionStep.lenData };
-	if (actionStep.lenData) {
-		acta.data = actionStep.data.get();
-	}
-	return acta;
+	return uh->GetUndoStep();
 }
 
 void CellBuffer::PerformUndoStep() {
-	const UndoAction &actionStep = uh->GetUndoStep();
+	const Action actionStep = uh->GetUndoStep();
 	if (changeHistory && uh->BeforeSavePoint()) {
 		changeHistory->StartReversion();
 	}
@@ -1112,7 +1107,7 @@ void CellBuffer::PerformUndoStep() {
 		}
 		BasicDeleteChars(actionStep.position, actionStep.lenData);
 	} else if (actionStep.at == ActionType::remove) {
-		BasicInsertString(actionStep.position, actionStep.data.get(), actionStep.lenData);
+		BasicInsertString(actionStep.position, actionStep.data, actionStep.lenData);
 		if (changeHistory) {
 			changeHistory->UndoDeleteStep(actionStep.position, actionStep.lenData, uh->AfterDetachPoint());
 		}
@@ -1129,18 +1124,13 @@ int CellBuffer::StartRedo() noexcept {
 }
 
 Action CellBuffer::GetRedoStep() const noexcept {
-	const UndoAction &actionStep = uh->GetRedoStep();
-	Action acta {actionStep.at, actionStep.mayCoalesce, actionStep.position, nullptr, actionStep.lenData};
-	if (actionStep.lenData) {
-		acta.data = actionStep.data.get();
-	}
-	return acta;
+	return uh->GetRedoStep();
 }
 
 void CellBuffer::PerformRedoStep() {
-	const UndoAction &actionStep = uh->GetRedoStep();
+	Action actionStep = uh->GetRedoStep();
 	if (actionStep.at == ActionType::insert) {
-		BasicInsertString(actionStep.position, actionStep.data.get(), actionStep.lenData);
+		BasicInsertString(actionStep.position, actionStep.data, actionStep.lenData);
 		if (changeHistory) {
 			changeHistory->Insert(actionStep.position, actionStep.lenData, collectingUndo,
 				uh->BeforeSavePoint() && !uh->AfterDetachPoint());

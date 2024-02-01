@@ -38,21 +38,48 @@ namespace Scintilla::Internal {
 
 UndoAction::UndoAction() noexcept = default;
 
-void UndoAction::Create(ActionType at_, Sci::Position position_, const char *data_, Sci::Position lenData_, bool mayCoalesce_) {
+void UndoAction::Create(ActionType at_, Sci::Position position_, Sci::Position lenData_, bool mayCoalesce_) noexcept {
 	position = position_;
 	at = at_;
 	mayCoalesce = mayCoalesce_;
 	lenData = lenData_;
-	data = nullptr;
-	if (lenData_) {
-		data = std::make_unique<char[]>(lenData_);
-		memcpy(&data[0], data_, lenData_);
-	}
 }
 
 void UndoAction::Clear() noexcept {
-	data = nullptr;
 	lenData = 0;
+}
+
+const char *ScrapStack::Push(const char *text, size_t length) {
+	if (current < stack.length()) {
+		stack.resize(current);
+	}
+	stack.append(text, length);
+	current = stack.length();
+	return stack.data() + current - length;
+}
+
+void ScrapStack::SetCurrent(size_t position) noexcept {
+	current = position;
+}
+
+void ScrapStack::MoveForward(size_t length) noexcept {
+	if ((current + length) <= stack.length()) {
+		current += length;
+	}
+}
+
+void ScrapStack::MoveBack(size_t length) noexcept {
+	if (current >= length) {
+		current -= length;
+	}
+}
+
+const char *ScrapStack::CurrentText() const noexcept {
+	return stack.data() + current;
+}
+
+const char *ScrapStack::TextAt(size_t position) const noexcept {
+	return stack.data() + position;
 }
 
 // The undo history stores a sequence of user operations that represent the user's view of the
@@ -81,9 +108,12 @@ UndoHistory::UndoHistory() {
 	undoSequenceDepth = 0;
 	savePoint = 0;
 	tentativePoint = -1;
+	scraps = std::make_unique<ScrapStack>();
 
 	actions[currentAction].Create(ActionType::start);
 }
+
+UndoHistory::~UndoHistory() noexcept = default;
 
 void UndoHistory::EnsureUndoRoom() {
 	// Have to test that there is room for 2 more actions in the array
@@ -163,12 +193,12 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 		currentAction++;
 	}
 	startSequence = oldCurrentAction != currentAction;
-	const int actionWithData = currentAction;
-	actions[currentAction].Create(at, position, data, lengthData, mayCoalesce);
+	const char *dataNew = lengthData ? scraps->Push(data, lengthData) : nullptr;
+	actions[currentAction].Create(at, position, lengthData, mayCoalesce);
 	currentAction++;
 	actions[currentAction].Create(ActionType::start);
 	maxAction = currentAction;
-	return actions[actionWithData].data.get();
+	return dataNew;
 }
 
 void UndoHistory::BeginUndoAction() {
@@ -202,7 +232,7 @@ void UndoHistory::DropUndoSequence() noexcept {
 	undoSequenceDepth = 0;
 }
 
-void UndoHistory::DeleteUndoHistory() {
+void UndoHistory::DeleteUndoHistory() noexcept {
 	for (int i = 1; i < maxAction; i++)
 		actions[i].Clear();
 	maxAction = 0;
@@ -278,11 +308,17 @@ int UndoHistory::StartUndo() noexcept {
 	return currentAction - act;
 }
 
-const UndoAction &UndoHistory::GetUndoStep() const noexcept {
-	return actions[currentAction];
+Action UndoHistory::GetUndoStep() const noexcept {
+	const UndoAction &step = actions[currentAction];
+	Action acta {step.at, step.mayCoalesce, step.position, nullptr, step.lenData};
+	if (step.lenData) {
+		acta.data = scraps->CurrentText() - step.lenData;
+	}
+	return acta;
 }
 
 void UndoHistory::CompletedUndoStep() noexcept {
+	scraps->MoveBack(actions[currentAction].lenData);
 	currentAction--;
 }
 
@@ -303,11 +339,17 @@ int UndoHistory::StartRedo() noexcept {
 	return act - currentAction;
 }
 
-const UndoAction &UndoHistory::GetRedoStep() const noexcept {
-	return actions[currentAction];
+Action UndoHistory::GetRedoStep() const noexcept {
+	const UndoAction &step = actions[currentAction];
+	Action acta {step.at, step.mayCoalesce, step.position, nullptr, step.lenData};
+	if (step.lenData) {
+		acta.data = scraps->CurrentText();
+	}
+	return acta;
 }
 
 void UndoHistory::CompletedRedoStep() noexcept {
+	scraps->MoveForward(actions[currentAction].lenData);
 	currentAction++;
 }
 
