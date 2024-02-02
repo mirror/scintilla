@@ -266,6 +266,56 @@ void TentativeUndo(UndoHistory &uh) {
 	uh.TentativeCommit();
 }
 
+TEST_CASE("ScaledVector") {
+
+	ScaledVector sv;
+
+	SECTION("ScalingUp") {
+		sv.ReSize(1);
+		REQUIRE(sv.SizeInBytes() == 1);
+		REQUIRE(sv.ValueAt(0) == 0);
+		sv.SetValueAt(0, 1);
+		REQUIRE(sv.ValueAt(0) == 1);
+		REQUIRE(sv.SignedValueAt(0) == 1);
+		sv.ClearValueAt(0);
+		REQUIRE(sv.ValueAt(0) == 0);
+
+		// Check boundary of 1-byte values
+		sv.SetValueAt(0, 0xff);
+		REQUIRE(sv.ValueAt(0) == 0xff);
+		REQUIRE(sv.SizeInBytes() == 1);
+		// Require expansion to 2 byte elements
+		sv.SetValueAt(0, 0x100);
+		REQUIRE(sv.ValueAt(0) == 0x100);
+		REQUIRE(sv.SizeInBytes() == 2);
+		// Only ever expands, never diminishes element size
+		sv.SetValueAt(0, 0xff);
+		REQUIRE(sv.ValueAt(0) == 0xff);
+		REQUIRE(sv.SizeInBytes() == 2);
+
+		// Check boundary of 2-byte values
+		sv.SetValueAt(0, 0xffff);
+		REQUIRE(sv.ValueAt(0) == 0xffff);
+		REQUIRE(sv.SizeInBytes() == 2);
+		// Require expansion to 2 byte elements
+		sv.SetValueAt(0, 0x10000);
+		REQUIRE(sv.ValueAt(0) == 0x10000);
+		REQUIRE(sv.SizeInBytes() == 3);
+
+		// Check that its not just simple bit patterns that work
+		sv.SetValueAt(0, 0xd4381);
+		REQUIRE(sv.ValueAt(0) == 0xd4381);
+
+		// Add a second item
+		sv.ReSize(2);
+		REQUIRE(sv.SizeInBytes() == 6);
+		// Truncate
+		sv.ReSize(1);
+		REQUIRE(sv.SizeInBytes() == 3);
+		REQUIRE(sv.ValueAt(0) == 0xd4381);
+	}
+}
+
 TEST_CASE("UndoHistory") {
 
 	UndoHistory uh;

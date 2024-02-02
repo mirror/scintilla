@@ -10,6 +10,30 @@
 
 namespace Scintilla::Internal {
 
+// ScaledVector is a vector of unsigned integers that uses elements sized to hold the largest value.
+// Thus, if an undo history only contains short insertions and deletions the lengths vector may
+// only use 2 bytes or even 1 byte for each length.
+// This saves much memory often reducing by 50% for 32-bit builds and 75% for 64-bit builds.
+
+class ScaledVector {
+	size_t elementSize = 1;
+	size_t elementMax = 255;
+	std::vector<uint8_t> bytes;
+public:
+	[[nodiscard]] size_t Size() const noexcept;
+	[[nodiscard]] size_t ValueAt(size_t index) const noexcept;
+	[[nodiscard]] intptr_t SignedValueAt(size_t index) const noexcept;
+	void SetValueAt(size_t index, size_t value);
+	void ClearValueAt(size_t index) noexcept;
+	void Clear() noexcept;
+	void Truncate(size_t length) noexcept;
+	void ReSize(size_t length);
+	void PushBack();
+
+	// For testing
+	[[nodiscard]] size_t SizeInBytes() const noexcept;
+};
+
 class UndoActionType {
 public:
 	ActionType at : 4;
@@ -19,12 +43,14 @@ public:
 
 struct UndoActions {
 	std::vector<UndoActionType> types;
-	std::vector<Sci::Position> positions;
-	std::vector<Sci::Position> lengths;
+	ScaledVector positions;
+	ScaledVector lengths;
 
+	UndoActions() noexcept;
 	void resize(size_t length);
 	[[nodiscard]] size_t size() const noexcept;
-	void Create(size_t index, ActionType at_, Sci::Position position_ = 0, Sci::Position lenData_ = 0, bool mayCoalesce_ = true) noexcept;
+	void CreateStart(size_t index) noexcept;
+	void Create(size_t index, ActionType at_, Sci::Position position_=0, Sci::Position lenData_=0, bool mayCoalesce_=true);
 };
 
 class ScrapStack {

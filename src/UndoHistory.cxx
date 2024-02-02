@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <cstdint>
 #include <cassert>
 #include <cstring>
 #include <cstdio>
@@ -36,24 +37,127 @@
 
 namespace Scintilla::Internal {
 
+template <typename T>
+void VectorTruncate(std::vector<T> &v, size_t length) noexcept {
+	v.erase(v.begin() + length, v.end());
+}
+
+constexpr size_t byteMask = UINT8_MAX;
+constexpr size_t byteBits = 8;
+constexpr size_t maxElementSize = 8;
+
+size_t ReadValue(const uint8_t *bytes, size_t length) noexcept {
+	size_t value = 0;
+	for (size_t i = 0; i < length; i++) {
+		value = (value << byteBits) + bytes[i];
+	}
+	return value;
+}
+
+void WriteValue(uint8_t *bytes, size_t length, size_t value) noexcept {
+	for (size_t i = 0; i < length; i++) {
+		bytes[length - i - 1] = value & byteMask;
+		value = value >> byteBits;
+	}
+}
+
+size_t ScaledVector::Size() const noexcept {
+	return bytes.size() / elementSize;
+}
+
+size_t ScaledVector::ValueAt(size_t index) const noexcept {
+	return ReadValue(bytes.data() + index * elementSize, elementSize);
+}
+
+intptr_t ScaledVector::SignedValueAt(size_t index) const noexcept {
+	return ReadValue(bytes.data() + index * elementSize, elementSize);
+}
+
+constexpr size_t MaxForBytes(size_t length) noexcept {
+	constexpr size_t one = 1;
+	return (one << (byteBits * length)) - 1;
+}
+
+constexpr size_t SizeForValue(size_t value) noexcept {
+	for (size_t i = 1; i < maxElementSize; i++) {
+		if (value <= MaxForBytes(i)) {
+			return i;
+		}
+	}
+	return 1;
+}
+
+void ScaledVector::SetValueAt(size_t index, size_t value) {
+	// Check if value fits, if not then expand
+	if (value > elementMax) {
+		const size_t elementSizeNew = SizeForValue(value);
+		const size_t length = bytes.size() / elementSize;
+		std::vector<uint8_t> bytesNew(elementSizeNew * length);
+		for (size_t i = 0; i < length; i++) {
+			const uint8_t *source = bytes.data() + i * elementSize;
+			uint8_t *destination = bytesNew.data() + (i+1) * elementSizeNew - elementSize;
+			memcpy(destination, source, elementSize);
+		}
+		std::swap(bytes, bytesNew);
+		elementSize = elementSizeNew;
+		elementMax = MaxForBytes(elementSize);
+	}
+	WriteValue(bytes.data() + index * elementSize, elementSize, value);
+}
+
+void ScaledVector::ClearValueAt(size_t index) noexcept {
+	// 0 fits in any size element so no expansion needed so no exceptions 
+	WriteValue(bytes.data() + index * elementSize, elementSize, 0);
+}
+
+void ScaledVector::Clear() noexcept {
+	bytes.clear();
+}
+
+void ScaledVector::Truncate(size_t length) noexcept {
+	VectorTruncate(bytes, length * elementSize);
+	assert(bytes.size() == length * elementSize);
+}
+
+void ScaledVector::ReSize(size_t length) {
+	bytes.resize(length * elementSize);
+}
+
+void ScaledVector::PushBack() {
+	ReSize(Size() + 1);
+}
+
+size_t ScaledVector::SizeInBytes() const noexcept {
+	return bytes.size();
+}
+
 UndoActionType::UndoActionType() noexcept : at(ActionType::insert), mayCoalesce(false) {
 }
 
+UndoActions::UndoActions() noexcept = default;
+
 void UndoActions::resize(size_t length) {
 	types.resize(length);
-	positions.resize(length);
-	lengths.resize(length);
+	positions.ReSize(length);
+	lengths.ReSize(length);
 }
 
 size_t UndoActions::size() const noexcept {
 	return types.size();
 }
 
-void UndoActions::Create(size_t index, ActionType at_, Sci::Position position_, Sci::Position lenData_, bool mayCoalesce_) noexcept {
+void UndoActions::CreateStart(size_t index) noexcept {
+	types[index].at = ActionType::start;
+	types[index].mayCoalesce = true;
+	positions.ClearValueAt(index);
+	lengths.ClearValueAt(index);
+}
+
+void UndoActions::Create(size_t index, ActionType at_, Sci::Position position_, Sci::Position lenData_, bool mayCoalesce_) {
 	types[index].at = at_;
 	types[index].mayCoalesce = mayCoalesce_;
-	positions[index] = position_;
-	lengths[index] = lenData_;
+	positions.SetValueAt(index, position_);
+	lengths.SetValueAt(index, lenData_);
 }
 
 const char *ScrapStack::Push(const char *text, size_t length) {
@@ -161,14 +265,14 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 			} else if ((at != actions.types[targetAct].at) && (actions.types[targetAct].at != ActionType::start)) {
 				currentAction++;
 			} else if ((at == ActionType::insert) &&
-			           (position != (actions.positions[targetAct] + actions.lengths[targetAct]))) {
+			           (position != (actions.positions.SignedValueAt(targetAct) + actions.lengths.SignedValueAt(targetAct)))) {
 				// Insertions must be immediately after to coalesce
 				currentAction++;
 			} else if (at == ActionType::remove) {
 				if ((lengthData == 1) || (lengthData == 2)) {
-					if ((position + lengthData) == actions.positions[targetAct]) {
+					if ((position + lengthData) == actions.positions.SignedValueAt(targetAct)) {
 						; // Backspace -> OK
-					} else if (position == actions.positions[targetAct]) {
+					} else if (position == actions.positions.SignedValueAt(targetAct)) {
 						; // Delete -> OK
 					} else {
 						// Removals must be at same position to coalesce
@@ -232,11 +336,11 @@ void UndoHistory::DropUndoSequence() noexcept {
 
 void UndoHistory::DeleteUndoHistory() noexcept {
 	for (int i = 1; i < maxAction; i++) {
-		actions.lengths[i] = 0;
+		actions.lengths.ClearValueAt(i);
 	}
 	maxAction = 0;
 	currentAction = 0;
-	actions.Create(currentAction, ActionType::start);
+	actions.CreateStart(currentAction);
 	savePoint = 0;
 	tentativePoint = -1;
 }
@@ -310,9 +414,9 @@ Action UndoHistory::GetUndoStep() const noexcept {
 	Action acta {
 		actions.types[currentAction].at,
 		actions.types[currentAction].mayCoalesce,
-		actions.positions[currentAction],
+		actions.positions.SignedValueAt(currentAction),
 		nullptr,
-		actions.lengths[currentAction]
+		actions.lengths.SignedValueAt(currentAction)
 	};
 	if (acta.lenData) {
 		acta.data = scraps->CurrentText() - acta.lenData;
@@ -321,7 +425,7 @@ Action UndoHistory::GetUndoStep() const noexcept {
 }
 
 void UndoHistory::CompletedUndoStep() noexcept {
-	scraps->MoveBack(actions.lengths[currentAction]);
+	scraps->MoveBack(actions.lengths.ValueAt(currentAction));
 	currentAction--;
 }
 
@@ -346,9 +450,9 @@ Action UndoHistory::GetRedoStep() const noexcept {
 	Action acta{
 		actions.types[currentAction].at,
 		actions.types[currentAction].mayCoalesce,
-		actions.positions[currentAction],
+		actions.positions.SignedValueAt(currentAction),
 		nullptr,
-		actions.lengths[currentAction]
+		actions.lengths.SignedValueAt(currentAction)
 	};
 	if (acta.lenData) {
 		acta.data = scraps->CurrentText();
@@ -357,7 +461,7 @@ Action UndoHistory::GetRedoStep() const noexcept {
 }
 
 void UndoHistory::CompletedRedoStep() noexcept {
-	scraps->MoveForward(actions.lengths[currentAction]);
+	scraps->MoveForward(actions.lengths.ValueAt(currentAction));
 	currentAction++;
 }
 
