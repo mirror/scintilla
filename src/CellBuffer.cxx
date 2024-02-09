@@ -1148,6 +1148,54 @@ void CellBuffer::PerformRedoStep() {
 	uh->CompletedRedoStep();
 }
 
+int CellBuffer::UndoActions() const noexcept {
+	return uh->Actions();
+}
+
+void CellBuffer::SetUndoSavePoint(int action) noexcept {
+	uh->SetSavePoint(action);
+}
+
+int CellBuffer::UndoSavePoint() const noexcept {
+	return uh->SavePoint();
+}
+
+void CellBuffer::SetUndoCurrent(int action) noexcept {
+	uh->SetCurrent(action);
+}
+
+int CellBuffer::UndoCurrent() const noexcept {
+	return uh->Current();
+}
+
+void CellBuffer::SetUndoTentative(int action) noexcept {
+	uh->SetTentative(action);
+}
+
+int CellBuffer::UndoTentative() const noexcept {
+	return uh->TentativePoint();
+}
+
+int CellBuffer::UndoActionType(int action) const noexcept {
+	return uh->Type(action);
+}
+
+Sci::Position CellBuffer::UndoActionPosition(int action) const noexcept {
+	return uh->Position(action);
+}
+
+std::string_view CellBuffer::UndoActionText(int action) const noexcept {
+	return uh->Text(action);
+}
+
+void CellBuffer::PushUndoActionType(int type, Sci::Position position) {
+	uh->PushUndoActionType(type, position);
+}
+
+void CellBuffer::ChangeLastUndoActionText(size_t length, const char *text) {
+	uh->ChangeLastUndoActionText(length, text);
+}
+
 void CellBuffer::ChangeHistorySet(bool set) {
 	if (set) {
 		if (!changeHistory && !uh->CanUndo()) {

@@ -6586,6 +6586,49 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->EndUndoAction();
 		return 0;
 
+	case Message::GetUndoActions:
+		return pdoc->UndoActions();
+
+	case Message::SetUndoSavePoint:
+		pdoc->SetUndoSavePoint(static_cast<int>(wParam));
+		break;
+
+	case Message::GetUndoSavePoint:
+		return pdoc->UndoSavePoint();
+
+	case Message::SetUndoCurrent:
+		pdoc->SetUndoCurrent(static_cast<int>(wParam));
+		break;
+
+	case Message::GetUndoCurrent:
+		return pdoc->UndoCurrent();
+
+	case Message::SetUndoTentative:
+		pdoc->SetUndoTentative(static_cast<int>(wParam));
+		break;
+
+	case Message::GetUndoTentative:
+		return pdoc->UndoTentative();
+
+	case Message::GetUndoActionType:
+		return pdoc->UndoActionType(static_cast<int>(wParam));
+
+	case Message::GetUndoActionPosition:
+		return pdoc->UndoActionPosition(static_cast<int>(wParam));
+
+	case Message::GetUndoActionText: {
+		std::string_view text = pdoc->UndoActionText(static_cast<int>(wParam));
+		return BytesResult(lParam, reinterpret_cast<const unsigned char *>(text.data()), text.length());
+	}
+
+	case Message::PushUndoActionType:
+		pdoc->PushUndoActionType(static_cast<int>(wParam), lParam);
+		break;
+
+	case Message::ChangeLastUndoActionText:
+		pdoc->ChangeLastUndoActionText(wParam, CharPtrFromSPtr(lParam));
+		break;
+
 	case Message::GetCaretPeriod:
 		return caret.period;
 

@@ -833,6 +833,42 @@ fun void BeginUndoAction=2078(,)
 # End a sequence of actions that is undone and redone as a unit.
 fun void EndUndoAction=2079(,)
 
+# How many undo actions are in the history?
+get int GetUndoActions=2790(,)
+
+# Set action as the save point
+set void SetUndoSavePoint=2791(int action,)
+
+# Which action is the save point?
+get int GetUndoSavePoint=2792(,)
+
+# Set action as the current point
+set void SetUndoCurrent=2793(int action,)
+
+# Which action is the current point?
+get int GetUndoCurrent=2794(,)
+
+# Set action as the tentative point
+set void SetUndoTentative=2795(int action,)
+
+# Which action is the tentative point?
+get int GetUndoTentative=2796(,)
+
+# Push one action onto undo history with no text
+fun void PushUndoActionType=2797(int type, position pos)
+
+# Set the text and length of the most recently pushed action
+fun void ChangeLastUndoActionText=2798(position length, string text)
+
+# What is the type of an action?
+get int GetUndoActionType=2799(int action,)
+
+# What is the position of an action?
+get position GetUndoActionPosition=2800(int action,)
+
+# What is the text of an action?
+get int GetUndoActionText=2801(int action, stringresult text)
+
 # Indicator style enumeration and some constants
 enu IndicatorStyle=INDIC_
 val INDIC_PLAIN=0

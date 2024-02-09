@@ -67,6 +67,8 @@ public:
 	[[nodiscard]] const char *TextAt(size_t position) const noexcept;
 };
 
+constexpr int coalesceFlag = 0x100;
+
 /**
  *
  */
@@ -78,6 +80,8 @@ class UndoHistory {
 	int tentativePoint = -1;
 	std::optional<int> detach;
 	std::unique_ptr<ScrapStack> scraps;
+	struct actPos { int act; size_t position; };
+	std::optional<actPos> memory;
 
 	int PreviousAction() const noexcept;
 
@@ -92,8 +96,12 @@ public:
 	void DropUndoSequence() noexcept;
 	void DeleteUndoHistory() noexcept;
 
+	[[nodiscard]] int Actions() const noexcept;
+
 	/// The save point is a marker in the undo stack where the container has stated that
 	/// the buffer was saved. Undo and redo can move over the save point.
+	void SetSavePoint(int action) noexcept;
+	[[nodiscard]] int SavePoint() const noexcept;
 	void SetSavePoint() noexcept;
 	bool IsSavePoint() const noexcept;
 	bool BeforeSavePoint() const noexcept;
@@ -103,7 +111,17 @@ public:
 	bool AfterDetachPoint() const noexcept;
 	bool AfterOrAtDetachPoint() const noexcept;
 
+	void SetCurrent(int action) noexcept;
+	[[nodiscard]] int Current() const noexcept;
+	[[nodiscard]] int Type(int action) const noexcept;
+	[[nodiscard]] Sci::Position Position(int action) const noexcept;
+	[[nodiscard]] std::string_view Text(int action) noexcept;
+	void PushUndoActionType(int type, Sci::Position position);
+	void ChangeLastUndoActionText(size_t length, const char *text);
+
 	// Tentative actions are used for input composition so that it can be undone cleanly
+	void SetTentative(int action) noexcept;
+	[[nodiscard]] int TentativePoint() const noexcept;
 	void TentativeStart() noexcept;
 	void TentativeCommit() noexcept;
 	bool TentativeActive() const noexcept;

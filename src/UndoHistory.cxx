@@ -341,6 +341,20 @@ void UndoHistory::DeleteUndoHistory() noexcept {
 	currentAction = 0;
 	savePoint = 0;
 	tentativePoint = -1;
+	scraps = std::make_unique<ScrapStack>();
+	memory = {};
+}
+
+int UndoHistory::Actions() const noexcept {
+	return static_cast<int>(actions.SSize());
+}
+
+void UndoHistory::SetSavePoint(int action) noexcept {
+	savePoint = action;
+}
+
+int UndoHistory::SavePoint() const noexcept {
+	return savePoint;
 }
 
 void UndoHistory::SetSavePoint() noexcept {
@@ -376,6 +390,72 @@ bool UndoHistory::AfterOrAtDetachPoint() const noexcept {
 	return detach && (*detach <= currentAction);
 }
 
+void UndoHistory::SetCurrent(int action) noexcept {
+	// Find position in scraps for action
+	memory = {};
+	size_t position = 0;
+	for (int act = 0; act < action; act++) {
+		position += actions.lengths.ValueAt(act);
+	}
+	scraps->SetCurrent(position);
+	currentAction = action;
+}
+
+int UndoHistory::Current() const noexcept {
+	return currentAction;
+}
+
+int UndoHistory::Type(int action) const noexcept {
+	const int baseType = static_cast<int>(actions.types[action].at);
+	const int open = actions.types[action].mayCoalesce ? coalesceFlag : 0;
+	return baseType | open;
+}
+
+Sci::Position UndoHistory::Position(int action) const noexcept {
+	return actions.positions.SignedValueAt(action);
+}
+
+std::string_view UndoHistory::Text(int action) noexcept {
+	// Assumes first call after any changes is for action 0.
+	// TODO: may need to invalidate memory in other circumstances
+	if (action == 0) {
+		memory = {};
+	}
+	int act = 0;
+	size_t position = 0;
+	if (memory && memory->act <= action) {
+		act = memory->act;
+		position = memory->position;
+	}
+	for (; act < action; act++) {
+		position += actions.lengths.ValueAt(act);
+	}
+	const size_t length = actions.lengths.ValueAt(action);
+	const char *scrap = scraps->TextAt(position);
+	memory = {action, position};
+	return {scrap, length};
+}
+
+void UndoHistory::PushUndoActionType(int type, Sci::Position position) {
+	actions.PushBack();
+	actions.Create(actions.SSize()-1, static_cast<ActionType>(type & byteMask),
+		position, 0, type & coalesceFlag);
+}
+
+void UndoHistory::ChangeLastUndoActionText(size_t length, const char *text) {
+	assert(actions.lengths.ValueAt(actions.SSize()-1) == 0);
+	actions.lengths.SetValueAt(actions.SSize()-1, length);
+	scraps->Push(text, length);
+}
+
+void UndoHistory::SetTentative(int action) noexcept {
+	tentativePoint = action;
+}
+
+int UndoHistory::TentativePoint() const noexcept {
+	return tentativePoint;
+}
+
 void UndoHistory::TentativeStart() noexcept {
 	tentativePoint = currentAction;
 }
@@ -402,11 +482,15 @@ bool UndoHistory::CanUndo() const noexcept {
 }
 
 int UndoHistory::StartUndo() noexcept {
+	assert(currentAction >= 0);
+
 	// Count the steps in this action
-	if (currentAction <= 0) {
+	if (currentAction == 0) {
 		return 0;
 	}
+
 	int act = currentAction - 1;
+
 	while (act > 0 && !actions.AtStart(act)) {
 		act--;
 	}
@@ -439,14 +523,21 @@ bool UndoHistory::CanRedo() const noexcept {
 
 int UndoHistory::StartRedo() noexcept {
 	// Count the steps in this action
+
 	if (currentAction >= actions.SSize()) {
 		// Already at end so can't redo
 		return 0;
 	}
+
+	// Slightly unusual logic handles case where last action still has mayCoalesce.
+	// Could set mayCoalesce of last action to false in StartUndo but this state is
+	// visible to applications so should not be changed.
+	const int maxAction = Actions() - 1;
 	int act = currentAction;
-	while ((act + 1) < actions.SSize() && !actions.AtStart(act + 1)) {
+	while (act <= maxAction && actions.types[act].mayCoalesce) {
 		act++;
 	}
+	act = std::min(act, maxAction);
 	return act - currentAction + 1;
 }
 

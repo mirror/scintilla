@@ -180,6 +180,19 @@ public:
 	Action GetRedoStep() const noexcept;
 	void PerformRedoStep();
 
+	int UndoActions() const noexcept;
+	void SetUndoSavePoint(int action) noexcept;
+	int UndoSavePoint() const noexcept;
+	void SetUndoCurrent(int action) noexcept;
+	int UndoCurrent() const noexcept;
+	void SetUndoTentative(int action) noexcept;
+	int UndoTentative() const noexcept;
+	int UndoActionType(int action) const noexcept;
+	Sci::Position UndoActionPosition(int action) const noexcept;
+	std::string_view UndoActionText(int action) const noexcept;
+	void PushUndoActionType(int type, Sci::Position position);
+	void ChangeLastUndoActionText(size_t length, const char *text);
+
 	void ChangeHistorySet(bool set);
 	[[nodiscard]] int EditionAt(Sci::Position pos) const noexcept;
 	[[nodiscard]] Sci::Position EditionEndRun(Sci::Position pos) const noexcept;
