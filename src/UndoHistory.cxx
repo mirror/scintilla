@@ -136,21 +136,27 @@ UndoActionType::UndoActionType() noexcept : at(ActionType::insert), mayCoalesce(
 
 UndoActions::UndoActions() noexcept = default;
 
-void UndoActions::resize(size_t length) {
-	types.resize(length);
-	positions.ReSize(length);
-	lengths.ReSize(length);
+void UndoActions::Truncate(size_t length) noexcept {
+	VectorTruncate(types, length);
+	assert(types.size() == length);
+	positions.Truncate(length);
+	lengths.Truncate(length);
 }
 
-size_t UndoActions::size() const noexcept {
+void UndoActions::PushBack() {
+	types.emplace_back();
+	positions.PushBack();
+	lengths.PushBack();
+}
+
+void UndoActions::Clear() noexcept {
+	types.clear();
+	positions.Clear();
+	lengths.Clear();
+}
+
+intptr_t UndoActions::SSize() const noexcept {
 	return types.size();
-}
-
-void UndoActions::CreateStart(size_t index) noexcept {
-	types[index].at = ActionType::start;
-	types[index].mayCoalesce = true;
-	positions.ClearValueAt(index);
-	lengths.ClearValueAt(index);
 }
 
 void UndoActions::Create(size_t index, ActionType at_, Sci::Position position_, Sci::Position lenData_, bool mayCoalesce_) {
@@ -158,6 +164,13 @@ void UndoActions::Create(size_t index, ActionType at_, Sci::Position position_, 
 	types[index].mayCoalesce = mayCoalesce_;
 	positions.SetValueAt(index, position_);
 	lengths.SetValueAt(index, lenData_);
+}
+
+bool UndoActions::AtStart(size_t index) const noexcept {
+	if (index == 0) {
+		return true;
+	}
+	return !types[index-1].mayCoalesce;
 }
 
 const char *ScrapStack::Push(const char *text, size_t length) {
@@ -196,14 +209,13 @@ const char *ScrapStack::TextAt(size_t position) const noexcept {
 // The undo history stores a sequence of user operations that represent the user's view of the
 // commands executed on the text.
 // Each user operation contains a sequence of text insertion and text deletion actions.
-// All the user operations are stored in a list of individual actions with 'start' actions used
-// as delimiters between user operations.
-// Initially there is one start action in the history.
+// All the user operations are stored in a list of individual actions.
+// A false 'mayCoalesce' flag acts as an end to a user operation.
+// Initially there are no actions in the history.
 // As each action is performed, it is recorded in the history. The action may either become
 // part of the current user operation or may start a new user operation. If it is to be part of the
-// current operation, then it overwrites the current last action. If it is to be part of a new
-// operation, it is appended after the current last action.
-// After writing the new action, a new start action is appended at the end of the history.
+// current operation, then 'mayCoalesce' is true. If it is to be part of a new operation, the
+// 'mayCoalesce' flag of the previous action is set false.
 // The decision of whether to start a new user operation is based upon two factors. If a
 // compound operation has been explicitly started by calling BeginUndoAction and no matching
 // EndUndoAction (these calls nest) has been called, then the action is coalesced into the current
@@ -211,26 +223,18 @@ const char *ScrapStack::TextAt(size_t position) const noexcept {
 // unless it looks as if the new action is caused by the user typing or deleting a stream of text.
 // Sequences that look like typing or deletion are coalesced into a single user operation.
 
+int UndoHistory::PreviousAction() const noexcept {
+	return currentAction - 1;
+}
+
 UndoHistory::UndoHistory() {
-	actions.resize(3);
 	scraps = std::make_unique<ScrapStack>();
-	actions.Create(currentAction, ActionType::start);
 }
 
 UndoHistory::~UndoHistory() noexcept = default;
 
-void UndoHistory::EnsureUndoRoom() {
-	// Have to test that there is room for 2 more actions in the array
-	// as two actions may be created by the calling function
-	if (static_cast<size_t>(currentAction) >= (actions.size() - 2)) {
-		// Run out of undo nodes so extend the array
-		actions.resize(actions.size() * 2);
-	}
-}
-
 const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, const char *data, Sci::Position lengthData,
 	bool &startSequence, bool mayCoalesce) {
-	EnsureUndoRoom();
 	//Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, lengthData, currentAction);
 	//Platform::DebugPrintf("^ %d action %d %d\n", actions[currentAction - 1].at,
 	//	actions[currentAction - 1].position, actions[currentAction - 1].lenData);
@@ -242,11 +246,15 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 	} else if (detach && (*detach > currentAction)) {
 		detach = currentAction;
 	}
-	const int oldCurrentAction = currentAction;
+	if (undoSequenceDepth > 0) {
+		// Actions not at top level are always coalesced unless this is after return to top level
+		mayCoalesce = true;
+	}
+	bool coalesce = true;
 	if (currentAction >= 1) {
+		int targetAct = currentAction - 1;
 		if (0 == undoSequenceDepth) {
 			// Top level actions may not always be coalesced
-			ptrdiff_t targetAct = currentAction - 1;
 			// Container actions may forward the coalesce state of Scintilla Actions.
 			while ((targetAct > 0) && (actions.types[targetAct].at == ActionType::container) && actions.types[targetAct].mayCoalesce) {
 				targetAct--;
@@ -254,20 +262,17 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 			// See if current action can be coalesced into previous action
 			// Will work if both are inserts or deletes and position is same
 			if ((currentAction == savePoint) || (currentAction == tentativePoint)) {
-				currentAction++;
-			} else if (!actions.types[currentAction].mayCoalesce) {
-				// Not allowed to coalesce if this set
-				currentAction++;
+				coalesce = false;
 			} else if (!mayCoalesce || !actions.types[targetAct].mayCoalesce) {
-				currentAction++;
-			} else if (at == ActionType::container || actions.types[currentAction].at == ActionType::container) {
+				coalesce = false;
+			} else if (at == ActionType::container || actions.types[targetAct].at == ActionType::container) {
 				;	// A coalescible containerAction
-			} else if ((at != actions.types[targetAct].at) && (actions.types[targetAct].at != ActionType::start)) {
-				currentAction++;
+			} else if ((at != actions.types[targetAct].at)) { // } && (!actions.AtStart(targetAct))) {
+				coalesce = false;
 			} else if ((at == ActionType::insert) &&
 			           (position != (actions.positions.SignedValueAt(targetAct) + actions.lengths.SignedValueAt(targetAct)))) {
 				// Insertions must be immediately after to coalesce
-				currentAction++;
+				coalesce = false;
 			} else if (at == ActionType::remove) {
 				if ((lengthData == 1) || (lengthData == 2)) {
 					if ((position + lengthData) == actions.positions.SignedValueAt(targetAct)) {
@@ -276,11 +281,11 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 						; // Delete -> OK
 					} else {
 						// Removals must be at same position to coalesce
-						currentAction++;
+						coalesce = false;
 					}
 				} else {
 					// Removals must be of one character to coalesce
-					currentAction++;
+					coalesce = false;
 				}
 			} else {
 				// Action coalesced.
@@ -288,45 +293,42 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 
 		} else {
 			// Actions not at top level are always coalesced unless this is after return to top level
-			if (!actions.types[currentAction].mayCoalesce)
-				currentAction++;
+			if (!actions.types[targetAct].mayCoalesce)
+				coalesce = false;
 		}
 	} else {
-		currentAction++;
+		coalesce = false;
 	}
-	startSequence = oldCurrentAction != currentAction;
+	startSequence = !coalesce;
+	// Maybe close previous action
+	if ((currentAction > 0) && startSequence) {
+		actions.types[PreviousAction()].mayCoalesce = false;
+	}
 	const char *dataNew = lengthData ? scraps->Push(data, lengthData) : nullptr;
+	if (currentAction >= actions.SSize()) {
+		actions.PushBack();
+	}
 	actions.Create(currentAction, at, position, lengthData, mayCoalesce);
 	currentAction++;
-	actions.Create(currentAction, ActionType::start);
-	maxAction = currentAction;
 	return dataNew;
 }
 
-void UndoHistory::BeginUndoAction() {
-	EnsureUndoRoom();
+void UndoHistory::BeginUndoAction() noexcept {
 	if (undoSequenceDepth == 0) {
-		if (actions.types[currentAction].at != ActionType::start) {
-			currentAction++;
-			actions.Create(currentAction, ActionType::start);
-			maxAction = currentAction;
+		if (currentAction > 0) {
+			actions.types[PreviousAction()].mayCoalesce = false;
 		}
-		actions.types[currentAction].mayCoalesce = false;
 	}
 	undoSequenceDepth++;
 }
 
-void UndoHistory::EndUndoAction() {
+void UndoHistory::EndUndoAction() noexcept {
 	PLATFORM_ASSERT(undoSequenceDepth > 0);
-	EnsureUndoRoom();
 	undoSequenceDepth--;
 	if (0 == undoSequenceDepth) {
-		if (actions.types[currentAction].at != ActionType::start) {
-			currentAction++;
-			actions.Create(currentAction, ActionType::start);
-			maxAction = currentAction;
+		if (currentAction > 0) {
+			actions.types[PreviousAction()].mayCoalesce = false;
 		}
-		actions.types[currentAction].mayCoalesce = false;
 	}
 }
 
@@ -335,12 +337,8 @@ void UndoHistory::DropUndoSequence() noexcept {
 }
 
 void UndoHistory::DeleteUndoHistory() noexcept {
-	for (int i = 1; i < maxAction; i++) {
-		actions.lengths.ClearValueAt(i);
-	}
-	maxAction = 0;
+	actions.Clear();
 	currentAction = 0;
-	actions.CreateStart(currentAction);
 	savePoint = 0;
 	tentativePoint = -1;
 }
@@ -358,8 +356,12 @@ bool UndoHistory::BeforeSavePoint() const noexcept {
 	return (savePoint < 0) || (savePoint > currentAction);
 }
 
+bool UndoHistory::BeforeOrAtSavePoint() const noexcept {
+	return (savePoint < 0) || (savePoint >= currentAction);
+}
+
 bool UndoHistory::BeforeReachableSavePoint() const noexcept {
-	return (savePoint >= 0) && !detach && (savePoint > currentAction);
+	return (savePoint > 0) && !detach && (savePoint > currentAction);
 }
 
 bool UndoHistory::AfterSavePoint() const noexcept {
@@ -370,6 +372,10 @@ bool UndoHistory::AfterDetachPoint() const noexcept {
 	return detach && (*detach < currentAction);
 }
 
+bool UndoHistory::AfterOrAtDetachPoint() const noexcept {
+	return detach && (*detach <= currentAction);
+}
+
 void UndoHistory::TentativeStart() noexcept {
 	tentativePoint = currentAction;
 }
@@ -377,46 +383,44 @@ void UndoHistory::TentativeStart() noexcept {
 void UndoHistory::TentativeCommit() noexcept {
 	tentativePoint = -1;
 	// Truncate undo history
-	maxAction = currentAction;
+	actions.Truncate(currentAction);
 }
 
 bool UndoHistory::TentativeActive() const noexcept {
 	return tentativePoint >= 0;
 }
 
-int UndoHistory::TentativeSteps() noexcept {
+int UndoHistory::TentativeSteps() const noexcept {
 	// Drop any trailing startAction
-	if (actions.types[currentAction].at == ActionType::start && currentAction > 0)
-		currentAction--;
 	if (tentativePoint >= 0)
 		return currentAction - tentativePoint;
 	return -1;
 }
 
 bool UndoHistory::CanUndo() const noexcept {
-	return (currentAction > 0) && (maxAction > 0);
+	return (currentAction > 0) && (actions.SSize() != 0);
 }
 
 int UndoHistory::StartUndo() noexcept {
-	// Drop any trailing startAction
-	if (actions.types[currentAction].at == ActionType::start && currentAction > 0)
-		currentAction--;
-
 	// Count the steps in this action
-	int act = currentAction;
-	while (actions.types[act].at != ActionType::start && act > 0) {
+	if (currentAction <= 0) {
+		return 0;
+	}
+	int act = currentAction - 1;
+	while (act > 0 && !actions.AtStart(act)) {
 		act--;
 	}
 	return currentAction - act;
 }
 
 Action UndoHistory::GetUndoStep() const noexcept {
+	const int previousAction = PreviousAction();
 	Action acta {
-		actions.types[currentAction].at,
-		actions.types[currentAction].mayCoalesce,
-		actions.positions.SignedValueAt(currentAction),
+		actions.types[previousAction].at,
+		actions.types[previousAction].mayCoalesce,
+		actions.positions.SignedValueAt(previousAction),
 		nullptr,
-		actions.lengths.SignedValueAt(currentAction)
+		actions.lengths.SignedValueAt(previousAction)
 	};
 	if (acta.lenData) {
 		acta.data = scraps->CurrentText() - acta.lenData;
@@ -425,25 +429,25 @@ Action UndoHistory::GetUndoStep() const noexcept {
 }
 
 void UndoHistory::CompletedUndoStep() noexcept {
-	scraps->MoveBack(actions.lengths.ValueAt(currentAction));
+	scraps->MoveBack(actions.lengths.ValueAt(PreviousAction()));
 	currentAction--;
 }
 
 bool UndoHistory::CanRedo() const noexcept {
-	return maxAction > currentAction;
+	return actions.SSize() > currentAction;
 }
 
 int UndoHistory::StartRedo() noexcept {
-	// Drop any leading startAction
-	if (currentAction < maxAction && actions.types[currentAction].at == ActionType::start)
-		currentAction++;
-
 	// Count the steps in this action
+	if (currentAction >= actions.SSize()) {
+		// Already at end so can't redo
+		return 0;
+	}
 	int act = currentAction;
-	while (act < maxAction && actions.types[act].at != ActionType::start) {
+	while ((act + 1) < actions.SSize() && !actions.AtStart(act + 1)) {
 		act++;
 	}
-	return act - currentAction;
+	return act - currentAction + 1;
 }
 
 Action UndoHistory::GetRedoStep() const noexcept {

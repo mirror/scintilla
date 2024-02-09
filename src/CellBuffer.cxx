@@ -1062,11 +1062,11 @@ bool CellBuffer::IsCollectingUndo() const noexcept {
 	return collectingUndo;
 }
 
-void CellBuffer::BeginUndoAction() {
+void CellBuffer::BeginUndoAction() noexcept {
 	uh->BeginUndoAction();
 }
 
-void CellBuffer::EndUndoAction() {
+void CellBuffer::EndUndoAction() noexcept {
 	uh->EndUndoAction();
 }
 
@@ -1075,7 +1075,7 @@ void CellBuffer::AddUndoAction(Sci::Position token, bool mayCoalesce) {
 	uh->AppendAction(ActionType::container, token, nullptr, 0, startSequence, mayCoalesce);
 }
 
-void CellBuffer::DeleteUndoHistory() {
+void CellBuffer::DeleteUndoHistory() noexcept {
 	uh->DeleteUndoHistory();
 }
 
@@ -1093,7 +1093,7 @@ Action CellBuffer::GetUndoStep() const noexcept {
 
 void CellBuffer::PerformUndoStep() {
 	const Action actionStep = uh->GetUndoStep();
-	if (changeHistory && uh->BeforeSavePoint()) {
+	if (changeHistory && uh->BeforeOrAtSavePoint()) {
 		changeHistory->StartReversion();
 	}
 	if (actionStep.at == ActionType::insert) {
@@ -1103,7 +1103,7 @@ void CellBuffer::PerformUndoStep() {
 		}
 		if (changeHistory) {
 			changeHistory->DeleteRange(actionStep.position, actionStep.lenData,
-				uh->BeforeSavePoint() && !uh->AfterDetachPoint());
+				uh->BeforeOrAtSavePoint() && !uh->AfterDetachPoint());
 		}
 		BasicDeleteChars(actionStep.position, actionStep.lenData);
 	} else if (actionStep.at == ActionType::remove) {
@@ -1128,12 +1128,12 @@ Action CellBuffer::GetRedoStep() const noexcept {
 }
 
 void CellBuffer::PerformRedoStep() {
-	Action actionStep = uh->GetRedoStep();
+	const Action actionStep = uh->GetRedoStep();
 	if (actionStep.at == ActionType::insert) {
 		BasicInsertString(actionStep.position, actionStep.data, actionStep.lenData);
 		if (changeHistory) {
 			changeHistory->Insert(actionStep.position, actionStep.lenData, collectingUndo,
-				uh->BeforeSavePoint() && !uh->AfterDetachPoint());
+				uh->BeforeSavePoint() && !uh->AfterOrAtDetachPoint());
 		}
 	} else if (actionStep.at == ActionType::remove) {
 		if (changeHistory) {

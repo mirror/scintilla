@@ -590,7 +590,7 @@ TEST_CASE("UndoHistory") {
 		uh.AppendAction(ActionType::insert, 0, "ab", 2, startSequence, true);
 		REQUIRE(uh.TentativeActive());
 		// The first TentativeCommit didn't seal off the first action so it is still undoable
-		REQUIRE(uh.TentativeSteps() == 3);
+		REQUIRE(uh.TentativeSteps() == 2);
 		REQUIRE(uh.CanUndo());
 		TentativeUndo(uh);
 		REQUIRE(!uh.TentativeActive());

@@ -47,10 +47,12 @@ struct UndoActions {
 	ScaledVector lengths;
 
 	UndoActions() noexcept;
-	void resize(size_t length);
-	[[nodiscard]] size_t size() const noexcept;
-	void CreateStart(size_t index) noexcept;
-	void Create(size_t index, ActionType at_, Sci::Position position_=0, Sci::Position lenData_=0, bool mayCoalesce_=true);
+	void Truncate(size_t length) noexcept;
+	void PushBack();
+	void Clear() noexcept;
+	[[nodiscard]] intptr_t SSize() const noexcept;
+	void Create(size_t index, ActionType at_, Sci::Position position_, Sci::Position lenData_, bool mayCoalesce_);
+	[[nodiscard]] bool AtStart(size_t index) const noexcept;
 };
 
 class ScrapStack {
@@ -70,7 +72,6 @@ public:
  */
 class UndoHistory {
 	UndoActions actions;
-	int maxAction = 0;
 	int currentAction = 0;
 	int undoSequenceDepth = 0;
 	int savePoint = 0;
@@ -78,7 +79,7 @@ class UndoHistory {
 	std::optional<int> detach;
 	std::unique_ptr<ScrapStack> scraps;
 
-	void EnsureUndoRoom();
+	int PreviousAction() const noexcept;
 
 public:
 	UndoHistory();
@@ -86,8 +87,8 @@ public:
 
 	const char *AppendAction(ActionType at, Sci::Position position, const char *data, Sci::Position lengthData, bool &startSequence, bool mayCoalesce=true);
 
-	void BeginUndoAction();
-	void EndUndoAction();
+	void BeginUndoAction() noexcept;
+	void EndUndoAction() noexcept;
 	void DropUndoSequence() noexcept;
 	void DeleteUndoHistory() noexcept;
 
@@ -96,15 +97,17 @@ public:
 	void SetSavePoint() noexcept;
 	bool IsSavePoint() const noexcept;
 	bool BeforeSavePoint() const noexcept;
+	bool BeforeOrAtSavePoint() const noexcept;
 	bool BeforeReachableSavePoint() const noexcept;
 	bool AfterSavePoint() const noexcept;
 	bool AfterDetachPoint() const noexcept;
+	bool AfterOrAtDetachPoint() const noexcept;
 
 	// Tentative actions are used for input composition so that it can be undone cleanly
 	void TentativeStart() noexcept;
 	void TentativeCommit() noexcept;
 	bool TentativeActive() const noexcept;
-	int TentativeSteps() noexcept;
+	int TentativeSteps() const noexcept;
 
 	/// To perform an undo, StartUndo is called to retrieve the number of steps, then UndoStep is
 	/// called that many times. Similarly for redo.

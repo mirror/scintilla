@@ -28,7 +28,7 @@ class ChangeHistory;
  */
 class ILineVector;
 
-enum class ActionType : unsigned char { insert, remove, start, container };
+enum class ActionType : unsigned char { insert, remove, container };
 
 /**
  * Actions are used to return the information required to report one undo/redo step.
@@ -164,10 +164,10 @@ public:
 
 	bool SetUndoCollection(bool collectUndo) noexcept;
 	bool IsCollectingUndo() const noexcept;
-	void BeginUndoAction();
-	void EndUndoAction();
+	void BeginUndoAction() noexcept;
+	void EndUndoAction() noexcept;
 	void AddUndoAction(Sci::Position token, bool mayCoalesce);
-	void DeleteUndoHistory();
+	void DeleteUndoHistory() noexcept;
 
 	/// To perform an undo, StartUndo is called to retrieve the number of steps, then UndoStep is
 	/// called that many times. Similarly for redo.
