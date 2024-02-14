@@ -59,6 +59,7 @@ class ScrapStack {
 	std::string stack;
 	size_t current = 0;
 public:
+	void Clear() noexcept;
 	const char *Push(const char *text, size_t length);
 	void SetCurrent(size_t position) noexcept;
 	void MoveForward(size_t length) noexcept;

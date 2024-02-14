@@ -173,6 +173,11 @@ bool UndoActions::AtStart(size_t index) const noexcept {
 	return !types[index-1].mayCoalesce;
 }
 
+void ScrapStack::Clear() noexcept {
+	stack.clear();
+	current = 0;
+}
+
 const char *ScrapStack::Push(const char *text, size_t length) {
 	if (current < stack.length()) {
 		stack.resize(current);
@@ -341,7 +346,7 @@ void UndoHistory::DeleteUndoHistory() noexcept {
 	currentAction = 0;
 	savePoint = 0;
 	tentativePoint = -1;
-	scraps = std::make_unique<ScrapStack>();
+	scraps->Clear();
 	memory = {};
 }
 
