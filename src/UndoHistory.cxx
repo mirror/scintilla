@@ -173,6 +173,14 @@ bool UndoActions::AtStart(size_t index) const noexcept {
 	return !types[index-1].mayCoalesce;
 }
 
+size_t UndoActions::LengthTo(size_t index) const noexcept {
+	size_t sum = 0;
+	for (size_t act = 0; act < index; act++) {
+		sum += lengths.ValueAt(act);
+	}
+	return sum;
+}
+
 void ScrapStack::Clear() noexcept {
 	stack.clear();
 	current = 0;
@@ -395,15 +403,49 @@ bool UndoHistory::AfterOrAtDetachPoint() const noexcept {
 	return detach && (*detach <= currentAction);
 }
 
-void UndoHistory::SetCurrent(int action) noexcept {
+intptr_t UndoHistory::Delta(int action) noexcept {
+	intptr_t sizeChange = 0;
+	for (int act = 0; act < action; act++) {
+		const intptr_t lengthChange = actions.lengths.SignedValueAt(act);
+		sizeChange += (actions.types[act].at == ActionType::insert) ? lengthChange : -lengthChange;
+	}
+	return sizeChange;
+}
+
+bool UndoHistory::Validate(intptr_t lengthDocument) noexcept {
+	// Check history for validity
+	const intptr_t sizeChange = Delta(currentAction);
+	if (sizeChange > lengthDocument) {
+		// Current document size too small for changes made in undo history.
+		return false;
+	}
+	const intptr_t lengthOriginal = lengthDocument - sizeChange;
+	intptr_t lengthCurrent = lengthOriginal;
+	for (int act = 0; act < actions.SSize(); act++) {
+		const intptr_t lengthChange = actions.lengths.SignedValueAt(act);
+		if (actions.positions.SignedValueAt(act) > lengthCurrent) {
+			// Change outside document.
+			return false;
+		}
+		lengthCurrent += (actions.types[act].at == ActionType::insert) ? lengthChange : -lengthChange;
+		if (lengthCurrent < 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void UndoHistory::SetCurrent(int action, intptr_t lengthDocument) {
 	// Find position in scraps for action
 	memory = {};
-	size_t position = 0;
-	for (int act = 0; act < action; act++) {
-		position += actions.lengths.ValueAt(act);
-	}
-	scraps->SetCurrent(position);
+	const size_t lengthSum = actions.LengthTo(action);
+	scraps->SetCurrent(lengthSum);
 	currentAction = action;
+	if (!Validate(lengthDocument)) {
+		currentAction = 0;
+		DeleteUndoHistory();
+		throw std::runtime_error("UndoHistory::SetCurrent: invalid undo history.");
+	}
 }
 
 int UndoHistory::Current() const noexcept {

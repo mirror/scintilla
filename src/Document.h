@@ -409,7 +409,7 @@ public:
 	int UndoActions() const noexcept;
 	void SetUndoSavePoint(int action) noexcept;
 	int UndoSavePoint() const noexcept;
-	void SetUndoCurrent(int action) noexcept;
+	void SetUndoCurrent(int action);
 	int UndoCurrent() const noexcept;
 	void SetUndoTentative(int action) noexcept;
 	int UndoTentative() const noexcept;

@@ -363,7 +363,7 @@ int Document::UndoSavePoint() const noexcept {
 	return cb.UndoSavePoint();
 }
 
-void Document::SetUndoCurrent(int action) noexcept {
+void Document::SetUndoCurrent(int action) {
 	cb.SetUndoCurrent(action);
 }
 

@@ -2063,14 +2063,22 @@ struct Sci_TextToFindFull {
     </p>
 
     <p>The history should first be set up with <code>SCI_PUSHUNDOACTIONTYPE</code>, and
-    <code>SCI_CHANGELASTUNDOACTIONTEXT</code> then the save, current, and tentativ points set
-    with <code>SCI_SETUNDOSAVEPOINT</code>, <code>SCI_SETUNDOCURRENT</code>, and
-    <code>SCI_SETUNDOTENTATIVE</code>.
+    <code>SCI_CHANGELASTUNDOACTIONTEXT</code> then the save, current, and tentative points set
+    with <code>SCI_SETUNDOSAVEPOINT</code>, <code>SCI_SETUNDOTENTATIVE</code>, and
+    <code>SCI_SETUNDOCURRENT</code>.
     </p>
 
     <p><code>SCI_PUSHUNDOACTIONTYPE(int type, position pos)</code> appends an action to the undo stack
     with a particular type and position then the text and length of that action are set with
     <code>SCI_CHANGELASTUNDOACTIONTEXT(position length, const char *text)</code>.
+    </p>
+
+    <p>
+    The last restoration API called should be <code>SCI_SETUNDOCURRENT</code> as this validates
+    the restored history and values against the document. For example, an undo history that could cause a negative
+    document length or inserting / removing text outside the document is invalid.
+    If the restored undo state is invalid then a failure status is set and the undo history cleared.
+    Check for failure with <a class="seealso" href="#SCI_GETSTATUS">SCI_GETSTATUS</a>.
     </p>
 
     <p>The current implementation may only work when the current and save point are the same and there is no tentative point.

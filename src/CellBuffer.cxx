@@ -1160,8 +1160,8 @@ int CellBuffer::UndoSavePoint() const noexcept {
 	return uh->SavePoint();
 }
 
-void CellBuffer::SetUndoCurrent(int action) noexcept {
-	uh->SetCurrent(action);
+void CellBuffer::SetUndoCurrent(int action) {
+	uh->SetCurrent(action, Length());
 }
 
 int CellBuffer::UndoCurrent() const noexcept {
