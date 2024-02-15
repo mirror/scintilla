@@ -390,19 +390,19 @@ public:
 	Sci::Position Redo();
 	bool CanUndo() const noexcept { return cb.CanUndo(); }
 	bool CanRedo() const noexcept { return cb.CanRedo(); }
-	void DeleteUndoHistory() { cb.DeleteUndoHistory(); }
-	bool SetUndoCollection(bool collectUndo) {
+	void DeleteUndoHistory() noexcept { cb.DeleteUndoHistory(); }
+	bool SetUndoCollection(bool collectUndo) noexcept {
 		return cb.SetUndoCollection(collectUndo);
 	}
 	bool IsCollectingUndo() const noexcept { return cb.IsCollectingUndo(); }
-	void BeginUndoAction() { cb.BeginUndoAction(); }
-	void EndUndoAction() { cb.EndUndoAction(); }
+	void BeginUndoAction() noexcept { cb.BeginUndoAction(); }
+	void EndUndoAction() noexcept { cb.EndUndoAction(); }
 	void AddUndoAction(Sci::Position token, bool mayCoalesce) { cb.AddUndoAction(token, mayCoalesce); }
 	void SetSavePoint();
 	bool IsSavePoint() const noexcept { return cb.IsSavePoint(); }
 
-	void TentativeStart() { cb.TentativeStart(); }
-	void TentativeCommit() { cb.TentativeCommit(); }
+	void TentativeStart() noexcept { cb.TentativeStart(); }
+	void TentativeCommit() noexcept { cb.TentativeCommit(); }
 	void TentativeUndo();
 	bool TentativeActive() const noexcept { return cb.TentativeActive(); }
 
@@ -440,7 +440,7 @@ public:
 	static std::string TransformLineEnds(const char *s, size_t len, Scintilla::EndOfLine eolModeWanted);
 	void ConvertLineEnds(Scintilla::EndOfLine eolModeSet);
 	std::string_view EOLString() const noexcept;
-	void SetReadOnly(bool set) { cb.SetReadOnly(set); }
+	void SetReadOnly(bool set) noexcept { cb.SetReadOnly(set); }
 	bool IsReadOnly() const noexcept { return cb.IsReadOnly(); }
 	bool IsLarge() const noexcept { return cb.IsLarge(); }
 	Scintilla::DocumentOption Options() const noexcept;
@@ -578,7 +578,7 @@ class UndoGroup {
 	Document *pdoc;
 	bool groupNeeded;
 public:
-	UndoGroup(Document *pdoc_, bool groupNeeded_=true) :
+	UndoGroup(Document *pdoc_, bool groupNeeded_=true) noexcept :
 		pdoc(pdoc_), groupNeeded(groupNeeded_) {
 		if (groupNeeded) {
 			pdoc->BeginUndoAction();
