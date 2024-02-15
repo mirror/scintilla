@@ -6605,12 +6605,12 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::GetUndoSavePoint:
 		return pdoc->UndoSavePoint();
 
-	case Message::SetUndoCurrent:
-		pdoc->SetUndoCurrent(static_cast<int>(wParam));
+	case Message::SetUndoDetach:
+		pdoc->SetUndoDetach(static_cast<int>(wParam));
 		break;
 
-	case Message::GetUndoCurrent:
-		return pdoc->UndoCurrent();
+	case Message::GetUndoDetach:
+		return pdoc->UndoDetach();
 
 	case Message::SetUndoTentative:
 		pdoc->SetUndoTentative(static_cast<int>(wParam));
@@ -6618,6 +6618,13 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case Message::GetUndoTentative:
 		return pdoc->UndoTentative();
+
+	case Message::SetUndoCurrent:
+		pdoc->SetUndoCurrent(static_cast<int>(wParam));
+		break;
+
+	case Message::GetUndoCurrent:
+		return pdoc->UndoCurrent();
 
 	case Message::GetUndoActionType:
 		return pdoc->UndoActionType(static_cast<int>(wParam));

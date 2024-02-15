@@ -1160,12 +1160,12 @@ int CellBuffer::UndoSavePoint() const noexcept {
 	return uh->SavePoint();
 }
 
-void CellBuffer::SetUndoCurrent(int action) {
-	uh->SetCurrent(action, Length());
+void CellBuffer::SetUndoDetach(int action) noexcept {
+	uh->SetDetachPoint(action);
 }
 
-int CellBuffer::UndoCurrent() const noexcept {
-	return uh->Current();
+int CellBuffer::UndoDetach() const noexcept {
+	return uh->DetachPoint();
 }
 
 void CellBuffer::SetUndoTentative(int action) noexcept {
@@ -1174,6 +1174,14 @@ void CellBuffer::SetUndoTentative(int action) noexcept {
 
 int CellBuffer::UndoTentative() const noexcept {
 	return uh->TentativePoint();
+}
+
+void CellBuffer::SetUndoCurrent(int action) {
+	uh->SetCurrent(action, Length());
+}
+
+int CellBuffer::UndoCurrent() const noexcept {
+	return uh->Current();
 }
 
 int CellBuffer::UndoActionType(int action) const noexcept {

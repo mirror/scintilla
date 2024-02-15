@@ -363,12 +363,12 @@ int Document::UndoSavePoint() const noexcept {
 	return cb.UndoSavePoint();
 }
 
-void Document::SetUndoCurrent(int action) {
-	cb.SetUndoCurrent(action);
+void Document::SetUndoDetach(int action) noexcept {
+	cb.SetUndoDetach(action);
 }
 
-int Document::UndoCurrent() const noexcept {
-	return cb.UndoCurrent();
+int Document::UndoDetach() const noexcept {
+	return cb.UndoDetach();
 }
 
 void Document::SetUndoTentative(int action) noexcept {
@@ -377,6 +377,14 @@ void Document::SetUndoTentative(int action) noexcept {
 
 int Document::UndoTentative() const noexcept {
 	return cb.UndoTentative();
+}
+
+void Document::SetUndoCurrent(int action) {
+	cb.SetUndoCurrent(action);
+}
+
+int Document::UndoCurrent() const noexcept {
+	return cb.UndoCurrent();
 }
 
 int Document::UndoActionType(int action) const noexcept {

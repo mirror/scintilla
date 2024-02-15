@@ -248,10 +248,12 @@ public:
 	int UndoActions();
 	void SetUndoSavePoint(int action);
 	int UndoSavePoint();
-	void SetUndoCurrent(int action);
-	int UndoCurrent();
+	void SetUndoDetach(int action);
+	int UndoDetach();
 	void SetUndoTentative(int action);
 	int UndoTentative();
+	void SetUndoCurrent(int action);
+	int UndoCurrent();
 	void PushUndoActionType(int type, Position pos);
 	void ChangeLastUndoActionText(Position length, const char *text);
 	int UndoActionType(int action);

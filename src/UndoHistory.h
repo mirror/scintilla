@@ -110,6 +110,10 @@ public:
 	bool BeforeOrAtSavePoint() const noexcept;
 	bool BeforeReachableSavePoint() const noexcept;
 	bool AfterSavePoint() const noexcept;
+
+	/// The detach point is the last action that was before an inaccessible missing save point.
+	void SetDetachPoint(int action) noexcept;
+	[[nodiscard]] int DetachPoint() const noexcept;
 	bool AfterDetachPoint() const noexcept;
 	bool AfterOrAtDetachPoint() const noexcept;
 

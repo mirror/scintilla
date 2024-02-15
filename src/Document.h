@@ -409,10 +409,12 @@ public:
 	int UndoActions() const noexcept;
 	void SetUndoSavePoint(int action) noexcept;
 	int UndoSavePoint() const noexcept;
-	void SetUndoCurrent(int action);
-	int UndoCurrent() const noexcept;
+	void SetUndoDetach(int action) noexcept;
+	int UndoDetach() const noexcept;
 	void SetUndoTentative(int action) noexcept;
 	int UndoTentative() const noexcept;
+	void SetUndoCurrent(int action);
+	int UndoCurrent() const noexcept;
 	int UndoActionType(int action) const noexcept;
 	Sci::Position UndoActionPosition(int action) const noexcept;
 	std::string_view UndoActionText(int action) const noexcept;

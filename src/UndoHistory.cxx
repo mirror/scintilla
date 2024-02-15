@@ -395,6 +395,18 @@ bool UndoHistory::AfterSavePoint() const noexcept {
 	return (savePoint >= 0) && (savePoint <= currentAction);
 }
 
+void UndoHistory::SetDetachPoint(int action) noexcept {
+	if (action == -1) {
+		detach = {};
+	} else {
+		detach = action;
+	}
+}
+
+int UndoHistory::DetachPoint() const noexcept {
+	return detach.value_or(-1);
+}
+
 bool UndoHistory::AfterDetachPoint() const noexcept {
 	return detach && (*detach < currentAction);
 }

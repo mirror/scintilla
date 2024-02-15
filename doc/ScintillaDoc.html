@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 19 December 2023 NH</p>
+    <p>Last edited 16 February 2024 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -1995,11 +1995,23 @@ struct Sci_TextToFindFull {
     <h2 id="UndoSaveRestore">Undo Save and Restore</h2>
 
     <p>This feature is unfinished and has limitations.
-    Restoring undo state is not compatible with change history so turn change history off before restoral.
+    Restoring change history alongside undo state is unfinished so turn change history off before restoral.
     The operation sequences discussed here are a 'golden path' that has been tested to some extent and calling
-    the APIs in other circumstances or with out-of-bounds values may cause failures.
-    The behaviour of tentative actions in save and restore is uncertain as these are meant to be short-term states in language input
-    and which need to synchronize with a language IME (input method editor).</p>
+    the APIs in other circumstances or with out-of-bounds values may cause failures.</p>
+
+    <p>The behaviour of tentative actions in save and restore is uncertain as these are meant to be short-term states in language input
+    and which need to synchronize with a language IME (input method editor).
+    For now, restore the tentative point to -1 as it seems safest to regard the tentative change as committed.</p>
+
+    <p>Scintilla stores each change in an undo stack.
+    Various inter-action points play roles in undo behaviour: actions count, save point, detach point,
+    tentative point, and current action. Just like positions in documents, these points are between actions in the 
+    undo stack. Thus the current action specifies the number of actions that led to the current document state and
+    actions after this are for redo.
+    The save point specifies that the actions before this point are in the most recent save and actions after this are not yet saved.</p>
+    <p>When the user undoes from a save point and then performs a new change, the save point can no longer be reached and is -1.
+    The detach point is the point at which the undo stack branched away from the saved state and is used by
+    change history.</p>
 
     <p>It is possible to retrieve the undo stack from Scintilla and subsequently restore the state of the stack.</p>
 
@@ -2012,10 +2024,12 @@ struct Sci_TextToFindFull {
     <code><a class="message" href="#SCI_GETUNDOACTIONS">SCI_GETUNDOACTIONS &rarr; int</a><br />
      <a class="message" href="#SCI_SETUNDOSAVEPOINT">SCI_SETUNDOSAVEPOINT(int action)</a><br />
      <a class="message" href="#SCI_GETUNDOSAVEPOINT">SCI_GETUNDOSAVEPOINT &rarr; int</a><br />
-     <a class="message" href="#SCI_SETUNDOCURRENT">SCI_SETUNDOCURRENT(int action)</a><br />
-     <a class="message" href="#SCI_GETUNDOCURRENT">SCI_GETUNDOCURRENT &rarr; int</a><br />
+     <a class="message" href="#SCI_SETUNDODETACH">SCI_SETUNDODETACH(int action)</a><br />
+     <a class="message" href="#SCI_GETUNDODETACH">SCI_GETUNDODETACH &rarr; int</a><br />
      <a class="message" href="#SCI_SETUNDOTENTATIVE">SCI_SETUNDOTENTATIVE(int action)</a><br />
      <a class="message" href="#SCI_GETUNDOTENTATIVE">SCI_GETUNDOTENTATIVE &rarr; int</a><br />
+     <a class="message" href="#SCI_SETUNDOCURRENT">SCI_SETUNDOCURRENT(int action)</a><br />
+     <a class="message" href="#SCI_GETUNDOCURRENT">SCI_GETUNDOCURRENT &rarr; int</a><br />
      <a class="message" href="#SCI_PUSHUNDOACTIONTYPE">SCI_PUSHUNDOACTIONTYPE(int type, position pos)</a><br />
      <a class="message" href="#SCI_CHANGELASTUNDOACTIONTEXT">SCI_CHANGELASTUNDOACTIONTEXT(position length, const char *text)</a><br />
      <a class="message" href="#SCI_GETUNDOACTIONTYPE">SCI_GETUNDOACTIONTYPE(int action) &rarr; int</a><br />
@@ -2028,16 +2042,18 @@ struct Sci_TextToFindFull {
     <p>The retrieval APIs are the 'GET*' ones:
     <code>SCI_GETUNDOACTIONS</code>,
     <code>SCI_GETUNDOSAVEPOINT</code>,
-    <code>SCI_GETUNDOCURRENT</code>,
+    <code>SCI_GETUNDODETACH</code>,
     <code>SCI_GETUNDOTENTATIVE</code>,
+    <code>SCI_GETUNDOCURRENT</code>,
     <code>SCI_GETUNDOACTIONTYPE</code>,
     <code>SCI_GETUNDOACTIONPOSITION</code>, and
     <code>SCI_GETUNDOACTIONTEXT</code>.
     </p>
 
     <p>The <code>SCI_GETUNDOACTIONS</code>,
-    <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_GETUNDOCURRENT</code>, and
-    <code>SCI_GETUNDOTENTATIVE</code> APIs each return a single value and may be called in any order.
+    <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_GETUNDODETACH</code>,
+    <code>SCI_GETUNDOTENTATIVE</code>, and <code>SCI_GETUNDOCURRENT</code>
+     APIs each return a single value and may be called in any order.
     </p>
 
     <p>The <code>SCI_GETUNDOACTIONTYPE</code>,
@@ -2056,15 +2072,16 @@ struct Sci_TextToFindFull {
 
     <p>The restore APIs are the 'SET*' and others:
     <code>SCI_SETUNDOSAVEPOINT</code>,
-    <code>SCI_SETUNDOCURRENT</code>,
+    <code>SCI_SETUNDODETACH</code>,
     <code>SCI_SETUNDOTENTATIVE</code>,
+    <code>SCI_SETUNDOCURRENT</code>,
     <code>SCI_PUSHUNDOACTIONTYPE</code>, and
     <code>SCI_CHANGELASTUNDOACTIONTEXT</code>.
     </p>
 
-    <p>The history should first be set up with <code>SCI_PUSHUNDOACTIONTYPE</code>, and
-    <code>SCI_CHANGELASTUNDOACTIONTEXT</code> then the save, current, and tentative points set
-    with <code>SCI_SETUNDOSAVEPOINT</code>, <code>SCI_SETUNDOTENTATIVE</code>, and
+    <p>The history should first be set up with <code>SCI_PUSHUNDOACTIONTYPE</code> and
+    <code>SCI_CHANGELASTUNDOACTIONTEXT</code> then the save, detach, tentative, and current points set
+    with <code>SCI_SETUNDOSAVEPOINT</code>, <code>SCI_SETUNDODETACH</code>, <code>SCI_SETUNDOTENTATIVE</code>, and
     <code>SCI_SETUNDOCURRENT</code>.
     </p>
 
@@ -2076,7 +2093,7 @@ struct Sci_TextToFindFull {
     <p>
     The last restoration API called should be <code>SCI_SETUNDOCURRENT</code> as this validates
     the restored history and values against the document. For example, an undo history that could cause a negative
-    document length or inserting / removing text outside the document is invalid.
+    document length or insert / remove text outside the document is invalid.
     If the restored undo state is invalid then a failure status is set and the undo history cleared.
     Check for failure with <a class="seealso" href="#SCI_GETSTATUS">SCI_GETSTATUS</a>.
     </p>

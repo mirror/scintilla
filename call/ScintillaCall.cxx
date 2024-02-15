@@ -811,12 +811,12 @@ int ScintillaCall::UndoSavePoint() {
 	return static_cast<int>(Call(Message::GetUndoSavePoint));
 }
 
-void ScintillaCall::SetUndoCurrent(int action) {
-	Call(Message::SetUndoCurrent, action);
+void ScintillaCall::SetUndoDetach(int action) {
+	Call(Message::SetUndoDetach, action);
 }
 
-int ScintillaCall::UndoCurrent() {
-	return static_cast<int>(Call(Message::GetUndoCurrent));
+int ScintillaCall::UndoDetach() {
+	return static_cast<int>(Call(Message::GetUndoDetach));
 }
 
 void ScintillaCall::SetUndoTentative(int action) {
@@ -825,6 +825,14 @@ void ScintillaCall::SetUndoTentative(int action) {
 
 int ScintillaCall::UndoTentative() {
 	return static_cast<int>(Call(Message::GetUndoTentative));
+}
+
+void ScintillaCall::SetUndoCurrent(int action) {
+	Call(Message::SetUndoCurrent, action);
+}
+
+int ScintillaCall::UndoCurrent() {
+	return static_cast<int>(Call(Message::GetUndoCurrent));
 }
 
 void ScintillaCall::PushUndoActionType(int type, Position pos) {
