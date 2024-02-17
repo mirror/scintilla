@@ -474,6 +474,10 @@ Sci::Position UndoHistory::Position(int action) const noexcept {
 	return actions.positions.SignedValueAt(action);
 }
 
+Sci::Position UndoHistory::Length(int action) const noexcept {
+	return actions.lengths.SignedValueAt(action);
+}
+
 std::string_view UndoHistory::Text(int action) noexcept {
 	// Assumes first call after any changes is for action 0.
 	// TODO: may need to invalidate memory in other circumstances

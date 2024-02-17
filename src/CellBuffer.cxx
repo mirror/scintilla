@@ -1178,6 +1178,64 @@ int CellBuffer::UndoTentative() const noexcept {
 
 void CellBuffer::SetUndoCurrent(int action) {
 	uh->SetCurrent(action, Length());
+	if (changeHistory) {
+		const intptr_t sizeChange = uh->Delta(action);
+		const intptr_t lengthOriginal = Length() - sizeChange;
+		// Recreate empty change history
+		changeHistory = std::make_unique<ChangeHistory>(lengthOriginal);
+
+		// Replay all undo undo actions into changeHistory
+		const int savePoint = uh->SavePoint();
+		const int detachPoint = uh->DetachPoint();
+		const int currentPoint = uh->Current();
+		for (int act = 0; act < uh->Actions(); act++) {
+			const ActionType type = static_cast<ActionType>(uh->Type(act) & ~coalesceFlag);
+			const Sci::Position position = uh->Position(act);
+			const Sci::Position length = uh->Length(act);
+			const bool beforeSave = act < savePoint;
+			const bool afterDetach = (detachPoint >= 0) && (detachPoint < act);
+			switch (type) {
+			case ActionType::insert:
+				changeHistory->Insert(position, length, true, beforeSave);
+				break;
+			case ActionType::remove:
+				changeHistory->DeleteRangeSavingHistory(position, length, beforeSave, afterDetach);
+				break;
+			default:
+				// Only insertions and deletions go into change history
+				break;
+			}
+			changeHistory->Check();
+		}
+		// Undo back to currentPoint, updating change history
+		for (int act = uh->Actions()-1; act >= currentPoint; act--) {
+			const ActionType type = static_cast<ActionType>(uh->Type(act) & ~coalesceFlag);
+			const Sci::Position position = uh->Position(act);
+			const Sci::Position length = uh->Length(act);
+			const bool beforeOrAtSavePoint = (savePoint < 0) || (savePoint >= act);
+			const bool afterDetach = (detachPoint >= 0) && (detachPoint < act);
+			if (beforeOrAtSavePoint) {
+				changeHistory->StartReversion();
+			}
+			switch (type) {
+			case ActionType::insert:
+				changeHistory->DeleteRange(position, length, beforeOrAtSavePoint && !afterDetach);
+				break;
+			case ActionType::remove:
+				changeHistory->UndoDeleteStep(position, length, afterDetach);
+				break;
+			default:
+				// Only insertions and deletions go into change history
+				break;
+			}
+			changeHistory->Check();
+		}
+		if (Length() != changeHistory->Length()) {
+			uh->DeleteUndoHistory();
+			changeHistory.reset();
+			throw std::runtime_error("UndoHistory::SetCurrent: invalid undo history.");
+		}
+	}
 }
 
 int CellBuffer::UndoCurrent() const noexcept {

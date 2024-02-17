@@ -123,6 +123,7 @@ public:
 	[[nodiscard]] int Current() const noexcept;
 	[[nodiscard]] int Type(int action) const noexcept;
 	[[nodiscard]] Sci::Position Position(int action) const noexcept;
+	[[nodiscard]] Sci::Position Length(int action) const noexcept;
 	[[nodiscard]] std::string_view Text(int action) noexcept;
 	void PushUndoActionType(int type, Sci::Position position);
 	void ChangeLastUndoActionText(size_t length, const char *text);
