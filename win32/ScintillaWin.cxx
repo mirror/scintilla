@@ -1520,19 +1520,21 @@ Window::Cursor ScintillaWin::ContextCursor(Point pt) {
 }
 
 sptr_t ScintillaWin::ShowContextMenu(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
-	Point pt = PointFromLParam(lParam);
-	POINT rpt = POINTFromPoint(pt);
-	::ScreenToClient(MainHWND(), &rpt);
-	const Point ptClient = PointFromPOINT(rpt);
+	Point ptScreen = PointFromLParam(lParam);
+	Point ptClient;
+	POINT point = POINTFromLParam(lParam);
+	if ((point.x == -1) && (point.y == -1)) {
+		// Caused by keyboard so display menu near caret
+		ptClient = PointMainCaret();
+		point = POINTFromPoint(ptClient);
+		::ClientToScreen(MainHWND(), &point);
+		ptScreen = PointFromPOINT(point);
+	} else {
+		::ScreenToClient(MainHWND(), &point);
+		ptClient = PointFromPOINT(point);
+	}
 	if (ShouldDisplayPopup(ptClient)) {
-		if ((pt.x == -1) && (pt.y == -1)) {
-			// Caused by keyboard so display menu near caret
-			pt = PointMainCaret();
-			POINT spt = POINTFromPoint(pt);
-			::ClientToScreen(MainHWND(), &spt);
-			pt = PointFromPOINT(spt);
-		}
-		ContextMenu(pt);
+		ContextMenu(ptScreen);
 		return 0;
 	}
 	return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
