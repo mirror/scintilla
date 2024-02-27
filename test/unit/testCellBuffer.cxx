@@ -41,7 +41,9 @@ TEST_CASE("ScrapStack") {
 	ScrapStack ss;
 
 	SECTION("Push") {
-		ss.Push("abc", 3);
+		const char *t = ss.Push("abc", 3);
+		REQUIRE(memcmp(t, "abc", 3) == 0);
+
 		ss.MoveBack(3);
 		const char *text = ss.CurrentText();
 		REQUIRE(memcmp(text, "abc", 3) == 0);
@@ -50,8 +52,16 @@ TEST_CASE("ScrapStack") {
 		const char *text2 = ss.CurrentText();
 		REQUIRE(memcmp(text2, "bc", 2) == 0);
 
-		const char *text3 = ss.TextAt(2);
-		REQUIRE(memcmp(text3, "c", 1) == 0);
+		ss.SetCurrent(1);
+		const char *text3 = ss.CurrentText();
+		REQUIRE(memcmp(text3, "bc", 2) == 0);
+
+		const char *text4 = ss.TextAt(2);
+		REQUIRE(memcmp(text4, "c", 1) == 0);
+
+		ss.Clear();
+		const char *text5 = ss.Push("1", 1);
+		REQUIRE(memcmp(text5, "1", 1) == 0);
 	}
 }
 
@@ -258,7 +268,7 @@ bool EqualContainerAction(const Action &a, Sci::Position token) noexcept {
 	return true;
 }
 
-void TentativeUndo(UndoHistory &uh) {
+void TentativeUndo(UndoHistory &uh) noexcept {
 	const int steps = uh.TentativeSteps();
 	for (int step = 0; step < steps; step++) {
 		/* const Action &actionStep = */ uh.GetUndoStep();
@@ -270,7 +280,7 @@ void TentativeUndo(UndoHistory &uh) {
 TEST_CASE("ScaledVector") {
 
 	ScaledVector sv;
-
+	
 	SECTION("ScalingUp") {
 		sv.ReSize(1);
 		REQUIRE(sv.SizeInBytes() == 1);
@@ -311,9 +321,18 @@ TEST_CASE("ScaledVector") {
 		sv.ReSize(2);
 		REQUIRE(sv.SizeInBytes() == 6);
 		// Truncate
-		sv.ReSize(1);
+		sv.Truncate(1);
 		REQUIRE(sv.SizeInBytes() == 3);
 		REQUIRE(sv.ValueAt(0) == 0xd4381);
+
+		sv.Clear();
+		REQUIRE(sv.Size() == 0);
+		sv.PushBack();
+		REQUIRE(sv.Size() == 1);
+		REQUIRE(sv.SizeInBytes() == 3);
+		sv.SetValueAt(0, 0x1fd4381);
+		REQUIRE(sv.SizeInBytes() == 4);
+		REQUIRE(sv.ValueAt(0) == 0x1fd4381);
 	}
 }
 
@@ -599,6 +618,30 @@ TEST_CASE("UndoHistory") {
 		REQUIRE(uh.CanUndo());
 	}
 }
+
+TEST_CASE("UndoActions") {
+
+	UndoActions ua;
+
+	SECTION("Basics") {
+		ua.PushBack();
+		REQUIRE(ua.SSize() == 1);
+		ua.Create(0, ActionType::insert, 0, 2, false);
+		REQUIRE(ua.AtStart(0));
+		REQUIRE(ua.LengthTo(0) == 0);
+		REQUIRE(ua.AtStart(1));
+		REQUIRE(ua.LengthTo(1) == 2);
+		ua.PushBack();
+		REQUIRE(ua.SSize() == 2);
+		ua.Create(0, ActionType::insert, 0, 2, false);
+		REQUIRE(ua.SSize() == 2);
+		ua.Truncate(1);
+		REQUIRE(ua.SSize() == 1);
+		ua.Clear();
+		REQUIRE(ua.SSize() == 0);
+	}
+}
+
 
 TEST_CASE("CharacterIndex") {
 
@@ -1083,20 +1126,20 @@ TEST_CASE("ChangeHistory") {
 
 	SECTION("Delete Contiguous Backward") {
 		// Deletes that touch
-		constexpr size_t length = 20;
-		constexpr size_t rounds = 8;
+		constexpr Sci::Position length = 20;
+		constexpr Sci::Position rounds = 8;
 		il.Insert(0, length, false, true);
 		REQUIRE(il.Length() == length);
 		il.SetSavePoint();
-		for (size_t i = 0; i < rounds; i++) {
+		for (Sci::Position i = 0; i < rounds; i++) {
 			il.DeleteRangeSavingHistory(9-i, 1, false, false);
 		}
 
-		constexpr size_t lengthAfterDeletions = length - rounds;
+		constexpr Sci::Position lengthAfterDeletions = length - rounds;
 		REQUIRE(il.Length() == lengthAfterDeletions);
 		REQUIRE(il.DeletionCount(0, lengthAfterDeletions) == rounds);
 
-		for (size_t j = 0; j < rounds; j++) {
+		for (Sci::Position j = 0; j < rounds; j++) {
 			il.UndoDeleteStep(2+j, 1, false);
 		}
 
@@ -1450,6 +1493,80 @@ TEST_CASE("CellBufferWithChangeHistory") {
 
 namespace {
 
+void PushUndoAction(CellBuffer &cb, int type, Sci::Position pos, std::string_view sv) {
+	cb.PushUndoActionType(type, pos);
+	cb.ChangeLastUndoActionText(sv.length(), sv.data());
+}
+
+}
+
+TEST_CASE("CellBufferLoadUndoHistory") {
+
+	CellBuffer cb(false, false);
+	constexpr int remove = 1;
+	constexpr int insert = 0;
+
+	SECTION("Basics") {
+		cb.SetUndoCollection(false);
+		constexpr std::string_view sInsert = "abcdef";
+		bool startSequence = false;
+		cb.InsertString(0, sInsert.data(), sInsert.length(), startSequence);
+		cb.SetUndoCollection(true);
+		cb.ChangeHistorySet(true);
+
+		// Create an undo history that matches the contents at current point 2
+		// So, 2 actions; current point; 2 actions
+		// a_cdef
+		PushUndoAction(cb, remove, 1, "_");
+		// acdef
+		PushUndoAction(cb, insert, 1, "b");
+		// abcdef -> current
+		PushUndoAction(cb, remove, 3, "d");
+		// abcef -> save
+		PushUndoAction(cb, insert, 3, "*");
+		// abc*ef
+		cb.SetUndoSavePoint(3);
+		cb.SetUndoDetach(-1);
+		cb.SetUndoTentative(-1);
+		cb.SetUndoCurrent(2);
+
+		// 2nd insertion is removed from change history as it isn't visible and isn't saved
+		// 2nd deletion is visible (as insertion) as it was saved but then reverted to original
+		// 1st insertion and 1st deletion are both visible as saved
+		const History hist{ {{1, 1, changeSaved}, {3, 1, changeRevertedOriginal}}, {{2, changeSaved}} };
+		REQUIRE(HistoryOf(cb) == hist);
+	}
+
+	SECTION("Detached") {
+		cb.SetUndoCollection(false);
+		constexpr std::string_view sInsert = "a-b=cdef";
+		bool startSequence = false;
+		cb.InsertString(0, sInsert.data(), sInsert.length(), startSequence);
+		cb.SetUndoCollection(true);
+		cb.ChangeHistorySet(true);
+
+		// Create an undo history that matches the contents at current point 2 which detached at 1
+		// So, insert saved; insert detached; current point
+		// abcdef
+		PushUndoAction(cb, insert, 1, "-");
+		// a-bcdef
+		PushUndoAction(cb, insert, 3, "=");
+		// a-b=cdef
+		cb.SetUndoSavePoint(-1);
+		cb.SetUndoDetach(1);
+		cb.SetUndoTentative(-1);
+		cb.SetUndoCurrent(2);
+
+		// This doesn't show elements due to undo.
+		// There was also a modified delete (reverting the insert) at 3 in the original but that is missing.
+		const History hist{ {{1, 1, changeSaved}, {3, 1, changeModified}}, {} };
+		REQUIRE(HistoryOf(cb) == hist);
+	}
+
+}
+
+namespace {
+
 // Implement low quality reproducible pseudo-random numbers.
 // Pseudo-random algorithm based on R. G. Dromey "How to Solve it by Computer" page 122.
 
@@ -1480,7 +1597,7 @@ TEST_CASE("CellBufferLong") {
 			const int r = rseq.Next() % 10;
 			if (r <= 2) {			// 30%
 				// Insert text
-				const int pos = rseq.Next() % (cb.Length() + 1);
+				const Sci::Position pos = rseq.Next() % (cb.Length() + 1);
 				const int len = rseq.Next() % 10 + 1;
 				std::string sInsert;
 				for (int j = 0; j < len; j++) {

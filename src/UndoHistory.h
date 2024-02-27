@@ -80,7 +80,7 @@ class UndoHistory {
 	int undoSequenceDepth = 0;
 	int savePoint = 0;
 	int tentativePoint = -1;
-	std::optional<int> detach;
+	std::optional<int> detach;	// Never set if savePoint set (>= 0)
 	std::unique_ptr<ScrapStack> scraps;
 	struct actPos { int act; size_t position; };
 	std::optional<actPos> memory;
@@ -107,7 +107,7 @@ public:
 	void SetSavePoint() noexcept;
 	bool IsSavePoint() const noexcept;
 	bool BeforeSavePoint() const noexcept;
-	bool BeforeOrAtSavePoint() const noexcept;
+	bool PreviousBeforeSavePoint() const noexcept;
 	bool BeforeReachableSavePoint() const noexcept;
 	bool AfterSavePoint() const noexcept;
 
@@ -139,11 +139,11 @@ public:
 	/// To perform an undo, StartUndo is called to retrieve the number of steps, then UndoStep is
 	/// called that many times. Similarly for redo.
 	bool CanUndo() const noexcept;
-	int StartUndo() noexcept;
+	int StartUndo() const noexcept;
 	Action GetUndoStep() const noexcept;
 	void CompletedUndoStep() noexcept;
 	bool CanRedo() const noexcept;
-	int StartRedo() noexcept;
+	int StartRedo() const noexcept;
 	Action GetRedoStep() const noexcept;
 	void CompletedRedoStep() noexcept;
 };

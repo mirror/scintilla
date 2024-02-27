@@ -383,12 +383,12 @@ bool UndoHistory::BeforeSavePoint() const noexcept {
 	return (savePoint < 0) || (savePoint > currentAction);
 }
 
-bool UndoHistory::BeforeOrAtSavePoint() const noexcept {
+bool UndoHistory::PreviousBeforeSavePoint() const noexcept {
 	return (savePoint < 0) || (savePoint >= currentAction);
 }
 
 bool UndoHistory::BeforeReachableSavePoint() const noexcept {
-	return (savePoint > 0) && !detach && (savePoint > currentAction);
+	return (savePoint > 0) && (savePoint > currentAction);
 }
 
 bool UndoHistory::AfterSavePoint() const noexcept {
@@ -544,7 +544,7 @@ bool UndoHistory::CanUndo() const noexcept {
 	return (currentAction > 0) && (actions.SSize() != 0);
 }
 
-int UndoHistory::StartUndo() noexcept {
+int UndoHistory::StartUndo() const noexcept {
 	assert(currentAction >= 0);
 
 	// Count the steps in this action
@@ -584,7 +584,7 @@ bool UndoHistory::CanRedo() const noexcept {
 	return actions.SSize() > currentAction;
 }
 
-int UndoHistory::StartRedo() noexcept {
+int UndoHistory::StartRedo() const noexcept {
 	// Count the steps in this action
 
 	if (currentAction >= actions.SSize()) {

@@ -1995,9 +1995,11 @@ struct Sci_TextToFindFull {
     <h2 id="UndoSaveRestore">Undo Save and Restore</h2>
 
     <p>This feature is unfinished and has limitations.
-    Restoring change history alongside undo state is unfinished so turn change history off before restoral.
+    When change history is active, it may show different changes than the previous session as undo actions
+    performed in that session are discarded in some circumstances such as when detaching from a save point.
+    A future version may add an API for archiving change history alongside undo history.
     The operation sequences discussed here are a 'golden path' that has been tested to some extent and calling
-    the APIs in other circumstances or with out-of-bounds values may cause failures.</p>
+    the APIs in other circumstances or with out-of-bounds values may fail.</p>
 
     <p>The behaviour of tentative actions in save and restore is uncertain as these are meant to be short-term states in language input
     and which need to synchronize with a language IME (input method editor).
@@ -2098,7 +2100,7 @@ struct Sci_TextToFindFull {
     Check for failure with <a class="seealso" href="#SCI_GETSTATUS">SCI_GETSTATUS</a>.
     </p>
 
-    <p>The current implementation may only work when the current and save point are the same and there is no tentative point.
+    <p>The current implementation may only work when there is no tentative point.
     </p>
 
     <h2 id="ChangeHistory">Change history</h2>
