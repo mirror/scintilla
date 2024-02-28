@@ -15,9 +15,13 @@ namespace Scintilla::Internal {
 // only use 2 bytes or even 1 byte for each length.
 // This saves much memory often reducing by 50% for 32-bit builds and 75% for 64-bit builds.
 
+struct SizeMax {
+	size_t size = 1;
+	size_t maxValue = UINT8_MAX;
+};
+
 class ScaledVector {
-	size_t elementSize = 1;
-	size_t elementMax = 255;
+	SizeMax element;
 	std::vector<uint8_t> bytes;
 public:
 	[[nodiscard]] size_t Size() const noexcept;
