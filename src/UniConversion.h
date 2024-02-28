@@ -59,8 +59,9 @@ constexpr bool UTF8IsAscii(char ch) noexcept {
 
 enum { UTF8MaskWidth=0x7, UTF8MaskInvalid=0x8 };
 int UTF8Classify(const unsigned char *us, size_t len) noexcept;
+int UTF8Classify(const char *s, size_t len) noexcept;
 inline int UTF8Classify(std::string_view sv) noexcept {
-	return UTF8Classify(reinterpret_cast<const unsigned char *>(sv.data()), sv.length());
+	return UTF8Classify(sv.data(), sv.length());
 }
 
 // Similar to UTF8Classify but returns a length of 1 for invalid bytes
@@ -70,13 +71,13 @@ int UTF8DrawBytes(const char *s, size_t len) noexcept;
 // Line separator is U+2028 \xe2\x80\xa8
 // Paragraph separator is U+2029 \xe2\x80\xa9
 constexpr int UTF8SeparatorLength = 3;
-inline bool UTF8IsSeparator(const unsigned char *us) noexcept {
+constexpr bool UTF8IsSeparator(const unsigned char *us) noexcept {
 	return (us[0] == 0xe2) && (us[1] == 0x80) && ((us[2] == 0xa8) || (us[2] == 0xa9));
 }
 
 // NEL is U+0085 \xc2\x85
 constexpr int UTF8NELLength = 2;
-inline bool UTF8IsNEL(const unsigned char *us) noexcept {
+constexpr bool UTF8IsNEL(const unsigned char *us) noexcept {
 	return (us[0] == 0xc2) && (us[1] == 0x85);
 }
 

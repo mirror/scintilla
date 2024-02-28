@@ -2235,7 +2235,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 						for (int b = 1; b < widthCharBytes; b++) {
 							bytes[b] = cbView.CharAt(posIndexDocument + b);
 						}
-						widthChar = UTF8Classify(reinterpret_cast<const unsigned char *>(bytes), widthCharBytes) & UTF8MaskWidth;
+						widthChar = UTF8Classify(bytes, widthCharBytes) & UTF8MaskWidth;
 						if (!indexSearch) {	// First character
 							widthFirstCharacter = widthChar;
 						}
