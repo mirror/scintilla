@@ -598,6 +598,12 @@
 	Add APIs for saving and restoring undo history.
 	</li>
 	<li>
+	For GTK, when laying out text, detect runs with both left-to-right and right-to-left ranges and divide into an ASCII prefix and
+	more complex suffix. Lay out the ASCII prefix in the standard manner but, for the suffix, measure the whole width
+	and spread that over the suffix bytes. This produces more usable results where the caret moves over the ASCII prefix correctly
+	and over the suffix reasonably but not accurately.
+	</li>
+	<li>
 	For ScintillaEdit on Qt, fix reference from ScintillaDocument to Document to match change in 5.4.1
 	using IDocumentEditable for SCI_GETDOCPOINTER and SCI_SETDOCPOINTER.
 	</li>
