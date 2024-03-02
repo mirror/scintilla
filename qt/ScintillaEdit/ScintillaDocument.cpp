@@ -153,8 +153,8 @@ bool ScintillaDocument::is_collecting_undo() {
     return (static_cast<Document *>(pdoc))->IsCollectingUndo();
 }
 
-void ScintillaDocument::begin_undo_action() {
-    (static_cast<Document *>(pdoc))->BeginUndoAction();
+void ScintillaDocument::begin_undo_action(bool coalesceWithPrior) {
+    (static_cast<Document *>(pdoc))->BeginUndoAction(coalesceWithPrior);
 }
 
 void ScintillaDocument::end_undo_action() {

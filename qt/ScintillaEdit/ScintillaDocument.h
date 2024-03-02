@@ -50,7 +50,7 @@ public:
     void delete_undo_history();
     bool set_undo_collection(bool collect_undo);
     bool is_collecting_undo();
-    void begin_undo_action();
+    void begin_undo_action(bool coalesceWithPrior = false);
     void end_undo_action();
     void set_save_point();
     bool is_save_point();

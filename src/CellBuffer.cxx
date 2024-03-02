@@ -1062,8 +1062,8 @@ bool CellBuffer::IsCollectingUndo() const noexcept {
 	return collectingUndo;
 }
 
-void CellBuffer::BeginUndoAction() noexcept {
-	uh->BeginUndoAction();
+void CellBuffer::BeginUndoAction(bool mayCoalesce) noexcept {
+	uh->BeginUndoAction(mayCoalesce);
 }
 
 void CellBuffer::EndUndoAction() noexcept {

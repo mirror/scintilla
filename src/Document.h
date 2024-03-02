@@ -395,7 +395,7 @@ public:
 		return cb.SetUndoCollection(collectUndo);
 	}
 	bool IsCollectingUndo() const noexcept { return cb.IsCollectingUndo(); }
-	void BeginUndoAction() noexcept { cb.BeginUndoAction(); }
+	void BeginUndoAction(bool coalesceWithPrior=false) noexcept { cb.BeginUndoAction(coalesceWithPrior); }
 	void EndUndoAction() noexcept { cb.EndUndoAction(); }
 	void AddUndoAction(Sci::Position token, bool mayCoalesce) { cb.AddUndoAction(token, mayCoalesce); }
 	void SetSavePoint();

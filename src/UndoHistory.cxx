@@ -322,10 +322,10 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 	return dataNew;
 }
 
-void UndoHistory::BeginUndoAction() noexcept {
+void UndoHistory::BeginUndoAction(bool mayCoalesce) noexcept {
 	if (undoSequenceDepth == 0) {
 		if (currentAction > 0) {
-			actions.types[PreviousAction()].mayCoalesce = false;
+			actions.types[PreviousAction()].mayCoalesce = mayCoalesce;
 		}
 	}
 	undoSequenceDepth++;

@@ -164,7 +164,7 @@ public:
 
 	bool SetUndoCollection(bool collectUndo) noexcept;
 	bool IsCollectingUndo() const noexcept;
-	void BeginUndoAction() noexcept;
+	void BeginUndoAction(bool mayCoalesce=false) noexcept;
 	void EndUndoAction() noexcept;
 	void AddUndoAction(Sci::Position token, bool mayCoalesce);
 	void DeleteUndoHistory() noexcept;
