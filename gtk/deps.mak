@@ -9,6 +9,7 @@ PlatGTK.o: \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../include/ScintillaWidget.h \
+	../src/CharacterType.h \
 	../src/XPM.h \
 	../src/UniConversion.h \
 	Wrappers.h \
