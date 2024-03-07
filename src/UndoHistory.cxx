@@ -44,7 +44,6 @@ void VectorTruncate(std::vector<T> &v, size_t length) noexcept {
 
 constexpr size_t byteMask = UINT8_MAX;
 constexpr size_t byteBits = 8;
-constexpr size_t maxElementSize = 8;
 
 size_t ReadValue(const uint8_t *bytes, size_t length) noexcept {
 	size_t value = 0;
@@ -75,13 +74,13 @@ intptr_t ScaledVector::SignedValueAt(size_t index) const noexcept {
 
 constexpr SizeMax ElementForValue(size_t value) noexcept {
 	size_t maxN = byteMask;
-	for (size_t i = 1; i < maxElementSize; i++) {
-		if (value <= maxN) {
-			return { i, maxN };
-		}
+	size_t i = 1;
+	while (value > byteMask) {
+		i++;
+		value >>= byteBits;
 		maxN = (maxN << byteBits) + byteMask;
 	}
-	return { 1, byteMask };
+	return { i, maxN };
 }
 
 void ScaledVector::SetValueAt(size_t index, size_t value) {
