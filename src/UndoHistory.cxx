@@ -102,7 +102,7 @@ void ScaledVector::SetValueAt(size_t index, size_t value) {
 }
 
 void ScaledVector::ClearValueAt(size_t index) noexcept {
-	// 0 fits in any size element so no expansion needed so no exceptions 
+	// 0 fits in any size element so no expansion needed so no exceptions
 	WriteValue(bytes.data() + index * element.size, element.size, 0);
 }
 
