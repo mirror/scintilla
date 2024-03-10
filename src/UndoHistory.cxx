@@ -54,8 +54,9 @@ size_t ReadValue(const uint8_t *bytes, size_t length) noexcept {
 }
 
 void WriteValue(uint8_t *bytes, size_t length, size_t value) noexcept {
-	for (size_t i = 0; i < length; i++) {
-		bytes[length - i - 1] = value & byteMask;
+	while (length != 0) {
+		--length;
+		bytes[length] = value & byteMask;
 		value = value >> byteBits;
 	}
 }
