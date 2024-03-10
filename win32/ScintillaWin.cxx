@@ -2528,10 +2528,11 @@ void ScintillaWin::NotifyDoubleClick(Point pt, KeyMod modifiers) {
 	//Platform::DebugPrintf("ScintillaWin Double click 0\n");
 	ScintillaBase::NotifyDoubleClick(pt, modifiers);
 	// Send myself a WM_LBUTTONDBLCLK, so the container can handle it too.
+	const POINT point = POINTFromPoint(pt);
 	::SendMessage(MainHWND(),
 			  WM_LBUTTONDBLCLK,
 			  FlagSet(modifiers, KeyMod::Shift) ? MK_SHIFT : 0,
-			  MAKELPARAM(pt.x, pt.y));
+			  MAKELPARAM(point.x, point.y));
 }
 
 namespace {
