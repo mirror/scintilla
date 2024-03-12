@@ -333,7 +333,7 @@ void ViewStyle::CalculateMarginWidthAndMask() noexcept {
 		maskDefinedMarkers |= m.mask;
 	}
 	maskDrawInText = 0;
-	for (int markBit = 0; markBit < 32; markBit++) {
+	for (int markBit = 0; markBit <= MarkerMax; markBit++) {
 		const int maskBit = 1U << markBit;
 		switch (markers[markBit].markType) {
 		case MarkerSymbol::Empty:
@@ -349,7 +349,7 @@ void ViewStyle::CalculateMarginWidthAndMask() noexcept {
 		}
 	}
 	maskDrawWrapped = 0;
-	for (int markBit = 0; markBit < 32; markBit++) {
+	for (int markBit = 0; markBit <= MarkerMax; markBit++) {
 		const int maskBit = 1U << markBit;
 		switch (markers[markBit].markType) {
 		case MarkerSymbol::Bar:
@@ -538,7 +538,7 @@ ColourOptional ViewStyle::Background(int marksOfLine, bool caretActive, bool lin
 	}
 	if (!background && marksOfLine) {
 		int marks = marksOfLine;
-		for (int markBit = 0; (markBit < 32) && marks; markBit++) {
+		for (int markBit = 0; (markBit <= MarkerMax) && marks; markBit++) {
 			if ((marks & 1) && (markers[markBit].markType == MarkerSymbol::Background) &&
 				(markers[markBit].layer == Layer::Base)) {
 				background = markers[markBit].back;
@@ -549,7 +549,7 @@ ColourOptional ViewStyle::Background(int marksOfLine, bool caretActive, bool lin
 	if (!background && maskInLine) {
 		int marksMasked = marksOfLine & maskInLine;
 		if (marksMasked) {
-			for (int markBit = 0; (markBit < 32) && marksMasked; markBit++) {
+			for (int markBit = 0; (markBit <= MarkerMax) && marksMasked; markBit++) {
 				if ((marksMasked & 1) &&
 					(markers[markBit].layer == Layer::Base)) {
 					background = markers[markBit].back;
