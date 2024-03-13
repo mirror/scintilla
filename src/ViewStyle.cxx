@@ -39,6 +39,17 @@
 using namespace Scintilla;
 using namespace Scintilla::Internal;
 
+namespace {
+
+// Colour component proportions of maximum 0xffU
+constexpr unsigned int light = 0xc0U;
+// The middle point of 0..0xff is between 0x7fU and 0x80U and both are used
+constexpr unsigned int mid = 0x80U;
+constexpr unsigned int half = 0x7fU;
+constexpr unsigned int quarter = 0x3fU;
+
+}
+
 MarginStyle::MarginStyle(MarginType style_, int width_, int mask_) noexcept :
 	style(style_), width(width_), mask(mask_), sensitive(false), cursor(CursorShape::ReverseArrow) {
 }
@@ -100,9 +111,9 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	// There are no image markers by default, so no need for calling CalcLargestMarkerHeight()
 	largestMarkerHeight = 0;
 
-	indicators[0] = Indicator(IndicatorStyle::Squiggle, ColourRGBA(0, 0x7f, 0));
-	indicators[1] = Indicator(IndicatorStyle::TT, ColourRGBA(0, 0, 0xff));
-	indicators[2] = Indicator(IndicatorStyle::Plain, ColourRGBA(0xff, 0, 0));
+	indicators[0] = Indicator(IndicatorStyle::Squiggle, ColourRGBA(0, half, 0));	// Green
+	indicators[1] = Indicator(IndicatorStyle::TT, ColourRGBA(0, 0, maximumByte));	// Blue
+	indicators[2] = Indicator(IndicatorStyle::Plain, ColourRGBA(maximumByte, 0, 0));	// Red
 
 	// Reverted to origin
 	constexpr ColourRGBA revertedToOrigin(0x40, 0xA0, 0xBF);
@@ -116,13 +127,16 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	// Edition indicators
 	constexpr size_t indexHistory = static_cast<size_t>(IndicatorNumbers::HistoryRevertedToOriginInsertion);
 
-	indicators[indexHistory+0] = Indicator(IndicatorStyle::CompositionThick, revertedToOrigin, false, 30, 60);
+	// Default indicators are moderately intense so they don't overwhelm text
+	constexpr int alphaFill = 30;
+	constexpr int alphaOutline = 50;
+	indicators[indexHistory+0] = Indicator(IndicatorStyle::CompositionThick, revertedToOrigin, false, alphaFill, alphaOutline);
 	indicators[indexHistory+1] = Indicator(IndicatorStyle::Point, revertedToOrigin);
-	indicators[indexHistory+2] = Indicator(IndicatorStyle::CompositionThick, saved, false, 30, 60);
+	indicators[indexHistory+2] = Indicator(IndicatorStyle::CompositionThick, saved, false, alphaFill, alphaOutline);
 	indicators[indexHistory+3] = Indicator(IndicatorStyle::Point, saved);
-	indicators[indexHistory+4] = Indicator(IndicatorStyle::CompositionThick, modified, false, 30, 60);
+	indicators[indexHistory+4] = Indicator(IndicatorStyle::CompositionThick, modified, false, alphaFill, alphaOutline);
 	indicators[indexHistory+5] = Indicator(IndicatorStyle::PointTop, modified);
-	indicators[indexHistory+6] = Indicator(IndicatorStyle::CompositionThick, revertedToChange, false, 30, 60);
+	indicators[indexHistory+6] = Indicator(IndicatorStyle::CompositionThick, revertedToChange, false, alphaFill, alphaOutline);
 	indicators[indexHistory+7] = Indicator(IndicatorStyle::Point, revertedToChange);
 
 	// Edition markers
@@ -164,10 +178,12 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	elementColours.erase(Element::SelectionSecondaryText);
 	elementColours.erase(Element::SelectionInactiveText);
 	// Shades of grey for selection backgrounds
-	elementBaseColours[Element::SelectionBack] = ColourRGBA(0xc0, 0xc0, 0xc0, 0xff);
-	elementBaseColours[Element::SelectionAdditionalBack] = ColourRGBA(0xd7, 0xd7, 0xd7, 0xff);
-	elementBaseColours[Element::SelectionSecondaryBack] = ColourRGBA(0xb0, 0xb0, 0xb0, 0xff);
-	elementBaseColours[Element::SelectionInactiveBack] = ColourRGBA(0x80, 0x80, 0x80, 0x3f);
+	elementBaseColours[Element::SelectionBack] = ColourRGBA::Grey(light);
+	constexpr unsigned int veryLight = 0xd7U;
+	elementBaseColours[Element::SelectionAdditionalBack] = ColourRGBA::Grey(veryLight);
+	constexpr unsigned int halfLight = 0xb0;
+	elementBaseColours[Element::SelectionSecondaryBack] = ColourRGBA::Grey(halfLight);
+	elementBaseColours[Element::SelectionInactiveBack] = ColourRGBA::Grey(mid, quarter);
 	elementAllowsTranslucent.insert({
 		Element::SelectionText,
 		Element::SelectionBack,
@@ -190,7 +206,7 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	styles[StyleLineNumber].back = Platform::Chrome();
 
 	elementBaseColours[Element::Caret] = black;
-	elementBaseColours[Element::CaretAdditional] = ColourRGBA(0x7f, 0x7f, 0x7f);
+	elementBaseColours[Element::CaretAdditional] = ColourRGBA::Grey(half);
 	elementAllowsTranslucent.insert({
 		Element::Caret,
 		Element::CaretAdditional,
@@ -238,7 +254,7 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	braceBadLightIndicator = 0;
 
 	edgeState = EdgeVisualStyle::None;
-	theEdge = EdgeProperties(0, ColourRGBA(0xc0, 0xc0, 0xc0));
+	theEdge = EdgeProperties(0, ColourRGBA::Grey(light));
 
 	marginNumberPadding = 3;
 	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
@@ -460,7 +476,7 @@ void ViewStyle::ClearStyles() {
 
 	// Set call tip fore/back to match the values previously set for call tips
 	styles[StyleCallTip].back = white;
-	styles[StyleCallTip].fore = ColourRGBA(0x80, 0x80, 0x80);
+	styles[StyleCallTip].fore = ColourRGBA::Grey(mid);
 }
 
 void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {
@@ -671,7 +687,7 @@ void ViewStyle::SetElementRGB(Element element, int rgb) {
 
 void ViewStyle::SetElementAlpha(Element element, int alpha) {
 	const ColourRGBA current = ElementColour(element).value_or(ColourRGBA(0, 0, 0, 0));
-	elementColours[element] = ColourRGBA(current, std::min(alpha, 0xff));
+	elementColours[element] = ColourRGBA(current, std::min<unsigned int>(alpha, maximumByte));
 }
 
 bool ViewStyle::ElementIsSet(Element element) const {
