@@ -602,13 +602,13 @@ void ViewStyle::AddMultiEdge(int column, ColourRGBA colour) {
 }
 
 ColourOptional ViewStyle::ElementColour(Element element) const {
-	ElementMap::const_iterator search = elementColours.find(element);
+	const ElementMap::const_iterator search = elementColours.find(element);
 	if (search != elementColours.end()) {
 		if (search->second.has_value()) {
 			return search->second;
 		}
 	}
-	ElementMap::const_iterator searchBase = elementBaseColours.find(element);
+	const ElementMap::const_iterator searchBase = elementBaseColours.find(element);
 	if (searchBase != elementBaseColours.end()) {
 		if (searchBase->second.has_value()) {
 			return searchBase->second;
@@ -630,19 +630,30 @@ bool ViewStyle::ElementAllowsTranslucent(Element element) const {
 }
 
 bool ViewStyle::ResetElement(Element element) {
-	ElementMap::const_iterator search = elementColours.find(element);
+	const ElementMap::const_iterator search = elementColours.find(element);
 	const bool changed = (search != elementColours.end()) && (search->second.has_value());
 	elementColours.erase(element);
 	return changed;
 }
 
-bool ViewStyle::SetElementColour(Element element, ColourRGBA colour) {
-	ElementMap::const_iterator search = elementColours.find(element);
-	const bool changed =
-		(search == elementColours.end()) ||
-		(search->second.has_value() && !(*search->second == colour));
-	elementColours[element] = colour;
+namespace {
+
+bool IsDifferentColour(const ColourOptional &colour, const ColourRGBA &test) noexcept {
+	return colour.has_value() && !(*colour == test);
+}
+
+bool SetElementMapColour(ViewStyle::ElementMap &elements, Element element, ColourRGBA colour) {
+	const ViewStyle::ElementMap::const_iterator search = elements.find(element);
+	const bool changed = (search == elements.end()) ||
+		IsDifferentColour(search->second, colour);
+	elements[element] = colour;
 	return changed;
+}
+
+}
+
+bool ViewStyle::SetElementColour(Element element, ColourRGBA colour) {
+	return SetElementMapColour(elementColours, element, colour);
 }
 
 bool ViewStyle::SetElementColourOptional(Element element, uptr_t wParam, sptr_t lParam) {
@@ -664,7 +675,7 @@ void ViewStyle::SetElementAlpha(Element element, int alpha) {
 }
 
 bool ViewStyle::ElementIsSet(Element element) const {
-	ElementMap::const_iterator search = elementColours.find(element);
+	const ElementMap::const_iterator search = elementColours.find(element);
 	if (search != elementColours.end()) {
 		return search->second.has_value();
 	}
@@ -672,12 +683,7 @@ bool ViewStyle::ElementIsSet(Element element) const {
 }
 
 bool ViewStyle::SetElementBase(Element element, ColourRGBA colour) {
-	ElementMap::const_iterator search = elementBaseColours.find(element);
-	const bool changed =
-		(search == elementBaseColours.end()) ||
-		(search->second.has_value() && !(*search->second == colour));
-	elementBaseColours[element] = colour;
-	return changed;
+	return SetElementMapColour(elementBaseColours, element, colour);
 }
 
 bool ViewStyle::SetWrapState(Wrap wrapState_) noexcept {
@@ -757,7 +763,7 @@ void ViewStyle::AllocStyles(size_t sizeNew) {
 
 void ViewStyle::CreateAndAddFont(const FontSpecification &fs) {
 	if (fs.fontName) {
-		FontMap::iterator it = fonts.find(fs);
+		const FontMap::iterator it = fonts.find(fs);
 		if (it == fonts.end()) {
 			fonts[fs] = std::make_unique<FontRealised>();
 		}
@@ -767,7 +773,7 @@ void ViewStyle::CreateAndAddFont(const FontSpecification &fs) {
 FontRealised *ViewStyle::Find(const FontSpecification &fs) {
 	if (!fs.fontName)	// Invalid specification so return arbitrary object
 		return fonts.begin()->second.get();
-	FontMap::iterator it = fonts.find(fs);
+	const FontMap::iterator it = fonts.find(fs);
 	if (it != fonts.end()) {
 		// Should always reach here since map was just set for all styles
 		return it->second.get();
