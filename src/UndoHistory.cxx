@@ -177,6 +177,13 @@ size_t UndoActions::LengthTo(size_t index) const noexcept {
 	return sum;
 }
 
+Sci::Position UndoActions::Position(int action) const noexcept {
+	return positions.SignedValueAt(action);
+}
+Sci::Position UndoActions::Length(int action) const noexcept {
+	return lengths.SignedValueAt(action);
+}
+
 void ScrapStack::Clear() noexcept {
 	stack.clear();
 	current = 0;
@@ -279,14 +286,14 @@ const char *UndoHistory::AppendAction(ActionType at, Sci::Position position, con
 			} else if ((at != actions.types[targetAct].at)) { // } && (!actions.AtStart(targetAct))) {
 				coalesce = false;
 			} else if ((at == ActionType::insert) &&
-			           (position != (actions.positions.SignedValueAt(targetAct) + actions.lengths.SignedValueAt(targetAct)))) {
+			           (position != (actions.Position(targetAct) + actions.Length(targetAct)))) {
 				// Insertions must be immediately after to coalesce
 				coalesce = false;
 			} else if (at == ActionType::remove) {
 				if ((lengthData == 1) || (lengthData == 2)) {
-					if ((position + lengthData) == actions.positions.SignedValueAt(targetAct)) {
+					if ((position + lengthData) == actions.Position(targetAct)) {
 						; // Backspace -> OK
-					} else if (position == actions.positions.SignedValueAt(targetAct)) {
+					} else if (position == actions.Position(targetAct)) {
 						; // Delete -> OK
 					} else {
 						// Removals must be at same position to coalesce
@@ -413,16 +420,16 @@ bool UndoHistory::AfterOrAtDetachPoint() const noexcept {
 	return detach && (*detach <= currentAction);
 }
 
-intptr_t UndoHistory::Delta(int action) noexcept {
+intptr_t UndoHistory::Delta(int action) const noexcept {
 	intptr_t sizeChange = 0;
 	for (int act = 0; act < action; act++) {
-		const intptr_t lengthChange = actions.lengths.SignedValueAt(act);
+		const intptr_t lengthChange = actions.Length(act);
 		sizeChange += (actions.types[act].at == ActionType::insert) ? lengthChange : -lengthChange;
 	}
 	return sizeChange;
 }
 
-bool UndoHistory::Validate(intptr_t lengthDocument) noexcept {
+bool UndoHistory::Validate(intptr_t lengthDocument) const noexcept {
 	// Check history for validity
 	const intptr_t sizeChange = Delta(currentAction);
 	if (sizeChange > lengthDocument) {
@@ -432,8 +439,8 @@ bool UndoHistory::Validate(intptr_t lengthDocument) noexcept {
 	const intptr_t lengthOriginal = lengthDocument - sizeChange;
 	intptr_t lengthCurrent = lengthOriginal;
 	for (int act = 0; act < actions.SSize(); act++) {
-		const intptr_t lengthChange = actions.lengths.SignedValueAt(act);
-		if (actions.positions.SignedValueAt(act) > lengthCurrent) {
+		const intptr_t lengthChange = actions.Length(act);
+		if (actions.Position(act) > lengthCurrent) {
 			// Change outside document.
 			return false;
 		}
@@ -469,11 +476,11 @@ int UndoHistory::Type(int action) const noexcept {
 }
 
 Sci::Position UndoHistory::Position(int action) const noexcept {
-	return actions.positions.SignedValueAt(action);
+	return actions.Position(action);
 }
 
 Sci::Position UndoHistory::Length(int action) const noexcept {
-	return actions.lengths.SignedValueAt(action);
+	return actions.Length(action);
 }
 
 std::string_view UndoHistory::Text(int action) noexcept {
@@ -563,9 +570,9 @@ Action UndoHistory::GetUndoStep() const noexcept {
 	Action acta {
 		actions.types[previousAction].at,
 		actions.types[previousAction].mayCoalesce,
-		actions.positions.SignedValueAt(previousAction),
+		actions.Position(previousAction),
 		nullptr,
-		actions.lengths.SignedValueAt(previousAction)
+		actions.Length(previousAction)
 	};
 	if (acta.lenData) {
 		acta.data = scraps->CurrentText() - acta.lenData;
@@ -606,9 +613,9 @@ Action UndoHistory::GetRedoStep() const noexcept {
 	Action acta{
 		actions.types[currentAction].at,
 		actions.types[currentAction].mayCoalesce,
-		actions.positions.SignedValueAt(currentAction),
+		actions.Position(currentAction),
 		nullptr,
-		actions.lengths.SignedValueAt(currentAction)
+		actions.Length(currentAction)
 	};
 	if (acta.lenData) {
 		acta.data = scraps->CurrentText();
