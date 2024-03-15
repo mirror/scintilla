@@ -177,6 +177,7 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	elementColours.erase(Element::SelectionAdditionalText);
 	elementColours.erase(Element::SelectionSecondaryText);
 	elementColours.erase(Element::SelectionInactiveText);
+	elementColours.erase(Element::SelectionInactiveAdditionalText);
 	// Shades of grey for selection backgrounds
 	elementBaseColours[Element::SelectionBack] = ColourRGBA::Grey(light);
 	constexpr unsigned int veryLight = 0xd7U;
@@ -193,6 +194,8 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 		Element::SelectionSecondaryBack,
 		Element::SelectionInactiveText,
 		Element::SelectionInactiveBack,
+		Element::SelectionInactiveAdditionalText,
+		Element::SelectionInactiveAdditionalBack,
 		});
 
 	foldmarginColour.reset();
@@ -590,7 +593,8 @@ bool ViewStyle::SelectionTextDrawn() const {
 		ElementIsSet(Element::SelectionText) ||
 		ElementIsSet(Element::SelectionAdditionalText) ||
 		ElementIsSet(Element::SelectionSecondaryText) ||
-		ElementIsSet(Element::SelectionInactiveText);
+		ElementIsSet(Element::SelectionInactiveText) ||
+		ElementIsSet(Element::SelectionInactiveAdditionalText);
 }
 
 bool ViewStyle::WhitespaceBackgroundDrawn() const {
