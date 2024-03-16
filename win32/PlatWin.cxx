@@ -405,7 +405,7 @@ float GetDeviceScaleFactorWhenGdiScalingActive(HWND hWnd) noexcept {
 			const HMONITOR hMonitor = MonitorFromWindowHandleScaling(hRootWnd);
 			DEVICE_SCALE_FACTOR deviceScaleFactor;
 			if (S_OK == fnGetScaleFactorForMonitor(hMonitor, &deviceScaleFactor))
-				return deviceScaleFactor / 100.f;
+				return static_cast<int>(deviceScaleFactor) / 100.f;
 		}
 	}
 	return 1.f;
