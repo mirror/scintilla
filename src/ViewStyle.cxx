@@ -103,7 +103,8 @@ void FontRealised::Realise(Surface &surface, int zoomLevel, Technology technolog
 ViewStyle::ViewStyle(size_t stylesSize_) :
 	styles(stylesSize_),
 	markers(MarkerMax + 1),
-	indicators(static_cast<size_t>(IndicatorNumbers::Max) + 1) {
+	indicators(static_cast<size_t>(IndicatorNumbers::Max) + 1),
+	ms(MaxMargin + 1) {
 
 	nextExtendedStyle = 256;
 	ResetDefaultStyle();
@@ -173,11 +174,6 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	tabWidth = spaceWidth * 8;
 
 	// Default is for no selection foregrounds
-	elementColours.erase(Element::SelectionText);
-	elementColours.erase(Element::SelectionAdditionalText);
-	elementColours.erase(Element::SelectionSecondaryText);
-	elementColours.erase(Element::SelectionInactiveText);
-	elementColours.erase(Element::SelectionInactiveAdditionalText);
 	// Shades of grey for selection backgrounds
 	elementBaseColours[Element::SelectionBack] = ColourRGBA::Grey(light);
 	constexpr unsigned int veryLight = 0xd7U;
@@ -198,9 +194,6 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 		Element::SelectionInactiveAdditionalBack,
 		});
 
-	foldmarginColour.reset();
-	foldmarginHighlightColour.reset();
-
 	controlCharSymbol = 0;	/* Draw the control characters */
 	controlCharWidth = 0;
 	selbar = Platform::Chrome();
@@ -215,19 +208,16 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 		Element::CaretAdditional,
 		});
 
-	elementColours.erase(Element::CaretLineBack);
 	elementAllowsTranslucent.insert(Element::CaretLineBack);
 
 	someStylesProtected = false;
 	someStylesForceCase = false;
 
 	hotspotUnderline = true;
-	elementColours.erase(Element::HotSpotActive);
 	elementAllowsTranslucent.insert(Element::HotSpotActive);
 
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
-	ms.resize(MaxMargin + 1);
 	ms[0] = MarginStyle(MarginType::Number);
 	ms[1] = MarginStyle(MarginType::Symbol, 16, ~MaskFolders);
 	ms[2] = MarginStyle(MarginType::Symbol);
@@ -238,7 +228,6 @@ ViewStyle::ViewStyle(size_t stylesSize_) :
 	viewWhitespace = WhiteSpace::Invisible;
 	tabDrawMode = TabDrawMode::LongArrow;
 	whitespaceSize = 1;
-	elementColours.erase(Element::WhiteSpace);
 	elementAllowsTranslucent.insert(Element::WhiteSpace);
 
 	viewIndentationGuides = IndentView::None;
