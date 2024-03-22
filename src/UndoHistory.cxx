@@ -120,7 +120,7 @@ void ScaledVector::ReSize(size_t length) {
 }
 
 void ScaledVector::PushBack() {
-	ReSize(Size() + 1);
+	bytes.resize(bytes.size() + element.size);
 }
 
 size_t ScaledVector::SizeInBytes() const noexcept {
@@ -496,9 +496,9 @@ std::string_view UndoHistory::Text(int action) noexcept {
 		position = memory->position;
 	}
 	for (; act < action; act++) {
-		position += actions.lengths.ValueAt(act);
+		position += actions.Length(act);
 	}
-	const size_t length = actions.lengths.ValueAt(action);
+	const size_t length = actions.Length(action);
 	const char *scrap = scraps->TextAt(position);
 	memory = {action, position};
 	return {scrap, length};
@@ -581,7 +581,7 @@ Action UndoHistory::GetUndoStep() const noexcept {
 }
 
 void UndoHistory::CompletedUndoStep() noexcept {
-	scraps->MoveBack(actions.lengths.ValueAt(PreviousAction()));
+	scraps->MoveBack(actions.Length(PreviousAction()));
 	currentAction--;
 }
 
@@ -624,7 +624,7 @@ Action UndoHistory::GetRedoStep() const noexcept {
 }
 
 void UndoHistory::CompletedRedoStep() noexcept {
-	scraps->MoveForward(actions.lengths.ValueAt(currentAction));
+	scraps->MoveForward(actions.Length(currentAction));
 	currentAction++;
 }
 
