@@ -129,7 +129,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 16 February 2024 NH</p>
+    <p>Last edited 22 March 2024 NH</p>
 
     <p style="background:#90F0C0">Scintilla 5 has moved the lexers from Scintilla into a new
     <a href="Lexilla.html">Lexilla</a> project.<br />
@@ -8598,6 +8598,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><b id="SCI_ALLOCATESUBSTYLES">SCI_ALLOCATESUBSTYLES(int styleBase, int numberStyles) &rarr; int</b><br />
      Allocate some number of substyles for a particular base style returning the first substyle number allocated.
+     A failure, such as requesting more substyles than available, is indicated by returning a negative number.
+     Lexers that support substyles will commonly allow allocating 64 substyles. 
      Substyles are allocated contiguously.</p>
 
     <p><b id="SCI_FREESUBSTYLES">SCI_FREESUBSTYLES</b><br />
@@ -8733,6 +8735,9 @@ Previously, lexers were called with a range that started one line before the ran
 needs to be folded as this allowed fixing up the last line from the previous folding.
 The new approach allows the lexer to decide whether to backtrack or to handle this
 more efficiently.</p>
+
+<p><code>AllocateSubStyles</code> returns a negative number when more
+substyles are requested than is available.</p>
 
 <p><code>NamedStyles</code>, <code>NameOfStyle</code>,
 <code>TagsOfStyle</code>, and <code>DescriptionOfStyle</code>
