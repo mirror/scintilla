@@ -8879,7 +8879,7 @@ struct SCNotification {
 	int x;			/* SCN_DWELLSTART, SCN_DWELLEND */
 	int y;		/* SCN_DWELLSTART, SCN_DWELLEND */
 	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
-	int annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
+	Sci_Position annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
 	int updated;	/* SCN_UPDATEUI */
 	int listCompletionMethod;
 	/* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
