@@ -294,6 +294,7 @@ class GlobalMemory;
 
 class ReverseArrowCursor {
 	UINT dpi = USER_DEFAULT_SCREEN_DPI;
+	UINT cursorBaseSize = defaultCursorBaseSize;
 	HCURSOR cursor {};
 
 public:
@@ -309,16 +310,17 @@ public:
 		}
 	}
 
-	HCURSOR Load(UINT dpi_) noexcept {
+	HCURSOR Load(UINT dpi_, UINT cursorBaseSize_) noexcept {
 		if (cursor)	 {
-			if (dpi == dpi_) {
+			if (dpi == dpi_ && cursorBaseSize == cursorBaseSize_) {
 				return cursor;
 			}
 			::DestroyCursor(cursor);
 		}
 
 		dpi = dpi_;
-		cursor = LoadReverseArrowCursor(dpi_);
+		cursorBaseSize = cursorBaseSize_;
+		cursor = LoadReverseArrowCursor(dpi_, cursorBaseSize_);
 		return cursor ? cursor : ::LoadCursor({}, IDC_ARROW);
 	}
 };
@@ -359,6 +361,7 @@ class ScintillaWin :
 	MouseWheelDelta horizontalWheelDelta;
 
 	UINT dpi = USER_DEFAULT_SCREEN_DPI;
+	UINT cursorBaseSize = defaultCursorBaseSize;
 	ReverseArrowCursor reverseArrowCursor;
 
 	PRectangle rectangleClient;
@@ -791,7 +794,7 @@ void ScintillaWin::DisplayCursor(Window::Cursor c) {
 		c = static_cast<Window::Cursor>(cursorMode);
 	}
 	if (c == Window::Cursor::reverseArrow) {
-		::SetCursor(reverseArrowCursor.Load(static_cast<UINT>(dpi * deviceScaleFactor)));
+		::SetCursor(reverseArrowCursor.Load(static_cast<UINT>(dpi * deviceScaleFactor), cursorBaseSize));
 	} else {
 		wMain.SetCursor(c);
 	}
@@ -3220,6 +3223,20 @@ void ScintillaWin::GetMouseParameters() noexcept {
 		charsPerScroll = (linesPerScroll == WHEEL_PAGESCROLL) ? 3 : linesPerScroll;
 	}
 	::SystemParametersInfo(SPI_GETMOUSEVANISH, 0, &typingWithoutCursor, 0);
+
+	// https://learn.microsoft.com/en-us/answers/questions/815036/windows-cursor-size
+	HKEY hKey;
+	LSTATUS status = ::RegOpenKeyExW(HKEY_CURRENT_USER, L"Control Panel\\Cursors", 0, KEY_READ, &hKey);
+	if (status == ERROR_SUCCESS) {
+		DWORD baseSize = 0;
+		DWORD type = REG_DWORD;
+		DWORD size = sizeof(DWORD);
+		status = ::RegQueryValueExW(hKey, L"CursorBaseSize", nullptr, &type, reinterpret_cast<LPBYTE>(&baseSize), &size);
+		if (status == ERROR_SUCCESS && type == REG_DWORD) {
+			cursorBaseSize = baseSize;
+		}
+		::RegCloseKey(hKey);
+	}
 }
 
 void ScintillaWin::CopyToGlobal(GlobalMemory &gmUnicode, const SelectionText &selectedText) {
