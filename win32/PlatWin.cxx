@@ -124,9 +124,13 @@ void LoadD2DOnce() noexcept {
 	}
 }
 
-bool LoadD2D() {
+bool LoadD2D() noexcept {
 	static std::once_flag once;
-	std::call_once(once, LoadD2DOnce);
+	try {
+		std::call_once(once, LoadD2DOnce);
+	} catch (...) {
+		// ignore
+	}
 	return pIDWriteFactory && pD2DFactory;
 }
 
