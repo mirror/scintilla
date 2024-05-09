@@ -2786,110 +2786,316 @@ void Window::InvalidateRectangle(PRectangle rc) {
 	::InvalidateRect(HwndFromWindowID(wid), &rcw, FALSE);
 }
 
-HCURSOR LoadReverseArrowCursor(UINT dpi, int cursorBaseSize) noexcept {
-	class CursorHelper {
-	public:
-		ICONINFO info{};
-		BITMAP bmp{};
-		bool HasBitmap() const noexcept {
-			return bmp.bmWidth > 0;
-		}
+namespace {
 
-		CursorHelper(const HCURSOR cursor) noexcept {
-			Init(cursor);
-		}
-		~CursorHelper() {
-			CleanUp();
-		}
+std::optional<DWORD> RegGetDWORD(HKEY hKey, LPCWSTR valueName) noexcept {
+	DWORD value = 0;
+	DWORD type = REG_NONE;
+	DWORD size = sizeof(DWORD);
+	const LSTATUS status = ::RegQueryValueExW(hKey, valueName, nullptr, &type, reinterpret_cast<LPBYTE>(&value), &size);
+	if (status == ERROR_SUCCESS && type == REG_DWORD) {
+		return value;
+	}
+	return {};
+}
 
-		CursorHelper &operator=(const HCURSOR cursor) noexcept {
-			CleanUp();
-			Init(cursor);
-			return *this;
-		}
+#if defined(USE_D2D)
 
-		bool MatchesSize(const int width, const int height) noexcept {
-			return bmp.bmWidth == width && bmp.bmHeight == height;
-		}
+using BrushSolid = std::unique_ptr<ID2D1SolidColorBrush, UnknownReleaser>;
 
-		HCURSOR CreateFlippedCursor() noexcept {
-			if (info.hbmMask)
-				FlipBitmap(info.hbmMask, bmp.bmWidth, bmp.bmHeight);
-			if (info.hbmColor)
-				FlipBitmap(info.hbmColor, bmp.bmWidth, bmp.bmHeight);
-			info.xHotspot = bmp.bmWidth - 1 - info.xHotspot;
+BrushSolid BrushSolidCreate(ID2D1RenderTarget *pTarget, COLORREF colour) noexcept {
+	ID2D1SolidColorBrush *pBrush = nullptr;
+	const D2D_COLOR_F col = ColorFromColourAlpha(ColourRGBA::FromRGB(colour));
+	const HRESULT hr = pTarget->CreateSolidColorBrush(col, &pBrush);
+	if (FAILED(hr) || !pBrush) {
+		return {};
+	}
+	return BrushSolid(pBrush);
+}
 
-			return ::CreateIconIndirect(&info);
-		}
+using Geometry = std::unique_ptr<ID2D1PathGeometry, UnknownReleaser>;
 
-	private:
-		void Init(const HCURSOR &cursor) noexcept {
-			if (::GetIconInfo(cursor, &info)) {
-				::GetObject(info.hbmMask, sizeof(bmp), &bmp);
-				PLATFORM_ASSERT(HasBitmap());
-			}
-		}
+Geometry GeometryCreate() noexcept {
+	ID2D1PathGeometry *geometry = nullptr;
+	const HRESULT hr = pD2DFactory->CreatePathGeometry(&geometry);
+	if (FAILED(hr) || !geometry) {
+		return {};
+	}
+	return Geometry(geometry);
+}
 
-		void CleanUp() noexcept {
-			if (info.hbmMask)
-				::DeleteObject(info.hbmMask);
-			if (info.hbmColor)
-				::DeleteObject(info.hbmColor);
-			info = {};
-			bmp = {};
-		}
+using GeometrySink = std::unique_ptr<ID2D1GeometrySink, UnknownReleaser>;
 
-		static void FlipBitmap(const HBITMAP bitmap, const int width, const int height) noexcept {
-			HDC hdc = ::CreateCompatibleDC({});
-			if (hdc) {
-				HBITMAP prevBmp = SelectBitmap(hdc, bitmap);
-				::StretchBlt(hdc, width - 1, 0, -width, height, hdc, 0, 0, width, height, SRCCOPY);
-				SelectBitmap(hdc, prevBmp);
-				::DeleteDC(hdc);
-			}
-		}
+GeometrySink GeometrySinkCreate(ID2D1PathGeometry *geometry) noexcept {
+	ID2D1GeometrySink *sink = nullptr;
+	const HRESULT hr = geometry->Open(&sink);
+	if (FAILED(hr) || !sink) {
+		return {};
+	}
+	return GeometrySink(sink);
+}
+
+#endif
+
+class CursorHelper {
+	HDC hMemDC {};
+	HBITMAP hBitmap {};
+	HBITMAP hOldBitmap {};
+	DWORD *pixels = nullptr;
+	const int width;
+	const int height;
+
+	static constexpr float arrow[][2] = {
+		{ 32.0f - 12.73606f,32.0f - 19.04075f },
+		{ 32.0f - 7.80159f, 32.0f - 19.04075f },
+		{ 32.0f - 9.82813f, 32.0f - 14.91828f },
+		{ 32.0f - 6.88341f, 32.0f - 13.42515f },
+		{ 32.0f - 4.62301f, 32.0f - 18.05872f },
+		{ 32.0f - 1.26394f, 32.0f - 14.78295f },
+		{ 32.0f - 1.26394f, 32.0f - 30.57485f },
 	};
 
-	HCURSOR reverseArrowCursor {};
+public:
+	~CursorHelper() {
+		if (hOldBitmap) {
+			SelectBitmap(hMemDC, hOldBitmap);
+		}
+		if (hBitmap) {
+			::DeleteObject(hBitmap);
+		}
+		if (hMemDC) {
+			::DeleteDC(hMemDC);
+		}
+	}
 
-	int width;
-	int height;
+	CursorHelper(int width_, int height_) noexcept : width{width_}, height{height_} {
+		hMemDC = ::CreateCompatibleDC({});
+		if (!hMemDC) {
+			return;
+		}
+
+		// https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors#creating-a-cursor
+		BITMAPV5HEADER bi {};
+		bi.bV5Size = sizeof(BITMAPV5HEADER);
+		bi.bV5Width = width;
+		bi.bV5Height = height;
+		bi.bV5Planes = 1;
+		bi.bV5BitCount = 32;
+		bi.bV5Compression = BI_BITFIELDS;
+		// The following mask specification specifies a supported 32 BPP alpha format for Windows XP.
+		bi.bV5RedMask   = 0x00FF0000U;
+		bi.bV5GreenMask = 0x0000FF00U;
+		bi.bV5BlueMask  = 0x000000FFU;
+		bi.bV5AlphaMask = 0xFF000000U;
+
+		// Create the DIB section with an alpha channel.
+		hBitmap = CreateDIBSection(hMemDC, reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS, reinterpret_cast<void **>(&pixels), nullptr, 0);
+		if (hBitmap) {
+			hOldBitmap = SelectBitmap(hMemDC, hBitmap);
+		}
+	}
+
+	bool HasBitmap() const noexcept {
+		return hOldBitmap != nullptr;
+	}
+
+	HCURSOR Create() noexcept {
+		HCURSOR cursor {};
+		// Create an empty mask bitmap.
+		HBITMAP hMonoBitmap = ::CreateBitmap(width, height, 1, 1, nullptr);
+		if (hMonoBitmap) {
+			// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createiconindirect
+			// hBitmap should not already be selected into a device context
+			SelectBitmap(hMemDC, hOldBitmap);
+			hOldBitmap = {};
+			ICONINFO info = {false, static_cast<DWORD>(width - 1), 0, hMonoBitmap, hBitmap};
+			cursor = ::CreateIconIndirect(&info);
+			::DeleteObject(hMonoBitmap);
+		}
+		return cursor;
+	}
+
+#if defined(USE_D2D)
+
+	bool DrawD2D(COLORREF fillColour, COLORREF strokeColour) noexcept {
+		if (!LoadD2D()) {
+			return false;
+		}
+
+		D2D1_RENDER_TARGET_PROPERTIES drtp {};
+		drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
+		drtp.usage = D2D1_RENDER_TARGET_USAGE_NONE;
+		drtp.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
+		drtp.dpiX = 96.f;
+		drtp.dpiY = 96.f;
+		drtp.pixelFormat = D2D1::PixelFormat(
+			DXGI_FORMAT_B8G8R8A8_UNORM,
+			D2D1_ALPHA_MODE_PREMULTIPLIED
+		);
+
+		ID2D1DCRenderTarget *pTarget_ = nullptr;
+		HRESULT hr = pD2DFactory->CreateDCRenderTarget(&drtp, &pTarget_);
+		if (FAILED(hr) || !pTarget_) {
+			return false;
+		}
+		const std::unique_ptr<ID2D1DCRenderTarget, UnknownReleaser> pTarget(pTarget_);
+
+		const RECT rc = {0, 0, width, height};
+		hr = pTarget_->BindDC(hMemDC, &rc);
+		if (FAILED(hr)) {
+			return false;
+		}
+
+		pTarget->BeginDraw();
+
+		// Draw something on the bitmap section.
+		constexpr size_t nPoints = std::size(arrow);
+		D2D1_POINT_2F points[nPoints]{};
+		const FLOAT scale = width/32.0f;
+		for (size_t i = 0; i < nPoints; i++) {
+			points[i].x = arrow[i][0] * scale;
+			points[i].y = arrow[i][1] * scale;
+		}
+
+		Geometry geometry = GeometryCreate();
+		if (!geometry) {
+			return false;
+		}
+
+		GeometrySink sink = GeometrySinkCreate(geometry.get());
+		if (!sink) {
+			return false;
+		}
+
+		sink->BeginFigure(points[0], D2D1_FIGURE_BEGIN_FILLED);
+		for (size_t i = 1; i < nPoints; i++) {
+			sink->AddLine(points[i]);
+		}
+		sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+		hr = sink->Close();
+		if (FAILED(hr)) {
+			return false;
+		}
+
+		if (const BrushSolid pBrushFill = BrushSolidCreate(pTarget.get(), fillColour)) {
+			pTarget->FillGeometry(geometry.get(), pBrushFill.get());
+		}
+
+		if (const BrushSolid pBrushStroke = BrushSolidCreate(pTarget.get(), strokeColour)) {
+			pTarget->DrawGeometry(geometry.get(), pBrushStroke.get(), scale);
+		}
+
+		hr = pTarget->EndDraw();
+		return SUCCEEDED(hr);
+	}
+#endif
+
+	void Draw(COLORREF fillColour, COLORREF strokeColour) noexcept {
+#if defined(USE_D2D)
+		if (DrawD2D(fillColour, strokeColour)) {
+			return;
+		}
+#endif
+
+		// Draw something on the DIB section.
+		constexpr size_t nPoints = std::size(arrow);
+		POINT points[nPoints]{};
+		const float scale = width/32.0f;
+		for (size_t i = 0; i < nPoints; i++) {
+			points[i].x = std::lround(arrow[i][0] * scale);
+			points[i].y = std::lround(arrow[i][1] * scale);
+		}
+
+		const DWORD penWidth = std::lround(scale);
+		HPEN pen;
+		if (penWidth > 1) {
+			const LOGBRUSH brushParameters { BS_SOLID, strokeColour, 0 };
+			pen = ::ExtCreatePen(PS_GEOMETRIC | PS_ENDCAP_ROUND | PS_JOIN_MITER,
+				penWidth,
+				&brushParameters,
+				0,
+				nullptr);
+		} else {
+			pen = ::CreatePen(PS_INSIDEFRAME, 1, strokeColour);
+		}
+
+		HPEN penOld = SelectPen(hMemDC, pen);
+		HBRUSH brush = ::CreateSolidBrush(fillColour);
+		HBRUSH brushOld = SelectBrush(hMemDC, brush);
+		::Polygon(hMemDC, points, static_cast<int>(nPoints));
+		SelectPen(hMemDC, penOld);
+		SelectBrush(hMemDC, brushOld);
+		::DeleteObject(pen);
+		::DeleteObject(brush);
+
+		// Set the alpha values for each pixel in the cursor.
+		for (int i = 0; i < width*height; i++) {
+			if (*pixels != 0) {
+				*pixels |= 0xFF000000U;
+			}
+			pixels++;
+		}
+	}
+};
+
+}
+
+HCURSOR LoadReverseArrowCursor(UINT dpi) noexcept {
+	// https://learn.microsoft.com/en-us/answers/questions/815036/windows-cursor-size
+	constexpr DWORD defaultCursorBaseSize = 32;
+	constexpr DWORD maxCursorBaseSize = 16*(1 + 15); // 16*(1 + CursorSize)
+	DWORD cursorBaseSize = 0;
+	HKEY hKey {};
+	LSTATUS status = ::RegOpenKeyExW(HKEY_CURRENT_USER, L"Control Panel\\Cursors", 0, KEY_QUERY_VALUE, &hKey);
+	if (status == ERROR_SUCCESS) {
+		if (std::optional<DWORD> baseSize = RegGetDWORD(hKey, L"CursorBaseSize")) {
+			// CursorBaseSize is multiple of 16
+			cursorBaseSize = std::min(*baseSize & ~15, maxCursorBaseSize);
+		}
+		::RegCloseKey(hKey);
+	}
+
+	int width = 0;
+	int height = 0;
 	if (cursorBaseSize > defaultCursorBaseSize) {
 		width = ::MulDiv(cursorBaseSize, dpi, USER_DEFAULT_SCREEN_DPI);
 		height = width;
 	} else {
 		width = SystemMetricsForDpi(SM_CXCURSOR, dpi);
 		height = SystemMetricsForDpi(SM_CYCURSOR, dpi);
+		PLATFORM_ASSERT(width == height);
 	}
 
-	DPI_AWARENESS_CONTEXT oldContext = nullptr;
-	if (fnAreDpiAwarenessContextsEqual && fnAreDpiAwarenessContextsEqual(fnGetThreadDpiAwarenessContext(), DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED)) {
-		oldContext = fnSetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-		PLATFORM_ASSERT(oldContext != nullptr);
+	CursorHelper cursorHelper(width, height);
+	if (!cursorHelper.HasBitmap()) {
+		return {};
 	}
 
-	const HCURSOR cursor = static_cast<HCURSOR>(::LoadImage({}, IDC_ARROW, IMAGE_CURSOR, width, height, LR_SHARED));
-	if (cursor) {
-		CursorHelper cursorHelper(cursor);
-
-		if (cursorHelper.HasBitmap() && !cursorHelper.MatchesSize(width, height)) {
-			const HCURSOR copy = static_cast<HCURSOR>(::CopyImage(cursor, IMAGE_CURSOR, width, height, LR_COPYFROMRESOURCE | LR_COPYRETURNORG));
-			if (copy) {
-				cursorHelper = copy;
-				::DestroyCursor(copy);
+	COLORREF fillColour = RGB(0xff, 0xff, 0xfe);
+	COLORREF strokeColour = RGB(0, 0, 1);
+	status = ::RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Accessibility", 0, KEY_QUERY_VALUE, &hKey);
+	if (status == ERROR_SUCCESS) {
+		if (std::optional<DWORD> cursorType = RegGetDWORD(hKey, L"CursorType")) {
+			switch (*cursorType) {
+			case 1: // black
+			case 4: // black
+				std::swap(fillColour, strokeColour);
+				break;
+			case 6: // custom
+				if (std::optional<DWORD> cursorColor = RegGetDWORD(hKey, L"CursorColor")) {
+					fillColour = *cursorColor;
+				}
+				break;
+			default: // 0, 3 white, 2, 5 invert
+				break;
 			}
 		}
-
-		if (cursorHelper.HasBitmap()) {
-			reverseArrowCursor = cursorHelper.CreateFlippedCursor();
-		}
+		::RegCloseKey(hKey);
 	}
 
-	if (oldContext) {
-		fnSetThreadDpiAwarenessContext(oldContext);
-	}
-
-	return reverseArrowCursor;
+	cursorHelper.Draw(fillColour, strokeColour);
+	HCURSOR cursor = cursorHelper.Create();
+	return cursor;
 }
 
 void Window::SetCursor(Cursor curs) {
@@ -2915,6 +3121,7 @@ void Window::SetCursor(Cursor curs) {
 	case Cursor::reverseArrow:
 	case Cursor::arrow:
 	case Cursor::invalid:	// Should not occur, but just in case.
+	default:
 		::SetCursor(::LoadCursor(NULL,IDC_ARROW));
 		break;
 	}

@@ -50,8 +50,7 @@ float GetDeviceScaleFactorWhenGdiScalingActive(HWND hWnd) noexcept;
 
 int SystemMetricsForDpi(int nIndex, UINT dpi) noexcept;
 
-constexpr int defaultCursorBaseSize = 32;
-HCURSOR LoadReverseArrowCursor(UINT dpi, int cursorBaseSize) noexcept;
+HCURSOR LoadReverseArrowCursor(UINT dpi) noexcept;
 
 class MouseWheelDelta {
 	int wheelDelta = 0;

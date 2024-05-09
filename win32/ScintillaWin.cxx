@@ -293,9 +293,8 @@ public:
 class GlobalMemory;
 
 class ReverseArrowCursor {
-	UINT dpi = USER_DEFAULT_SCREEN_DPI;
-	UINT cursorBaseSize = defaultCursorBaseSize;
 	HCURSOR cursor {};
+	bool valid = false;
 
 public:
 	ReverseArrowCursor() noexcept {}
@@ -310,17 +309,20 @@ public:
 		}
 	}
 
-	HCURSOR Load(UINT dpi_, UINT cursorBaseSize_) noexcept {
+	void Invalidate() noexcept {
+		valid = false;
+	}
+
+	HCURSOR Load(UINT dpi) noexcept {
 		if (cursor)	 {
-			if (dpi == dpi_ && cursorBaseSize == cursorBaseSize_) {
+			if (valid) {
 				return cursor;
 			}
 			::DestroyCursor(cursor);
 		}
 
-		dpi = dpi_;
-		cursorBaseSize = cursorBaseSize_;
-		cursor = LoadReverseArrowCursor(dpi_, cursorBaseSize_);
+		valid = true;
+		cursor = LoadReverseArrowCursor(dpi);
 		return cursor ? cursor : ::LoadCursor({}, IDC_ARROW);
 	}
 };
@@ -361,7 +363,6 @@ class ScintillaWin :
 	MouseWheelDelta horizontalWheelDelta;
 
 	UINT dpi = USER_DEFAULT_SCREEN_DPI;
-	UINT cursorBaseSize = defaultCursorBaseSize;
 	ReverseArrowCursor reverseArrowCursor;
 
 	PRectangle rectangleClient;
@@ -794,7 +795,7 @@ void ScintillaWin::DisplayCursor(Window::Cursor c) {
 		c = static_cast<Window::Cursor>(cursorMode);
 	}
 	if (c == Window::Cursor::reverseArrow) {
-		::SetCursor(reverseArrowCursor.Load(static_cast<UINT>(dpi * deviceScaleFactor), cursorBaseSize));
+		::SetCursor(reverseArrowCursor.Load(static_cast<UINT>(dpi * deviceScaleFactor)));
 	} else {
 		wMain.SetCursor(c);
 	}
@@ -2134,6 +2135,7 @@ sptr_t ScintillaWin::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 
 		case WM_DPICHANGED:
 			dpi = HIWORD(wParam);
+			reverseArrowCursor.Invalidate();
 			InvalidateStyleRedraw();
 			break;
 
@@ -2141,6 +2143,7 @@ sptr_t ScintillaWin::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 				const UINT dpiNow = DpiForWindow(wMain.GetID());
 				if (dpi != dpiNow) {
 					dpi = dpiNow;
+					reverseArrowCursor.Invalidate();
 					InvalidateStyleRedraw();
 				}
 			}
@@ -3216,6 +3219,8 @@ LRESULT ScintillaWin::ImeOnDocumentFeed(LPARAM lParam) const {
 }
 
 void ScintillaWin::GetMouseParameters() noexcept {
+	// mouse pointer size and colour may changed
+	reverseArrowCursor.Invalidate();
 	// This retrieves the number of lines per scroll as configured in the Mouse Properties sheet in Control Panel
 	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &linesPerScroll, 0);
 	if (!::SystemParametersInfo(SPI_GETWHEELSCROLLCHARS, 0, &charsPerScroll, 0)) {
@@ -3223,20 +3228,6 @@ void ScintillaWin::GetMouseParameters() noexcept {
 		charsPerScroll = (linesPerScroll == WHEEL_PAGESCROLL) ? 3 : linesPerScroll;
 	}
 	::SystemParametersInfo(SPI_GETMOUSEVANISH, 0, &typingWithoutCursor, 0);
-
-	// https://learn.microsoft.com/en-us/answers/questions/815036/windows-cursor-size
-	HKEY hKey;
-	LSTATUS status = ::RegOpenKeyExW(HKEY_CURRENT_USER, L"Control Panel\\Cursors", 0, KEY_READ, &hKey);
-	if (status == ERROR_SUCCESS) {
-		DWORD baseSize = 0;
-		DWORD type = REG_DWORD;
-		DWORD size = sizeof(DWORD);
-		status = ::RegQueryValueExW(hKey, L"CursorBaseSize", nullptr, &type, reinterpret_cast<LPBYTE>(&baseSize), &size);
-		if (status == ERROR_SUCCESS && type == REG_DWORD) {
-			cursorBaseSize = baseSize;
-		}
-		::RegCloseKey(hKey);
-	}
 }
 
 void ScintillaWin::CopyToGlobal(GlobalMemory &gmUnicode, const SelectionText &selectedText) {
