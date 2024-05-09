@@ -171,9 +171,6 @@ GetWindowDpiAwarenessContextSig fnGetWindowDpiAwarenessContext = nullptr;
 using GetScaleFactorForMonitorSig = HRESULT(WINAPI *)(HMONITOR, DEVICE_SCALE_FACTOR *);
 GetScaleFactorForMonitorSig fnGetScaleFactorForMonitor = nullptr;
 
-using GetThreadDpiAwarenessContextSig = DPI_AWARENESS_CONTEXT(WINAPI *)();
-GetThreadDpiAwarenessContextSig fnGetThreadDpiAwarenessContext = nullptr;
-
 using SetThreadDpiAwarenessContextSig = DPI_AWARENESS_CONTEXT(WINAPI *)(DPI_AWARENESS_CONTEXT);
 SetThreadDpiAwarenessContextSig fnSetThreadDpiAwarenessContext = nullptr;
 
@@ -182,7 +179,6 @@ void LoadDpiForWindow() noexcept {
 	fnGetDpiForWindow = DLLFunction<GetDpiForWindowSig>(user32, "GetDpiForWindow");
 	fnGetSystemMetricsForDpi = DLLFunction<GetSystemMetricsForDpiSig>(user32, "GetSystemMetricsForDpi");
 	fnAdjustWindowRectExForDpi = DLLFunction<AdjustWindowRectExForDpiSig>(user32, "AdjustWindowRectExForDpi");
-	fnGetThreadDpiAwarenessContext = DLLFunction<GetThreadDpiAwarenessContextSig>(user32, "GetThreadDpiAwarenessContext");
 	fnSetThreadDpiAwarenessContext = DLLFunction<SetThreadDpiAwarenessContextSig>(user32, "SetThreadDpiAwarenessContext");
 
 	using GetDpiForSystemSig = UINT(WINAPI *)(void);
