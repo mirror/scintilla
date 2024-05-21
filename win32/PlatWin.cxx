@@ -1408,7 +1408,7 @@ public:
 	int PixelDivisions() override;
 	int DeviceHeightFont(int points) override;
 	void LineDraw(Point start, Point end, Stroke stroke) override;
-	Geometry GeometricFigure(const Point *pts, size_t npts, D2D1_FIGURE_BEGIN figureBegin) noexcept;
+	static Geometry GeometricFigure(const Point *pts, size_t npts, D2D1_FIGURE_BEGIN figureBegin) noexcept;
 	void PolyLine(const Point *pts, size_t npts, Stroke stroke) override;
 	void Polygon(const Point *pts, size_t npts, FillStroke fillStroke) override;
 	void RectangleDraw(PRectangle rc, FillStroke fillStroke) override;
@@ -1621,8 +1621,7 @@ void SurfaceD2D::LineDraw(Point start, Point end, Stroke stroke) {
 Geometry SurfaceD2D::GeometricFigure(const Point *pts, size_t npts, D2D1_FIGURE_BEGIN figureBegin) noexcept {
 	Geometry geometry = GeometryCreate();
 	if (geometry) {
-		GeometrySink sink = GeometrySinkCreate(geometry.get());
-		if (sink) {
+		if (const GeometrySink sink = GeometrySinkCreate(geometry.get())) {
 			sink->BeginFigure(DPointFromPoint(pts[0]), figureBegin);
 			for (size_t i = 1; i < npts; i++) {
 				sink->AddLine(DPointFromPoint(pts[i]));
@@ -1641,7 +1640,7 @@ void SurfaceD2D::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 		return;
 	}
 
-	Geometry geometry = GeometricFigure(pts, npts, D2D1_FIGURE_BEGIN_HOLLOW);
+	const Geometry geometry = GeometricFigure(pts, npts, D2D1_FIGURE_BEGIN_HOLLOW);
 	PLATFORM_ASSERT(geometry);
 	if (!geometry) {
 		return;
@@ -1670,7 +1669,7 @@ void SurfaceD2D::PolyLine(const Point *pts, size_t npts, Stroke stroke) {
 void SurfaceD2D::Polygon(const Point *pts, size_t npts, FillStroke fillStroke) {
 	PLATFORM_ASSERT(pRenderTarget && (npts > 2));
 	if (pRenderTarget) {
-		Geometry geometry = GeometricFigure(pts, npts, D2D1_FIGURE_BEGIN_FILLED);
+		const Geometry geometry = GeometricFigure(pts, npts, D2D1_FIGURE_BEGIN_FILLED);
 		PLATFORM_ASSERT(geometry);
 		if (geometry) {
 			D2DPenColourAlpha(fillStroke.fill.colour);
@@ -1905,11 +1904,10 @@ void SurfaceD2D::Stadium(PRectangle rc, FillStroke fillStroke, Ends ends) {
 		PRectangle rcInner = rc;
 		rcInner.left += radius;
 		rcInner.right -= radius;
-		Geometry pathGeometry = GeometryCreate();
+		const Geometry pathGeometry = GeometryCreate();
 		if (!pathGeometry)
 			return;
-		GeometrySink pSink = GeometrySinkCreate(pathGeometry.get());
-		if (pSink) {
+		if (const GeometrySink pSink = GeometrySinkCreate(pathGeometry.get())) {
 			switch (leftSide) {
 				case Ends::leftFlat:
 					pSink->BeginFigure(DPointFromPoint(Point(rc.left + halfStroke, rc.top + halfStroke)), D2D1_FIGURE_BEGIN_FILLED);
@@ -2940,12 +2938,12 @@ public:
 			points[i].y = arrow[i][1] * scale;
 		}
 
-		Geometry geometry = GeometryCreate();
+		const Geometry geometry = GeometryCreate();
 		if (!geometry) {
 			return false;
 		}
 
-		GeometrySink sink = GeometrySinkCreate(geometry.get());
+		const GeometrySink sink = GeometrySinkCreate(geometry.get());
 		if (!sink) {
 			return false;
 		}
