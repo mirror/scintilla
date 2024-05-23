@@ -52,6 +52,11 @@
 using namespace Scintilla;
 using namespace Scintilla::Internal;
 
+#if defined(__GNUC__) && !defined(__clang__)
+// False warnings from g++ 14.1 for UTF-8 accumulation code where UTF8MaxBytes allocated.
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
 LexInterface::LexInterface(Document *pdoc_) noexcept : pdoc(pdoc_), performingStyle(false) {
 }
 
