@@ -8246,7 +8246,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p>Scintilla incorporates a "zoom factor" that lets you make all the text in the document
     larger or smaller in steps of one point. The displayed point size never goes below 2, whatever
-    zoom factor you set. You can set zoom factors in the range -10 to +20 points.</p>
+    zoom factor you set. You can set zoom factors in the range -10 to +60 points.</p>
     <code><a class="message" href="#SCI_ZOOMIN">SCI_ZOOMIN</a><br />
      <a class="message" href="#SCI_ZOOMOUT">SCI_ZOOMOUT</a><br />
      <a class="message" href="#SCI_SETZOOM">SCI_SETZOOM(int zoomInPoints)</a><br />
@@ -8256,13 +8256,13 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p><b id="SCI_ZOOMIN">SCI_ZOOMIN</b><br />
      <b id="SCI_ZOOMOUT">SCI_ZOOMOUT</b><br />
      <code>SCI_ZOOMIN</code> increases the zoom factor by one point if the current zoom factor is
-    less than 20 points. <code>SCI_ZOOMOUT</code> decreases the zoom factor by one point if the
+    less than 60 points. <code>SCI_ZOOMOUT</code> decreases the zoom factor by one point if the
     current zoom factor is greater than -10 points.</p>
 
     <p><b id="SCI_SETZOOM">SCI_SETZOOM(int zoomInPoints)</b><br />
      <b id="SCI_GETZOOM">SCI_GETZOOM &rarr; int</b><br />
      These messages let you set and get the zoom factor directly. There is no limit set on the
-    factors you can set, so limiting yourself to -10 to +20 to match the incremental zoom functions
+    factors you can set, so limiting yourself to -10 to +60 to match the incremental zoom functions
     is a good idea.</p>
 
     <h2 id="LongLines">Long lines</h2>
