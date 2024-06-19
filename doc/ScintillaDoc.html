@@ -1852,6 +1852,7 @@ struct Sci_TextToFindFull {
      <a class="message" href="#SCI_COPYRANGE">SCI_COPYRANGE(position start, position end)</a><br />
      <a class="message" href="#SCI_COPYTEXT">SCI_COPYTEXT(position length, const char *text)</a><br />
      <a class="message" href="#SCI_COPYALLOWLINE">SCI_COPYALLOWLINE</a><br />
+     <a class="message" href="#SCI_CUTALLOWLINE">SCI_CUTALLOWLINE</a><br />
      <a class="message" href="#SCI_SETPASTECONVERTENDINGS">SCI_SETPASTECONVERTENDINGS(bool convert)</a><br />
      <a class="message" href="#SCI_GETPASTECONVERTENDINGS">SCI_GETPASTECONVERTENDINGS &rarr; bool</a><br />
      <a class="message" href="#SCI_REPLACERECTANGULAR">SCI_REPLACERECTANGULAR(position length, const char *text)</a><br />
@@ -1863,6 +1864,7 @@ struct Sci_TextToFindFull {
      <b id="SCI_CLEAR">SCI_CLEAR</b><br />
      <b id="SCI_CANPASTE">SCI_CANPASTE &rarr; bool</b><br />
      <b id="SCI_COPYALLOWLINE">SCI_COPYALLOWLINE</b><br />
+     <b id="SCI_CUTALLOWLINE">SCI_CUTALLOWLINE</b><br />
      These commands perform the standard tasks of cutting and copying data to the clipboard,
     pasting from the clipboard into the document, and clearing the document.
     <code>SCI_CANPASTE</code> returns non-zero if the document isn't read-only and if the selection
@@ -1879,6 +1881,11 @@ struct Sci_TextToFindFull {
 
     <p><code>SCI_COPYALLOWLINE</code> works the same as SCI_COPY except that if the
     selection is empty then the current line is copied. On Windows, an extra "MSDEVLineSelect" marker
+    is added to the clipboard which is then used in <code>SCI_PASTE</code> to paste
+    the whole line before the current line.</p>
+
+    <p><code>SCI_CUTALLOWLINE</code> works the same as SCI_CUT except that if the
+    selection is empty then the current line is cut. On Windows, an extra "MSDEVLineSelect" marker
     is added to the clipboard which is then used in <code>SCI_PASTE</code> to paste
     the whole line before the current line.</p>
 

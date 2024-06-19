@@ -2267,6 +2267,21 @@ void Editor::CopyAllowLine() {
 	CopyToClipboard(selectedText);
 }
 
+void Editor::CutAllowLine() {
+	if (sel.Empty()) {
+		pdoc->CheckReadOnly();
+		if (!pdoc->IsReadOnly()) {
+			SelectionText selectedText;
+			if (CopyLineRange(&selectedText, false)) {
+				CopyToClipboard(selectedText);
+				LineDelete();
+			}
+		}
+	} else {
+		Cut();
+	}
+}
+
 void Editor::Cut() {
 	pdoc->CheckReadOnly();
 	if (!pdoc->IsReadOnly() && !SelectionContainsProtected()) {
@@ -2959,6 +2974,7 @@ void Editor::NotifyMacroRecord(Message iMessage, uptr_t wParam, sptr_t lParam) {
 	case Message::PageDownRectExtend:
 	case Message::SelectionDuplicate:
 	case Message::CopyAllowLine:
+	case Message::CutAllowLine:
 	case Message::VerticalCentreCaret:
 	case Message::MoveSelectedLinesUp:
 	case Message::MoveSelectedLinesDown:
@@ -3079,6 +3095,13 @@ void Editor::ChangeCaseOfSelection(CaseMapping caseMapping) {
 			}
 		}
 	}
+}
+
+void Editor::LineDelete() {
+	const Sci::Line line = pdoc->SciLineFromPosition(sel.MainCaret());
+	const Sci::Position start = pdoc->LineStart(line);
+	const Sci::Position end = pdoc->LineStart(line + 1);
+	pdoc->DeleteChars(start, end - start);
 }
 
 void Editor::LineTranspose() {
@@ -3991,12 +4014,8 @@ int Editor::KeyCommand(Message iMessage) {
 			SetLastXChosen();
 		}
 		break;
-	case Message::LineDelete: {
-			const Sci::Line line = pdoc->SciLineFromPosition(sel.MainCaret());
-			const Sci::Position start = pdoc->LineStart(line);
-			const Sci::Position end = pdoc->LineStart(line + 1);
-			pdoc->DeleteChars(start, end - start);
-		}
+	case Message::LineDelete:
+		LineDelete();
 		break;
 	case Message::LineTranspose:
 		LineTranspose();
@@ -4316,20 +4335,29 @@ std::string Editor::RangeText(Sci::Position start, Sci::Position end) const {
 	return std::string();
 }
 
+bool Editor::CopyLineRange(SelectionText *ss, bool allowProtected) {
+	const Sci::Line currentLine = pdoc->SciLineFromPosition(sel.MainCaret());
+	const Sci::Position start = pdoc->LineStart(currentLine);
+	const Sci::Position end = pdoc->LineEnd(currentLine);
+
+	if (allowProtected || !RangeContainsProtected(start, end)) {
+		std::string text = RangeText(start, end);
+		if (pdoc->eolMode != EndOfLine::Lf)
+			text.push_back('\r');
+		if (pdoc->eolMode != EndOfLine::Cr)
+			text.push_back('\n');
+		ss->Copy(text, pdoc->dbcsCodePage,
+			vs.styles[StyleDefault].characterSet, false, true);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 	if (sel.Empty()) {
 		if (allowLineCopy) {
-			const Sci::Line currentLine = pdoc->SciLineFromPosition(sel.MainCaret());
-			const Sci::Position start = pdoc->LineStart(currentLine);
-			const Sci::Position end = pdoc->LineEnd(currentLine);
-
-			std::string text = RangeText(start, end);
-			if (pdoc->eolMode != EndOfLine::Lf)
-				text.push_back('\r');
-			if (pdoc->eolMode != EndOfLine::Cr)
-				text.push_back('\n');
-			ss->Copy(text, pdoc->dbcsCodePage,
-				vs.styles[StyleDefault].characterSet, false, true);
+			CopyLineRange(ss);
 		}
 	} else {
 		std::string text;
@@ -6181,6 +6209,11 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case Message::CopyAllowLine:
 		CopyAllowLine();
+		break;
+
+	case Message::CutAllowLine:
+		CutAllowLine();
+		SetLastXChosen();
 		break;
 
 	case Message::VerticalCentreCaret:

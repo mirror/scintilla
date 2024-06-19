@@ -2657,6 +2657,9 @@ get int GetLayoutThreads=2776(,)
 # Copy the selection, if selection empty copy the line with the caret
 fun void CopyAllowLine=2519(,)
 
+# Cut the selection, if selection empty cut the line with the caret
+fun void CutAllowLine=2810(,)
+
 # Compact the document buffer and return a read-only pointer to the
 # characters in the document.
 get pointer GetCharacterPointer=2520(,)

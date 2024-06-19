@@ -595,7 +595,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	cfColumnSelect = RegisterClipboardType(L"MSDEVColumnSelect");
 	cfBorlandIDEBlockType = RegisterClipboardType(L"Borland IDE Block Type");
 
-	// Likewise for line-copy (copies a full line when no text is selected)
+	// Likewise for line-copy or line-cut (copies or cuts a full line when no text is selected)
 	cfLineSelect = RegisterClipboardType(L"MSDEVLineSelect");
 	cfVSLineTag = RegisterClipboardType(L"VisualStudioEditorOperationsLineCutCopyClipboardTag");
 	hrOle = E_FAIL;

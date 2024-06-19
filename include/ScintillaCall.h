@@ -723,6 +723,7 @@ public:
 	void SetLayoutThreads(int threads);
 	int LayoutThreads();
 	void CopyAllowLine();
+	void CutAllowLine();
 	void *CharacterPointer();
 	void *RangePointer(Position start, Position lengthRange);
 	Position GapPosition();

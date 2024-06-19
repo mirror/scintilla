@@ -2711,6 +2711,10 @@ void ScintillaCall::CopyAllowLine() {
 	Call(Message::CopyAllowLine);
 }
 
+void ScintillaCall::CutAllowLine() {
+	Call(Message::CutAllowLine);
+}
+
 void *ScintillaCall::CharacterPointer() {
 	return reinterpret_cast<void *>(Call(Message::GetCharacterPointer));
 }

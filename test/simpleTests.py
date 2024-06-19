@@ -581,6 +581,19 @@ class TestSimple(unittest.TestCase):
 		self.ed.EOLMode = lineEndType
 		self.assertEqual(self.ed.Contents(), b"a1\na1\nb2")
 
+	def testCutAllowLine(self):
+		lineEndType = self.ed.EOLMode
+		self.ed.EOLMode = self.ed.SC_EOL_LF
+		self.ed.AddText(5, b"a1\nb2")
+		self.ed.SetSel(1,1)
+		self.ed.CutAllowLine()
+		# Clipboard = "a1\n"
+		self.assertEqual(self.ed.CanPaste(), 1)
+		self.ed.SetSel(0, 0)
+		self.ed.Paste()
+		self.ed.EOLMode = lineEndType
+		self.assertEqual(self.ed.Contents(), b"a1\nb2")
+
 	def testDuplicate(self):
 		self.ed.AddText(3, b"1b2")
 		self.ed.SetSel(1,2)

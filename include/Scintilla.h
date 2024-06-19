@@ -976,6 +976,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SCI_SETLAYOUTTHREADS 2775
 #define SCI_GETLAYOUTTHREADS 2776
 #define SCI_COPYALLOWLINE 2519
+#define SCI_CUTALLOWLINE 2810
 #define SCI_GETCHARACTERPOINTER 2520
 #define SCI_GETRANGEPOINTER 2643
 #define SCI_GETGAPPOSITION 2644
