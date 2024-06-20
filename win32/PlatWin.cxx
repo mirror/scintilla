@@ -2699,7 +2699,7 @@ void SurfaceD2D::SetRenderingParams(std::shared_ptr<RenderingParams> renderingPa
 
 #endif
 
-std::unique_ptr<Surface> Surface::Allocate(Technology technology) {
+std::unique_ptr<Surface> Surface::Allocate([[maybe_unused]] Technology technology) {
 #if defined(USE_D2D)
 	if (technology == Technology::Default)
 		return std::make_unique<SurfaceGDI>();
