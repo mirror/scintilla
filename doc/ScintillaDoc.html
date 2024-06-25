@@ -2232,6 +2232,9 @@ struct Sci_TextToFindFull {
         </tr>
       </tbody>
     </table>
+    
+    <p>The bits used for change history markers are specified by <code>SC_MASK_HISTORY</code>, which is commonly
+    used as an argument to <code>SCI_SETMARGINMASKN</code> when defining a margin to be used for change history.</p>
 
     <p>Indicators:</p>
 
@@ -4468,8 +4471,10 @@ struct Sci_TextToFindFull {
      The mask is a 32-bit value. Each bit corresponds to one of 32 logical symbols that can be
     displayed in a margin that is enabled for symbols. There is a useful constant,
     <code>SC_MASK_FOLDERS</code> (0xFE000000 or -33554432), that is a mask for the 7 logical
-    symbols used to denote folding. You can assign a wide range of symbols and colours to each of
-    the 32 logical symbols, see <a href="#Markers">Markers</a> for more information. If <code>(mask
+    symbols used to denote folding, and another, <code>SC_MASK_HISTORY</code> (0x01E00000 or
+    31457280), that is a mask for the 4 logical symbols used to denote change history. You can
+    assign a wide range of symbols and colours to each of the 32 logical symbols, see
+    <a href="#Markers">Markers</a> for more information. If <code>(mask
     &amp; SC_MASK_FOLDERS)==0</code>, the margin background colour is controlled by style 33 (<a
     class="message" href="#StyleDefinition"><code>STYLE_LINENUMBER</code></a>).</p>
 

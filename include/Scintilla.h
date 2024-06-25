@@ -166,6 +166,7 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SC_MARKNUM_FOLDERSUB 29
 #define SC_MARKNUM_FOLDER 30
 #define SC_MARKNUM_FOLDEROPEN 31
+#define SC_MASK_HISTORY 0x01E00000
 #define SC_MASK_FOLDERS 0xFE000000
 #define SCI_MARKERDEFINE 2040
 #define SCI_MARKERSETFORE 2041
