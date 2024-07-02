@@ -461,6 +461,8 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SCI_AUTOCGETMAXWIDTH 2209
 #define SCI_AUTOCSETMAXHEIGHT 2210
 #define SCI_AUTOCGETMAXHEIGHT 2211
+#define SCI_AUTOCSETSTYLE 2109
+#define SCI_AUTOCGETSTYLE 2120
 #define SCI_SETINDENT 2122
 #define SCI_GETINDENT 2123
 #define SCI_SETUSETABS 2124

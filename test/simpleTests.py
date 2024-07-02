@@ -3106,6 +3106,10 @@ class TestAutoComplete(unittest.TestCase):
 		self.assertEqual(self.ed.AutoCGetDropRestOfWord(), 1)
 		self.ed.AutoCSetDropRestOfWord(0)
 
+		self.ed.AutoCSetStyle(13)
+		self.assertEqual(self.ed.AutoCGetStyle(), 13)
+		self.ed.AutoCSetStyle(self.ed.STYLE_DEFAULT)
+
 	def testAutoShow(self):
 		self.assertEqual(self.ed.AutoCActive(), 0)
 		self.ed.SetSel(0, 0)

@@ -319,6 +319,8 @@ public:
 	int AutoCGetMaxWidth();
 	void AutoCSetMaxHeight(int rowCount);
 	int AutoCGetMaxHeight();
+	void AutoCSetStyle(int style);
+	int AutoCGetStyle();
 	void SetIndent(int indentSize);
 	int Indent();
 	void SetUseTabs(bool useTabs);

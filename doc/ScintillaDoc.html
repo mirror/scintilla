@@ -667,15 +667,17 @@
 
     <p><b id="SCI_RELEASEALLEXTENDEDSTYLES">SCI_RELEASEALLEXTENDEDSTYLES</b><br />
     <b id="SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES(int numberStyles) &rarr; int</b><br />
-     Extended styles are used for features like textual margins and annotations as well as internally by Scintilla.
+     Extended styles are used for features like textual margins and annotations and autocompletion lists as well as
+     internally by Scintilla.
      They are outside the range 0..255 used for the styles bytes associated with document bytes.
      These functions manage the use of extended styles to ensures that components cooperate in defining styles.
      <code>SCI_RELEASEALLEXTENDEDSTYLES</code> releases any extended styles allocated by the container.
      <code>SCI_ALLOCATEEXTENDEDSTYLES</code> allocates a range of style numbers after the byte style values and returns
      the number of the first allocated style.
-     Ranges for margin and annotation styles should be allocated before calling
+     Ranges for margin, annotation, and autocompletion list styles should be allocated before calling
      <a class="seealso" href="#SCI_MARGINSETSTYLEOFFSET">SCI_MARGINSETSTYLEOFFSET</a> or
-     <a class="seealso" href="#SCI_ANNOTATIONSETSTYLEOFFSET">SCI_ANNOTATIONSETSTYLEOFFSET</a>.</p>
+     <a class="seealso" href="#SCI_ANNOTATIONSETSTYLEOFFSET">SCI_ANNOTATIONSETSTYLEOFFSET</a> or
+     <a class="seealso" href="#SCI_AUTOCSETSTYLE">SCI_AUTOCSETSTYLE</a>.</p>
 
     <p><b id="Sci_TextRange">Sci_TextRange</b> and <b id="Sci_CharacterRange">Sci_CharacterRange</b><br />
      These structures are defined to be exactly the same shape as the Win32 <code>TEXTRANGE</code>
@@ -6506,6 +6508,16 @@ struct Sci_TextToFindFull {
       If zero (the default) then the list's width is calculated to fit the item with the most characters. Any items that cannot be fully displayed within
       the available width are indicated by the presence of ellipsis.
      </p>
+
+    <p>
+      <b id="SCI_AUTOCSETSTYLE">SCI_AUTOCSETSTYLE</b><br />
+      <b id="SCI_AUTOCGETSTYLE">SCI_AUTOCGETSTYLE &rarr; int</b><br />
+
+      Get or set the style used by autocompletion lists to determine the font facename, size and character set used to display characters. Defaults
+      to <code><a class="message" href="#StyleDefinition">STYLE_DEFAULT</a></code>. Always call
+      <a class="seealso" href="#SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES(1)</a> before <code>SCI_AUTOCSETSTYLE</code> and use the
+      result as the argument to <code>SCI_AUTOCSETSTYLE</code> and <code>SCI_STYLESETFONT</code> and others.
+    </p>
 
     <p>
      <b id="SC_ELEMENT_LIST">SC_ELEMENT_LIST : colouralpha</b><br />
