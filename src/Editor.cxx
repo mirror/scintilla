@@ -4342,10 +4342,7 @@ bool Editor::CopyLineRange(SelectionText *ss, bool allowProtected) {
 
 	if (allowProtected || !RangeContainsProtected(start, end)) {
 		std::string text = RangeText(start, end);
-		if (pdoc->eolMode != EndOfLine::Lf)
-			text.push_back('\r');
-		if (pdoc->eolMode != EndOfLine::Cr)
-			text.push_back('\n');
+		text.append(pdoc->EOLString());
 		ss->Copy(text, pdoc->dbcsCodePage,
 			vs.styles[StyleDefault].characterSet, false, true);
 		return true;
@@ -4365,12 +4362,9 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 		if (sel.selType == Selection::SelTypes::rectangle)
 			std::sort(rangesInOrder.begin(), rangesInOrder.end());
 		for (const SelectionRange &current : rangesInOrder) {
-				text.append(RangeText(current.Start().Position(), current.End().Position()));
+			text.append(RangeText(current.Start().Position(), current.End().Position()));
 			if (sel.selType == Selection::SelTypes::rectangle) {
-				if (pdoc->eolMode != EndOfLine::Lf)
-					text.push_back('\r');
-				if (pdoc->eolMode != EndOfLine::Cr)
-					text.push_back('\n');
+				text.append(pdoc->EOLString());
 			}
 		}
 		ss->Copy(text, pdoc->dbcsCodePage,
