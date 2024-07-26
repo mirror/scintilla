@@ -6288,6 +6288,8 @@ struct Sci_TextToFindFull {
      <a class="message" href="#SCI_AUTOCGETMAXHEIGHT">SCI_AUTOCGETMAXHEIGHT &rarr; int</a><br />
      <a class="message" href="#SCI_AUTOCSETMAXWIDTH">SCI_AUTOCSETMAXWIDTH(int characterCount)</a><br />
      <a class="message" href="#SCI_AUTOCGETMAXWIDTH">SCI_AUTOCGETMAXWIDTH &rarr; int</a><br />
+     <a class="message" href="#SCI_AUTOCSETSTYLE">SCI_AUTOCSETSTYLE(int style)</a><br />
+     <a class="message" href="#SCI_AUTOCGETSTYLE">SCI_AUTOCGETSTYLE &rarr; int</a><br />
      <a class="element" href="#SC_ELEMENT_LIST">SC_ELEMENT_LIST : colouralpha</a><br />
      <a class="element" href="#SC_ELEMENT_LIST_BACK">SC_ELEMENT_LIST_BACK : colouralpha</a><br />
      <a class="element" href="#SC_ELEMENT_LIST_SELECTED">SC_ELEMENT_LIST_SELECTED : colouralpha</a><br />
@@ -6510,7 +6512,7 @@ struct Sci_TextToFindFull {
      </p>
 
     <p>
-      <b id="SCI_AUTOCSETSTYLE">SCI_AUTOCSETSTYLE</b><br />
+      <b id="SCI_AUTOCSETSTYLE">SCI_AUTOCSETSTYLE(int style)</b><br />
       <b id="SCI_AUTOCGETSTYLE">SCI_AUTOCGETSTYLE &rarr; int</b><br />
 
       Get or set the style used by autocompletion lists to determine the font facename, size and character set used to display characters. Defaults
