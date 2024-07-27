@@ -171,6 +171,7 @@ enum class Message {
 	GetCharacterCategoryOptimization = 2721,
 	BeginUndoAction = 2078,
 	EndUndoAction = 2079,
+	GetUndoSequence = 2799,
 	GetUndoActions = 2790,
 	SetUndoSavePoint = 2791,
 	GetUndoSavePoint = 2792,

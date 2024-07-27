@@ -221,6 +221,25 @@ class TestSimple(unittest.TestCase):
 		self.assertEqual(self.ed.CanRedo(), 0)
 		self.assertEqual(self.ed.CanUndo(), 1)
 
+	def testUndoSequence(self):
+		data = b"xy"
+		self.assertEqual(self.ed.UndoSequence, 0)
+		self.ed.InsertText(0, data)
+		self.assertEqual(self.ed.UndoSequence, 0)
+		# Check that actions between BeginUndoAction and EndUndoAction are undone together
+		self.ed.BeginUndoAction()
+		self.assertEqual(self.ed.UndoSequence, 1)
+		self.ed.InsertText(0, data)
+		self.ed.InsertText(1, data)
+		# xxyyxy
+		self.assertEqual(self.ed.Length, 6)
+		self.ed.EndUndoAction()
+		self.assertEqual(self.ed.UndoSequence, 0)
+		self.ed.Undo()
+		# xy as 2 inserts removed
+		self.assertEqual(self.ed.Length, 2)
+		self.assertEqual(self.ed.UndoSequence, 0)
+
 	def testUndoSavePoint(self):
 		data = b"xy"
 		self.assertEqual(self.ed.Modify, 0)

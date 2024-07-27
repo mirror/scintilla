@@ -245,6 +245,7 @@ public:
 	int CharacterCategoryOptimization();
 	void BeginUndoAction();
 	void EndUndoAction();
+	int UndoSequence();
 	int UndoActions();
 	void SetUndoSavePoint(int action);
 	int UndoSavePoint();

@@ -799,6 +799,10 @@ void ScintillaCall::EndUndoAction() {
 	Call(Message::EndUndoAction);
 }
 
+int ScintillaCall::UndoSequence() {
+	return static_cast<int>(Call(Message::GetUndoSequence));
+}
+
 int ScintillaCall::UndoActions() {
 	return static_cast<int>(Call(Message::GetUndoActions));
 }

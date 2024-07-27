@@ -1936,6 +1936,7 @@ struct Sci_TextToFindFull {
      <a class="message" href="#SCI_GETUNDOCOLLECTION">SCI_GETUNDOCOLLECTION &rarr; bool</a><br />
      <a class="message" href="#SCI_BEGINUNDOACTION">SCI_BEGINUNDOACTION</a><br />
      <a class="message" href="#SCI_ENDUNDOACTION">SCI_ENDUNDOACTION</a><br />
+     <a class="message" href="#SCI_GETUNDOSEQUENCE">SCI_GETUNDOSEQUENCE &rarr; int</a><br />
      <a class="message" href="#SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token, int flags)</a><br />
     </code>
 
@@ -1979,10 +1980,16 @@ struct Sci_TextToFindFull {
 
     <p><b id="SCI_BEGINUNDOACTION">SCI_BEGINUNDOACTION</b><br />
      <b id="SCI_ENDUNDOACTION">SCI_ENDUNDOACTION</b><br />
-     Send these two messages to Scintilla to mark the beginning and end of a set of operations that
+     Send these two messages to Scintilla to mark the beginning and end of a sequence of operations that
     you want to undo all as one operation but that you have to generate as several operations.
     Alternatively, you can use these to mark a set of operations that you do not want to have
     combined with the preceding or following operations if they are undone.</p>
+
+    <p><b id="SCI_GETUNDOSEQUENCE">SCI_GETUNDOSEQUENCE &rarr; int</b><br />
+     Determine if an undo sequence is active with a positive value indicating that a sequence is active and 0 that there is no current sequence.
+     The value returned is the nesting depth of the sequence, that is, the number of times <code>SCI_BEGINUNDOACTION</code>
+     was called without a correspnding <code>SCI_ENDUNDOACTION</code>.
+     A negative value indicates an error.</p>
 
     <p><b id="SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token, int flags)</b><br />
      The container can add its own actions into the undo stack by calling

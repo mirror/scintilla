@@ -6636,6 +6636,9 @@ sptr_t Editor::WndProc(Message iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->EndUndoAction();
 		return 0;
 
+	case Message::GetUndoSequence:
+		return pdoc->UndoSequenceDepth();
+
 	case Message::GetUndoActions:
 		return pdoc->UndoActions();
 

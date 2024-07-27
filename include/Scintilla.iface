@@ -837,6 +837,9 @@ fun void BeginUndoAction=2078(,)
 # End a sequence of actions that is undone and redone as a unit.
 fun void EndUndoAction=2079(,)
 
+# Is an undo sequence active?
+get int GetUndoSequence=2799(,)
+
 # How many undo actions are in the history?
 get int GetUndoActions=2790(,)
 
