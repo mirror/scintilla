@@ -1858,6 +1858,8 @@ struct Sci_TextToFindFull {
      <a class="message" href="#SCI_CUTALLOWLINE">SCI_CUTALLOWLINE</a><br />
      <a class="message" href="#SCI_SETPASTECONVERTENDINGS">SCI_SETPASTECONVERTENDINGS(bool convert)</a><br />
      <a class="message" href="#SCI_GETPASTECONVERTENDINGS">SCI_GETPASTECONVERTENDINGS &rarr; bool</a><br />
+     <a class="message" href="#SCI_SETCOPYSEPARATOR">SCI_SETCOPYSEPARATOR(&lt;unused&gt;, const char *separator)</a><br />
+     <a class="message" href="#SCI_GETCOPYSEPARATOR">SCI_GETCOPYSEPARATOR(&lt;unused&gt;, char *separator) &rarr; int</a><br />
      <a class="message" href="#SCI_REPLACERECTANGULAR">SCI_REPLACERECTANGULAR(position length, const char *text)</a><br />
     </code>
 
@@ -1904,6 +1906,11 @@ struct Sci_TextToFindFull {
      end of line mode as set with
      <a class="seealso" href="#SCI_SETEOLMODE">SCI_SETEOLMODE</a>.
      Defaults to true.</p>
+
+    <p><b id="SCI_SETCOPYSEPARATOR">SCI_SETCOPYSEPARATOR(&lt;unused&gt;, const char *separator)</b><br />
+     <b id="SCI_GETCOPYSEPARATOR">SCI_GETCOPYSEPARATOR(&lt;unused&gt;, char *separator) &rarr; int</b><br />
+     When a multiple selection is copied, this string property is added between each part.
+     Defaults to empty.</p>
 
     <p><b id="SCI_REPLACERECTANGULAR">SCI_REPLACERECTANGULAR(position length, const char *text)</b><br/>
       Replaces the selected text or empty selection with the given text.

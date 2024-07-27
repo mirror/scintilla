@@ -726,6 +726,9 @@ public:
 	int LayoutThreads();
 	void CopyAllowLine();
 	void CutAllowLine();
+	void SetCopySeparator(const char *separator);
+	int CopySeparator(char *separator);
+	std::string CopySeparator();
 	void *CharacterPointer();
 	void *RangePointer(Position start, Position lengthRange);
 	Position GapPosition();

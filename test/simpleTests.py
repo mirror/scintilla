@@ -1974,9 +1974,7 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEqual(self.ed.Contents(), result)
 
 	def testMultipleCopy(self):
-		self.ed.ClearAll()
-		t = b"abc\n123\nxyz"
-		self.ed.AddText(len(t), t)
+		self.ed.SetContents(b"abc\n123\nxyz")
 		self.ed.SetSelection(4, 5)	# 1
 		self.ed.AddSelection(1, 3) 	# bc
 		self.ed.AddSelection(10, 11)	# z
@@ -1985,6 +1983,21 @@ class TestMultiSelection(unittest.TestCase):
 		self.ed.ClearAll()
 		self.ed.Paste()
 		self.assertEqual(self.ed.Contents(), b"1bcz")
+
+	def testCopySeparator(self):
+		self.assertEqual(self.ed.GetCopySeparator(), b"")
+		self.ed.CopySeparator = b"_"
+		self.assertEqual(self.ed.GetCopySeparator(), b"_")
+		self.ed.SetContents(b"abc\n123\nxyz")
+		self.ed.SetSelection(4, 5)	# 1
+		self.ed.AddSelection(1, 3) 	# bc
+		self.ed.AddSelection(10, 11)	# z
+		self.ed.Copy()
+		self.ed.ClearAll()
+		self.ed.Paste()
+		# 1,bc,z separated by _
+		self.assertEqual(self.ed.Contents(), b"1_bc_z")
+		self.ed.CopySeparator = b""
 
 	def testPasteConversion(self):
 		# Test that line ends are converted to current mode

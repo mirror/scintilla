@@ -640,6 +640,8 @@ enum class Message {
 	GetLayoutThreads = 2776,
 	CopyAllowLine = 2519,
 	CutAllowLine = 2810,
+	SetCopySeparator = 2811,
+	GetCopySeparator = 2812,
 	GetCharacterPointer = 2520,
 	GetRangePointer = 2643,
 	GetGapPosition = 2644,

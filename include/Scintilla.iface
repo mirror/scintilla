@@ -2668,6 +2668,12 @@ fun void CopyAllowLine=2519(,)
 # Cut the selection, if selection empty cut the line with the caret
 fun void CutAllowLine=2810(,)
 
+# Set the string to separate parts when copying a multiple selection.
+set void SetCopySeparator=2811(, string separator)
+
+# Get the string to separate parts when copying a multiple selection.
+get int GetCopySeparator=2812(, stringresult separator)
+
 # Compact the document buffer and return a read-only pointer to the
 # characters in the document.
 get pointer GetCharacterPointer=2520(,)

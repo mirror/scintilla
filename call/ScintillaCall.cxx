@@ -2723,6 +2723,18 @@ void ScintillaCall::CutAllowLine() {
 	Call(Message::CutAllowLine);
 }
 
+void ScintillaCall::SetCopySeparator(const char *separator) {
+	CallString(Message::SetCopySeparator, 0, separator);
+}
+
+int ScintillaCall::CopySeparator(char *separator) {
+	return static_cast<int>(CallPointer(Message::GetCopySeparator, 0, separator));
+}
+
+std::string ScintillaCall::CopySeparator() {
+	return CallReturnString(Message::GetCopySeparator, 0);
+}
+
 void *ScintillaCall::CharacterPointer() {
 	return reinterpret_cast<void *>(Call(Message::GetCharacterPointer));
 }
