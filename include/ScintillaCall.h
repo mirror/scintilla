@@ -540,7 +540,9 @@ public:
 	void Cancel();
 	void DeleteBack();
 	void Tab();
+	void LineIndent();
 	void BackTab();
+	void LineDedent();
 	void NewLine();
 	void FormFeed();
 	void VCHome();

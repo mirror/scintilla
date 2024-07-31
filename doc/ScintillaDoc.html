@@ -6929,6 +6929,9 @@ struct Sci_TextToFindFull {
 
           <td><code>SCI_VERTICALCENTRECARET</code></td>
 
+          <td><code>SCI_LINEINDENT</code></td>
+
+          <td><code>SCI_LINEDEDENT</code></td>
         </tr>
 
         <tr>
@@ -6970,6 +6973,9 @@ struct Sci_TextToFindFull {
      but if the cursor is already at the point, it goes on to the start or end of the document line,
      as appropriate for <code>SCI_[[VC]HOME|LINEEND]*</code>.
      </p>
+
+    <p>The <code>SCI_LINE[INDENT|DEDENT]</code> commands are like <code>SCI_[BACK]TAB</code> but force the
+    multiline behaviour of the second.</p>
 
     <p>The <code>SCI_SCROLLTO[START|END]</code> commands scroll the document to the start
     or end without changing the selection. These commands match macOS platform conventions for the behaviour of the

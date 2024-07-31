@@ -756,7 +756,9 @@ typedef sptr_t (*SciFnDirectStatus)(sptr_t ptr, unsigned int iMessage, uptr_t wP
 #define SCI_CANCEL 2325
 #define SCI_DELETEBACK 2326
 #define SCI_TAB 2327
+#define SCI_LINEINDENT 2813
 #define SCI_BACKTAB 2328
+#define SCI_LINEDEDENT 2814
 #define SCI_NEWLINE 2329
 #define SCI_FORMFEED 2330
 #define SCI_VCHOME 2331
