@@ -2067,8 +2067,7 @@ void Editor::InsertCharacter(std::string_view sv, CharacterSource charSource) {
 				positionInsert = RealizeVirtualSpace(positionInsert, currentSel->caret.VirtualSpace());
 				const Sci::Position lengthInserted = pdoc->InsertString(positionInsert, sv);
 				if (lengthInserted > 0) {
-					currentSel->caret.SetPosition(positionInsert + lengthInserted);
-					currentSel->anchor.SetPosition(positionInsert + lengthInserted);
+					*currentSel = SelectionRange(positionInsert + lengthInserted);
 				}
 				currentSel->ClearVirtualSpace();
 				// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
@@ -2173,8 +2172,7 @@ void Editor::InsertPaste(const char *text, Sci::Position len) {
 				positionInsert = RealizeVirtualSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
 				const Sci::Position lengthInserted = pdoc->InsertString(positionInsert, text, len);
 				if (lengthInserted > 0) {
-					sel.Range(r).caret.SetPosition(positionInsert + lengthInserted);
-					sel.Range(r).anchor.SetPosition(positionInsert + lengthInserted);
+					sel.Range(r) = SelectionRange(positionInsert + lengthInserted);
 				}
 				sel.Range(r).ClearVirtualSpace();
 			}
