@@ -15,14 +15,14 @@
 class QuartzFont {
 public:
 	/** Create a font style from a name. */
-	QuartzFont(const char *name, size_t length, float size, Scintilla::FontWeight weight, bool italic) {
+	QuartzFont(const char *name, size_t length, float size, Scintilla::FontWeight weight, Scintilla::FontStretch stretch, bool italic) {
 		assert(name != NULL && length > 0 && name[length] == '\0');
 
 		CFStringRef fontName = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingMacRoman);
 		assert(fontName != NULL);
 		bool bold = weight > Scintilla::FontWeight::Normal;
 
-		if (bold || italic) {
+		if (bold || italic || stretch != Scintilla::FontStretch::Normal) {
 			CTFontSymbolicTraits desiredTrait = 0;
 			CTFontSymbolicTraits traitMask = 0;
 
@@ -36,6 +36,13 @@ public:
 			if (italic) {
 				desiredTrait |= kCTFontItalicTrait;
 				traitMask |= kCTFontItalicTrait;
+			}
+			if (stretch < Scintilla::FontStretch::Normal) {
+				desiredTrait |= kCTFontCondensedTrait;
+				traitMask |= kCTFontCondensedTrait;
+			} else if (stretch > Scintilla::FontStretch::Normal) {
+				desiredTrait |= kCTFontExpandedTrait;
+				traitMask |= kCTFontExpandedTrait;
 			}
 
 			// create a font and then a copy of it with the sym traits

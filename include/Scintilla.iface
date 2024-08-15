@@ -700,6 +700,23 @@ set void StyleSetCheckMonospaced=2254(int style, bool checkMonospaced)
 # Get whether a style may be monospaced.
 get bool StyleGetCheckMonospaced=2255(int style,)
 
+enu FontStretch=SC_STRETCH_
+val SC_STRETCH_ULTRA_CONDENSED=1
+val SC_STRETCH_EXTRA_CONDENSED=2
+val SC_STRETCH_CONDENSED=3
+val SC_STRETCH_SEMI_CONDENSED=4
+val SC_STRETCH_NORMAL=5
+val SC_STRETCH_SEMI_EXPANDED=6
+val SC_STRETCH_EXPANDED=7
+val SC_STRETCH_EXTRA_EXPANDED=8
+val SC_STRETCH_ULTRA_EXPANDED=9
+
+# Set the stretch of characters of a style.
+set void StyleSetStretch=2258(int style, FontStretch stretch)
+
+# Get the stretch of characters of a style.
+get FontStretch StyleGetStretch=2259(int style,)
+
 # Set the invisible representation for a style.
 set void StyleSetInvisibleRepresentation=2256(int style, string representation)
 

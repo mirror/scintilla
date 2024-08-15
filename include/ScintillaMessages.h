@@ -137,6 +137,8 @@ enum class Message {
 	StyleSetHotSpot = 2409,
 	StyleSetCheckMonospaced = 2254,
 	StyleGetCheckMonospaced = 2255,
+	StyleSetStretch = 2258,
+	StyleGetStretch = 2259,
 	StyleSetInvisibleRepresentation = 2256,
 	StyleGetInvisibleRepresentation = 2257,
 	SetElementColour = 2753,
