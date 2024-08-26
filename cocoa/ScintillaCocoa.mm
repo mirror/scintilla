@@ -1102,11 +1102,12 @@ void ScintillaCocoa::Paste(bool forceRectangular) {
 		// No data or no flavor we support.
 		return;
 
-	pdoc->BeginUndoAction();
-	ClearSelection(false);
-	InsertPasteShape(selectedText.Data(), selectedText.Length(),
-			 selectedText.rectangular ? PasteShape::rectangular : PasteShape::stream);
-	pdoc->EndUndoAction();
+	{
+		UndoGroup ug(pdoc);
+		ClearSelection(false);
+		InsertPasteShape(selectedText.Data(), selectedText.Length(),
+				 selectedText.rectangular ? PasteShape::rectangular : PasteShape::stream);
+	}
 
 	Redraw();
 	EnsureCaretVisible();

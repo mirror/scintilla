@@ -1167,10 +1167,9 @@ void ScintillaWin::SelectionToHangul() {
 
 		if (converted) {
 			documentStr = StringEncode(uniStr, CodePageOfDocument());
-			pdoc->BeginUndoAction();
+			UndoGroup ug(pdoc);
 			ClearSelection();
 			InsertPaste(&documentStr[0], documentStr.size());
-			pdoc->EndUndoAction();
 		}
 	}
 }
