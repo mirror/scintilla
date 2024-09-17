@@ -1516,7 +1516,8 @@ void ScintillaCocoa::StartDrag() {
 	CGImageRelease(imagePixmap);
 
 	NSImage *image = [[NSImage alloc] initWithSize: selectionRectangle.size];
-	[image addRepresentation: bitmap];
+	if (bitmap)
+		[image addRepresentation: bitmap];
 
 	NSImage *dragImage = [[NSImage alloc] initWithSize: selectionRectangle.size];
 	dragImage.backgroundColor = [NSColor clearColor];
